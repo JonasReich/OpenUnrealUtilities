@@ -14,7 +14,7 @@ class APlayerController;
  *
  */
 UCLASS()
-class ARGUSCAMERA_API USceneProjectionLibrary : public UBlueprintFunctionLibrary
+class OPENUNREALUTILITIES_API USceneProjectionLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:

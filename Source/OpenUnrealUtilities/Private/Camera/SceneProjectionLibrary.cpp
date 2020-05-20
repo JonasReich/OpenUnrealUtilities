@@ -1,6 +1,6 @@
 // Copyright (c) 2020 Jonas Reich
 
-#include "SceneProjectionLibrary.h"
+#include "Camera/SceneProjectionLibrary.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
@@ -103,11 +103,8 @@ bool USceneProjectionLibrary::GetViewProjectionData(UCameraComponent* TargetCame
 	return true;
 }
 
-DECLARE_CYCLE_STAT(TEXT("Project World to Screen"), STAT_ProjectWorldToScreen, STATGROUP_Argus);
 bool USceneProjectionLibrary::ProjectWorldToScreen(UCameraComponent* TargetCamera, APlayerController const* Player, const FVector& WorldPosition, FVector2D& OutScreenPosition, bool bPlayerViewportRelative /*= true*/)
 {
-	SCOPE_CYCLE_COUNTER(STAT_ProjectWorldToScreen);
-
 	FSceneViewProjectionData ProjectionData;
 	if (GetViewProjectionData(TargetCamera, Player, ProjectionData))
 	{
@@ -125,11 +122,8 @@ bool USceneProjectionLibrary::ProjectWorldToScreen(UCameraComponent* TargetCamer
 	return false;
 }
 
-DECLARE_CYCLE_STAT(TEXT("Project Screen to World"), STAT_ProjectScreenToWorld, STATGROUP_Argus);
 bool USceneProjectionLibrary::DeprojectScreenToWorld(UCameraComponent* TargetCamera, APlayerController const* Player, const FVector2D& ScreenPosition, FVector& OutWorldPosition, FVector& OutWorldDirection)
 {
-	SCOPE_CYCLE_COUNTER(STAT_ProjectScreenToWorld);
-
 	FSceneViewProjectionData ProjectionData;
 	if (GetViewProjectionData(TargetCamera, Player, ProjectionData))
 	{

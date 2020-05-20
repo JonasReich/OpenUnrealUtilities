@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "RenderTextureLibrary.generated.h"
+#include "TextureRenderTargetLibrary.generated.h"
 
 class UTextureRenderTarget2D;
 
@@ -12,7 +12,7 @@ class UTextureRenderTarget2D;
  * 
  */
 UCLASS()
-class ARGUSCAMERA_API UTextureRenderTargetLibrary : public UBlueprintFunctionLibrary
+class OPENUNREALUTILITIES_API UTextureRenderTargetLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 	

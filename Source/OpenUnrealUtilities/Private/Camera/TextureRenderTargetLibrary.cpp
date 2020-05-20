@@ -1,6 +1,6 @@
 // Copyright (c) 2020 Jonas Reich
 
-#include "TextureRenderTargetLibrary.h"
+#include "Camera/TextureRenderTargetLibrary.h"
 #include "Engine/TextureRenderTarget2D.h"
 
 // Copied from Private\KismetRenderingLibrary.cpp:220
