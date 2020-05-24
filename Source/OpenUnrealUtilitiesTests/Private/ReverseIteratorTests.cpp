@@ -77,7 +77,7 @@ namespace ReverseIteratorTests
 		}
 
 		// Assert
-		AutomationTest.TestEqual("Checking reverse iterated array against expected result", ResultArray, ExpectedResult);
+		TestArraysEqual(AutomationTest, "Checking reverse iterated array against expected result", ResultArray, ExpectedResult);
 	}
 
 	// Test reverse iteration on a const linear collection by adding elements to a result array and comparing to the expected result array
@@ -94,7 +94,7 @@ namespace ReverseIteratorTests
 		}
 
 		// Assert
-		AutomationTest.TestEqual("Checking reverse iterated array against expected result", ResultArray, ExpectedResult);
+		TestArraysEqual(AutomationTest, "Checking reverse iterated array against expected result", ResultArray, ExpectedResult);
 	}
 }
 

@@ -6,6 +6,71 @@
 
 #if WITH_AUTOMATION_WORKER
 
+#include "Templates/Models.h"
+
+struct CLexToStringConvertable
+{
+	template<typename ElementType>
+	auto Requires(ElementType It) -> decltype(LexToString(DeclVal<ElementType>()));
+};
+
+template< typename ElementType, typename =
+	typename TEnableIf<TModels<CLexToStringConvertable, ElementType>::Value>::Type >
+void AddValueError(
+		FAutomationTestBase& AutomationTest,
+		const FString& What,
+		int32 Idx,
+		const ElementType& AValue,
+		const ElementType& BValue)
+{
+	AutomationTest.AddError(
+		FString::Printf(
+			TEXT("%s: The two arrays have different values at index %i (expected %s, but it was %s)."),
+			*What, Idx, *LexToString(AValue), *LexToString(BValue)), 1);
+}
+
+template< typename ElementType, typename =
+	typename TEnableIf<TModels<CLexToStringConvertable, ElementType>::Value == false>::Type >
+void AddValueError(
+		FAutomationTestBase& AutomationTest,
+		const FString& What,
+		int32 Idx,
+		const ElementType& AValue,
+		const ElementType& BValue,
+		int32 iOverloadArg = 0)
+{
+	AutomationTest.AddError(
+		FString::Printf(
+			TEXT("%s: The two arrays have different values at index %i."),
+			*What, Idx), 1);
+}
+
+template<typename ElementType, typename AllocatorType>
+void TestArraysEqual(
+	FAutomationTestBase& AutomationTest,
+	const FString& What,
+	const TArray<ElementType, AllocatorType>& ActualArray,
+	const TArray<ElementType, AllocatorType>& ExpectedArray)
+{
+	int32 ActualNum = ActualArray.Num();
+	int32 ExpectedNum = ExpectedArray.Num();
+	if (ActualNum != ExpectedNum)
+	{
+		AutomationTest.AddError(
+			FString::Printf(TEXT("%s: The two arrays have different length (expected %i, but it was %i)."),
+				*What, ActualNum, ExpectedNum), 1);
+		return;
+	}
+	for (int32 i = 0; i < ActualNum; i++)
+	{
+		if (ActualArray[i] != ExpectedArray[i])
+		{
+			AddValueError(AutomationTest, What, i, ActualArray[i], ExpectedArray[i]);
+			return;
+		}
+	}
+}
+
 /**
  * Combination of automation test flags that can be used for most if not all project/project-plugin automation tests.
  * It's recommended only to use these as is OR to explicitly define all flags as opposed to combining this macro with other flags.
@@ -35,7 +100,18 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST_INNER(OUU_TEST_CLASS(TestCase), OUU_TESTCAS
  * Use this macro in conjunction with a predefined OUU_TEST_CATEGORY and OUU_TEST_TYPE to declare a complex automation test.
  * In contrast to simple tests, complex automation tests are called on multiple test-cases based on strings.
  * This utility allows declaring those test-cases in a simple list instead of manually implementing the GetTests() function of the test class.
- * 
+ * Used like this:
+ * -------------------------
+ * OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_BEGIN(PrintString, DEFAULT_OUU_TEST_FLAGS)
+ * OUU_COMPLEX_AUTOMATION_TESTCASE("Hello")
+ * OUU_COMPLEX_AUTOMATION_TESTCASE("World")
+ * OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(PrintString)
+ * {
+ *     // test case implementation
+ *     // use parameter (const FString& Parameters) to get one of
+ *     // the test-case strings "Hello" and "World"
+ * }
+ * -------------------------
  */
 #define OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_BEGIN(TestCase, TestFlags) \
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_BEGIN_INNER(OUU_TEST_CLASS(TestCase), OUU_TESTCASE_PRETTY_NAME(TestCase), TestFlags)

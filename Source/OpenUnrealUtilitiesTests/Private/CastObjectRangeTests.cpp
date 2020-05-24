@@ -48,7 +48,7 @@ namespace CastObjectRangeTests
 		}
 
 		// Assert
-		AutomationTest.TestEqual("CastObjectRange AActor from UObject (" + TestString + ") returned correctly cast results", ResultActorArray, ExpectedActorArray);
+		TestArraysEqual(AutomationTest, "CastObjectRange AActor from UObject (" + TestString + ") returned correctly cast results", ResultActorArray, ExpectedActorArray);
 	}
 }
 

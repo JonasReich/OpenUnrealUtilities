@@ -23,7 +23,7 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(SetAllTo, DEFAULT_OUU_TEST_FLAGS)
 	FArrayUtils::SetAllTo(WorkingArray, 8);
 	
 	// Assert
-	TestEqual("All elements are set to the same value", WorkingArray, ExpectedResult);
+	TestArraysEqual(*this, "All elements are set to the same value", WorkingArray, ExpectedResult);
 	
 	return true;
 }
@@ -40,7 +40,7 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(SetNumTo_Increase, DEFAULT_OUU_TEST_FLAGS)
 	FArrayUtils::SetNumTo(WorkingArray, 6, 8);
 
 	// Assert
-	TestEqual("All elements are set to the same value, count was increased", WorkingArray, ExpectedResult);
+	TestArraysEqual(*this, "All elements are set to the same value, count was increased", WorkingArray, ExpectedResult);
 
 	return true;
 }
@@ -57,7 +57,7 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(SetNumTo_Decrease, DEFAULT_OUU_TEST_FLAGS)
 	FArrayUtils::SetNumTo(WorkingArray, 3, 8);
 
 	// Assert
-	TestEqual("All elements are set to the same value, count was decreased", WorkingArray, ExpectedResult);
+	TestArraysEqual(*this, "All elements are set to the same value, count was decreased", WorkingArray, ExpectedResult);
 
 	return true;
 }
