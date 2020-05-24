@@ -8,15 +8,19 @@
 
 #include "Templates/Models.h"
 
+namespace OUUTests_Internal
+{
+/** Concept for a class that supports LexToString() */
 struct CLexToStringConvertable
 {
 	template<typename ElementType>
 	auto Requires(ElementType It) -> decltype(LexToString(DeclVal<ElementType>()));
 };
 
+/** Overload for adding an equality error of array values that DO support LexToString() */
 template< typename ElementType, typename =
 	typename TEnableIf<TModels<CLexToStringConvertable, ElementType>::Value>::Type >
-void AddValueError(
+void AddArrayValueError(
 		FAutomationTestBase& AutomationTest,
 		const FString& What,
 		int32 Idx,
@@ -29,9 +33,10 @@ void AddValueError(
 			*What, Idx, *LexToString(AValue), *LexToString(BValue)), 1);
 }
 
+/** Overload for adding an equality error of array values that do NOT support LexToString() */
 template< typename ElementType, typename =
 	typename TEnableIf<TModels<CLexToStringConvertable, ElementType>::Value == false>::Type >
-void AddValueError(
+void AddArrayValueError(
 		FAutomationTestBase& AutomationTest,
 		const FString& What,
 		int32 Idx,
@@ -45,6 +50,13 @@ void AddValueError(
 			*What, Idx), 1);
 }
 
+}
+
+/**
+ * Test if two arrays are equal.
+ * This check doesn't have any functional difference to an arrays equality check via operator==(),
+ * but this function has more verbose output because it compares individual array elements.
+ */
 template<typename ElementType, typename AllocatorType>
 void TestArraysEqual(
 	FAutomationTestBase& AutomationTest,
@@ -52,6 +64,7 @@ void TestArraysEqual(
 	const TArray<ElementType, AllocatorType>& ActualArray,
 	const TArray<ElementType, AllocatorType>& ExpectedArray)
 {
+	// Quick initial test: Compare element counts
 	int32 ActualNum = ActualArray.Num();
 	int32 ExpectedNum = ExpectedArray.Num();
 	if (ActualNum != ExpectedNum)
@@ -61,14 +74,18 @@ void TestArraysEqual(
 				*What, ActualNum, ExpectedNum), 1);
 		return;
 	}
+
+	// More thorough test: Compare individual elements for equal values at the same index
 	for (int32 i = 0; i < ActualNum; i++)
 	{
 		if (ActualArray[i] != ExpectedArray[i])
 		{
-			AddValueError(AutomationTest, What, i, ActualArray[i], ExpectedArray[i]);
+			OUUTests_Internal::AddArrayValueError(AutomationTest, What, i, ActualArray[i], ExpectedArray[i]);
 			return;
 		}
 	}
+
+	ensureMsgf(ActualArray == ExpectedArray, TEXT("If the two arrays did not match, we should have gotten an error before."));
 }
 
 /**
