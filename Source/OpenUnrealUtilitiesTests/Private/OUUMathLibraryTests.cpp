@@ -55,6 +55,9 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("X=+1,Y=+0,Z=+0|X=-1,Y=+0,Z=+0.0001|X=+0,Y=-1,Z=
 // for smaller angles everything is fine
 OUU_COMPLEX_AUTOMATION_TESTCASE("X=+1,Y=+0,Z=+0|X=+0,Y=+0,Z=+1|X=+0,Y=+1,Z=+0|+90")
 OUU_COMPLEX_AUTOMATION_TESTCASE("X=+1,Y=+0,Z=+0|X=+0,Y=+0,Z=+1|X=+0,Y=-1,Z=+0|-90")
+// changing vectors A and B (compared to the two cases directly above) should result in opposite signs
+OUU_COMPLEX_AUTOMATION_TESTCASE("X=+0,Y=+0,Z=+1|X=+1,Y=+0,Z=+0|X=+0,Y=+1,Z=+0|-90")
+OUU_COMPLEX_AUTOMATION_TESTCASE("X=+0,Y=+0,Z=+1|X=+1,Y=+0,Z=+0|X=+0,Y=-1,Z=+0|+90")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(SignedAngleBetweenVectors)
 {
 	// Arrange

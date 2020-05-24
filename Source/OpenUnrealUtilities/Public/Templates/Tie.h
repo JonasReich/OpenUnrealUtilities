@@ -4,12 +4,6 @@
 
 #include "Templates/Tuple.h"
 
-namespace AesirTie_Private {
-
-	template<typename... Types>
-	struct TTieTupleWrapper;
-}
-
 namespace AesirTie_Private
 {
 	/**
