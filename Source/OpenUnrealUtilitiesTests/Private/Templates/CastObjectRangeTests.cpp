@@ -1,7 +1,5 @@
 // Aesir Interactive GmbH, (c) 2020
 
-#pragma once
-
 #include "OUUTests.h"
 
 #if WITH_AUTOMATION_WORKER
