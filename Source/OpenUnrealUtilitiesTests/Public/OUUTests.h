@@ -68,6 +68,14 @@ T ParseValue(const FString& s, int32 iOverloadArg = 0)
 	return static_cast<T>(Result);
 }
 
+template<>
+FORCEINLINE FVector ParseValue<FVector>(const FString& s)
+{
+	FVector Result;
+	Result.InitFromString(s);
+	return Result;
+}
+
 }
 
 /**

@@ -22,20 +22,16 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("X=+1,Y=+0,Z=+0|X=+1,Y=+1,Z=+0|+45")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(AngleBetweenVectors)
 {
 	// Arrange
-	TArray<FString> Args;
-	Parameters.ParseIntoArray(Args, TEXT("|"));
-	FVector A;
-	A.InitFromString(Args[0]);	
-	FVector B;
-	B.InitFromString(Args[1]);
-	float ExpectedAngle;
-	LexTryParseString(ExpectedAngle, *Args[2]);
+	FTestParameterParser Parser{ Parameters };
+	const FVector A = Parser.GetValue<FVector>(0);
+	const FVector B = Parser.GetValue<FVector>(1);
+	const float ExpectedAngle = Parser.GetValue<float>(2);
 	
 	// Act
 	float ActualAngle = UOUUMathLibrary::AngleBetweenVectors(A, B);
 
 	// Assert
-	FString DisplayString = FString::Printf(TEXT("Angle between vectors %s and %s"), *Args[0], *Args[1]);
+	FString DisplayString = FString::Printf(TEXT("Angle between vectors %s and %s"), *A.ToString(), *B.ToString());
 	TestEqual(DisplayString, ActualAngle, ExpectedAngle);
 
 	return true;
@@ -59,22 +55,17 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("X=+0,Y=+0,Z=+1|X=+1,Y=+0,Z=+0|X=+0,Y=-1,Z=+0|+9
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(SignedAngleBetweenVectors)
 {
 	// Arrange
-	TArray<FString> Args;
-	Parameters.ParseIntoArray(Args, TEXT("|"));
-	FVector A;
-	A.InitFromString(Args[0]);
-	FVector B;
-	B.InitFromString(Args[1]);
-	FVector Up;
-	Up.InitFromString(Args[2]);
-	float ExpectedAngle;
-	LexTryParseString(ExpectedAngle, *Args[3]);
-
+	FTestParameterParser Parser{ Parameters };
+	const FVector A = Parser.GetValue<FVector>(0);
+	const FVector B = Parser.GetValue<FVector>(1);
+	const FVector Up = Parser.GetValue<FVector>(2);
+	const float ExpectedAngle = Parser.GetValue<float>(3);
+	
 	// Act
 	float ActualAngle = UOUUMathLibrary::SignedAngleBetweenVectors(A, B, Up);
 
 	// Assert
-	FString DisplayString = FString::Printf(TEXT("Signed angle between vectors %s and %s"), *Args[0], *Args[1]);
+	FString DisplayString = FString::Printf(TEXT("Signed angle between vectors %s and %s with up: %s"), *A.ToString(), *B.ToString(), *Up.ToString());
 	TestEqual(DisplayString, ActualAngle, ExpectedAngle);
 
 	return true;
@@ -89,24 +80,18 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("4|1|3|3")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(ClampToRange)
 {
 	// Arrange
-	TArray<FString> Args;
-	Parameters.ParseIntoArray(Args, TEXT("|"));
-	
-	float InValue = 0;
-	LexTryParseString(InValue, *Args[0]);
-	float Min = 0;
-	float Max = 1;
-	LexTryParseString(Min, *Args[1]);
-	LexTryParseString(Max, *Args[2]);
+	FTestParameterParser Parser{ Parameters };
+	float InValue = Parser.GetValue<float>(0);
+	float Min = Parser.GetValue<float>(1);
+	float Max = Parser.GetValue<float>(2);
 	TRange<float> Range{ Min, Max };
-	float ExpectedResult = 0;
-	LexTryParseString(ExpectedResult, *Args[3]);
-
+	float ExpectedResult = Parser.GetValue<float>(3);
+	
 	// Act
 	float ActualResult = UOUUMathLibrary::ClampToRange(InValue, Range);
 
 	// Assert
-	FString DisplayString = FString::Printf(TEXT("Signed angle between vectors %s and %s"), *Args[0], *Args[1]);
+	FString DisplayString = FString::Printf(TEXT("%f clamped between %f and %f"), InValue, Min, Max);
 	TestEqual(DisplayString, ActualResult, ExpectedResult);
 
 	return true;
