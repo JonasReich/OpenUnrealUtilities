@@ -19,7 +19,7 @@ struct CLexToStringConvertable
 
 /** Overload for adding an equality error of array values that DO support LexToString() */
 template< typename ElementType, typename =
-	typename TEnableIf<TModels<CLexToStringConvertable, ElementType>::Value>::Type >
+	typename TEnableIf<TModels<CLexToStringConvertable, ElementType>::Value &! TIsPointer<ElementType>::Value>::Type >
 void AddArrayValueError(
 		FAutomationTestBase& AutomationTest,
 		const FString& What,
@@ -35,7 +35,7 @@ void AddArrayValueError(
 
 /** Overload for adding an equality error of array values that do NOT support LexToString() */
 template< typename ElementType, typename =
-	typename TEnableIf<TModels<CLexToStringConvertable, ElementType>::Value == false>::Type >
+	typename TEnableIf<TModels<CLexToStringConvertable, ElementType>::Value == false || TIsPointer<ElementType>::Value>::Type >
 void AddArrayValueError(
 		FAutomationTestBase& AutomationTest,
 		const FString& What,
