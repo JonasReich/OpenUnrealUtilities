@@ -7,6 +7,7 @@
 #if WITH_AUTOMATION_WORKER
 
 #include "Templates/Models.h"
+#include "Templates/IsEnumClass.h"
 
 namespace OUUTests_Internal
 {
@@ -50,6 +51,23 @@ void AddArrayValueError(
 			*What, Idx), 1);
 }
 
+template<typename T, typename = typename TEnableIf<TIsEnumClass<T>::Value == false>::Type>
+T ParseValue(const FString& s)
+{
+	T Result;
+	LexTryParseString(Result, *s);
+	return Result;
+}
+
+template<typename T, typename = typename TEnableIf<TIsEnumClass<T>::Value == true>::Type>
+T ParseValue(const FString& s, int32 iOverloadArg = 0)
+{
+	static_assert(sizeof(int32) >= sizeof(T), "Cannot parse value because enum class T underlying type is bigger than int32");
+	int32 Result;
+	LexTryParseString(Result, *s);
+	return static_cast<T>(Result);
+}
+
 }
 
 /**
@@ -87,6 +105,45 @@ void TestArraysEqual(
 
 	ensureMsgf(ActualArray == ExpectedArray, TEXT("If the two arrays did not match, we should have gotten an error before."));
 }
+
+struct FTestParameterParser
+{
+	const FString ParameterDelimiter;
+	const FString ArrayDelimiter;
+	TArray<FString> Parameters;
+
+
+	FTestParameterParser(FString ParametersString, FString InParameterDelimiter, FString InArrayDelimiter) :
+		ParameterDelimiter(InParameterDelimiter),
+		ArrayDelimiter(InArrayDelimiter)
+	{
+		ParametersString.ParseIntoArray(Parameters, *ParameterDelimiter);
+	}
+
+	FTestParameterParser(FString ParametersString) :
+		FTestParameterParser(ParametersString, TEXT("|"), TEXT(";"))
+	{
+	}
+
+	template<typename T>
+	T GetValue(int32 Index) const
+	{
+		return OUUTests_Internal::ParseValue<T>(Parameters[Index]);
+	}
+
+	template<typename T>
+	TArray<T> GetArrayValue(int32 Index) const
+	{
+		TArray<FString> ParameterArray;
+		Parameters[i].ParseIntoArray(ParameterArray, *ArrayDelimiter);
+		TArray<T> Result;
+		for (const FString& s : ParameterArray)
+		{
+			Result.Add(OUUTests_Internal::ParseValue(s));
+		}
+		return Result;
+	}
+};
 
 /**
  * Combination of automation test flags that can be used for most if not all project/project-plugin automation tests.
