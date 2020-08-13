@@ -3,6 +3,14 @@
 #pragma once
 
 #include "Misc/AutomationTest.h"
+#include "OUUTests.generated.h"
+
+/** Used in place of plain UObject for tests, because UObject itself is abstract */
+UCLASS()
+class UOUUTestObject : public UObject
+{
+	GENERATED_BODY()
+};
 
 #if WITH_AUTOMATION_WORKER
 
