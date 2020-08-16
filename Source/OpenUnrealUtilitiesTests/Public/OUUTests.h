@@ -26,9 +26,28 @@ struct CLexToStringConvertable
 	auto Requires(ElementType It) -> decltype(LexToString(DeclVal<ElementType>()));
 };
 
+FORCEINLINE FString LexToStringWrapper(const UObject* O)
+{
+	return IsValid(O) ? O->GetName() : "Invalid";
+}
+
+template<typename ElementType, typename = typename TEnableIf<TIsPointer<ElementType>::Value == false>::Type>
+FString LexToStringWrapper(ElementType Element)
+{
+	return LexToString(Element);
+}
+
+template<typename ElementType, typename = typename TEnableIf<TIsPointer<ElementType>::Value == true &&
+	TPointerIsConvertibleFromTo<TRemovePointer<ElementType>::Type, UObject>::Value == false>::Type>
+FString LexToStringWrapper(ElementType Element, int32 iOverloadArg = 0)
+{
+	return LexToString(*Element);
+}
+
+
 /** Overload for adding an equality error of array values that DO support LexToString() */
 template< typename ElementType, typename =
-	typename TEnableIf<TModels<CLexToStringConvertable, ElementType>::Value &! TIsPointer<ElementType>::Value>::Type >
+	typename TEnableIf<TModels<CLexToStringConvertable, TRemovePointer<ElementType>>::Value>::Type >
 void AddArrayValueError(
 		FAutomationTestBase& AutomationTest,
 		const FString& What,
@@ -39,12 +58,12 @@ void AddArrayValueError(
 	AutomationTest.AddError(
 		FString::Printf(
 			TEXT("%s: The two arrays have different values at index %i (expected %s, but it was %s)."),
-			*What, Idx, *LexToString(AValue), *LexToString(BValue)), 1);
+			*What, Idx, *LexToStringWrapper(AValue), *LexToStringWrapper(BValue)), 1);
 }
 
 /** Overload for adding an equality error of array values that do NOT support LexToString() */
 template< typename ElementType, typename =
-	typename TEnableIf<TModels<CLexToStringConvertable, ElementType>::Value == false || TIsPointer<ElementType>::Value>::Type >
+	typename TEnableIf<TModels<CLexToStringConvertable, TRemovePointer<ElementType>>::Value == false>::Type >
 void AddArrayValueError(
 		FAutomationTestBase& AutomationTest,
 		const FString& What,
@@ -120,6 +139,59 @@ void TestArraysEqual(
 	}
 
 	ensureMsgf(ActualArray == ExpectedArray, TEXT("If the two arrays did not match, we should have gotten an error before."));
+}
+
+/**
+ * Test if two unordered arrays have matching elements.
+ * Iterates several times over array to match array items, so it's pretty expensive.
+ * However this allows to give quite detailed feedback which elements are missing from either array.
+ */
+template<typename ElementType, typename AllocatorType>
+void TestUnorderedArraysMatch(
+	FAutomationTestBase& AutomationTest,
+	const FString& What,
+	const TArray<ElementType, AllocatorType>& ActualArray,
+	const TArray<ElementType, AllocatorType>& ExpectedArray)
+{
+	// Quick initial test: Compare element counts
+	int32 ActualNum = ActualArray.Num();
+	int32 ExpectedNum = ExpectedArray.Num();
+	if (ActualNum != ExpectedNum)
+	{
+		AutomationTest.AddError(
+			FString::Printf(TEXT("%s: The two arrays have different length (expected %i, but it was %i)."),
+				*What, ExpectedNum, ActualNum), 1);
+		return;
+	}
+	TArray<ElementType, AllocatorType> ActualArrayCopy = ActualArray;
+	TArray<ElementType, AllocatorType> ExpectedArrayCopy = ExpectedArray;
+	for (int32 i = ExpectedArrayCopy.Num() - 1; i >= 0; i--)
+	{
+		const auto& Value = ExpectedArrayCopy[i];
+		int32 j = ActualArrayCopy.Find(Value);
+		if (j == INDEX_NONE)
+		{
+			AutomationTest.AddError(
+				FString::Printf(
+					TEXT("%s: The value %s from the expected array was not found in the actual array"),
+					*What, *OUUTests_Internal::LexToStringWrapper(Value)), 1);
+			return;
+		}
+		
+		ExpectedArrayCopy.RemoveAtSwap(i);
+		ActualArrayCopy.RemoveAtSwap(j);
+	}
+
+	if (ActualArrayCopy.Num() > 0)
+	{
+		AutomationTest.AddError(
+			FString::Printf(
+				TEXT("%s: The actual array contains %i that could not be matched to the expected array"),
+				*What, ActualArrayCopy.Num()), 1);
+		return;
+	}
+
+	ensureMsgf(ActualArrayCopy.Num() == 0 && ExpectedArrayCopy.Num() == 0, TEXT("If we didn't find all values in both arrays, we should have gotten an error before."));
 }
 
 struct FTestParameterParser

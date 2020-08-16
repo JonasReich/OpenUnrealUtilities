@@ -247,8 +247,6 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(RaiseNewRequest, DEFAULT_OUU_TEST_FLAGS)
 
 //////////////////////////////////////////////////////////////////////////
 
-PRAGMA_DISABLE_OPTIMIZATION
-
 /**
  * 0: action for request 0
  * 1: action for request 1
