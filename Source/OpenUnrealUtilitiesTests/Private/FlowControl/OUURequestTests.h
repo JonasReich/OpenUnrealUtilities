@@ -1,6 +1,7 @@
 // Copyright (c) 2020 Jonas Reich
 
 #include "CoreMinimal.h"
+
 #include "FlowControl/OUURequest.h"
 #include "OUURequestTests.generated.h"
 
@@ -39,4 +40,12 @@ public:
 	{
 		StateHistory.Add(State);
 	}
+};
+
+UCLASS()
+class UOUURequestQueue_TestRequest : public UOUURequest
+{
+	GENERATED_BODY()
+public:
+
 };

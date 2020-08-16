@@ -63,35 +63,3 @@ void UOUURequest::ChangeState(EOUURequestState NewState)
 		}
 	}
 }
-
-//////////////////////////////////////////////////////////////////////////
- 
-UOUURequest* UOUURequestQueue::CreateNewRequest()
-{
-	return nullptr;
-}
-
-UOUURequest* UOUURequestQueue::RaiseNewRequest()
-{
-	return nullptr;
-}
-
-UOUURequest* UOUURequestQueue::RaiseNewRequestAndWait(FOnRequestStatusChangedDelegate CompletedCallback)
-{
-	return nullptr;
-}
-
-TArray<UOUURequest*> UOUURequestQueue::GetPendingRequests()
-{
-	return RequestQueue;
-}
-
-void UOUURequestQueue::HandleRequestRaised(UOUURequest* Request) const
-{
-
-}
-
-void UOUURequestQueue::HandleRequestCompleted(UOUURequest* Request, EOUURequestState State) const
-{
-
-}
