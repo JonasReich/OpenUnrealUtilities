@@ -35,6 +35,7 @@ struct FOUURequestTestEnvironment
  * 1: reset after completion
  * 2: raise and wait / raise
  * 3: manually reset?
+ * 4: raise multiple times?
  */
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_BEGIN(Raise, DEFAULT_OUU_TEST_FLAGS)
 OUU_COMPLEX_AUTOMATION_TESTCASE("1|1|1|0")
@@ -95,6 +96,87 @@ OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(Raise)
 	return true;
 }
 
+//////////////////////////////////////////////////////////////////////////
+
+OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(RaiseTwice, DEFAULT_OUU_TEST_FLAGS)
+{
+	// Arrange
+	FOUURequestTestEnvironment Env;
+	Env.Responder->bCompleteRequestSuccesfully = true;
+	Env.Request->bResetAfterCompletion = true;
+	Env.Request->OnCompleted.AddDynamic(Env.Owner, &UOUURequestTests_Owner::HandleRequestCompleted);
+
+	// Act
+	Env.Request->Raise();
+	Env.Request->Raise();
+	Env.Request->Complete(true);
+
+	// Assert
+	TestTrue("Callback was received", Env.Owner->bRequestCompleted);
+	TestEqual("Success State (callback)", Env.Owner->StateAfterCompletion, EOUURequestState::Successful);
+	TestEqual("Success State (request)", Env.Request->GetState(), EOUURequestState::Idle);
+	
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(Cancel, DEFAULT_OUU_TEST_FLAGS)
+{
+	// Arrange
+	FOUURequestTestEnvironment Env;
+	Env.Responder->bCompleteRequestSuccesfully = true;
+	Env.Request->bResetAfterCompletion = true;
+	Env.Request->OnCompleted.AddDynamic(Env.Owner, &UOUURequestTests_Owner::HandleRequestCompleted);
+
+	// Act
+	Env.Request->Raise();
+	Env.Request->Cancel();
+	Env.Request->Complete(true);
+
+	// Assert
+	TestTrue("Callback was received", Env.Owner->bRequestCompleted);
+	TestEqual("Success State (callback)", Env.Owner->StateAfterCompletion, EOUURequestState::Canceled);
+	TestEqual("Success State (request)", Env.Request->GetState(), EOUURequestState::Idle);
+
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(OnStatusChanged, DEFAULT_OUU_TEST_FLAGS)
+{
+	// Arrange
+	FOUURequestTestEnvironment Env;
+	Env.Responder->bCompleteRequestSuccesfully = true;
+	Env.Request->bResetAfterCompletion = false;
+	Env.Request->OnStatusChanged.AddDynamic(Env.Owner, &UOUURequestTests_Owner::HandleStateChanged);
+
+	// Act
+	Env.Request->Raise();
+	Env.Request->Cancel();
+	Env.Request->Reset();
+	Env.Request->Raise();
+	Env.Request->Complete(true);
+	Env.Request->Reset();
+	Env.Request->Raise();
+	Env.Request->Complete(false);
+
+	// Assert
+	TArray<EOUURequestState> ExpectedHistory = {
+		EOUURequestState::Pending,
+		EOUURequestState::Canceled,
+		EOUURequestState::Idle,
+		EOUURequestState::Pending,
+		EOUURequestState::Successful,
+		EOUURequestState::Idle,
+		EOUURequestState::Pending,
+		EOUURequestState::Failed
+	};
+	TestArraysEqual(*this, "State history", Env.Owner->StateHistory, ExpectedHistory);
+
+	return true;
+}
 //////////////////////////////////////////////////////////////////////////
 
 #undef OUU_TEST_CATEGORY

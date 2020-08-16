@@ -32,4 +32,11 @@ public:
 		bRequestCompleted = true;
 		StateAfterCompletion = State;
 	}
+
+	TArray<EOUURequestState> StateHistory;
+	UFUNCTION()
+	void HandleStateChanged(UOUURequest* Request, EOUURequestState State)
+	{
+		StateHistory.Add(State);
+	}
 };

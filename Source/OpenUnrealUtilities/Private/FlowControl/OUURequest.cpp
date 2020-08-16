@@ -7,7 +7,7 @@ void UOUURequest::Raise()
 	if (State != EOUURequestState::Idle)
 		return;
 
-	State = EOUURequestState::Pending;
+	ChangeState(EOUURequestState::Pending);
 	OnRaised.Broadcast(this);
 }
 
@@ -48,6 +48,8 @@ EOUURequestState UOUURequest::GetState() const
 
 void UOUURequest::ChangeState(EOUURequestState NewState)
 {
+	if (State == NewState)
+		return;
 	State = NewState;
 	OnStatusChanged.Broadcast(this, NewState);
 	if (NewState == EOUURequestState::Successful ||

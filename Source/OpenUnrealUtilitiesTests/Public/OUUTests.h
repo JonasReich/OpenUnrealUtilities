@@ -105,7 +105,7 @@ void TestArraysEqual(
 	{
 		AutomationTest.AddError(
 			FString::Printf(TEXT("%s: The two arrays have different length (expected %i, but it was %i)."),
-				*What, ActualNum, ExpectedNum), 1);
+				*What, ExpectedNum, ActualNum), 1);
 		return;
 	}
 
