@@ -1,4 +1,10 @@
 
+The Open Unreal Utilities plugin for Unreal Engine 4 is licensed under the MIT license.
+You are invited to create pull-requests to the github source for any additions or modifications you make to the plugin:
+https://github.com/JonasReich/OpenUnrealUtilities
+
+----
+
 MIT License
 
 Copyright (c) 2020 Jonas Reich
