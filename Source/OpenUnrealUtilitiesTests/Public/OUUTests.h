@@ -3,11 +3,12 @@
 #pragma once
 
 #include "Misc/AutomationTest.h"
+#include "ScopedAutomationWorld.h"
 #include "OUUTests.generated.h"
 
 /** Used in place of plain UObject for tests, because UObject itself is abstract */
 UCLASS()
-class UOUUTestObject : public UObject
+class OPENUNREALUTILITIESTESTS_API UOUUTestObject : public UObject
 {
 	GENERATED_BODY()
 };
