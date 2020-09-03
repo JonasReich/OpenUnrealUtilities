@@ -15,6 +15,11 @@ public class OpenUnrealUtilitiesTests : ModuleRules
 				"Core",
 				"CoreUObject",
 				"Engine",
+				"InputCore",
+				"SlateCore",
+				"UMG",
+
+				"OnlineSubsystem",
 
 				// Plugin
 				"OpenUnrealUtilities"
