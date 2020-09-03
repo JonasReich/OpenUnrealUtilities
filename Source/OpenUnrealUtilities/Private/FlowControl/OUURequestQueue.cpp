@@ -36,6 +36,23 @@ TArray<UOUURequest*> UOUURequestQueue::GetRequestsInQueue()
 	return RequestQueue;
 }
 
+UOUURequest* UOUURequestQueue::GetOldestRequest() const
+{
+	return RequestQueue.Num() > 0 ? RequestQueue[0] : nullptr;
+}
+
+UOUURequest* UOUURequestQueue::GetOldestRequestWithState(EOUURequestState State) const
+{
+	if (UOUURequest*const* ResultPtr = RequestQueue.FindByPredicate([State](const UOUURequest* R) -> bool
+	{
+		return IsValid(R) && R->GetState() == State;
+	}))
+	{
+		return *ResultPtr;
+	}
+	return nullptr;
+}
+
 void UOUURequestQueue::HandleRequestRaised(UOUURequest* Request)
 {
 	// Forward newly raised requests

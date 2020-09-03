@@ -65,6 +65,20 @@ public:
 	UFUNCTION(BlueprintCallable)
 	TArray<UOUURequest*> GetRequestsInQueue();
 
+	/**
+	 * Get the older request in the queue independent of state.
+	 * If you only want requests of a certain state (e.g. only pending requests),
+	 * call GetOldestRequestWithState() instead.
+	 */
+	UOUURequest* GetOldestRequest() const;
+
+	/**
+	 * Get the oldest request in the queue with the specified state.
+	 * Especially handy for request handlers to find the latest pending request.
+	 */
+	UFUNCTION(BlueprintCallable)
+	UOUURequest* GetOldestRequestWithState(EOUURequestState State) const;
+
 private:
 	UPROPERTY(Transient)
 	TArray<UOUURequest*> RequestQueue;

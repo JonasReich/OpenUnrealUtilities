@@ -199,6 +199,9 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(CreateNewRequest, DEFAULT_OUU_TEST_FLAGS)
 	UOUURequest* Request0 = RequestQueue->CreateNewRequest();
 	UOUURequest* Request1 = RequestQueue->CreateNewRequest();
 	TArray<UOUURequest*> OpenRequests = RequestQueue->GetRequestsInQueue();
+	UOUURequest* OldestRequest = RequestQueue->GetOldestRequest();
+	UOUURequest* OldestPendingRequest = RequestQueue->GetOldestRequestWithState(EOUURequestState::Pending);
+	UOUURequest* OldestIdleRequest = RequestQueue->GetOldestRequestWithState(EOUURequestState::Idle);
 
 	// Assert
 	bool bRequest0CorrectClass = IsValid(Cast<UOUURequestQueue_TestRequest>(Request0));
@@ -211,6 +214,9 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(CreateNewRequest, DEFAULT_OUU_TEST_FLAGS)
 	TestEqual("Request 0 state", Request0->GetState(), EOUURequestState::Idle);
 	TestEqual("Request 1 state", Request1->GetState(), EOUURequestState::Idle);
 	TestTrue("Request 0 and 1 are different objects", bDifferentObjects);
+	TestEqual("OldestRequest", OldestRequest, Request0);
+	TestEqual("OldestPendingRequest", OldestPendingRequest, (UOUURequest*)nullptr);
+	TestEqual("OldestIdleRequest", OldestIdleRequest, Request0);
 	TestArraysEqual(*this, "PendingRequests", OpenRequests, ExpectedRequestList);
 	
 	return true;
@@ -228,6 +234,9 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(RaiseNewRequest, DEFAULT_OUU_TEST_FLAGS)
 	UOUURequest* Request0 = RequestQueue->RaiseNewRequest();
 	UOUURequest* Request1 = RequestQueue->RaiseNewRequest();
 	TArray<UOUURequest*> OpenRequests = RequestQueue->GetRequestsInQueue();
+	UOUURequest* OldestRequest = RequestQueue->GetOldestRequest();
+	UOUURequest* OldestPendingRequest = RequestQueue->GetOldestRequestWithState(EOUURequestState::Pending);
+	UOUURequest* OldestIdleRequest = RequestQueue->GetOldestRequestWithState(EOUURequestState::Idle);
 
 	// Assert
 	bool bRequest0CorrectClass = IsValid(Cast<UOUURequestQueue_TestRequest>(Request0));
@@ -240,6 +249,9 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(RaiseNewRequest, DEFAULT_OUU_TEST_FLAGS)
 	TestEqual("Request 0 state", Request0->GetState(), EOUURequestState::Pending);
 	TestEqual("Request 1 state", Request1->GetState(), EOUURequestState::Pending);
 	TestTrue("Request 0 and 1 are different objects", bDifferentObjects);
+	TestEqual("OldestRequest", OldestRequest, Request0);
+	TestEqual("OldestPendingRequest", OldestPendingRequest, Request0);
+	TestEqual("OldestIdleRequest", OldestIdleRequest, (UOUURequest*)nullptr);
 	TestArraysEqual(*this, "PendingRequests", OpenRequests, ExpectedRequestList);
 
 	return true;
