@@ -1,6 +1,7 @@
 // Copyright (c) 2020 Jonas Reich
 
 #pragma once
+
 #include "CoreMinimal.h"
 #include "Engine/Engine.h"
 
@@ -20,6 +21,7 @@ struct OPENUNREALUTILITIESTESTS_API FScopedAutomationWorld
 public:
 	UWorld* World;
 	FWorldContext& WorldContext;
+	FURL URL;
 
 	FScopedAutomationWorld() : 
 		World (UWorld::CreateWorld(EWorldType::Game, false)),
@@ -34,13 +36,24 @@ public:
 		World->DestroyWorld(false);
 	}
 
-	/** Call this for actor initialization */
-	void BeginPlay()
-	{
-		FURL URL;
-		World->InitializeActorsForPlay(URL);
-		World->BeginPlay();
-	}
+	/**
+	 * Call this for actor initialization.
+	 * This is a prerequisite to many game framework operations (e.g. spawning player controller, etc.)
+	 */
+	void BeginPlay();
+
+	/** Pointers to game framework objects that will be set by InitiailizeGame() */
+	UGameInstance* GameInstance;
+	AGameModeBase* GameMode;
+	ULocalPlayer* LocalPlayer;
+	APlayerController* PlayerController;
+
+	/**
+	 * Initialize and spawn the most important game framework classes for tests that require gamemode, player controller, etc.
+	 * @returns if everything went ok. This should always be the case, but you should use it as early exit condition for tests
+	 * anyways to prevent crashes during test runs.
+	 */
+	bool InitiailizeGame();
 };
 
 #endif

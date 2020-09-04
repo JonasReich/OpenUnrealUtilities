@@ -37,19 +37,29 @@ struct OPENUNREALUTILITIES_API FUMGInputAction
 public:
 	/** Name of the input action as registered in the InputSettings/PlayerInput. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName ActionName;
+	FName ActionName = NAME_None;
 	
 	/** Which key event(s) will provoke the callback delegate being broadcast. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EUMGInputActionKeyEvent ReactEvent;
-	
+	EUMGInputActionKeyEvent ReactEvent = EUMGInputActionKeyEvent::None;
+
+	/** Required time to hold the key for a reaction if ReactEvent is set to KeyHeldTimer */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HoldTime = 0.f;
+
 	/** Which key event(s) to consume. Can be a subset or a superset of ReactEvents. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EUMGInputActionKeyEvent ConsumeEvent;
+	EUMGInputActionKeyEvent ConsumeEvent = EUMGInputActionKeyEvent::None;
 
 	/** Bindings with this action will be removed/destroyed as soon as it was broadcast once. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsOneshot = false;
+
+	FORCEINLINE bool operator==(const FUMGInputAction& Other) const
+	{
+		return ActionName == Other.ActionName && ReactEvent == Other.ReactEvent && 
+			ConsumeEvent == Other.ConsumeEvent && bIsOneshot == Other.bIsOneshot;
+	}
 };
 
 DECLARE_DYNAMIC_DELEGATE_OneParam(FUMGInputActionDelegate, EUMGInputActionKeyEvent, SourceEvent);
@@ -122,10 +132,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FEventReply ProcessOnKeyUp(FGeometry MyGeometry, FKeyEvent InKeyEvent);
 	
-	/** Link this in a widgets OnRemovedFromFocusPath event */
-	UFUNCTION(BlueprintCallable)
-	void ProcessOnRemovedFromFocusPath(const FFocusEvent& InFocusEvent);
-
 private:
 	// Can be used to retrieve PlayerInput and InputComponent
 	UPROPERTY()
@@ -133,9 +139,26 @@ private:
 
 	struct FUMGInputActionBinding
 	{
+		FUMGInputActionBinding(FUMGInputAction InSignature, FUMGInputActionDelegate InDelegate) :
+			BindingSignature(InSignature), Delegate(InDelegate) {}
+
 		FUMGInputAction BindingSignature;
+
 		FUMGInputActionDelegate Delegate;
+
+		// If the delegate was called for a KeyHeldTimer type event.
+		// Not used for any of the other event types.
+		bool bKeyHeldTimerCalled = false;
+
+		FORCEINLINE bool operator==(const FUMGInputActionBinding& Other) const
+		{
+			return BindingSignature == Other.BindingSignature && Delegate == Other.Delegate;
+		}
 	};
 
 	TArray<FUMGInputActionBinding> BindingStack;
+
+	int32 GetFirstBindingWithKey(FKey Key) const;
+
+	FEventReply ProcessBindingMatch(int32 BindingIndex, EUMGInputActionKeyEvent Event);
 };

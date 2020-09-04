@@ -9,7 +9,7 @@
  * Similar to BindDynamic()/AddDynamic() utility macros.
  */
 #define CreateDynamic(DynamicDelegateType, UserObject, FuncName) \
-[&UserObject]() -> DynamicDelegateType {\
+[&]() -> DynamicDelegateType {\
 DynamicDelegateType Delegate; \
 Delegate.BindDynamic(Widget, FuncName); \
 return Delegate; \

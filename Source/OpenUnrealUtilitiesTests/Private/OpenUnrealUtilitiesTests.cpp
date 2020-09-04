@@ -1,8 +1,10 @@
 // Copyright (c) 2020 Jonas Reich
 
-#include "OpenUnrealUtilitiesTestsModule.h"
+#include "OpenUnrealUtilitiesTests.h"
 
 #define LOCTEXT_NAMESPACE "FOpenUnrealUtilitiesTestsModule"
+
+DEFINE_LOG_CATEGORY(LogOpenUnrealUtilitiesTests);
 
 void FOpenUnrealUtilitiesTestsModule::StartupModule()
 {

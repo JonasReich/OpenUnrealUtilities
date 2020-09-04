@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogOpenUnrealUtilities, Log, All);
+
 class FOpenUnrealUtilitiesModule : public IModuleInterface
 {
 public:
