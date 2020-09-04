@@ -36,6 +36,16 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(LexToString_Enum, DEFAULT_OUU_TEST_FLAGS)
 	return true;
 }
 
+enum class EStringUtilsTestEnum2
+{
+	Alpha,
+	Beta,
+	Gamma
+};
+
+static_assert(TModels<CLexToStringConvertable, EStringUtilsTestEnum2>::Value == false,
+	"Enum classes must not be LexToString()-convertable without a special LexToString() overload!");
+
 //////////////////////////////////////////////////////////////////////////
 
 OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(LexToString_int32_Value, DEFAULT_OUU_TEST_FLAGS)

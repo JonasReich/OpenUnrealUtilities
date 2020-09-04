@@ -17,11 +17,13 @@ struct CMemberToStringConvertable
 	auto Requires(ElementType It) -> decltype(DeclVal<ElementType>().ToString());
 };
 
+/** LexToString overload for UObject pointers */
 FORCEINLINE FString LexToString(const UObject* O)
 {
 	return IsValid(O) ? O->GetName() : "Invalid";
 }
 
+/** LexToString overload for pointers to objects that are themselves string convertable with LexToString() */
 template<typename T, typename = typename TEnableIf<
 	TIsPointer<T>::Value == true &&
 	TPointerIsConvertibleFromTo<TRemovePointer<T>::Type, const UObject>::Value == false &&
@@ -32,7 +34,7 @@ FString LexToString(T Object)
 	return (Object != nullptr) ? LexToString(*Object) : TEXT("nullptr");
 }
 
-// Overload for pointers to objects that are already LexToString convertable
+/** LexToString overload for pointers to objects that have a ToString member */
 template<typename T, typename = typename TEnableIf<
 	TIsPointer<T>::Value == true &&
 	TPointerIsConvertibleFromTo<TRemovePointer<T>::Type, const UObject>::Value == false &&
@@ -43,6 +45,7 @@ FString LexToString(T Object, int32 iOverloadArg = 0)
 	return (Object != nullptr) ? Object->ToString() : TEXT("nullptr");
 }
 
+/** LexToString overload for references to objects that have a ToString member */
 template<typename T, typename = typename TEnableIf<
 	TIsPointer<T>::Value == false &&
 	TModels<CMemberToStringConvertable, T>::Value
