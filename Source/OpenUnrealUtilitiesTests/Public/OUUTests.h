@@ -4,6 +4,7 @@
 
 #include "Misc/AutomationTest.h"
 #include "ScopedAutomationWorld.h"
+#include "StringUtils.h"
 #include "OUUTests.generated.h"
 
 /** Used in place of plain UObject for tests, because UObject itself is abstract */
@@ -20,35 +21,8 @@ class OPENUNREALUTILITIESTESTS_API UOUUTestObject : public UObject
 
 namespace OUUTests_Internal
 {
-/** Concept for a class that supports LexToString() */
-struct CLexToStringConvertable
-{
-	template<typename ElementType>
-	auto Requires(ElementType It) -> decltype(LexToString(DeclVal<ElementType>()));
-};
 
-FORCEINLINE FString LexToStringWrapper(const UObject* O)
-{
-	return IsValid(O) ? O->GetName() : "Invalid";
-}
-
-template<typename ElementType, typename = typename TEnableIf<TIsPointer<ElementType>::Value == false>::Type>
-FString LexToStringWrapper(ElementType Element)
-{
-	return LexToString(Element);
-}
-
-template<typename ElementType, typename = typename TEnableIf<TIsPointer<ElementType>::Value == true &&
-	TPointerIsConvertibleFromTo<TRemovePointer<ElementType>::Type, UObject>::Value == false>::Type>
-FString LexToStringWrapper(ElementType Element, int32 iOverloadArg = 0)
-{
-	return LexToString(*Element);
-}
-
-
-/** Overload for adding an equality error of array values that DO support LexToString() */
-template< typename ElementType, typename =
-	typename TEnableIf<TModels<CLexToStringConvertable, TRemovePointer<ElementType>>::Value>::Type >
+template< typename ElementType >
 void AddArrayValueError(
 		FAutomationTestBase& AutomationTest,
 		const FString& What,
@@ -59,24 +33,7 @@ void AddArrayValueError(
 	AutomationTest.AddError(
 		FString::Printf(
 			TEXT("%s: The two arrays have different values at index %i (expected %s, but it was %s)."),
-			*What, Idx, *LexToStringWrapper(AValue), *LexToStringWrapper(BValue)), 1);
-}
-
-/** Overload for adding an equality error of array values that do NOT support LexToString() */
-template< typename ElementType, typename =
-	typename TEnableIf<TModels<CLexToStringConvertable, TRemovePointer<ElementType>>::Value == false>::Type >
-void AddArrayValueError(
-		FAutomationTestBase& AutomationTest,
-		const FString& What,
-		int32 Idx,
-		const ElementType& AValue,
-		const ElementType& BValue,
-		int32 iOverloadArg = 0)
-{
-	AutomationTest.AddError(
-		FString::Printf(
-			TEXT("%s: The two arrays have different values at index %i."),
-			*What, Idx), 1);
+			*What, Idx, *LexToString(AValue), *LexToString(BValue)), 1);
 }
 
 template<typename T, typename = typename TEnableIf<TIsEnumClass<T>::Value == false>::Type>
@@ -175,7 +132,7 @@ void TestUnorderedArraysMatch(
 			AutomationTest.AddError(
 				FString::Printf(
 					TEXT("%s: The value %s from the expected array was not found in the actual array"),
-					*What, *OUUTests_Internal::LexToStringWrapper(Value)), 1);
+					*What, *LexToString(Value)), 1);
 			return;
 		}
 		

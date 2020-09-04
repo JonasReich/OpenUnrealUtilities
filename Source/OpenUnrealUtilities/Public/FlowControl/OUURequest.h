@@ -23,6 +23,8 @@ enum class EOUURequestState : uint8
 	Failed
 };
 
+FString OPENUNREALUTILITIES_API LexToString(EOUURequestState E);
+
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnRequestStatusChangedDelegate, UOUURequest*, Request, EOUURequestState, State);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRequestStatusChanged, UOUURequest*, Request, EOUURequestState, State);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnRequestRaisedDelegate, UOUURequest*, Request);

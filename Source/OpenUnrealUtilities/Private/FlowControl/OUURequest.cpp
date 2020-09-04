@@ -2,6 +2,19 @@
 
 #include "FlowControl/OUURequest.h"
 
+FString LexToString(EOUURequestState E)
+{
+	switch (E)
+	{
+	case EOUURequestState::Idle: return TEXT("Idle");
+	case EOUURequestState::Pending: return TEXT("Pending");
+	case EOUURequestState::Canceled: return TEXT("Canceled");
+	case EOUURequestState::Successful: return TEXT("Successful");
+	case EOUURequestState::Failed: return TEXT("Failed");
+	default: return FString();
+	}
+}
+
 void UOUURequest::Raise()
 {
 	if (State != EOUURequestState::Idle)
