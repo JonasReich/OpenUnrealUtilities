@@ -61,6 +61,13 @@ void FUMGInputActionBindingSpec::Define()
 			TestTrue("valid stack", IsValid(Stack));
 			TestEqual("OwningPlayerInput", Stack->GetOwningPlayerInput(), PlayerInput);
 		});
+
+		It("should throw an error and return nullptr if the provided widget is invalid", [this]()
+		{
+			AddExpectedError("Could not create UMGInputActionBindingStack with invalid OwningWidget!", EAutomationExpectedErrorFlags::Exact, 1);
+			UUMGInputActionBindingStack* ResultStack = UUMGInputActionBindingStack::CreateUMGInputActionBindingStack(nullptr);
+			TestNull("Stack created from nullptr widget", ResultStack);
+		});
 	});
 
 	Describe("SetOwningPlayerInput", [this]()

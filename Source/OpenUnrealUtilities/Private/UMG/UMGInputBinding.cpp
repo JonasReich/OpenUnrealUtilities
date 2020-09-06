@@ -17,6 +17,12 @@ UPlayerInput* UUMGInputActionBindingStack::GetOwningPlayerInput() const
 
 UUMGInputActionBindingStack* UUMGInputActionBindingStack::CreateUMGInputActionBindingStack(UUserWidget* InOwningWidget)
 {
+	if (!IsValid(InOwningWidget))
+	{
+		UE_LOG(LogOpenUnrealUtilities, Error, TEXT("Could not create UMGInputActionBindingStack with invalid OwningWidget!"));
+		return nullptr;
+	}
+
 	APlayerController* OwningPlayer = InOwningWidget->GetOwningPlayer();
 	if (!ensure(IsValid(OwningPlayer)))
 		return nullptr;
@@ -100,12 +106,6 @@ bool UUMGInputActionBindingStack::ProcessKeyEvent(FGeometry MyGeometry, FKeyEven
 
 	if (!ensure(OwningPlayerInput.IsValid()))
 		return false;
-
-	/*
-	int32 Idx = GetFirstBindingWithKey(Key);
-	if (Idx == INDEX_NONE)
-		return FEventReply(false);
-	*/
 
 	for (int32 Idx = 0; Idx < BindingStack.Num(); Idx++)
 	{
