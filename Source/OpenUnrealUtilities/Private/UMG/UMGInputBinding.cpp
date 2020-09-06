@@ -3,29 +3,31 @@
 #include "UMG/UMGInputBinding.h"
 #include "Blueprint/UserWidget.h"
 #include "OpenUnrealUtilities.h"
-#include <GameFramework/PlayerInput.h>
+#include "GameFramework/PlayerInput.h"
 
-void UUMGInputActionBindingStack::SetOwningWidget(UUserWidget* InOwningWidget)
+void UUMGInputActionBindingStack::SetOwningPlayerInput(UPlayerInput* InOwningPlayerInput)
 {
-	OwningPlayer = InOwningWidget->GetOwningPlayer();
-	ensure(IsValid(OwningPlayer.Get()));
+	OwningPlayerInput = InOwningPlayerInput;
+}
+
+UPlayerInput* UUMGInputActionBindingStack::GetOwningPlayerInput() const
+{
+	return OwningPlayerInput.IsValid() ? OwningPlayerInput.Get() : nullptr;
 }
 
 UUMGInputActionBindingStack* UUMGInputActionBindingStack::CreateUMGInputActionBindingStack(UUserWidget* InOwningWidget)
 {
+	APlayerController* OwningPlayer = InOwningWidget->GetOwningPlayer();
+	if (!ensure(IsValid(OwningPlayer)))
+		return nullptr;
+
 	UUMGInputActionBindingStack* NewStack = NewObject<UUMGInputActionBindingStack>(InOwningWidget);
-	NewStack->SetOwningWidget(InOwningWidget);
+	NewStack->SetOwningPlayerInput(OwningPlayer->PlayerInput);
 	return NewStack;
 }
 
 void UUMGInputActionBindingStack::BindAction(FUMGInputAction Action, FUMGInputActionDelegate Delegate)
 {
-	if (Action.ReactEvent == EUMGInputActionKeyEvent::None)
-	{
-		UE_LOG(LogOpenUnrealUtilities, Error, TEXT("Action '%s' could not be bound in action stack because ReactEvent is None!"));
-		return;
-	}
-
 	BindingStack.Add({ Action, Delegate });
 }
 
@@ -41,7 +43,7 @@ void UUMGInputActionBindingStack::RemoveBindings(FUMGInputAction Action)
 	});
 }
 
-void UUMGInputActionBindingStack::RemoveBindingByObject(UObject* TargetObject)
+void UUMGInputActionBindingStack::RemoveBindingsByObject(UObject* TargetObject)
 {
 	BindingStack.RemoveAll([&TargetObject](const FUMGInputActionBinding& Binding) -> bool {
 		return Binding.Delegate.IsBoundToObject(TargetObject);
@@ -53,75 +55,29 @@ void UUMGInputActionBindingStack::RemoveAllBindings()
 	BindingStack.Empty();
 }
 
-FEventReply UUMGInputActionBindingStack::ProcessOnKeyDown(FGeometry MyGeometry, FKeyEvent InKeyEvent)
+int32 UUMGInputActionBindingStack::GetNumBindingsToObject(UObject* Object)
 {
-	FKey Key = InKeyEvent.GetKey();
-	int32 Idx = GetFirstBindingWithKey(Key);
-	if (Idx == INDEX_NONE)
-		return FEventReply(false);
-
-	UPlayerInput* Input = OwningPlayer->PlayerInput;
-
-	FUMGInputActionBinding& Binding = BindingStack[Idx];
-	switch (Binding.BindingSignature.ReactEvent)
+	int32 Count = 0;
+	for (const FUMGInputActionBinding& Binding : BindingStack)
 	{
-	case EUMGInputActionKeyEvent::None:
-	{
-		ensureMsgf(false, TEXT("ActionEvents should not be registered with ReactEvent == None"));
-		return FEventReply(false);
+		if (Binding.Delegate.IsBoundToObject(Object))
+			Count++;
 	}
-	case EUMGInputActionKeyEvent::KeyDown:
-	{
-		if (Input->WasJustPressed(Key))
-		{
-			return ProcessBindingMatch(Idx, EUMGInputActionKeyEvent::KeyDown);
-		}
-		break;
-	}
-	case EUMGInputActionKeyEvent::KeyUp:
-	{
-		if (Input->WasJustReleased(Key))
-		{
-			return ProcessBindingMatch(Idx, EUMGInputActionKeyEvent::KeyUp);
-		}
-		break;
-	}
-	case EUMGInputActionKeyEvent::KeyHeldContinuous:
-	{
-		if (Input->WasJustPressed(Key) == false && Input->IsPressed(Key))
-		{
-			return ProcessBindingMatch(Idx, EUMGInputActionKeyEvent::KeyHeldContinuous);
-		}
-		break;
-	}
-	case EUMGInputActionKeyEvent::KeyHeldTimer:
-	{
-		float TimeDown = Input->GetTimeDown(Key);
-		if (TimeDown < Binding.BindingSignature.HoldTime)
-		{
-			Binding.bKeyHeldTimerCalled = false;
-		}
-		if (TimeDown >= Binding.BindingSignature.HoldTime && Binding.bKeyHeldTimerCalled == false)
-		{
-			Binding.bKeyHeldTimerCalled = true;
-			return ProcessBindingMatch(Idx, EUMGInputActionKeyEvent::KeyHeldTimer);
-		}
-		break;
-	}
-	case EUMGInputActionKeyEvent::Any:
-	{
-		return ProcessBindingMatch(Idx, EUMGInputActionKeyEvent::Any);
-	}
-	default:
-		break;
-	}
-	
-	return FEventReply(false);
+	return Count;
 }
 
-FEventReply UUMGInputActionBindingStack::ProcessOnKeyUp(FGeometry MyGeometry, FKeyEvent InKeyEvent)
+FEventReply UUMGInputActionBindingStack::ProcessOnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)
 {
-	return FEventReply(false);
+	bool bHandled = ProcessKeyEvent(MyGeometry, InKeyEvent);
+	CleanUpStack();
+	return bHandled;
+}
+
+FEventReply UUMGInputActionBindingStack::ProcessOnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)
+{
+	bool bHandled = ProcessKeyEvent(MyGeometry, InKeyEvent);
+	CleanUpStack();
+	return bHandled;
 }
 
 int32 UUMGInputActionBindingStack::GetFirstBindingWithKey(FKey Key) const
@@ -129,7 +85,7 @@ int32 UUMGInputActionBindingStack::GetFirstBindingWithKey(FKey Key) const
 	for (int32 i = 0; i < BindingStack.Num(); i++)
 	{
 		const FUMGInputActionBinding& Binding = BindingStack[i];
-		const TArray<FInputActionKeyMapping>& Actions = OwningPlayer->PlayerInput->GetKeysForAction(Binding.BindingSignature.ActionName);
+		const TArray<FInputActionKeyMapping>& Actions = OwningPlayerInput->GetKeysForAction(Binding.BindingSignature.ActionName);
 		bool bMatchesKey = Actions.ContainsByPredicate([&Key](const FInputActionKeyMapping& Action) {
 			return Action.Key == Key;
 		});
@@ -138,16 +94,107 @@ int32 UUMGInputActionBindingStack::GetFirstBindingWithKey(FKey Key) const
 	return INDEX_NONE;
 }
 
-FEventReply UUMGInputActionBindingStack::ProcessBindingMatch(int32 BindingIndex, EUMGInputActionKeyEvent Event)
+bool UUMGInputActionBindingStack::ProcessKeyEvent(FGeometry MyGeometry, FKeyEvent InKeyEvent)
+{
+	FKey Key = InKeyEvent.GetKey();
+
+	if (!ensure(OwningPlayerInput.IsValid()))
+		return false;
+
+	/*
+	int32 Idx = GetFirstBindingWithKey(Key);
+	if (Idx == INDEX_NONE)
+		return FEventReply(false);
+	*/
+
+	for (int32 Idx = 0; Idx < BindingStack.Num(); Idx++)
+	{
+		FUMGInputActionBinding& Binding = BindingStack[Idx];
+		const TArray<FInputActionKeyMapping>& Actions = OwningPlayerInput->GetKeysForAction(Binding.BindingSignature.ActionName);
+		bool bMatchesKey = Actions.ContainsByPredicate([&Key](const FInputActionKeyMapping& Action) {
+			return Action.Key == Key;
+		});
+
+		if(!bMatchesKey)
+			continue;
+
+		switch (Binding.BindingSignature.ReactEvent)
+		{
+		case EUMGInputActionKeyEvent::KeyDown:
+		{
+			if (OwningPlayerInput->WasJustPressed(Key))
+			{
+				if (ProcessBindingMatch(Idx, EUMGInputActionKeyEvent::KeyDown))
+					return true;
+			}
+			break;
+		}
+		case EUMGInputActionKeyEvent::KeyUp:
+		{
+			if (OwningPlayerInput->WasJustReleased(Key))
+			{
+				if (ProcessBindingMatch(Idx, EUMGInputActionKeyEvent::KeyUp))
+					return true;
+			}
+			break;
+		}
+		case EUMGInputActionKeyEvent::KeyHeldContinuous:
+		{
+			if (OwningPlayerInput->WasJustPressed(Key) == false && OwningPlayerInput->IsPressed(Key))
+			{
+				if (ProcessBindingMatch(Idx, EUMGInputActionKeyEvent::KeyHeldContinuous))
+					return true;
+			}
+			break;
+		}
+		case EUMGInputActionKeyEvent::KeyHeldTimer:
+		{
+			float TimeDown = OwningPlayerInput->GetTimeDown(Key);
+			if (TimeDown < Binding.BindingSignature.HoldTime)
+			{
+				Binding.bKeyHeldTimerCalled = false;
+			}
+			if (TimeDown >= Binding.BindingSignature.HoldTime && Binding.bKeyHeldTimerCalled == false)
+			{
+				Binding.bKeyHeldTimerCalled = true;
+				if (ProcessBindingMatch(Idx, EUMGInputActionKeyEvent::KeyHeldTimer))
+					return true;
+			}
+			break;
+		}
+		case EUMGInputActionKeyEvent::Any:
+		{
+			if (ProcessBindingMatch(Idx, EUMGInputActionKeyEvent::Any))
+				return true;
+		}
+		default:
+			break;
+		}
+	}
+
+	return false;
+}
+
+bool UUMGInputActionBindingStack::ProcessBindingMatch(int32 BindingIndex, EUMGInputActionKeyEvent Event)
 {
 	check(BindingStack.IsValidIndex(BindingIndex));
 	FUMGInputActionBinding& Binding = BindingStack[BindingIndex];
 	Binding.Delegate.ExecuteIfBound(Event);
-	EUMGInputActionKeyEvent ConsumeEvent = Binding.BindingSignature.ConsumeEvent;
-	bool bConsume = ConsumeEvent == Event || ConsumeEvent == EUMGInputActionKeyEvent::Any;
+	EUMGInputActionKeyEventConsumeMode ConsumeMode = Binding.BindingSignature.ConsumeMode;
 	if (Binding.BindingSignature.bIsOneshot)
 	{
-		BindingStack.RemoveAt(BindingIndex);
+		IndicesToRemoveThisFrame.Add(BindingIndex);
 	}
-	return FEventReply(bConsume);
+	return ConsumeMode == EUMGInputActionKeyEventConsumeMode::Same || ConsumeMode == EUMGInputActionKeyEventConsumeMode::All;
+}
+
+void UUMGInputActionBindingStack::CleanUpStack()
+{
+	int32 NumRemoved = 0;
+	for (int32 Index : IndicesToRemoveThisFrame)
+	{
+		BindingStack.RemoveAt(Index - NumRemoved);
+		NumRemoved++;
+	}
+	IndicesToRemoveThisFrame.Empty();
 }

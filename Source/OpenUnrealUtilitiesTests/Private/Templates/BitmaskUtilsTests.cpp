@@ -73,7 +73,7 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("false|16|16")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(EnumValueAsBitmask)
 {
 	// Arrange
-	FTestParameterParser Parser{ Parameters };
+	FAutomationTestParameterParser Parser{ Parameters };
 	const bool bNaturalEnum = Parser.GetValue<bool>(0);
 	const int32 ExpectedBitmask = Parser.GetValue<int32>(2);
 
@@ -130,7 +130,7 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("false|4|1|5")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(SetBit)
 {
 	// Arrange
-	FTestParameterParser Parser{ Parameters };
+	FAutomationTestParameterParser Parser{ Parameters };
 	const bool bNaturalEnum = Parser.GetValue<bool>(0);
 	int32 Bitmask = Parser.GetValue<int32>(1);
 	const int32 ExpectedResult = Parser.GetValue<int32>(3);
@@ -191,7 +191,7 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("false|3|2|1")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(ClearBit)
 {
 	// Arrange
-	FTestParameterParser Parser{ Parameters };
+	FAutomationTestParameterParser Parser{ Parameters };
 	const bool bNaturalEnum = Parser.GetValue<bool>(0);
 	int32 Bitmask = Parser.GetValue<int32>(1);
 	const int32 ExpectedResult = Parser.GetValue<int32>(3);
@@ -257,7 +257,7 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("false|3|4|false")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(TestBit)
 {
 	// Arrange
-	FTestParameterParser Parser{ Parameters };
+	FAutomationTestParameterParser Parser{ Parameters };
 	const bool bNaturalEnum = Parser.GetValue<bool>(0);
 	int32 Bitmask = Parser.GetValue<int32>(1);
 	const bool ExpectedResult = Parser.GetValue<bool>(3);

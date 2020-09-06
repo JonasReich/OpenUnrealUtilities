@@ -1,6 +1,6 @@
 // Copyright (c) 2020 Jonas Reich
 
-#include "OpenUnrealUtilitiesTests.h"
+#include "OpenUnrealUtilitiesTestsModule.h"
 
 #define LOCTEXT_NAMESPACE "FOpenUnrealUtilitiesTestsModule"
 

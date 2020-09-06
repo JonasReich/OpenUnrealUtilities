@@ -22,7 +22,7 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("X=+1,Y=+0,Z=+0|X=+1,Y=+1,Z=+0|+45")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(AngleBetweenVectors)
 {
 	// Arrange
-	FTestParameterParser Parser{ Parameters };
+	FAutomationTestParameterParser Parser{ Parameters };
 	const FVector A = Parser.GetValue<FVector>(0);
 	const FVector B = Parser.GetValue<FVector>(1);
 	const float ExpectedAngle = Parser.GetValue<float>(2);
@@ -55,7 +55,7 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("X=+0,Y=+0,Z=+1|X=+1,Y=+0,Z=+0|X=+0,Y=-1,Z=+0|+9
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(SignedAngleBetweenVectors)
 {
 	// Arrange
-	FTestParameterParser Parser{ Parameters };
+	FAutomationTestParameterParser Parser{ Parameters };
 	const FVector A = Parser.GetValue<FVector>(0);
 	const FVector B = Parser.GetValue<FVector>(1);
 	const FVector Up = Parser.GetValue<FVector>(2);
@@ -80,7 +80,7 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("4|1|3|3")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(ClampToRange)
 {
 	// Arrange
-	FTestParameterParser Parser{ Parameters };
+	FAutomationTestParameterParser Parser{ Parameters };
 	float InValue = Parser.GetValue<float>(0);
 	float Min = Parser.GetValue<float>(1);
 	float Max = Parser.GetValue<float>(2);

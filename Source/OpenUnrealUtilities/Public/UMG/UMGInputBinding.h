@@ -8,12 +8,10 @@
 
 class UUserWidget;
 
-/** Which input events to react to/consume in UMG input action bindings. Compare EInputEvent */
+/** Which input events to react to in UMG input action bindings. Compare EInputEvent */
 UENUM(BlueprintType)
 enum class EUMGInputActionKeyEvent : uint8
 {
-	// Don't react to/consume any key events
-	None,
 	// Once on initial key press
 	KeyDown,
 	// Once as soon as the key was let go
@@ -27,6 +25,22 @@ enum class EUMGInputActionKeyEvent : uint8
 };
 
 /**
+ * Which input events to handle/consume in UMG input action bindings.
+ * Values are defined in relation to EUMGInputActionKeyEvents that trigger a response.
+ */
+UENUM(BlueprintType)
+enum class EUMGInputActionKeyEventConsumeMode : uint8
+{
+	// Don't consume any key events
+	None,
+	// Consume all key events that trigger a reaction
+	Same,
+	// Consume all key events
+	All
+};
+
+
+/**
  * Utility struct used to bind delegates to an input action.
  * Only works for Input ACTION mappings, not Axis mappings.
  */
@@ -35,30 +49,42 @@ struct OPENUNREALUTILITIES_API FUMGInputAction
 {
 	GENERATED_BODY()
 public:
+	FUMGInputAction() = default;
+	FUMGInputAction(FName InActionName, EUMGInputActionKeyEvent InReactEvent, EUMGInputActionKeyEventConsumeMode InConsumeMode = EUMGInputActionKeyEventConsumeMode::Same,
+		bool bInIsOneshot = false, float InHoldTime = 0.f) :
+
+		ActionName(InActionName),
+		ReactEvent(InReactEvent),
+		ConsumeMode(InConsumeMode),
+		bIsOneshot(bInIsOneshot),
+		HoldTime(InHoldTime)
+	{
+	}
+
 	/** Name of the input action as registered in the InputSettings/PlayerInput. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName ActionName = NAME_None;
 	
 	/** Which key event(s) will provoke the callback delegate being broadcast. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EUMGInputActionKeyEvent ReactEvent = EUMGInputActionKeyEvent::None;
+	EUMGInputActionKeyEvent ReactEvent = EUMGInputActionKeyEvent::KeyDown;
 
-	/** Required time to hold the key for a reaction if ReactEvent is set to KeyHeldTimer */
+	/** Which key event(s) to consume. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float HoldTime = 0.f;
-
-	/** Which key event(s) to consume. Can be a subset or a superset of ReactEvents. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EUMGInputActionKeyEvent ConsumeEvent = EUMGInputActionKeyEvent::None;
+	EUMGInputActionKeyEventConsumeMode ConsumeMode = EUMGInputActionKeyEventConsumeMode::Same;
 
 	/** Bindings with this action will be removed/destroyed as soon as it was broadcast once. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsOneshot = false;
 
+	/** Required time to hold the key for a reaction if ReactEvent is set to KeyHeldTimer */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float HoldTime = 0.f;
+
 	FORCEINLINE bool operator==(const FUMGInputAction& Other) const
 	{
 		return ActionName == Other.ActionName && ReactEvent == Other.ReactEvent && 
-			ConsumeEvent == Other.ConsumeEvent && bIsOneshot == Other.bIsOneshot;
+			ConsumeMode == Other.ConsumeMode && bIsOneshot == Other.bIsOneshot;
 	}
 };
 
@@ -81,9 +107,11 @@ public:
 	// Setup
 	//------------- 
 
-	/** Set the owning user widget that should be used to setup bindings. */
 	UFUNCTION(BlueprintCallable)
-	void SetOwningWidget(UUserWidget* InOwningWidget);
+	void SetOwningPlayerInput(UPlayerInput* InOwningPlayerInput);
+	
+	UFUNCTION(BlueprintPure)
+	UPlayerInput* GetOwningPlayerInput() const;
 
 	/** Create a UUMGInputActionBindingStack object and initialize it with the specified UUserWidget as outer and owner. */
 	UFUNCTION(BlueprintCallable)
@@ -111,11 +139,15 @@ public:
 	
 	/** Remove all bindings that have delegates with the specified target object */
 	UFUNCTION(BlueprintCallable)
-	void RemoveBindingByObject(UObject* TargetObject);
+	void RemoveBindingsByObject(UObject* TargetObject);
 	
 	/** Remove all bindings no matter the action or delegate */
 	UFUNCTION(BlueprintCallable)
 	void RemoveAllBindings();
+
+	/** @returns the number of bindings in the stack bound to the specified object */
+	UFUNCTION(BlueprintPure)
+	int32 GetNumBindingsToObject(UObject* Object);
 
 	//-------------
 	// Process Key Events
@@ -126,16 +158,17 @@ public:
 
 	/** Link this in a widgets KeyDown event and pass the event reply on */
 	UFUNCTION(BlueprintCallable)
-	FEventReply ProcessOnKeyDown(FGeometry MyGeometry, FKeyEvent InKeyEvent);
+	FEventReply ProcessOnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent);
 	
 	/** Link this in a widgets KeyUp event and pass the event reply on */
 	UFUNCTION(BlueprintCallable)
-	FEventReply ProcessOnKeyUp(FGeometry MyGeometry, FKeyEvent InKeyEvent);
+	FEventReply ProcessOnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent);
 	
 private:
-	// Can be used to retrieve PlayerInput and InputComponent
 	UPROPERTY()
-	TSoftObjectPtr<APlayerController> OwningPlayer;
+	TSoftObjectPtr<UPlayerInput> OwningPlayerInput;
+
+	TArray<int32> IndicesToRemoveThisFrame;
 
 	struct FUMGInputActionBinding
 	{
@@ -160,5 +193,9 @@ private:
 
 	int32 GetFirstBindingWithKey(FKey Key) const;
 
-	FEventReply ProcessBindingMatch(int32 BindingIndex, EUMGInputActionKeyEvent Event);
+	bool ProcessKeyEvent(FGeometry MyGeometry, FKeyEvent InKeyEvent);
+
+	bool ProcessBindingMatch(int32 BindingIndex, EUMGInputActionKeyEvent Event);
+
+	void CleanUpStack();
 };

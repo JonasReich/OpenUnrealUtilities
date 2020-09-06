@@ -11,6 +11,6 @@
 #define CreateDynamic(DynamicDelegateType, UserObject, FuncName) \
 [&]() -> DynamicDelegateType {\
 DynamicDelegateType Delegate; \
-Delegate.BindDynamic(Widget, FuncName); \
+Delegate.BindDynamic(UserObject, FuncName); \
 return Delegate; \
 }()

@@ -95,12 +95,25 @@ CONSTEXPR auto MakeReverseIterator(IteratorType Iterator)
 
 /** Swaps begin() and end() iterators to allow for reversed iteration over a container, */
 template<typename ContainerType>
-class TReverseRangeAdaptor
+class TReverseRangeAdaptor_ByRef
 {
 private:
 	ContainerType& Container;
 public:
-	CONSTEXPR explicit TReverseRangeAdaptor(ContainerType& c) : Container(c) {}
+	CONSTEXPR explicit TReverseRangeAdaptor_ByRef(ContainerType& c) : Container(c) {}
+
+	auto begin() const noexcept { return MakeReverseIterator(IteratorUtils::end(Container)); }
+	auto end()   const noexcept { return MakeReverseIterator(IteratorUtils::begin(Container)); }
+};
+
+/** Swaps begin() and end() iterators to allow for reversed iteration over a container, */
+template<typename ContainerType>
+class TReverseRangeAdaptor_ByValue
+{
+private:
+	ContainerType Container;
+public:
+	CONSTEXPR explicit TReverseRangeAdaptor_ByValue(ContainerType&& c) : Container(c) {}
 
 	auto begin() const noexcept { return MakeReverseIterator(IteratorUtils::end(Container)); }
 	auto end()   const noexcept { return MakeReverseIterator(IteratorUtils::begin(Container)); }
@@ -110,5 +123,11 @@ public:
 template<typename ContainerType>
 CONSTEXPR auto ReverseRange(ContainerType& Container)
 {
-	return TReverseRangeAdaptor<ContainerType>(Container);
+	return TReverseRangeAdaptor_ByRef<ContainerType>(Container);
+}
+
+template<typename ContainerType>
+CONSTEXPR auto ReverseRange(ContainerType&& Container)
+{
+	return TReverseRangeAdaptor_ByValue<ContainerType>(MoveTemp(Container));
 }

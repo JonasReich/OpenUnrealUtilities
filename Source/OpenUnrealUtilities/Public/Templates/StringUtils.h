@@ -3,19 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
-/** Concept for a class that supports LexToString() */
-struct CLexToStringConvertable
-{
-	template<typename ElementType>
-	auto Requires(ElementType It) -> decltype(LexToString(DeclVal<ElementType>()));
-};
-
-struct CMemberToStringConvertable
-{
-	template<typename ElementType>
-	auto Requires(ElementType It) -> decltype(DeclVal<ElementType>().ToString());
-};
+#include "Traits/StringConversionTraits.h"
 
 /** LexToString overload for UObject pointers */
 FORCEINLINE FString LexToString(const UObject* O)

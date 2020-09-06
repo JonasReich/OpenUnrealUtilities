@@ -61,7 +61,7 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("0|0|0|1")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(Raise)
 {
 	// Arrange
-	FTestParameterParser Parser{ Parameters };
+	FAutomationTestParameterParser Parser{ Parameters };
 	FOUURequestTestEnvironment Env;
 	const bool bExpectSuccess = Parser.GetValue<bool>(0);
 	Env.Responder->bCompleteRequestSuccesfully = bExpectSuccess;
@@ -315,7 +315,7 @@ OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(RaiseRequest_Complete)
 	};
 
 	// Arrange
-	FTestParameterParser Parser{ Parameters };
+	FAutomationTestParameterParser Parser{ Parameters };
 	const ETestRequestAction Action0 = Parser.GetValue<ETestRequestAction>(0);
 	const ETestRequestAction Action1 = Parser.GetValue<ETestRequestAction>(1);
 	const bool bReverseActions = Parser.GetValue<bool>(2);

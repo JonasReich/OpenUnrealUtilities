@@ -1,7 +1,7 @@
 // Copyright (c) 2020 Jonas Reich
 
 #include "OUUTests.h"
-#include "StringUtils.h"
+#include "Templates/StringUtils.h"
 
 #if WITH_AUTOMATION_WORKER
 
