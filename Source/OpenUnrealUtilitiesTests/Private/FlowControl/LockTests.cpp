@@ -7,7 +7,7 @@
 
 #include "FlowControl/Lock.h"
 
-#define OUU_TEST_CATEGORY OpenUnrealUtilities
+#define OUU_TEST_CATEGORY OpenUnrealUtilities.FlowControl
 
 template<class LockType>
 struct FOUULockTestEnvironment

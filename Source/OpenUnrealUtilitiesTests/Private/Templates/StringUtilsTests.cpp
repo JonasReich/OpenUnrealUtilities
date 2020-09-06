@@ -5,7 +5,7 @@
 
 #if WITH_AUTOMATION_WORKER
 
-#define OUU_TEST_CATEGORY OpenUnrealUtilities
+#define OUU_TEST_CATEGORY OpenUnrealUtilities.Templates
 #define OUU_TEST_TYPE StringUtils
 
 //////////////////////////////////////////////////////////////////////////

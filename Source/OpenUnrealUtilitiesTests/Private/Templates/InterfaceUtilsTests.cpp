@@ -7,7 +7,7 @@
 
 #include "Templates/InterfaceUtils.h"
 
-#define OUU_TEST_CATEGORY OpenUnrealUtilities.InterfaceUtils
+#define OUU_TEST_CATEGORY OpenUnrealUtilities.InterfaceUtils.Templates
 
 //////////////////////////////////////////////////////////////////////////
 // C++ Interface

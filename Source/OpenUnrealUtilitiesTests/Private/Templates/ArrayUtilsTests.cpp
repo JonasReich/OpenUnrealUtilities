@@ -6,7 +6,7 @@
 
 #include "Templates/ArrayUtils.h"
 
-#define OUU_TEST_CATEGORY OpenUnrealUtilities
+#define OUU_TEST_CATEGORY OpenUnrealUtilities.Templates
 #define OUU_TEST_TYPE ArrayUtils
 
 //////////////////////////////////////////////////////////////////////////

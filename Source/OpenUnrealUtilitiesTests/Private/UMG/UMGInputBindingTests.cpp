@@ -34,7 +34,7 @@ FKeyEvent SimulateKeyEvent(UPlayerInput* PlayerInput, UUMGInputBindingTestWidget
 	return KeyEvent;
 }
 
-BEGIN_DEFINE_SPEC(FUMGInputActionBindingSpec, "OpenUnrealUtilities.UMGInputActionBinding", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FUMGInputActionBindingSpec, "OpenUnrealUtilities.UMG.InputActionBinding", DEFAULT_OUU_TEST_FLAGS)
 FAutomationTestWorld TestWorld;
 UPlayerInput* PlayerInput;
 UUMGInputBindingTestWidget* Widget;

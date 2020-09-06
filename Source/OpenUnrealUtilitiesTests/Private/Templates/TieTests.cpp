@@ -7,7 +7,7 @@
 #include "Templates/Tie.h"
 #include "Engine/EngineTypes.h"
 
-#define OUU_TEST_CATEGORY OpenUnrealUtilities
+#define OUU_TEST_CATEGORY OpenUnrealUtilities.Templates
 #define OUU_TEST_TYPE Tie
 
 //////////////////////////////////////////////////////////////////////////

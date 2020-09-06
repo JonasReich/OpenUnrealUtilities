@@ -8,7 +8,7 @@
 #include "FlowControl/OUURequest.h"
 #include "FlowControl/OUURequestQueue.h"
 
-#define OUU_TEST_CATEGORY OpenUnrealUtilities
+#define OUU_TEST_CATEGORY OpenUnrealUtilities.FlowControl
 
 // Shared environment for all tests
 struct FOUURequestTestEnvironment
