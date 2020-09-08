@@ -265,7 +265,7 @@ void FUMGInputActionBindingSpec::Define()
 
 	It("RemoveBindingByObject should remove only the bindings to the target object", [this]()
 	{
-		UUMGInputBindingTestWidget* SecondWidget = Cast<UUMGInputBindingTestWidget>(UUserWidget::CreateWidgetInstance(*TestWorld.PlayerController, UUMGInputBindingTestWidget::StaticClass(), NAME_None));
+		UUMGInputBindingTestWidget* SecondWidget = CreateWidget<UUMGInputBindingTestWidget>(TestWorld.PlayerController, UUMGInputBindingTestWidget::StaticClass(), NAME_None);
 
 		const FName FirstActionName = "FirstAction";
 		PlayerInput->AddActionMapping(FInputActionKeyMapping(FirstActionName, EKeys::One));
