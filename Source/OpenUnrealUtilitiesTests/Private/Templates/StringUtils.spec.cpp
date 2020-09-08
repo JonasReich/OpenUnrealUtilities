@@ -43,7 +43,7 @@ struct FStringUtilsTestStruct
 	}
 };
 
-BEGIN_DEFINE_SPEC(FStringUtilsSpec, "UnrealUtilities.Templates.StringUtils", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FStringUtilsSpec, "OpenUnrealUtilities.Templates.StringUtils", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FStringUtilsSpec)
 void FStringUtilsSpec::Define()
 {
