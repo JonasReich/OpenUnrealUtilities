@@ -18,6 +18,9 @@
 struct OPENUNREALUTILITIESTESTS_API FAutomationTestWorld
 {
 public:
+	FAutomationTestWorld() = default;
+	virtual ~FAutomationTestWorld();
+
 	// Travel URL that will be used for game BeginPlay()
 	FURL URL;
 
@@ -28,7 +31,7 @@ public:
 	 * Create the world.
 	 * Before this the World pointer will be null.
 	 */
-	void CreateWorld();
+	virtual void CreateWorld();
 
 	/**
 	 * Get the world context for the world.
@@ -61,14 +64,24 @@ public:
 	/**
 	 * Destroy the world and world context.
 	 * Afterwards none of the members may be used anymore to access the world or any of the game framework objects!
+	 * This function must be called explicitly!
 	 */
-	void DestroyWorld();
+	virtual void DestroyWorld();
+
+protected:
+	// Remember if we have a world that needs destruction
+	bool bHasWorld = false;
+
+	void CreateWorldImplementation();
+	void DestroyWorldImplementation();
 };
 
 /**
  * Same as FAutomationTestWorld, but the world is automatically created during construction and
  * destroyed and cleaned up as soon as the FScopedAutomationWorld runs out of scope.
- * Note that in Automation Specs you usually wan
+ * Note that in Automation Specs you usually want to use an FAutomationTestWorld instead because it can be
+ * reused across scopes.
+ * When using this Scoped alternative you should not call CreateWorld() and DestroyWorld anymore!
  */
 struct OPENUNREALUTILITIESTESTS_API FScopedAutomationTestWorld : public FAutomationTestWorld
 {
@@ -76,6 +89,11 @@ public:
 	using Super = FAutomationTestWorld;
 	FScopedAutomationTestWorld();
 	~FScopedAutomationTestWorld();
+
+	// - FAutomationTestWorld
+	void CreateWorld() override;
+	void DestroyWorld() override;
+	// --
 };
 
 #endif
