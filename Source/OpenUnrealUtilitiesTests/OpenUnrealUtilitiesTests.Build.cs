@@ -19,8 +19,6 @@ public class OpenUnrealUtilitiesTests : ModuleRules
 				"SlateCore",
 				"UMG",
 
-				"OnlineSubsystem",
-
 				// Plugin
 				"OpenUnrealUtilities"
 			}
