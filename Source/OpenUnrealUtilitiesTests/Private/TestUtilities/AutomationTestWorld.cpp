@@ -11,7 +11,6 @@
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
 #include "GameFramework/PlayerState.h"
-#include "OnlineSubsystemTypes.h"
 #include "Engine/EngineTypes.h"
 #include "UObject/CoreOnline.h"
 
@@ -50,7 +49,7 @@ if (Condition) { \
 	return false; \
 }
 
-bool FAutomationTestWorld::InitiailizeGame()
+bool FAutomationTestWorld::InitializeGame()
 {
 	if (!IsValid(World))
 	{
@@ -61,21 +60,13 @@ bool FAutomationTestWorld::InitiailizeGame()
 	FString ErrorString;
 
 	GameInstance = NewObject<UGameInstance>(GEngine);
-	GameInstance->InitializeStandalone();
+	GameInstance->InitializeStandalone(); // -> indiretly calls GameInstance->Init();
 	GameInstance->GetWorldContext()->SetCurrentWorld(World);
 	World->SetGameInstance(GameInstance);
-	// GameInstance->Init(); // should be called by InitializeStandalone()
 	bool bIsGameModeSet = World->SetGameMode(URL);
 	CHECK_INIT_GAME_CONDITION(!bIsGameModeSet, "Failed to set game mode");
 	GameMode = World->GetAuthGameMode();
 	
-	/*
-	FString MapName = "";
-	FString Options = "";
-	GameMode->InitGame(MapName, Options, ErrorString);
-	CHECK_INIT_GAME_CONDITION(ErrorString.Len() > 0, ErrorString);
-	*/
-
 	GameMode->PlayerStateClass = APlayerState::StaticClass();
 	LocalPlayer = World->GetGameInstance()->CreateLocalPlayer(0, ErrorString, false);
 	CHECK_INIT_GAME_CONDITION(ErrorString.Len() > 0, ErrorString);

@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetTree.h"
 
+class UWidget;
+
 namespace UMGUtils
 {
 	/**
@@ -21,10 +23,12 @@ namespace UMGUtils
 	 * Execute a predicate on the RootWidget and any widgets nested as Slot or Named Slot children.
 	 * Also goes into other UUserWidgets and their children (so this potentially goes a lot deeper than ForEachWidget).
 	 * Modeled after UWidgetTree::ForEachWidgetAndDescendants, but the predicate returns a boolean break condition
+	 * @param RootWidget: The widget of which children should be iterated over
+	 * @param bIncludeRootWidget: If the predicate should also be called on the root widget itself
+	 * @param Predicate: The predicate to execute for the widgets
 	 * @returns if the exit condition was set / iteration was canceled
 	 */
-	template<class WidgetClass>
-	bool ForEachWidgetAndDescendants(WidgetClass* RootWidget, TFunctionRef<bool(WidgetClass*)> Predicate);
+	template<class WidgetClass> bool ForEachWidgetAndDescendants(WidgetClass* RootWidget, bool bIncludeRootWidget, TFunctionRef<bool(WidgetClass*)> Predicate);
 
 	/**
 	 * Execute a predicate on all widgets nested as Slot or Named Slot children under the RootWidget.
@@ -46,19 +50,26 @@ namespace UMGUtils
 	bool OPENUNREALUTILITIES_API IsInputVisible(const UWidget* Widget);
 
 	/**
-	 * Perform IsInputVisible check on all widgets in the widget tree underneath the specified widget.
-	 * Traverses the widget tree using ForEachWidgetAndDescendants(), so the same rules apply.
-	 * Stops search as soon as the first InputVisible widget is found.
+	 * Check if a widget has input visible descendants or is input visible itself.
 	 */
-	bool OPENUNREALUTILITIES_API HasAnyInputVisibleDescendantsIncludingSelf(const UWidget* Widget);
+	bool OPENUNREALUTILITIES_API HasInputVisibleDescendantsIncludingSelf(const UWidget* Widget);
+
+	/**
+	 * Check if a widget has input visible descendants.
+	 * The check skips the initial target widget and only checks children!
+	 */
+	bool OPENUNREALUTILITIES_API HasInputVisibleDescendantsExcludingSelf(const UWidget* Widget);
+
+	/** @returns the first descendant in the widget tree that is focusable. May return nullptr */
+	OPENUNREALUTILITIES_API UWidget* GetFirstFocusableDescendantIncludingSelf(UWidget* Widget);
 
 	//////////////////////////////////////////////////////////////////////////
 
 	// Explicit instantiations of the widget tree iteration templates above
 	template bool OPENUNREALUTILITIES_API ForEachWidget<UWidget>(UWidget* RootWidget, TFunctionRef<bool(UWidget*)> Predicate);
 	template bool OPENUNREALUTILITIES_API ForEachWidget<const UWidget>(const UWidget* RootWidget, TFunctionRef<bool(const UWidget*)> Predicate);
-	template bool OPENUNREALUTILITIES_API ForEachWidgetAndDescendants<UWidget>(UWidget* RootWidget, TFunctionRef<bool(UWidget*)> Predicate);
-	template bool OPENUNREALUTILITIES_API ForEachWidgetAndDescendants<const UWidget>(const UWidget* RootWidget, TFunctionRef<bool(const UWidget*)> Predicate);
+	template bool OPENUNREALUTILITIES_API ForEachWidgetAndDescendants<UWidget>(UWidget* RootWidget, bool bIncludeRootWidget, TFunctionRef<bool(UWidget*)> Predicate);
+	template bool OPENUNREALUTILITIES_API ForEachWidgetAndDescendants<const UWidget>(const UWidget* RootWidget, bool bIncludeRootWidget, TFunctionRef<bool(const UWidget*)> Predicate);
 	template bool OPENUNREALUTILITIES_API ForChildWidgets<UWidget>(UWidget* Widget, TFunctionRef<bool(UWidget*)> Predicate);
 	template bool OPENUNREALUTILITIES_API ForChildWidgets<const UWidget>(const UWidget* Widget, TFunctionRef<bool(const UWidget*)> Predicate);
 }

@@ -9,7 +9,7 @@
 
 class UUMGInputActionBindingStack;
 
-UCLASS()
+UCLASS(meta = (Hidden, HideDropDown))
 class UUMGInputBindingTestWidget : public UUserWidget
 {
 	GENERATED_BODY()

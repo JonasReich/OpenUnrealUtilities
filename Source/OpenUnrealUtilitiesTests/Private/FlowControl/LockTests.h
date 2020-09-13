@@ -6,7 +6,7 @@
 #include "FlowControl/Lock.h"
 #include "LockTests.generated.h"
 
-UCLASS()
+UCLASS(meta = (Hidden, HideDropDown))
 class ULockTestsHelper : public UObject
 {
 	GENERATED_BODY()

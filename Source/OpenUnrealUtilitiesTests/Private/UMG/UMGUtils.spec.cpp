@@ -41,7 +41,7 @@ void FUMGUtilsSpec::Define()
 	BeforeEach([this]()
 	{
 		TestWorld.CreateWorld();
-		TestWorld.InitiailizeGame();
+		TestWorld.InitializeGame();
 
 		Widget = CreateWidget<UOUUTestWidget>(TestWorld.PlayerController);
 		WidgetTree = Widget->WidgetTree;
@@ -89,10 +89,21 @@ void FUMGUtilsSpec::Define()
 
 	Describe("ForEachWidgetAndDescendants", [this]()
 	{
+		It("should call the predicate on all widgets in the tree including nested user widgets excluding the root widget if bIncludingRootWidget is false", [this]()
+		{
+			CreateComplexUserWidget(TestWorld, Widget, WidgetTree);
+			UMGUtils::ForEachWidgetAndDescendants<UWidget>(Widget, false, [&](UWidget* Widget) -> bool
+			{
+				PredicateCallCount++;
+				return false;
+			});
+			SPEC_TEST_EQUAL(PredicateCallCount, 6);
+		});
+
 		It("should call the predicate on all widgets in the tree including nested user widgets", [this]()
 		{
 			CreateComplexUserWidget(TestWorld, Widget, WidgetTree);
-			UMGUtils::ForEachWidgetAndDescendants<UWidget>(Widget, [&](UWidget* Widget) -> bool
+			UMGUtils::ForEachWidgetAndDescendants<UWidget>(Widget, true, [&](UWidget* Widget) -> bool
 			{
 				PredicateCallCount++;
 				return false;
@@ -103,7 +114,7 @@ void FUMGUtilsSpec::Define()
 		It("should stop iterating the widgets as soon as one predicate returns true", [this]()
 		{
 			CreateComplexUserWidget(TestWorld, Widget, WidgetTree);
-			UMGUtils::ForEachWidgetAndDescendants<UWidget>(Widget, [&](UWidget* Widget) -> bool
+			UMGUtils::ForEachWidgetAndDescendants<UWidget>(Widget, true, [&](UWidget* Widget) -> bool
 			{
 				PredicateCallCount++;
 				return PredicateCallCount >= 4;
@@ -237,7 +248,40 @@ void FUMGUtilsSpec::Define()
 		});
 	});
 
-	Describe("HasAnyInputVisibleDescendantsIncludingSelf", [this]()
+	Describe("HasInputVisibleDescendantsExcludingSelf", [this]()
+	{
+		It("should return false by default when called on a button", [this]()
+		{
+			UButton* Button = NewObject<UButton>();
+			auto SlateWidget = Button->TakeWidget();
+			SPEC_TEST_FALSE(UMGUtils::HasInputVisibleDescendantsExcludingSelf(Button));
+		});
+
+		Describe("called on a UUserWidget", [this]()
+		{
+			It("should return false by default", [this]()
+			{
+				auto SlateWidget = Widget->TakeWidget();
+				SPEC_TEST_FALSE(UMGUtils::HasInputVisibleDescendantsExcludingSelf(Widget));
+			});
+
+			It("should return false when the widget is set to be focusable itself", [this]()
+			{
+				Widget->bIsFocusable = true;
+				auto SlateWidget = Widget->TakeWidget();
+				SPEC_TEST_FALSE(UMGUtils::HasInputVisibleDescendantsExcludingSelf(Widget));
+			});
+
+			It("should return true when the widget has a nested UserWidget that has a focusable/clickable button", [this]()
+			{
+				CreateComplexUserWidget(TestWorld, Widget, WidgetTree);
+				auto SlateWidget = Widget->TakeWidget();
+				SPEC_TEST_TRUE(UMGUtils::HasInputVisibleDescendantsExcludingSelf(Widget));
+			});
+		});
+	});
+
+	Describe("HasInputVisibleDescendantsIncludingSelf", [this]()
 	{
 		Describe("called on a button", [this]()
 		{
@@ -245,7 +289,7 @@ void FUMGUtilsSpec::Define()
 			{
 				UButton* Button = NewObject<UButton>();
 				auto SlateWidget = Button->TakeWidget();
-				SPEC_TEST_TRUE(UMGUtils::HasAnyInputVisibleDescendantsIncludingSelf(Button));
+				SPEC_TEST_TRUE(UMGUtils::HasInputVisibleDescendantsIncludingSelf(Button));
 			});
 
 			It("should return true when disabled but still hit test visible", [this]()
@@ -254,7 +298,7 @@ void FUMGUtilsSpec::Define()
 				Button->bIsEnabled = false;
 				Button->SetVisibility(ESlateVisibility::Visible);
 				auto SlateWidget = Button->TakeWidget();
-				SPEC_TEST_TRUE(UMGUtils::HasAnyInputVisibleDescendantsIncludingSelf(Button));
+				SPEC_TEST_TRUE(UMGUtils::HasInputVisibleDescendantsIncludingSelf(Button));
 			});
 
 			It("should return true when hit test invisible but still enabled", [this]()
@@ -263,7 +307,7 @@ void FUMGUtilsSpec::Define()
 				Button->bIsEnabled = true;
 				Button->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 				auto SlateWidget = Button->TakeWidget();
-				SPEC_TEST_TRUE(UMGUtils::HasAnyInputVisibleDescendantsIncludingSelf(Button));
+				SPEC_TEST_TRUE(UMGUtils::HasInputVisibleDescendantsIncludingSelf(Button));
 			});
 
 			It("should return false if the button is disabled and SelfHitTestVisible", [this]()
@@ -272,7 +316,7 @@ void FUMGUtilsSpec::Define()
 				Button->bIsEnabled = false;
 				Button->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 				auto SlateWidget = Button->TakeWidget();
-				SPEC_TEST_FALSE(UMGUtils::HasAnyInputVisibleDescendantsIncludingSelf(Button));
+				SPEC_TEST_FALSE(UMGUtils::HasInputVisibleDescendantsIncludingSelf(Button));
 			});
 		});
 
@@ -281,22 +325,56 @@ void FUMGUtilsSpec::Define()
 			It("should return false by default", [this]()
 			{
 				auto SlateWidget = Widget->TakeWidget();
-				SPEC_TEST_FALSE(UMGUtils::HasAnyInputVisibleDescendantsIncludingSelf(Widget));
+				SPEC_TEST_FALSE(UMGUtils::HasInputVisibleDescendantsIncludingSelf(Widget));
 			});
 
 			It("should return true when the widget is set to be focusable itself", [this]()
 			{
 				Widget->bIsFocusable = true;
 				auto SlateWidget = Widget->TakeWidget();
-				SPEC_TEST_TRUE(UMGUtils::HasAnyInputVisibleDescendantsIncludingSelf(Widget));
+				SPEC_TEST_TRUE(UMGUtils::HasInputVisibleDescendantsIncludingSelf(Widget));
 			});
 
 			It("should return true when the widget has a nested UserWidget that has a focusable/clickable button", [this]()
 			{
 				CreateComplexUserWidget(TestWorld, Widget, WidgetTree);
 				auto SlateWidget = Widget->TakeWidget();
-				SPEC_TEST_TRUE(UMGUtils::HasAnyInputVisibleDescendantsIncludingSelf(Widget));
+				SPEC_TEST_TRUE(UMGUtils::HasInputVisibleDescendantsIncludingSelf(Widget));
 			});
+		});
+	});
+
+	Describe("GetFirstFocusableDescendantIncludingSelf", [this]()
+	{
+		It("should return the first button in a horizontal list", [this]()
+		{
+			UHorizontalBox* HorizontalBox = WidgetTree->ConstructWidget<UHorizontalBox>();
+			WidgetTree->RootWidget = HorizontalBox;
+			UButton* FirstButton = WidgetTree->ConstructWidget<UButton>();
+			HorizontalBox->AddChildToHorizontalBox(FirstButton);
+			for (int32 i = 0; i < 4; i++)
+			{
+				HorizontalBox->AddChildToHorizontalBox(WidgetTree->ConstructWidget<UButton>());
+			}
+			auto SlateWidget = Widget->TakeWidget();
+			UWidget* FirstFocusableDescendant = UMGUtils::GetFirstFocusableDescendantIncludingSelf(Widget);
+			SPEC_TEST_TRUE(FirstFocusableDescendant == FirstButton);
+		});
+
+		It("should return the UUSerWidget itself if it's focusable itself", [this]()
+		{
+			WidgetTree->RootWidget = WidgetTree->ConstructWidget<UButton>();
+			Widget->bIsFocusable = true;
+			auto SlateWidget = Widget->TakeWidget();
+			UWidget* FirstFocusableDescendant = UMGUtils::GetFirstFocusableDescendantIncludingSelf(Widget);
+			SPEC_TEST_TRUE(FirstFocusableDescendant == Widget);
+		});
+
+		It("should return nullptr if there are no focusable descendants", [this]()
+		{
+			auto SlateWidget = Widget->TakeWidget();
+			UWidget* FirstFocusableDescendant = UMGUtils::GetFirstFocusableDescendantIncludingSelf(Widget);
+			SPEC_TEST_NULL(FirstFocusableDescendant);
 		});
 	});
 

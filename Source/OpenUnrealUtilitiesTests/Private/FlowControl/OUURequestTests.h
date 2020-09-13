@@ -5,7 +5,7 @@
 #include "FlowControl/OUURequest.h"
 #include "OUURequestTests.generated.h"
 
-UCLASS()
+UCLASS(meta = (Hidden, HideDropDown))
 class UOUURequestTests_Responder : public UObject
 {
 	GENERATED_BODY()
@@ -19,7 +19,7 @@ public:
 	}
 };
 
-UCLASS()
+UCLASS(meta = (Hidden, HideDropDown))
 class UOUURequestTests_Owner : public UObject
 {
 	GENERATED_BODY()
@@ -42,7 +42,7 @@ public:
 	}
 };
 
-UCLASS()
+UCLASS(meta = (Hidden, HideDropDown))
 class UOUURequestQueue_TestRequest : public UOUURequest
 {
 	GENERATED_BODY()

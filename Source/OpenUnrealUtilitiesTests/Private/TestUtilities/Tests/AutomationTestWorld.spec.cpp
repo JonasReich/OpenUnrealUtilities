@@ -61,7 +61,7 @@ void FAutomationTestWorldSpec::Define()
 			{
 				BeforeEach([this]()
 				{
-					bool bInitializeResult = TestWorld.InitiailizeGame();
+					bool bInitializeResult = TestWorld.InitializeGame();
 					TestTrue("initialization successful", bInitializeResult);
 				});
 
@@ -83,7 +83,7 @@ void FAutomationTestWorldSpec::Define()
 			{
 				FAutomationTestWorld LocalTempWorldContext;
 				AddExpectedError("Could not InitiailizeGame invalid world!", EAutomationExpectedErrorFlags::Exact, 1);
-				LocalTempWorldContext.InitiailizeGame();
+				LocalTempWorldContext.InitializeGame();
 			});
 		});
 
@@ -103,7 +103,7 @@ void FAutomationTestWorldSpec::Define()
 		
 		It("should reset the pointers to game framework objects that were created with InitializeGame()", [this]()
 		{
-			TestWorld.InitiailizeGame();
+			TestWorld.InitializeGame();
 			TestWorld.DestroyWorld();
 			TestNull("GameInstance", TestWorld.GameInstance);
 			TestNull("GameMode", TestWorld.GameMode);

@@ -59,7 +59,7 @@ public:
 	 * @returns if everything went ok. This should always be the case, but you should use it as early exit condition for tests
 	 * anyways to prevent crashes during test runs.
 	 */
-	bool InitiailizeGame();
+	bool InitializeGame();
 
 	/**
 	 * Destroy the world and world context.

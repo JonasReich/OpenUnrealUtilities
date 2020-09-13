@@ -45,7 +45,7 @@ void FUMGInputActionBindingSpec::Define()
 	BeforeEach([this]()
 	{
 		TestWorld.CreateWorld();
-		TestWorld.InitiailizeGame();
+		TestWorld.InitializeGame();
 		PlayerInput = TestWorld.PlayerController->PlayerInput;
 
 		Widget = Cast<UUMGInputBindingTestWidget>(UUserWidget::CreateWidgetInstance(*TestWorld.PlayerController, UUMGInputBindingTestWidget::StaticClass(), NAME_None));

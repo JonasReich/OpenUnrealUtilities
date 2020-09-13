@@ -32,52 +32,55 @@ namespace UMGUtils
 		return false;
 	}
 
-	template<class WidgetClass>
-	bool ForEachWidgetAndDescendants(WidgetClass* RootWidget, TFunctionRef<bool(WidgetClass*)> Predicate)
+	template<class WidgetClass> bool ForEachWidgetAndDescendants(WidgetClass* RootWidget, bool bIncludeRootWidget, TFunctionRef<bool(WidgetClass*)> Predicate)
 	{
-		if (RootWidget)
+		if (!RootWidget)
+			return false;
+
+		if (bIncludeRootWidget)
 		{
 			if (Predicate(RootWidget))
 				return true;
+		}
 
-			if (const UUserWidget* UserWidgetChild = Cast<UUserWidget>(RootWidget))
+		if (const UUserWidget* UserWidgetChild = Cast<UUserWidget>(RootWidget))
+		{
+			if (UserWidgetChild->WidgetTree)
 			{
-				if (UserWidgetChild->WidgetTree)
+				if (UMGUtils::ForEachWidgetAndDescendants<WidgetClass>(UserWidgetChild->WidgetTree->RootWidget, true, Predicate))
+					return true;
+			}
+		}
+
+		// Search for any named slot with content that we need to dive into.
+		if (const INamedSlotInterface* NamedSlotHost = Cast<INamedSlotInterface>(RootWidget))
+		{
+			TArray<FName> SlotNames;
+			NamedSlotHost->GetSlotNames(SlotNames);
+
+			for (FName SlotName : SlotNames)
+			{
+				if (WidgetClass* SlotContent = NamedSlotHost->GetContentForSlot(SlotName))
 				{
-					if (UMGUtils::ForEachWidgetAndDescendants<WidgetClass>(UserWidgetChild->WidgetTree->RootWidget, Predicate))
+					if (UMGUtils::ForEachWidgetAndDescendants<WidgetClass>(SlotContent, true, Predicate))
 						return true;
 				}
 			}
+		}
 
-			// Search for any named slot with content that we need to dive into.
-			if (const INamedSlotInterface* NamedSlotHost = Cast<INamedSlotInterface>(RootWidget))
+		// Search standard children.
+		if (const UPanelWidget* PanelParent = Cast<UPanelWidget>(RootWidget))
+		{
+			for (int32 ChildIndex = 0; ChildIndex < PanelParent->GetChildrenCount(); ChildIndex++)
 			{
-				TArray<FName> SlotNames;
-				NamedSlotHost->GetSlotNames(SlotNames);
-
-				for (FName SlotName : SlotNames)
+				if (WidgetClass* ChildWidget = PanelParent->GetChildAt(ChildIndex))
 				{
-					if (WidgetClass* SlotContent = NamedSlotHost->GetContentForSlot(SlotName))
-					{
-						if (UMGUtils::ForEachWidgetAndDescendants<WidgetClass>(SlotContent, Predicate))
-							return true;
-					}
-				}
-			}
-
-			// Search standard children.
-			if (const UPanelWidget* PanelParent = Cast<UPanelWidget>(RootWidget))
-			{
-				for (int32 ChildIndex = 0; ChildIndex < PanelParent->GetChildrenCount(); ChildIndex++)
-				{
-					if (WidgetClass* ChildWidget = PanelParent->GetChildAt(ChildIndex))
-					{
-						if (UMGUtils::ForEachWidgetAndDescendants<WidgetClass>(ChildWidget, Predicate))
-							return true;
-					}
+					if (UMGUtils::ForEachWidgetAndDescendants<WidgetClass>(ChildWidget, true, Predicate))
+						return true;
 				}
 			}
 		}
+
 		return false;
 	}
 
@@ -141,7 +144,7 @@ namespace UMGUtils
 		if (!Widget.IsValid())
 			return false;
 
-		if (Widget->IsEnabled())
+		if (Widget->IsEnabled() && Widget->GetVisibility().IsVisible())
 		{
 			if (Widget->IsInteractable())
 				return true;
@@ -156,14 +159,34 @@ namespace UMGUtils
 		return false;
 	}
 
-	bool HasAnyInputVisibleDescendantsIncludingSelf(const UWidget* Widget)
+	bool HasInputVisibleDescendantsIncludingSelf(const UWidget* Widget)
 	{
-		return UMGUtils::ForEachWidgetAndDescendants<const UWidget>(Widget, [&](const UWidget* Widget) -> bool
+		return UMGUtils::ForEachWidgetAndDescendants<const UWidget>(Widget, true, [&](const UWidget* W) -> bool
 		{
-			return UMGUtils::IsInputVisible(Widget);
+			return UMGUtils::IsInputVisible(W);
 		});
-		return false;
 	}
 
-}
+	bool HasInputVisibleDescendantsExcludingSelf(const UWidget* Widget)
+	{
+		return UMGUtils::ForEachWidgetAndDescendants<const UWidget>(Widget, false, [&](const UWidget* W) -> bool
+		{
+			return UMGUtils::IsInputVisible(W);
+		});
+	}
 
+	UWidget* GetFirstFocusableDescendantIncludingSelf(UWidget* Widget)
+	{
+		UWidget* Result = nullptr;
+		UMGUtils::ForEachWidgetAndDescendants<UWidget>(Widget, true, [&](UWidget* W) -> bool
+		{
+			if (UMGUtils::IsFocusable(W))
+			{
+				Result = W;
+				return true;
+			}
+			return false;
+		});
+		return Result;
+	}
+}
