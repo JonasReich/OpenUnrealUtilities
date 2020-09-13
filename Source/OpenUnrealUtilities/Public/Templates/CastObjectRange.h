@@ -72,15 +72,15 @@ template<typename ContainerType, typename CastTargetType,
 	class TCastObjectRangeAdaptor
 {
 private:
-	ContainerType& Container;
-
-
+	ContainerType Container;
 
 public:
-	CONSTEXPR explicit TCastObjectRangeAdaptor(ContainerType& c) : Container(c) {}
+	CONSTEXPR explicit TCastObjectRangeAdaptor(ContainerType c) : Container(c) {}
 
 	auto begin() const noexcept { return CreateCastObjectIterator<CastTargetType>(IteratorUtils::begin(Container)); }
 	auto end()   const noexcept { return CreateCastObjectIterator<CastTargetType>(IteratorUtils::end(Container)); }
+	auto begin()       noexcept { return CreateCastObjectIterator<CastTargetType>(IteratorUtils::begin(Container)); }
+	auto end()         noexcept { return CreateCastObjectIterator<CastTargetType>(IteratorUtils::end(Container)); }
 };
 
 /**
@@ -95,5 +95,11 @@ public:
 template<class CastTargetType, typename ContainerType>
 CONSTEXPR auto CastObjectRange(ContainerType& Container)
 {
-	return TCastObjectRangeAdaptor<ContainerType, CastTargetType>(Container);
+	return TCastObjectRangeAdaptor<ContainerType&, CastTargetType>(Container);
+}
+
+template<class CastTargetType, typename ContainerType>
+CONSTEXPR auto CastObjectRange(ContainerType&& Container)
+{
+	return TCastObjectRangeAdaptor<ContainerType, CastTargetType>(MoveTemp(Container));
 }
