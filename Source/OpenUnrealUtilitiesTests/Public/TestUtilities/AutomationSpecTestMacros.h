@@ -17,7 +17,7 @@
 #define SPEC_TEST_FALSE(Actual)                                TestFalse(PREPROCESSOR_TO_STRING(Actual), Actual)
 #define SPEC_TEST_EQUAL(Actual, Expected)                      TestEqual(PREPROCESSOR_TO_STRING(Actual vs Expected), Actual, Expected)
 #define SPEC_TEST_NOT_EQUAL(Actual, Expected)                  TestNotEqual(PREPROCESSOR_TO_STRING(Actual vs Expected), Actual, Expected)
-#define SPEC_TEST_EQUAL_TOLERANCE(Actual, Expected, Tolerance) TestEqual(PREPROCESSOR_TO_STRING(Actual vs Expected) " (tolerance: " PREPROCESSOR_TO_STRING(Tolerance) ")", Actual, Expected, Tolerance)
+#define SPEC_TEST_EQUAL_TOLERANCE(Actual, Expected, Tolerance) TestEqual(PREPROCESSOR_TO_STRING(Actual vs Expected), Actual, Expected, Tolerance)
 #define SPEC_TEST_EQUAL_INSENSITIVE(Actual, Expected)          TestEqualInsensitive(PREPROCESSOR_TO_STRING(Actual vs Expected), Actual, Expected)
 #define SPEC_TEST_SAME(Actual, Expected)                       TestSame(PREPROCESSOR_TO_STRING(Actual vs Expected), Actual, Expected)
 #define SPEC_TEST_NOT_SAME(Actual, Expected)                   TestNotSame(PREPROCESSOR_TO_STRING(Actual vs Expected), Actual, Expected)
