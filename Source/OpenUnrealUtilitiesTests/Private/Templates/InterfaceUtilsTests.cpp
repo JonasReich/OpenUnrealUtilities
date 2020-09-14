@@ -1,6 +1,6 @@
 // Copyright (c) 2020 Jonas Reich
 
-#include "InterfaceUtilsTests.h"
+#include "Templates/InterfaceUtilsTests_Implementations.h"
 #include "OUUTests.h"
 
 #if WITH_AUTOMATION_WORKER
