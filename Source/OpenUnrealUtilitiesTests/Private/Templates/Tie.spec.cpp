@@ -7,6 +7,8 @@
 #include "Templates/Tie.h"
 #include "Engine/EngineTypes.h"
 
+using FStringTriplet = TTuple < FString, FString, FString >;
+
 BEGIN_DEFINE_SPEC(FTieSpec, "OpenUnrealUtilities.Templates.Tie", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FTieSpec)
 void FTieSpec::Define()
@@ -36,7 +38,7 @@ void FTieSpec::Define()
 	It("should unpack string tuples from lambda call", [this]()
 	{
 		FString A, B, C;
-		Tie(A, B, C) = []() { return TTuple < FString, FString, FString >{ "Alpha",  "Beta",  "Gamma" }; }();
+		Tie(A, B, C) = []() { return FStringTriplet{ "Alpha",  "Beta",  "Gamma" }; }();
 		
 		SPEC_TEST_EQUAL(A, "Alpha");
 		SPEC_TEST_EQUAL(B, "Beta"); 
@@ -46,7 +48,7 @@ void FTieSpec::Define()
 	It("should unpack string tuples from local variable", [this]()
 	{
 		FString A, B, C;
-		TTuple < FString, FString, FString > LocalVar { "Alpha", "Beta", "Gamma" };
+		FStringTriplet LocalVar { "Alpha", "Beta", "Gamma" };
 		Tie(A, B, C) = LocalVar;
 
 		SPEC_TEST_EQUAL(A, "Alpha");
@@ -57,11 +59,22 @@ void FTieSpec::Define()
 	It("should unpack string tuples from inline variable", [this]()
 	{
 		FString A, B, C;
-		Tie(A, B, C) = TTuple < FString, FString, FString >{ "Alpha", "Beta", "Gamma" };
+		Tie(A, B, C) = FStringTriplet{ "Alpha", "Beta", "Gamma" };
 
 		SPEC_TEST_EQUAL(A, "Alpha");
 		SPEC_TEST_EQUAL(B, "Beta");
 		SPEC_TEST_EQUAL(C, "Gamma");
+	});
+
+	It("should unpack string tuples from inline variable into array members", [this]()
+	{
+		TArray<FString> Array;
+		Array.SetNumZeroed(3);
+		Tie(Array[0], Array[1], Array[2]) = FStringTriplet{ "Alpha", "Beta", "Gamma" };
+
+		SPEC_TEST_EQUAL(Array[0], "Alpha");
+		SPEC_TEST_EQUAL(Array[1], "Beta");
+		SPEC_TEST_EQUAL(Array[2], "Gamma");
 	});
 }
 
