@@ -11,6 +11,7 @@
 // AutomationTest utilities.
 //////////////////////////////////////////////////////////////////////////
 
+#include "TestUtilities/AutomationSpecTestMacros.h"
 #include "TestUtilities/AutomationTestWorld.h"
 #include "TestUtilities/AutomationTestParameterParser.h"
 #include "TestUtilities/CollectionTestFunctions.h"

@@ -20,7 +20,7 @@
  * Combination of automation test flags that can be used for most if not all project/project-plugin automation tests.
  * It's recommended only to use these as is OR to explicitly define all flags as opposed to combining this macro with other flags.
  */
-#define DEFAULT_OUU_TEST_FLAGS EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter
+const int32 DEFAULT_OUU_TEST_FLAGS = EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter;
 
 /**
  * Use this macro in conjunction with a predefined OUU_TEST_CATEGORY and OUU_TEST_TYPE to declare a simple automation test.
@@ -83,7 +83,7 @@ OutBeautifiedNames.Add(DisplayName);
 #define OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(TestCase) \
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END_INNER(OUU_TEST_CLASS(TestCase))
 
-// ---------------------------------
+//////////////////////////////////////////////////////////////////////////
 
 // shared macros
 #define OUU_CONCAT_TEST_CLASS_NAME(a, b, c, d) a ## b ## c ## d
@@ -117,35 +117,5 @@ void TestCaseClass::GetTests(TArray<FString>& OutBeautifiedNames, TArray<FString
 #define OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END_INNER(TestCaseClass) \
 } \
 bool TestCaseClass::RunTest(const FString& Parameters)
-
-// ---------------------------------
-
-/**
- * Shorthands for calling test functions for use in specs.
- * A detailed plain-text description should already be provided in the surrounding It(),
- * so it's often even really hard to even provide a good description other than copying the object/function call
- * that is tested, which is exactly what this macro does.
- * Doesn't have any early exit conditions (like UTEST macros) because those obfuscate the test flow without adding
- * any significant advantages.
- */ 
-#define SPEC_TEST_TRUE(Actual) TestTrue(PREPROCESSOR_TO_STRING(Actual), Actual)
-#define SPEC_TEST_FALSE(Actual) TestFalse(PREPROCESSOR_TO_STRING(Actual), Actual)
-#define SPEC_TEST_EQUAL(Actual, Expected) TestEqual(WHAT_SPEC_TEST_COMPARE(Actual, Expected), Actual, Expected)
-#define SPEC_TEST_NOT_EQUAL(Actual, Expected) TestNotEqual(WHAT_SPEC_TEST_COMPARE(Actual, Expected), Actual, Expected)
-#define SPEC_TEST_EQUAL_TOLERANCE(Actual, Expected, Tolerance) TestEqual(WHAT_SPEC_TEST_COMPARE(Actual, Expected) " (tolerance: " PREPROCESSOR_TO_STRING(Tolerance) ")", Actual, Expected, Tolerance)
-#define SPEC_TEST_EQUAL_INSENSITIVE(Actual, Expected) TestEqualInsensitive(WHAT_SPEC_TEST_COMPARE(Actual, Expected), Actual, Expected)
-#define SPEC_TEST_SAME(Actual, Expected) TestSame(WHAT_SPEC_TEST_COMPARE(Actual, Expected), Actual, Expected)
-#define SPEC_TEST_NOT_SAME(Actual, Expected) TestNotSame(WHAT_SPEC_TEST_COMPARE(Actual, Expected), Actual, Expected)
-#define SPEC_TEST_VALID(Actual) TestValid(PREPROCESSOR_TO_STRING(Actual), Actual)
-#define SPEC_TEST_INVALID(Actual) TestInvalid(PREPROCESSOR_TO_STRING(Actual), Actual)
-#define SPEC_TEST_NULL(Actual) TestNull(PREPROCESSOR_TO_STRING(Actual), Actual)
-#define SPEC_TEST_NOT_NULL(Actual) TestNotNull(PREPROCESSOR_TO_STRING(Actual), Actual)
-#define SPEC_TEST_ARRAYS_EQUAL(Actual, Expected) TestArraysEqual(*this, WHAT_SPEC_TEST_COMPARE(Actual, Expected), Actual, Expected)
-#define SPEC_TEST_ARRAYS_MATCH_UNORDERED(Actual, Expected) TestUnorderedArraysMatch(*this, WHAT_SPEC_TEST_COMPARE(Actual, Expected), Actual, Expected)
-
-// shared inner macros
-#define WHAT_SPEC_TEST_COMPARE(Actual, Expected) PREPROCESSOR_TO_STRING(Actual vs Expected)
-
-// ---------------------------------
 
 #endif
