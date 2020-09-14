@@ -65,6 +65,7 @@ public:
 	 * Destroy the world and world context.
 	 * Afterwards none of the members may be used anymore to access the world or any of the game framework objects!
 	 * This function must be called explicitly!
+	 * Warning: This function forces garbage collection, so any stale UObjects created by tests will be destroyed!
 	 */
 	virtual void DestroyWorld();
 

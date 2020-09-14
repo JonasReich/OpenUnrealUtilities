@@ -116,6 +116,8 @@ void FAutomationTestWorld::DestroyWorldImplementation()
 	PlayerController = nullptr;
 
 	bHasWorld = false;
+
+	CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
 }
 
 FScopedAutomationTestWorld::FScopedAutomationTestWorld()
