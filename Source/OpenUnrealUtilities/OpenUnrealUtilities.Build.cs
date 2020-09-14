@@ -40,6 +40,7 @@ public class OpenUnrealUtilities : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
+				"EngineSettings"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
