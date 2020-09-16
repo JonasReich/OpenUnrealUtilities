@@ -15,13 +15,13 @@ namespace OUUTests_Internal
 		FAutomationTestBase& AutomationTest,
 		const FString& What,
 		int32 Idx,
-		const ElementType& AValue,
-		const ElementType& BValue)
+		const ElementType& ActualValue,
+		const ElementType& ExpectedValue)
 	{
 		AutomationTest.AddError(
 			FString::Printf(
 				TEXT("%s: The two arrays have different values at index %i (expected %s, but it was %s)."),
-				*What, Idx, *LexToString(AValue), *LexToString(BValue)), 1);
+				*What, Idx, *LexToString(ExpectedValue), *LexToString(ActualValue)), 1);
 	}
 }
 

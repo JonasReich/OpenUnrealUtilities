@@ -42,3 +42,17 @@ FString LexToString(const T& Object)
 {
 	return Object.ToString();
 }
+
+template<typename T>
+FString ArrayToString(const TArray<T>& Array)
+{
+	static_assert(TModels<CLexToStringConvertable, T>::Value, "T must be string convertible with LexToString()!");
+	FString Result = "{";
+	for (int32 i = 0; i < Array.Num()-1; i++)
+	{
+		const T& Element = Array[i];
+		Result.Append(LexToString(Element)).Append(", ");
+	}
+	Result.Append(LexToString(Array.Last())).Append("}");
+	return Result;
+}

@@ -22,6 +22,11 @@
  */
 const int32 DEFAULT_OUU_TEST_FLAGS = EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter;
 
+FORCEINLINE FString OPENUNREALUTILITIESTESTS_API EscapeTestName(FString InTestName)
+{
+	return InTestName.Replace(TEXT("."), TEXT("-"));
+}
+
 /**
  * Use this macro in conjunction with a predefined OUU_TEST_CATEGORY and OUU_TEST_TYPE to declare a simple automation test.
  * Used like this:
