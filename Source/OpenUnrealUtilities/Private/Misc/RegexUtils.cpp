@@ -3,8 +3,6 @@
 #include "Misc/RegexUtils.h"
 #include "Internationalization/Regex.h"
 
-PRAGMA_DISABLE_OPTIMIZATION
-
 struct FScopedRegex
 {
 	FRegexPattern Pattern;
@@ -128,7 +126,6 @@ TArray<FRegexGroups> GetRegexMatchesAndGroups_Recursive(const FString& RegexPatt
 		return TArray<FRegexGroups>{};
 	});
 }
-
 
 TArray<FRegexGroups> URegexFunctionLibrary::GetRegexMatchesAndGroups(const FString& RegexPattern, int32 GroupCount, const FString& TestString)
 {

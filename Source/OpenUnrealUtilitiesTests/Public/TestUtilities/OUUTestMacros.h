@@ -24,7 +24,7 @@ const int32 DEFAULT_OUU_TEST_FLAGS = EAutomationTestFlags::ApplicationContextMas
 
 FORCEINLINE FString OPENUNREALUTILITIESTESTS_API EscapeTestName(FString InTestName)
 {
-	return InTestName.Replace(TEXT("."), TEXT("-"));
+	return InTestName.Replace(TEXT("."), TEXT("<dot>"));
 }
 
 /**

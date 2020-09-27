@@ -49,6 +49,14 @@ void FRegexUtilsSpec::Define()
 		{
 			SPEC_TEST_FALSE(FRegexUtils::MatchesRegexExact("[a-z]*", ""));
 		});
+
+		It("should be the same as using MatchesRegex and ^$ as line start/end delimiters", [this]()
+		{
+			SPEC_TEST_FALSE(FRegexUtils::MatchesRegexExact("[a-z]*", "1234alphabet1234"));
+			SPEC_TEST_FALSE(FRegexUtils::MatchesRegex("^[a-z]*$", "1234alphabet1234"));
+			SPEC_TEST_TRUE(FRegexUtils::MatchesRegex("[a-z]*", "1234alphabet1234"));
+			SPEC_TEST_TRUE(FRegexUtils::MatchesRegex("^[a-z]$*", "alphabet"));
+		});
 	});
 
 	Describe("CountRegexMatches", [this]()
