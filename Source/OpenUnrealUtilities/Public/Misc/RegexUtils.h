@@ -1,5 +1,7 @@
 // Copyright (c) 2020 Jonas Reich
 
+#pragma once
+
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Templates/StringUtils.h"
 #include "RegexUtils.generated.h"
@@ -73,6 +75,11 @@ public:
 	{
 		return !(*this == Other);
 	}
+
+	bool IsValid() const
+	{
+		return CaptureGroups.Num() > 0;
+	}
 };
 
 /** Simplified and blueprint exposed functions for regex matching. */
@@ -100,6 +107,11 @@ public:
 	/** @returns all of the matches of the pattern in the test string together with all of the capture groups */
 	UFUNCTION(BlueprintPure, Category = Regex)
 	static TArray<FRegexGroups> GetRegexMatchesAndGroups(const FString& RegexPattern, int32 GroupCount, const FString& TestString);
+
+	/** @returns the single regex match of the pattern in the test string together with all of the capture groups,
+	 * IF the match ranges from the beginning to the end of the test string (all characters included). */
+	UFUNCTION(BlueprintPure, Category = Regex)
+	static FRegexGroups GetRegexMatchAndGroupsExact(const FString& RegexPattern, int32 GroupCount, const FString& TestString);
 };
 
 using FRegexUtils = URegexFunctionLibrary;

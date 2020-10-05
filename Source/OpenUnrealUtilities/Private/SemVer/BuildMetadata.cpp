@@ -31,13 +31,23 @@ bool FSemVerBuildMetadata::TryParseString(const FString& SourceString, ESemVerPa
 			return true;
 		}
 	}
-	else
+	else if(Strictness == ESemVerParsingStrictness::Regular)
 	{
 		FString StringCopy = SourceString.TrimStartAndEnd();
 		int32 WhitespaceIdx = StringCopy.FindLastCharByPredicate(FChar::IsWhitespace);
 		if (WhitespaceIdx == INDEX_NONE) 
 		{
 			Metadata = MoveTemp(StringCopy);
+			return true;
+		}
+	}
+	else
+	{
+		TArray<FString> WhitespaceSplit;
+		SourceString.ParseIntoArrayWS(WhitespaceSplit);
+		if (WhitespaceSplit.Num() > 0)
+		{
+			Metadata = WhitespaceSplit[0];
 			return true;
 		}
 	}

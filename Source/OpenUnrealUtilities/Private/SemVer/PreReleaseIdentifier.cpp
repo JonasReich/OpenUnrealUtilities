@@ -30,26 +30,39 @@ bool FSemVerPreReleaseIdentifier::TryParseString(const FString& SourceString, ES
 	{
 		if (InStrictness != ESemVerParsingStrictness::Strict)
 		{
-			bool bHasRemovedAZero = false;
-
-			// Strip leading zeroes to comply with strict standard afterwards
-			while (Identifier.RemoveFromStart("0"))
+			if (Identifier.IsEmpty())
 			{
-				bHasRemovedAZero = true;
+				return false;
 			}
 
-			if (bHasRemovedAZero && Identifier.IsEmpty())
+			if (Identifier.IsNumeric())
 			{
-				Identifier = "0";
+				bool bHasRemovedAZero = false;
+
+				// Strip leading zeroes to comply with strict standard afterwards
+				while (Identifier.RemoveFromStart("0"))
+				{
+					bHasRemovedAZero = true;
+				}
+
+				if (bHasRemovedAZero && Identifier.IsEmpty())
+				{
+					Identifier = "0";
+				}
 			}
 		}
 
-		if (!FRegexUtils::MatchesRegexExact("(?:0|\\d*[a-zA-Z-][0-9a-zA-Z-]*)", Identifier))
+		if (!FRegexUtils::MatchesRegexExact("^(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)$", Identifier))
 		{
 			bIdentifiersOk = false;
 			break;
 		}
 	}
+
+	Identifiers.RemoveAll([](auto& Identifier) -> bool
+	{
+		return Identifier.IsEmpty();
+	});
 	
 	if (bIdentifiersOk)
 	{

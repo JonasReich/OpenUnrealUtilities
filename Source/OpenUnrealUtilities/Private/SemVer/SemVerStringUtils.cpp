@@ -2,11 +2,11 @@
 
 #include "SemVer/SemVerStringUtils.h"
 #include "Misc/RegexUtils.h"
+#include "SemVer/SemVerParsingStrictness.h"
 
 bool USemVerStringLibrary::IsValidSemanticVersion(const FString& InString)
 {
-	return FRegexUtils::MatchesRegexExact("^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\."
-		"(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)"
-		"(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+"
-		"(?:\\.[0-9a-zA-Z-]+)*))?$", InString);
+	return FRegexUtils::MatchesRegexExact(
+		TSemVerRegex<ESemVerParsingStrictness::Strict>::String(),
+		InString);
 }

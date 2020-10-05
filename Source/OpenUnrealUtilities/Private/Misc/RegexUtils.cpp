@@ -20,6 +20,12 @@ struct FScopedRegex
 	}
 };
 
+bool IsExactMatchRange(const FString& TestString, int32 MatchBeginning, int32 MatchEnding)
+{
+	int32 StringLength = TestString.Len();
+	return (StringLength > 0) && (MatchBeginning == 0) && (MatchEnding == StringLength);
+}
+
 bool IsValidMatchRange(const FString& TestString, int32 MatchBeginning, int32 MatchEnding)
 {
 	int32 StringLength = TestString.Len();
@@ -84,8 +90,7 @@ bool URegexFunctionLibrary::MatchesRegexExact(const FString& RegexPattern, const
 	if (!Regex->FindNext())
 		return false;
 
-	int32 StringLength = TestString.Len();
-	return (StringLength > 0) && (Regex->GetMatchBeginning() == 0) && (Regex->GetMatchEnding() == StringLength);
+	return IsExactMatchRange(TestString, Regex->GetMatchBeginning(), Regex->GetMatchEnding());
 }
 
 TArray<FRegexMatch> GetRegexMatches_Recursive(const FString& RegexPattern, const FString& TestString, int32 BeginIndex)
@@ -103,6 +108,34 @@ TArray<FRegexMatch> GetRegexMatches_Recursive(const FString& RegexPattern, const
 TArray<FRegexMatch> URegexFunctionLibrary::GetRegexMatches(const FString& RegexPattern, const FString& TestString)
 {
 	return GetRegexMatches_Recursive(RegexPattern, TestString, 0);
+}
+
+FRegexGroups URegexFunctionLibrary::GetRegexMatchAndGroupsExact(const FString& RegexPattern, int32 GroupCount, const FString& TestString)
+{
+	FRegexGroups Result;
+
+	FScopedRegex Regex{ RegexPattern, TestString };
+	int32 StringLength = TestString.Len();
+	if (!Regex->FindNext())
+		return Result;
+
+	int32 MatchBeginning = Regex->GetMatchBeginning();
+	int32 MatchEnding = Regex->GetMatchEnding();
+	if (!IsExactMatchRange(TestString, MatchBeginning, MatchEnding))
+		return Result;
+
+	TArray<FRegexGroups> ResultList;
+	for (int32 i = 0; i < (GroupCount + 1); i++)
+	{
+		Result.CaptureGroups.Add(FRegexMatch
+			{
+				Regex->GetCaptureGroupBeginning(i),
+				Regex->GetCaptureGroupEnding(i),
+				Regex->GetCaptureGroup(i)
+			});
+	}
+
+	return Result;
 }
 
 TArray<FRegexGroups> GetRegexMatchesAndGroups_Recursive(const FString& RegexPattern, int32 GroupCount, const FString& TestString, int32 BeginIndex)

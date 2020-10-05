@@ -5,6 +5,7 @@
 #if WITH_AUTOMATION_WORKER
 
 #include "SemVer/SemanticVersion.h"
+#include "SemVer/SemVerTests.h"
 
 BEGIN_DEFINE_SPEC(FSemanticVersionSpec, "OpenUnrealUtilities.SemVer.SemanticVersion", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FSemanticVersionSpec)
@@ -131,6 +132,228 @@ void FSemanticVersionSpec::Define()
 			FSemanticVersion SemVer(42, 69, 404, { "alpha" }, { "build1234.6789" });
 			SemVer.IncrementPatchVersion();
 			SPEC_TEST_EQUAL(SemVer, (FSemanticVersion{ 42, 69, 405 }));
+		});
+	});
+
+	Describe("TryIncrementPrereleaseVersion", [this]()
+	{
+		It("should increase the pre-release version if it's a simple number", [this]()
+		{
+			FSemanticVersion SemVer(1, 0, 0, { "4" });
+			bool bSuccess = SemVer.TryIncrementPrereleaseVersion();
+			SPEC_TEST_TRUE(bSuccess);
+			SPEC_TEST_EQUAL(SemVer, (FSemanticVersion{ 1, 0, 0, { "5" } }));
+		});
+
+		It("should fail to increase the pre-release version if it's a string", [this]()
+		{
+			FSemanticVersion SemVer(1, 0, 0, { "alpha" });
+			bool bSuccess = SemVer.TryIncrementPrereleaseVersion();
+			SPEC_TEST_FALSE(bSuccess);
+			SPEC_TEST_EQUAL(SemVer, (FSemanticVersion{ 1, 0, 0, { "alpha" } }));
+		});
+
+		It("should increase the pre-release version if the last identifier in it is a number", [this]()
+		{
+			FSemanticVersion SemVer(1, 0, 0, { "alpha.2" });
+			bool bSuccess = SemVer.TryIncrementPrereleaseVersion();
+			SPEC_TEST_TRUE(bSuccess);
+			SPEC_TEST_EQUAL(SemVer, (FSemanticVersion{ 1, 0, 0, { "alpha.3" } }));
+		});
+
+		It("should fail to increase the pre-release version if the second-to-last identifier is a number but the last identifier is a string", [this]()
+		{
+			FSemanticVersion SemVer(1, 0, 0, { "alpha.2.x" });
+			bool bSuccess = SemVer.TryIncrementPrereleaseVersion();
+			SPEC_TEST_FALSE(bSuccess);
+			SPEC_TEST_EQUAL(SemVer, (FSemanticVersion{ 1, 0, 0, { "alpha.2.x" } }));
+		});
+	});
+
+	Describe("ToString", [this]()
+	{
+		for (auto SemVerString : ValidSemVers)
+		{
+			It(EscapeTestName(FString::Printf(TEXT("should return the semver string that was used to construct it (%s)"), *SemVerString)), [this, SemVerString]()
+			{
+				FSemanticVersion SemVer(SemVerString);
+				FString ResultString = SemVer.ToString();
+				SPEC_TEST_EQUAL(ResultString, SemVerString);
+			});
+		}
+	});
+
+	Describe("TryParseString", [this]()
+	{
+		for (auto Strictness : TEnumRange<ESemVerParsingStrictness>())
+		{
+			Describe(FString::Printf(TEXT("with Strictness level %s"), *LexToString(Strictness)), [this, Strictness]()
+			{
+				for (auto SemVerString : ValidSemVers)
+				{
+					Describe("should succeed on spec complient semver", [this, Strictness, SemVerString]()
+					{
+						It(EscapeTestName(FString::Printf(TEXT("%s"), *SemVerString)), [this, Strictness, SemVerString]()
+						{
+							FSemanticVersion SemVer;
+							bool bResult = SemVer.TryParseString(SemVerString, Strictness);
+							FString ResultString = SemVer.ToString();
+							SPEC_TEST_TRUE(bResult);
+							SPEC_TEST_EQUAL(ResultString, SemVerString);
+						});
+					});
+				}
+			});
+		}
+
+		Describe("with Strictness level Strict", [this]()
+		{
+			Describe("should fail on spec incompliant semver", [this]()
+			{
+				for (auto SemVerString : InvalidSemVers)
+				{
+					It(EscapeTestName(FString::Printf(TEXT("%s"), *SemVerString)), [this, SemVerString]()
+					{
+						FSemanticVersion SemVer;
+						bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Strict);
+						FString ResultString = SemVer.ToString();
+						SPEC_TEST_FALSE(bResult);
+					});
+				}
+			});
+		});
+
+		Describe("with Strictness level Regular", [this]()
+		{
+			It("should succeed with semvers that have leading zeroes", [this]()
+			{
+				FString SemVerString = "01.006.010-01.0build.02";
+				FSemanticVersion SemVer;
+				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Regular);
+				FString ResultString = SemVer.ToString();
+				SPEC_TEST_TRUE(bResult);
+				SPEC_TEST_EQUAL(ResultString, "1.6.10-1.0build.2");
+			});
+
+			It("should succeed with semvers that have special characters in the build metadata", [this]()
+			{
+				FString SemVerString = "1.0.5+build@meta#data";
+				FSemanticVersion SemVer;
+				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Regular);
+				FString ResultString = SemVer.ToString();
+				SPEC_TEST_TRUE(bResult);
+				SPEC_TEST_EQUAL(ResultString, "1.0.5+build@meta#data");
+			});
+
+			It("should fail with semvers that have less than three digits", [this]()
+			{
+				FString SemVerString = "4.0";
+				FSemanticVersion SemVer;
+				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Regular);
+				FString ResultString = SemVer.ToString();
+				SPEC_TEST_FALSE(bResult);
+			});
+
+			It("should fail with semvers that have more than three digits", [this]()
+			{
+				FString SemVerString = "1.2.3.4";
+				FSemanticVersion SemVer;
+				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Regular);
+				FString ResultString = SemVer.ToString();
+				SPEC_TEST_FALSE(bResult);
+			});
+
+			It("should fail with semvers that contain whitespace", [this]()
+			{
+				FString SemVerString = "1.2.3.4 ";
+				FSemanticVersion SemVer;
+				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Regular);
+				FString ResultString = SemVer.ToString();
+				SPEC_TEST_FALSE(bResult);
+			});
+		});
+
+		Describe("with Strictness level Liberal", [this]()
+		{
+			It("should succeed with semvers that have leading zeroes", [this]()
+			{
+				FString SemVerString = "01.006.010-01.0build.02";
+				FSemanticVersion SemVer;
+				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
+				FString ResultString = SemVer.ToString();
+				SPEC_TEST_TRUE(bResult);
+				SPEC_TEST_EQUAL(ResultString, "1.6.10-1.0build.2");
+			});
+
+			It("should succeed with semvers that have special characters in the build metadata", [this]()
+			{
+				FString SemVerString = "1.0.5+build@meta#data";
+				FSemanticVersion SemVer;
+				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
+				FString ResultString = SemVer.ToString();
+				SPEC_TEST_TRUE(bResult);
+				SPEC_TEST_EQUAL(ResultString, "1.0.5+build@meta#data");
+			});
+
+			It("should succeed with semvers that have a single digits", [this]()
+			{
+				FString SemVerString = "42";
+				FSemanticVersion SemVer;
+				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
+				FString ResultString = SemVer.ToString();
+				SPEC_TEST_TRUE(bResult);
+				SPEC_TEST_EQUAL(ResultString, "42.0.0");
+			});
+
+			It("should succeed with semvers that have two digits", [this]()
+			{
+				FString SemVerString = "4.3";
+				FSemanticVersion SemVer;
+				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
+				FString ResultString = SemVer.ToString();
+				SPEC_TEST_TRUE(bResult);
+				SPEC_TEST_EQUAL(ResultString, "4.3.0");
+			});
+
+			It("should succeed with semvers that have more than three digits", [this]()
+			{
+				FString SemVerString = "1.2.3.4";
+				FSemanticVersion SemVer;
+				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
+				FString ResultString = SemVer.ToString();
+				SPEC_TEST_TRUE(bResult);
+				SPEC_TEST_EQUAL(ResultString, "1.2.3-4");
+			});
+
+			It("should succeed with semvers that contain whitespace", [this]()
+			{
+				FString SemVerString = "1.2.3 -build-metadata";
+				FSemanticVersion SemVer;
+				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
+				FString ResultString = SemVer.ToString();
+				SPEC_TEST_TRUE(bResult);
+				SPEC_TEST_EQUAL(ResultString, "1.2.3");
+			});
+
+			It("should succeed with semvers that have arbitrary prefixes", [this]()
+			{
+				FString SemVerString = "Version#=1.2.3-alpha+build";
+				FSemanticVersion SemVer;
+				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
+				FString ResultString = SemVer.ToString();
+				SPEC_TEST_TRUE(bResult);
+				SPEC_TEST_EQUAL(ResultString, "1.2.3-alpha+build");
+			});
+
+			It("should succeed with semvers that have arbitrary prefixes or suffixes", [this]()
+			{
+				FString SemVerString = "The version 1.2.3-alpha+build is the version we need";
+				FSemanticVersion SemVer;
+				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
+				FString ResultString = SemVer.ToString();
+				SPEC_TEST_TRUE(bResult);
+				SPEC_TEST_EQUAL(ResultString, "1.2.3-alpha+build");
+			});
 		});
 	});
 }

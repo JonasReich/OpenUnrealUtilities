@@ -155,165 +155,39 @@ bool FSemanticVersion::operator>=(const FSemanticVersion& Other) const
 
 bool FSemanticVersion::TryParseString_Internal(const FString& SourceString, ESemVerParsingStrictness Strictness)
 {
-	switch (Strictness)
+	FString VersionNumbersString, PreReleaseAndBuildNr, PreReleaseString, BuildMetadataString;
+	
+	FRegexGroups Result;
+	if (Strictness == ESemVerParsingStrictness::Liberal)
 	{
-	case ESemVerParsingStrictness::Strict:
+		TArray<FRegexGroups> Matches = FRegexUtils::GetRegexMatchesAndGroups(FSemVerRegex::String(Strictness), 5, SourceString);
+		if (Matches.Num() > 0)
+		{
+			Result = Matches[0];
+		}
+	}
+	else
 	{
-		FString VersionNumbersString, PreReleaseAndBuildNr;
-		SourceString.Split("-", &VersionNumbersString, &PreReleaseAndBuildNr);
-		if (!FRegexUtils::MatchesRegexExact("(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)", VersionNumbersString))
-			return false;
-
-		TArray<FString> VersionNumbers;
-		VersionNumbersString.ParseIntoArray(VersionNumbers, TEXT("."));
-		LexFromString(MajorVersion, *VersionNumbers[0]);
-		LexFromString(MinorVersion, *VersionNumbers[1]);
-		LexFromString(PatchVersion, *VersionNumbers[2]);
-
-		FString PreReleaseString, BuildMetadataString;
-		PreReleaseAndBuildNr.Split("+", &PreReleaseString, &BuildMetadataString);
-
-		if (!PreReleaseIdentifier.TryParseString(PreReleaseString, Strictness))
-			return false;
-
-		if (!BuildMetadata.TryParseString(BuildMetadataString, Strictness))
-			return false;
-
-		return true;
+		Result = FRegexUtils::GetRegexMatchAndGroupsExact(FSemVerRegex::String(Strictness), 5, SourceString);
 	}
-	case ESemVerParsingStrictness::Regular:
-	{
-		int32 FirstDigitIdx = INDEX_NONE;
-		for (int32 i = 0; i < SourceString.Len(); i++)
-		{
-			const TCHAR& Char = SourceString.GetCharArray()[i];
-			if (FChar::IsDigit(Char))
-			{
-				FirstDigitIdx = i;
-				break;
-			}
-		}
+	
+	if (!Result.IsValid())
+		return false;
 
-		if (FirstDigitIdx == INDEX_NONE)
-			return false;
+	if (!ensure(Result.CaptureGroups.Num() == 6))
+		return false;
 
-		FString SourceStringWithoutPrefix = SourceString.Mid(FirstDigitIdx);
+	LexFromString(MajorVersion, *Result.CaptureGroups[1].MatchString);
+	LexFromString(MinorVersion, *Result.CaptureGroups[2].MatchString);
+	LexFromString(PatchVersion, *Result.CaptureGroups[3].MatchString);
 
-		FString VersionNumbersString, PreReleaseAndBuildNr;
-		SourceStringWithoutPrefix.Split("-", &VersionNumbersString, &PreReleaseAndBuildNr);
-		if (!FRegexUtils::MatchesRegexExact("\\d*\\.\\d*\\.\\d*", VersionNumbersString))
-			return false;
+	// Check for max int
+	UE_CLOG(MajorVersion == TNumericLimits<int32>::Max(), LogOpenUnrealUtilities, Warning, TEXT("MajorVersion is equal to maximum integer value after parsing. Such high version numbers are not supported!"));
+	UE_CLOG(MinorVersion == TNumericLimits<int32>::Max(), LogOpenUnrealUtilities, Warning, TEXT("MinorVersion is equal to maximum integer value after parsing. Such high version numbers are not supported!"));
+	UE_CLOG(PatchVersion == TNumericLimits<int32>::Max(), LogOpenUnrealUtilities, Warning, TEXT("PatchVersion is equal to maximum integer value after parsing. Such high version numbers are not supported!"));
 
-		TArray<FString> VersionNumbers;
-		VersionNumbersString.ParseIntoArray(VersionNumbers, TEXT("."));
-		LexFromString(MajorVersion, *VersionNumbers[0]);
-		LexFromString(MinorVersion, *VersionNumbers[1]);
-		LexFromString(PatchVersion, *VersionNumbers[2]);
+	PreReleaseIdentifier = { Result.CaptureGroups[4].MatchString, Strictness };
+	BuildMetadata = { Result.CaptureGroups[5].MatchString, Strictness };
 
-		FString PreReleaseString, BuildMetadataString;
-		PreReleaseAndBuildNr.Split("+", &PreReleaseString, &BuildMetadataString);
-
-		if (!PreReleaseIdentifier.TryParseString(PreReleaseString, Strictness))
-			return false;
-
-		if (!BuildMetadata.TryParseString(BuildMetadataString, Strictness))
-			return false;
-
-		return true;
-	}
-	default:
-	{
-		int32 FirstDigitIdx = INDEX_NONE;
-		for (int32 i = 0; i < SourceString.Len(); i++)
-		{
-			const TCHAR& Char = SourceString.GetCharArray()[i];
-			if (FChar::IsDigit(Char))
-			{
-				FirstDigitIdx = i;
-				break;
-			}
-		}
-
-		if (FirstDigitIdx == INDEX_NONE)
-			return false;
-
-		FString SourceStringWithoutPrefix = SourceString.Mid(FirstDigitIdx);
-
-		FString VersionNumbersString, PreReleaseAndBuildNr;
-		SourceStringWithoutPrefix.Split("-", &VersionNumbersString, &PreReleaseAndBuildNr);
-		
-		TArray<FString> VersionNumbers;
-		VersionNumbersString.ParseIntoArray(VersionNumbers, TEXT("."));
-		int32 NumVersionNumbers = VersionNumbers.Num();
-		if (NumVersionNumbers > 0 && VersionNumbers[0].IsNumeric())
-		{
-			LexFromString(MajorVersion, *VersionNumbers[0]);
-			if (NumVersionNumbers > 1 && VersionNumbers[1].IsNumeric())
-			{
-				LexFromString(MinorVersion, *VersionNumbers[1]);
-
-				if (NumVersionNumbers > 2 && VersionNumbers[2].IsNumeric())
-				{
-					LexFromString(PatchVersion, *VersionNumbers[2]);
-
-					// semver might have more than 3 version number components (e.g. 1.0.0.0) but only the first three are parsed
-					// all other numbers will be dropped silently
-				}
-			}
-		}
-		else
-		{
-			return false;
-		}
-		
-		// Find the first char that cannot be part of a pre-release and must therefore be part of the build metadata
-		int32 FirstNonPreReleaseCharIdx = INDEX_NONE;
-		// Also find the first whitespace char, so we can end at that position
-		int32 FirstWhitespaceCharIdx = MAX_int32;
-
-		for (int32 i = 0; i < SourceString.Len(); i++)
-		{
-			const TCHAR& Char = SourceString.GetCharArray()[i];
-			if (FChar::IsDigit(Char) && FirstNonPreReleaseCharIdx == INDEX_NONE)
-			{
-				FirstNonPreReleaseCharIdx = i;
-			}
-
-			if (FChar::IsWhitespace(Char))
-			{
-				FirstWhitespaceCharIdx = i;
-				break;
-			}
-		}
-
-		FString PreReleaseString, BuildMetadataString;
-		if (FirstNonPreReleaseCharIdx != INDEX_NONE)
-		{
-			PreReleaseString = PreReleaseAndBuildNr.Mid(0, FirstNonPreReleaseCharIdx);
-			if (FirstNonPreReleaseCharIdx != MAX_int32)
-			{
-				BuildMetadataString = PreReleaseAndBuildNr.Mid(FirstNonPreReleaseCharIdx, FirstWhitespaceCharIdx - FirstNonPreReleaseCharIdx);
-			}
-		}
-		else if (FirstNonPreReleaseCharIdx != MAX_int32)
-		{
-			PreReleaseString = PreReleaseAndBuildNr.Mid(0, FirstNonPreReleaseCharIdx);
-		}
-		else
-		{
-			PreReleaseString = PreReleaseAndBuildNr;
-		}
-
-		if (!PreReleaseIdentifier.TryParseString(PreReleaseString, Strictness))
-			return false;
-
-		if (!BuildMetadata.TryParseString(BuildMetadataString, Strictness))
-			return false;
-
-		return true;
-	}
-	}
-
-	// No return path here to make sure all execution paths exit in one of the cases above
-	// return false;
+	return true;
 }
