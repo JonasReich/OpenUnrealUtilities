@@ -4,9 +4,7 @@
 #include "Misc/RegexUtils.h"
 #include "SemVer/SemVerParsingStrictness.h"
 
-bool USemVerStringLibrary::IsValidSemanticVersion(const FString& InString)
+bool USemVerStringLibrary::IsValidSemanticVersion(const FString& InString, ESemVerParsingStrictness ParsingStrictness)
 {
-	return FRegexUtils::MatchesRegexExact(
-		TSemVerRegex<ESemVerParsingStrictness::Strict>::String(),
-		InString);
+	return FRegexUtils::MatchesRegexExact(FSemVerRegex::String(ParsingStrictness), InString);
 }

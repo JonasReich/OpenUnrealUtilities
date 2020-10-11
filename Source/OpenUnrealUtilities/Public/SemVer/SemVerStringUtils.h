@@ -11,7 +11,7 @@ class OPENUNREALUTILITIES_API USemVerStringLibrary : public UBlueprintFunctionLi
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintPure)
-	static bool IsValidSemanticVersion(const FString& InString);
+	static bool IsValidSemanticVersion(const FString& InString, ESemVerParsingStrictness ParsingStrictness);
 };
 
 using FSemVerStringUtils = USemVerStringLibrary;
