@@ -1,6 +1,7 @@
 // Copyright (c) 2020 Jonas Reich
 
 #include "SemVer/SemanticVersion.h"
+#include "SemVer/SemVerRegex.h"
 #include "Misc/RegexUtils.h"
 #include "OpenUnrealUtilities.h"
 
