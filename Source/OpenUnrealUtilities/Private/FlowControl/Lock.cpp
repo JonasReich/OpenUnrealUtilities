@@ -51,7 +51,7 @@ void USharedLock::Lock(UObject* Key)
 	}
 }
 
-bool USharedLock::TryRelease(UObject* Key)
+bool USharedLock::TryUnlock(UObject* Key)
 {
 	bool bWasLockedBefore = IsLocked();
 	ActiveKeys.RemoveSwap(Key);

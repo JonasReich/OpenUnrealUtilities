@@ -206,7 +206,7 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(LockUnlock_Nullptr, DEFAULT_OUU_TEST_FLAGS)
 
 	Env.Lock->Lock(Env.Key0);
 
-	bool bUnlockNullptrSuccess = Env.Lock->TryRelease(nullptr);
+	bool bUnlockNullptrSuccess = Env.Lock->TryUnlock(nullptr);
 	bool bIsLockedAfterNullUnlock = Env.Lock->IsLocked();
 
 	// Assert
@@ -229,7 +229,7 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(LockUnlock_SingleKey_Once, DEFAULT_OUU_TEST
 	bool bIsLockedBeforeLocking = Env.Lock->IsLocked();
 	Env.Lock->Lock(Env.Key0);
 	bool bIsLockedAfterLocking = Env.Lock->IsLocked();
-	bool bUnlockSuccessful = Env.Lock->TryRelease(Env.Key0);
+	bool bUnlockSuccessful = Env.Lock->TryUnlock(Env.Key0);
 	bool bIsLockedAfterUnlocking = Env.Lock->IsLocked();
 
 	// Assert
@@ -259,7 +259,7 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(LockUnlock_SingleKey_TwiceSameTime, DEFAULT
 	bool bIsLockedAfterLocking = Env.Lock->IsLocked();
 	Env.Lock->Lock(Env.Key0);
 	bool bIsLockedAfter2ndLocking = Env.Lock->IsLocked();
-	bool bUnlockSuccessful = Env.Lock->TryRelease(Env.Key0);
+	bool bUnlockSuccessful = Env.Lock->TryUnlock(Env.Key0);
 	bool bIsLockedAfterUnlocking = Env.Lock->IsLocked();
 
 	// Assert
@@ -287,9 +287,9 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(LockUnlock_SingleKey_TwiceSequential, DEFAU
 	// Act
 	bool bAllOperationsSuccessful = true;
 	Env.Lock->Lock(Env.Key0);
-	bAllOperationsSuccessful |= Env.Lock->TryRelease(Env.Key0);
+	bAllOperationsSuccessful |= Env.Lock->TryUnlock(Env.Key0);
 	Env.Lock->Lock(Env.Key0);
-	bAllOperationsSuccessful |= Env.Lock->TryRelease(Env.Key0);
+	bAllOperationsSuccessful |= Env.Lock->TryUnlock(Env.Key0);
 	bool bIsLockedAfter2ndUnlocking = Env.Lock->IsLocked();
 
 	// Assert
@@ -317,11 +317,11 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(LockUnlock_DifferentKey, DEFAULT_OUU_TEST_F
 	bool bIsLockedAfter2ndKeyLock = Env.Lock->IsLocked();
 	TArray<UObject*> KeysAfterSecondKeySet = Env.Lock->GetActiveKeys();
 
-	bool bUnlock2ndKeySuccessful = Env.Lock->TryRelease(Env.Key1);
+	bool bUnlock2ndKeySuccessful = Env.Lock->TryUnlock(Env.Key1);
 	bool bIsLockedAfter2ndKeyUnlocking = Env.Lock->IsLocked();
 	TArray<UObject*> KeysAfter2ndKeyRemoved = Env.Lock->GetActiveKeys();
 
-	bool bUnlock1stKeySuccessful = Env.Lock->TryRelease(Env.Key0);
+	bool bUnlock1stKeySuccessful = Env.Lock->TryUnlock(Env.Key0);
 	bool bIsLockedAfter1stKeyUnlocking = Env.Lock->IsLocked();
 	TArray<UObject*> KeysAfter1stKeyRemoved = Env.Lock->GetActiveKeys();
 

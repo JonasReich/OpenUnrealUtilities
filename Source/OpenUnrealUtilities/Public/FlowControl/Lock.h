@@ -74,7 +74,7 @@ public:
 	 * @returns if the entire lock was successfully released
 	 */
 	UFUNCTION(BlueprintCallable)
-	bool TryRelease(UObject* Key);
+	bool TryUnlock(UObject* Key);
 
 	/**
 	 * Simple check if the lock has any active keys.
