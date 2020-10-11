@@ -6,6 +6,7 @@
 #if WITH_AUTOMATION_WORKER
 
 #include "FlowControl/Lock.h"
+#include "EditorLevelLibrary.h"
 
 #define OUU_TEST_CATEGORY OpenUnrealUtilities.FlowControl
 
@@ -190,32 +191,17 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(LockUnlock_DifferentKey, DEFAULT_OUU_TEST_F
 
 OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(TryLockForDuration, DEFAULT_OUU_TEST_FLAGS)
 {
-	// Arrange
-	FScopedAutomationTestWorld World;
-	FOUULockTestEnvironment<UExclusiveLock> Env(World.World);
-	const int32 FrameCounterBeforeTest = GFrameCounter;
+	auto Env = MakeShared<FOUULockTestEnvironment<UExclusiveLock>>(UEditorLevelLibrary::GetEditorWorld());
+	Env->Lock->TryLockForDuration(Env->Key0, 6.f);
+	TestTrue("Is locked at beginning", Env->Lock->IsLocked());
 
-	// Act
-	Env.Lock->TryLockForDuration(Env.Key0, 30.f);
-	bool bIsLockedAtBeginning = Env.Lock->IsLocked();
+	AddCommand(new FDelayedFunctionLatentCommand([=]() {
+		TestTrue("Is locked after half time", Env->Lock->IsLocked());
+	}, 3.f));
 
-	// Timer manager will only call delegates on second tick, so we have to split the times
-	World.World->GetTimerManager().Tick(1.f);
-	// Temporarily increment the GFrameCounter, so the second timer manager tick goes through
-	GFrameCounter++;
-	World.World->GetTimerManager().Tick(14.f);
-	bool bIsLockedAfterHalfTime = Env.Lock->IsLocked();
-	GFrameCounter++;
-	World.World->GetTimerManager().Tick(17.f);
-	bool bIsLockedAfterFullTime = Env.Lock->IsLocked();
-
-	// Assert
-	TestTrue("Is locked at beginning", bIsLockedAtBeginning);
-	TestTrue("Is locked after half time", bIsLockedAfterHalfTime);
-	TestFalse("Is locked after full time", bIsLockedAfterFullTime);
-
-	// Cleanup
-	GFrameCounter = FrameCounterBeforeTest;
+	AddCommand(new FDelayedFunctionLatentCommand([=]() {
+		TestFalse("Is locked after full time", Env->Lock->IsLocked());
+	}, 3.1f));
 
 	return true;
 }
@@ -381,32 +367,17 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(LockUnlock_DifferentKey, DEFAULT_OUU_TEST_F
 
 OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(LockForDuration, DEFAULT_OUU_TEST_FLAGS)
 {
-	// Arrange
-	FScopedAutomationTestWorld World;
-	FOUULockTestEnvironment<USharedLock> Env(World.World);
-	const int32 FrameCounterBeforeTest = GFrameCounter;
+	auto Env = MakeShared<FOUULockTestEnvironment<USharedLock>>(UEditorLevelLibrary::GetEditorWorld());
+	Env->Lock->LockForDuration(Env->Key0, 6.f);
+	TestTrue("Is locked at beginning", Env->Lock->IsLocked());
+	
+	AddCommand(new FDelayedFunctionLatentCommand([=]() {
+		TestTrue("Is locked after half time", Env->Lock->IsLocked());
+	}, 3.f));
 
-	// Act
-	Env.Lock->LockForDuration(Env.Key0, 30.f);
-	bool bIsLockedAtBeginning = Env.Lock->IsLocked();
-
-	// Timer manager will only call delegates on second tick, so we have to split the times
-	World.World->GetTimerManager().Tick(1.f);
-	// Temporarily increment the GFrameCounter, so the second timer manager tick goes through
-	GFrameCounter++;
-	World.World->GetTimerManager().Tick(14.f);
-	bool bIsLockedAfterHalfTime = Env.Lock->IsLocked();
-	GFrameCounter++;
-	World.World->GetTimerManager().Tick(17.f);
-	bool bIsLockedAfterFullTime = Env.Lock->IsLocked();
-
-	// Assert
-	TestTrue("Is locked at beginning", bIsLockedAtBeginning);
-	TestTrue("Is locked after half time", bIsLockedAfterHalfTime);
-	TestFalse("Is locked after full time", bIsLockedAfterFullTime);
-
-	// Cleanup
-	GFrameCounter = FrameCounterBeforeTest;
+	AddCommand(new FDelayedFunctionLatentCommand([=]() {
+		TestFalse("Is locked after full time", Env->Lock->IsLocked());
+	}, 3.1f));
 
 	return true;
 }

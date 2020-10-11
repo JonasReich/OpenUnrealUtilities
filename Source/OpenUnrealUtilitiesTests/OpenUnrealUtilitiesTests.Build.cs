@@ -18,6 +18,7 @@ public class OpenUnrealUtilitiesTests : ModuleRules
 				"InputCore",
 				"SlateCore",
 				"UMG",
+				"EditorScriptingUtilities",
 
 				// Plugin
 				"OpenUnrealUtilities"
