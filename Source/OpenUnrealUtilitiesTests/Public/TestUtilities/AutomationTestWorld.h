@@ -31,13 +31,16 @@ public:
 	 * Create the world.
 	 * Before this the World pointer will be null.
 	 */
-	virtual void CreateWorld();
+	virtual void CreateWorld(); 
 
 	/**
 	 * Get the world context for the world.
 	 * Will crash if the world was not created yet or was already destroyed.
 	 */
 	FWorldContext& GetWorldContext() const;
+
+	/** Get a reference to the world's timer manager */
+	FTimerManager& GetTimerManager() const;
 
 	/**
 	 * Call this for actor initialization.

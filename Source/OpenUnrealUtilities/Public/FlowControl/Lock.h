@@ -28,6 +28,15 @@ public:
 	bool TryLock(UObject* Key);
 
 	/**
+	 * Attempt to lock the exclusive lock. Will fail if the lock was already locked by a different object.
+	 * Calling this function again with the active object key will result in a success without any side-effects.
+	 * The lock will be automatically released after the specified time (in game time).
+	 * @returns whether the lock was successfully locked by this key object.
+	 */
+	UFUNCTION(BlueprintCallable)
+	bool TryLockForDuration(UObject* Key, float Duration);
+
+	/**
 	 * Release the lock with the object which was used to lock it.
 	 * Calling unlock with an object that was not used to lock it will trigger an ensure condition.
 	 */
@@ -61,12 +70,22 @@ public:
 	FOnSharedLockStateChanged OnLockStateChanged;
 	
 	/**
-	 * Add a key to the lock. May successively with multiple different key objects.
-	 * All of these key objects need to removed via TryRelease() in order to release the entire lock.
+	 * Add a key to the lock. May be called successively with multiple different key objects.
+	 * All of these key objects need to be removed via TryRelease() in order to release the entire lock.
 	 * May be called multiple times with the same key object without any side-effects.
 	 */
 	UFUNCTION(BlueprintCallable)
 	void Lock(UObject* Key);
+
+	/**
+	 * Add a key to the lock. May be called successively with multiple different key objects.
+	 * The key will be released automatically after the specified time.
+	 * All of these key objects need to either be removed via TryRelease() or waited until
+	 * the specified duration has passed, so the entire lock is released again.
+	 * May be called multiple times with the same key object, which effectively resets the timer.
+	 */
+	UFUNCTION(BlueprintCallable)
+	void LockForDuration(UObject* Key, float Duration);
 
 	/**
 	 * Release a single key from the lock. May release the entire lock if it was the last active key.

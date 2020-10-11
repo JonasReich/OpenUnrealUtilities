@@ -1,6 +1,7 @@
 // Copyright (c) 2020 Jonas Reich
 
 #include "FlowControl/Lock.h"
+#include "OpenUnrealUtilities.h"
 
 bool UExclusiveLock::TryLock(UObject* Key)
 {
@@ -19,6 +20,20 @@ bool UExclusiveLock::TryLock(UObject* Key)
 	}
 
 	return false;
+}
+
+bool UExclusiveLock::TryLockForDuration(UObject* Key, float Duration)
+{
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("TryLockForDuration cannot be used if the lock does not have a valid world context"));
+		return false;
+	}
+
+	FTimerHandle Handle;
+	World->GetTimerManager().SetTimer(Handle, [this, Key]() { TryUnlock(Key); }, Duration, false);
+	return TryLock(Key);
 }
 
 bool UExclusiveLock::TryUnlock(UObject* Key)
@@ -49,6 +64,21 @@ void USharedLock::Lock(UObject* Key)
 	{
 		OnLockStateChanged.Broadcast(this, true);
 	}
+}
+
+void USharedLock::LockForDuration(UObject* Key, float Duration)
+{
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("LockForDuration cannot be used if the lock does not have a valid world context"));
+		return;
+	}
+
+	FTimerHandle Handle;
+	World->GetTimerManager().SetTimer(Handle, [this, Key]() { TryUnlock(Key); }, Duration, false);
+
+	Lock(Key);
 }
 
 bool USharedLock::TryUnlock(UObject* Key)

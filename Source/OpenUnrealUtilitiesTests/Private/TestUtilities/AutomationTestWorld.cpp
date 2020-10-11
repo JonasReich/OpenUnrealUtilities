@@ -32,6 +32,11 @@ FWorldContext& FAutomationTestWorld::GetWorldContext() const
 	return GEngine->GetWorldContextFromWorldChecked(World);
 }
 
+FTimerManager& FAutomationTestWorld::GetTimerManager() const
+{
+	return World->GetTimerManager();
+}
+
 void FAutomationTestWorld::BeginPlay()
 {
 	if (!IsValid(World))

@@ -17,9 +17,9 @@ struct FOUULockTestEnvironment
 	UObject* Key0;
 	UObject* Key1;
 
-	FOUULockTestEnvironment()
+	FOUULockTestEnvironment(UObject* Outer = GetTransientPackage())
 	{
-		Lock = NewObject<LockType>();
+		Lock = NewObject<LockType>(Outer);
 		Helper = NewObject<ULockTestsHelper>();
 		Key0 = NewObject<UOUUTestObject>();
 		Key1 = NewObject<UOUUTestObject>();
@@ -163,7 +163,6 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(LockUnlock_DifferentKey, DEFAULT_OUU_TEST_F
 
 	// Act
 	Env.Lock->TryLock(Env.Key0);
-	Env.Lock->IsLocked();
 	
 	bool bIs2ndKeyLockSuccessful = Env.Lock->TryLock(Env.Key1);
 	bool bIsLockedAfter2ndKeyLock = Env.Lock->IsLocked();
@@ -186,6 +185,42 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(LockUnlock_DifferentKey, DEFAULT_OUU_TEST_F
 
 	return true;
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(TryLockForDuration, DEFAULT_OUU_TEST_FLAGS)
+{
+	// Arrange
+	FScopedAutomationTestWorld World;
+	FOUULockTestEnvironment<UExclusiveLock> Env(World.World);
+	const int32 FrameCounterBeforeTest = GFrameCounter;
+
+	// Act
+	Env.Lock->TryLockForDuration(Env.Key0, 30.f);
+	bool bIsLockedAtBeginning = Env.Lock->IsLocked();
+
+	// Timer manager will only call delegates on second tick, so we have to split the times
+	World.World->GetTimerManager().Tick(1.f);
+	// Temporarily increment the GFrameCounter, so the second timer manager tick goes through
+	GFrameCounter++;
+	World.World->GetTimerManager().Tick(14.f);
+	bool bIsLockedAfterHalfTime = Env.Lock->IsLocked();
+	GFrameCounter++;
+	World.World->GetTimerManager().Tick(17.f);
+	bool bIsLockedAfterFullTime = Env.Lock->IsLocked();
+
+	// Assert
+	TestTrue("Is locked at beginning", bIsLockedAtBeginning);
+	TestTrue("Is locked after half time", bIsLockedAfterHalfTime);
+	TestFalse("Is locked after full time", bIsLockedAfterFullTime);
+
+	// Cleanup
+	GFrameCounter = FrameCounterBeforeTest;
+
+	return true;
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 #undef OUU_TEST_TYPE
 
@@ -342,6 +377,39 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(LockUnlock_DifferentKey, DEFAULT_OUU_TEST_F
 	return true;
 }
 
+//////////////////////////////////////////////////////////////////////////
+
+OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(LockForDuration, DEFAULT_OUU_TEST_FLAGS)
+{
+	// Arrange
+	FScopedAutomationTestWorld World;
+	FOUULockTestEnvironment<USharedLock> Env(World.World);
+	const int32 FrameCounterBeforeTest = GFrameCounter;
+
+	// Act
+	Env.Lock->LockForDuration(Env.Key0, 30.f);
+	bool bIsLockedAtBeginning = Env.Lock->IsLocked();
+
+	// Timer manager will only call delegates on second tick, so we have to split the times
+	World.World->GetTimerManager().Tick(1.f);
+	// Temporarily increment the GFrameCounter, so the second timer manager tick goes through
+	GFrameCounter++;
+	World.World->GetTimerManager().Tick(14.f);
+	bool bIsLockedAfterHalfTime = Env.Lock->IsLocked();
+	GFrameCounter++;
+	World.World->GetTimerManager().Tick(17.f);
+	bool bIsLockedAfterFullTime = Env.Lock->IsLocked();
+
+	// Assert
+	TestTrue("Is locked at beginning", bIsLockedAtBeginning);
+	TestTrue("Is locked after half time", bIsLockedAfterHalfTime);
+	TestFalse("Is locked after full time", bIsLockedAfterFullTime);
+
+	// Cleanup
+	GFrameCounter = FrameCounterBeforeTest;
+
+	return true;
+}
 
 //////////////////////////////////////////////////////////////////////////
 
