@@ -2,10 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "CoreBlueprintLibrary.generated.h"
+#include "OUUCoreBlueprintLibrary.generated.h"
 
+/**
+ * Core engine/UObject functionality that is for some reason not blueprint exposed via Kismet functions, e.g GetDefaultObject(), etc.
+ * Does not expand upon existing C++ functionality but merely makes it available for blueprint use. 
+ */
 UCLASS()
-class UCoreBlueprintLibrary : public UBlueprintFunctionLibrary
+class UOUUCoreBlueprintLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
