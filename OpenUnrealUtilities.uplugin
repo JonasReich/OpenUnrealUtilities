@@ -16,12 +16,17 @@
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "OpenUnrealUtilities",
+			"Name": "OUURuntime",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		},
 		{
-			"Name": "OpenUnrealUtilitiesTests",
+			"Name": "OUUEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "OUUTests",
 			"Type": "UncookedOnly",
 			"LoadingPhase": "Default"
 		}
