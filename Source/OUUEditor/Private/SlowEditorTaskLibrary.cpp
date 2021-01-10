@@ -1,6 +1,6 @@
 ﻿// Copyright (c) 2021 Jonas Reich
 
-#include "SlowEditorTask.h"
+#include "SlowEditorTaskLibrary.h"
 #include "OUUEditorModule.h"
 #include "Misc/ScopedSlowTask.h"
 

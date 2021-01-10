@@ -5,7 +5,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Misc/ScopedSlowTask.h"
 
-#include "SlowEditorTask.generated.h"
+#include "SlowEditorTaskLibrary.generated.h"
 
 USTRUCT(BlueprintType)
 struct FSlowEditorTaskHandle
