@@ -2,7 +2,7 @@
 
 #include "OUUTestsModule.h"
 
-#define LOCTEXT_NAMESPACE "FOpenUnrealUtilitiesTestsModule"
+#define LOCTEXT_NAMESPACE "FOUUTestsModule"
 
 DEFINE_LOG_CATEGORY(LogOpenUnrealUtilitiesTests);
 

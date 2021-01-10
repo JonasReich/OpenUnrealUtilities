@@ -2,7 +2,7 @@
 
 #include "OUURuntimeModule.h"
 
-#define LOCTEXT_NAMESPACE "FOpenUnrealUtilitiesModule"
+#define LOCTEXT_NAMESPACE "FOUURuntimeModule"
 
 DEFINE_LOG_CATEGORY(LogOpenUnrealUtilities);
 
