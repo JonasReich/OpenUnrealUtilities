@@ -12,23 +12,23 @@ class UEngineGlobalsLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
-	/** @returns if this build was compiled with editor configuration */
+	/** If this build was compiled with editor configuration */
 	UFUNCTION(BlueprintPure, Category = "Build")
 	static bool IsEditorBuild();
 	
-	/** @returns if this build was compiled with debug configuration */
+	/** If this build was compiled with debug configuration */
 	UFUNCTION(BlueprintPure, Category = "Build")
 	static bool IsDebugBuild();
 	
-	/** @returns if this build was compiled with development configuration */
+	/** If this build was compiled with development configuration */
 	UFUNCTION(BlueprintPure, Category = "Build")
 	static bool IsDevelopmentBuild();
 	
-	/** @returns if this build was compiled with test configuration */
+	/** If this build was compiled with test configuration */
 	UFUNCTION(BlueprintPure, Category = "Build")
 	static bool IsTestBuild();
 	
-	/** @returns if this build was compiled with shipping configuration */
+	/** If this build was compiled with shipping configuration */
 	UFUNCTION(BlueprintPure, Category = "Build")
 	static bool IsShippingBuild();
 	
@@ -70,7 +70,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Engine Globals")
 	static bool IsBuildMachine();
 
-	/** @return True if called from the game thread. */
+	/** If the current execution scope is in the game thread. */
 	UFUNCTION(BlueprintPure, Category = "Engine Globals")
 	static bool IsInGameThread();
 };
