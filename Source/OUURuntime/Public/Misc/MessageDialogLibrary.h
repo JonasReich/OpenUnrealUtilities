@@ -41,7 +41,7 @@ static_assert(EBlueprintAppMsgType::Ok == static_cast<EBlueprintAppMsgType>(EApp
 	"EBlueprintAppMsgType::Ok must be equal to EAppMsgType::Ok");
 
 /**
-*  
+* Library to open blocking message dialog popups from blueprint (editor utilities).
 */
 UCLASS()
 class OUURUNTIME_API UMessageDialogLibrary : public UBlueprintFunctionLibrary
