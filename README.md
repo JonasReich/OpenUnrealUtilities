@@ -1,6 +1,6 @@
 
 # Open Unreal Utilities
-The Open Unreal Utilties plugin is a general purpose utility plugin for Unreal Engine 4.
+The Open Unreal Utilities plugin is a general purpose utility plugin for Unreal Engine 4.
 
 ## Contents
 So far the plugin mainly contains runtime utilities and some automated testing helpers. These utilities include:
@@ -78,7 +78,7 @@ Whenever you run into instances where the description of the test case is not su
 the description or break the test case down into separate smaller test cases that are easy to describe.
 
 ## Licensing
-Both Open Unreal Utilities [plugin](SampleProject/Plugins/OpenUnrealUtilities/LICENSE.md) and [sample project](LICENSE.md) are licensed under the MIT license.
+Both Open Unreal Utilities plugin and [sample project](https://github.com/JonasReich/OpenUnrealUtilitiesSampleProject) are licensed under the MIT license.
 
 ## Contributing
 You are invited to create pull-requests to the github source for any additions or modifications you make to the plugin:
