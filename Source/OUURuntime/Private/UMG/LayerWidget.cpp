@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Jonas Reich
+// Copyright (c) 2021 Jonas Reich
 
 #include "UMG/LayerWidget.h"
 #include "Widgets/SWidget.h"

@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Jonas Reich
+// Copyright (c) 2021 Jonas Reich
 
 #include "Camera/SceneProjectionLibrary.h"
 #include "GameFramework/PlayerController.h"

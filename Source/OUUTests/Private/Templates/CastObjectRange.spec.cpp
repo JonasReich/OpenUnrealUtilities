@@ -1,4 +1,4 @@
-// Aesir Interactive GmbH, (c) 2020
+// Copyright (c) 2021 Jonas Reich
 
 #include "OUUTests.h"
 
