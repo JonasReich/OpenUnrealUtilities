@@ -77,6 +77,16 @@ part of the expectations formulated using Describe and It, so the actual test ca
 Whenever you run into instances where the description of the test case is not sufficient to explain the call of test functions, it's a good sign that you should either rephrase
 the description or break the test case down into separate smaller test cases that are easy to describe.
 
+## Coding Conventions
+
+Generally the plugin attempts to follow the [UE4 Coding Standard](https://docs.unrealengine.com/en-US/ProductionPipelines/DevelopmentSetup/CodingStandard/index.html) (especially concerning naming, capitalization, etc.) to replicate the engine's code style for easier integration into third party projects.
+Assets follow the [Gamemakin UE4 Style Guide](https://github.com/Allar/ue4-style-guide).
+
+Some plugin specific conventions:
+- Types or functions that are not namespaced which are likely to cause naming conflicts with future engine types or third/project code should be prefixed with OUU
+- The full name of the plugin 'OpenUnrealUtilities' should be avoided to keep type names short and consistent
+- All module names in the plugin must start with OUU_ prefix
+
 ## Licensing
 Both Open Unreal Utilities plugin and [sample project](https://github.com/JonasReich/OpenUnrealUtilitiesSampleProject) are licensed under the MIT license.
 
