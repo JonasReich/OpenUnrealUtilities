@@ -2,6 +2,13 @@
 # Open Unreal Utilities
 The Open Unreal Utilities plugin is a general purpose utility plugin for Unreal Engine 4.
 
+## 1.0 TODOs
+The following tasks must be adressed before we can release a 1.0 version:
+
+- [ ] Add style guides for Blueprint code
+- [ ] Add functional testing utilities
+- [ ] Check if we need some gameplay debugger utils
+
 ## Contents
 So far the plugin mainly contains runtime utilities and some automated testing helpers. These utilities include:
 
