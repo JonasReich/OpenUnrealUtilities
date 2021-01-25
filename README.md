@@ -8,6 +8,7 @@ The following tasks must be adressed before we can release a 1.0 version:
 - [ ] Add style guides for Blueprint code
 - [ ] Add functional testing utilities
 - [ ] Check if we need some gameplay debugger utils
+- [ ] Add guide for git subtree usage with plugin so it can be embedded while continuing development?
 
 ## Contents
 So far the plugin mainly contains runtime utilities and some automated testing helpers. These utilities include:
