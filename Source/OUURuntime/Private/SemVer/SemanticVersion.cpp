@@ -91,7 +91,7 @@ void FSemanticVersion::IncrementPatchVersion()
 	BuildMetadata = {};
 }
 
-bool FSemanticVersion::TryIncrementPrereleaseVersion()
+bool FSemanticVersion::TryIncrementPreReleaseVersion()
 {
 	BuildMetadata = {};
 	return PreReleaseIdentifier.TryIncrement();

@@ -140,7 +140,7 @@ void FSemanticVersionSpec::Define()
 		It("should increase the pre-release version if it's a simple number", [this]()
 		{
 			FSemanticVersion SemVer(1, 0, 0, { "4" });
-			bool bSuccess = SemVer.TryIncrementPrereleaseVersion();
+			bool bSuccess = SemVer.TryIncrementPreReleaseVersion();
 			SPEC_TEST_TRUE(bSuccess);
 			SPEC_TEST_EQUAL(SemVer, (FSemanticVersion{ 1, 0, 0, { "5" } }));
 		});
@@ -148,7 +148,7 @@ void FSemanticVersionSpec::Define()
 		It("should fail to increase the pre-release version if it's a string", [this]()
 		{
 			FSemanticVersion SemVer(1, 0, 0, { "alpha" });
-			bool bSuccess = SemVer.TryIncrementPrereleaseVersion();
+			bool bSuccess = SemVer.TryIncrementPreReleaseVersion();
 			SPEC_TEST_FALSE(bSuccess);
 			SPEC_TEST_EQUAL(SemVer, (FSemanticVersion{ 1, 0, 0, { "alpha" } }));
 		});
@@ -156,7 +156,7 @@ void FSemanticVersionSpec::Define()
 		It("should increase the pre-release version if the last identifier in it is a number", [this]()
 		{
 			FSemanticVersion SemVer(1, 0, 0, { "alpha.2" });
-			bool bSuccess = SemVer.TryIncrementPrereleaseVersion();
+			bool bSuccess = SemVer.TryIncrementPreReleaseVersion();
 			SPEC_TEST_TRUE(bSuccess);
 			SPEC_TEST_EQUAL(SemVer, (FSemanticVersion{ 1, 0, 0, { "alpha.3" } }));
 		});
@@ -164,7 +164,7 @@ void FSemanticVersionSpec::Define()
 		It("should fail to increase the pre-release version if the second-to-last identifier is a number but the last identifier is a string", [this]()
 		{
 			FSemanticVersion SemVer(1, 0, 0, { "alpha.2.x" });
-			bool bSuccess = SemVer.TryIncrementPrereleaseVersion();
+			bool bSuccess = SemVer.TryIncrementPreReleaseVersion();
 			SPEC_TEST_FALSE(bSuccess);
 			SPEC_TEST_EQUAL(SemVer, (FSemanticVersion{ 1, 0, 0, { "alpha.2.x" } }));
 		});

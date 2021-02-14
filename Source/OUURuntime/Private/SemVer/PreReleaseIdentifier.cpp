@@ -122,6 +122,11 @@ bool FSemVerPreReleaseIdentifier::operator==(const FSemVerPreReleaseIdentifier& 
 	return true;
 }
 
+bool FSemVerPreReleaseIdentifier::operator!=(const FSemVerPreReleaseIdentifier& Other) const
+{
+	return !((*this) == Other);
+}
+
 bool FSemVerPreReleaseIdentifier::operator<(const FSemVerPreReleaseIdentifier& Other) const
 {
 	int32 ThisNumIdentifiers = Identifiers.Num();

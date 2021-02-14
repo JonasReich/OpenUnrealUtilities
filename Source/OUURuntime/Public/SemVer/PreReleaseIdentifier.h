@@ -50,6 +50,9 @@ public:
 	/** Does this pre-release identifier have the same value and precedence as the other one? */
 	bool operator==(const FSemVerPreReleaseIdentifier& Other) const;
 
+	/** Does this pre-release identifier have differing value or precedence as the other one? */
+	bool operator!=(const FSemVerPreReleaseIdentifier& Other) const;
+
 	/** Does this pre-release identifier have lower precedence than the other one? */
 	bool operator<(const FSemVerPreReleaseIdentifier& Other) const;
 

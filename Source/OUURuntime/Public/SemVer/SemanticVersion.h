@@ -100,9 +100,9 @@ public:
 	void IncrementPatchVersion();
 
 	/**
-	 * If the prerelease version ends in digits
+	 * If the pre-release version ends in digits
 	 */
-	bool TryIncrementPrereleaseVersion();
+	bool TryIncrementPreReleaseVersion();
 
 	/**
 	 * @returns Is the precedence of the other version equal to this version.
