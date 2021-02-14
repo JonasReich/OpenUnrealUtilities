@@ -29,19 +29,19 @@ public:
 	 * @returns if parsing was successful
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
-	static bool TryParseSemanticVersionString(const FString& SourceString, ESemVerParsingStrictness Strictness, FSemanticVersion& OutSemanticVersion);
+	static bool TryParseSemVerString(const FString& SourceString, ESemVerParsingStrictness Strictness, FSemanticVersion& OutSemanticVersion);
 
 	/** Increment the major version of a semantic version object */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
-	static void IncrementSemanticMajorVersion(UPARAM(ref) FSemanticVersion& Version);
+	static void IncrementSemVerMajorVersion(UPARAM(ref) FSemanticVersion& Version);
 
 	/** Increment the minor version of a semantic version object */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
-	static void IncrementSemanticMinorVersion(UPARAM(ref) FSemanticVersion& Version);
+	static void IncrementSemVerMinorVersion(UPARAM(ref) FSemanticVersion& Version);
 
 	/** Increment the patch version of a semantic version object */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
-	static void IncrementSemanticPatchVersion(UPARAM(ref) FSemanticVersion& Version);
+	static void IncrementSemVerPatchVersion(UPARAM(ref) FSemanticVersion& Version);
 
 	/**
 	 * Try to increment the pre-release version of a semantic version object.
@@ -49,20 +49,20 @@ public:
 	 * @returns if incrementing the pre-release version was successful
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
-	static bool TryIncrementSemanticPreReleaseVersion(UPARAM(ref) FSemanticVersion& Version);
+	static bool TryIncrementSemVerPreReleaseVersion(UPARAM(ref) FSemanticVersion& Version);
 
 	/**
 	 * @returns Is the precedence of the other version equal to this version.
 	 * Ignores the build metadata.
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
-	static bool SemanticVersionsEqualPrecedence(const FSemanticVersion& A, const FSemanticVersion& B);
+	static bool SemVerEqualPrecedence(const FSemanticVersion& A, const FSemanticVersion& B);
 
 	/**
 	 * Checks equality including BuildMetadata.
 	 * This means it cannot be used to check precedence!
 	 * If you want to check if two semantic versions have the same precedence,
-	 * call SemanticVersionsEqualPrecedence() instead.
+	 * call SemVerEqualPrecedence() instead.
 	 */
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Equal (SemVer)", CompactNodeTitle = "==", ScriptMethod = "Equals", ScriptOperator = "==", Keywords = "== equal"), Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
 	static bool Equal_SemVerSemVer(const FSemanticVersion& A, const FSemanticVersion& B);
@@ -110,14 +110,14 @@ public:
 	* @returns if parsing was successful
 	*/
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Semantic Versioning|Pre-Release Identifier")
-	static bool TryParseSemanticVersionReleaseIdentifierString(const FString& SourceString, ESemVerParsingStrictness Strictness, FSemVerPreReleaseIdentifier& OutReleaseIdentifier);
+	static bool TryParseSemVerPreReleaseIdentifierString(const FString& SourceString, ESemVerParsingStrictness Strictness, FSemVerPreReleaseIdentifier& OutReleaseIdentifier);
 
 	/**
 	 * Try to increment a pre-release identifier. Only works if the last identifier has only digits or is empty.
 	 * @returns if incrementing the pre-release was successful
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Semantic Versioning|Pre-Release Identifier")
-	bool TryIncrementSemanticVersionReleaseIdentifier(UPARAM(ref) FSemVerPreReleaseIdentifier& PreReleaseIdentifier);
+	bool TryIncrementSemVerPreReleaseIdentifier(UPARAM(ref) FSemVerPreReleaseIdentifier& PreReleaseIdentifier);
 
 	/** Does one pre-release identifier have the same value and precedence as the other one? */
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Equal (SemVer PreRelease)", CompactNodeTitle = "==", ScriptMethod = "Equals", ScriptOperator = "==", Keywords = "== equal"), Category = "Open Unreal Utilities|Semantic Versioning|Pre-Release Identifier")

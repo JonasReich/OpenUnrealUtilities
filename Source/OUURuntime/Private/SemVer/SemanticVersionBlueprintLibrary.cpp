@@ -2,32 +2,32 @@
 
 #include "SemVer/SemanticVersionBlueprintLibrary.h"
 
-bool USemanticVersionBlueprintLibrary::TryParseSemanticVersionString(const FString& SourceString, ESemVerParsingStrictness Strictness, FSemanticVersion& OutSemanticVersion)
+bool USemanticVersionBlueprintLibrary::TryParseSemVerString(const FString& SourceString, ESemVerParsingStrictness Strictness, FSemanticVersion& OutSemanticVersion)
 {
 	return OutSemanticVersion.TryParseString(SourceString, Strictness);
 }
 
-void USemanticVersionBlueprintLibrary::IncrementSemanticMajorVersion(FSemanticVersion& Version)
+void USemanticVersionBlueprintLibrary::IncrementSemVerMajorVersion(FSemanticVersion& Version)
 {
 	return Version.IncrementMajorVersion();
 }
 
-void USemanticVersionBlueprintLibrary::IncrementSemanticMinorVersion(FSemanticVersion& Version)
+void USemanticVersionBlueprintLibrary::IncrementSemVerMinorVersion(FSemanticVersion& Version)
 {
 	return Version.IncrementMinorVersion();
 }
 
-void USemanticVersionBlueprintLibrary::IncrementSemanticPatchVersion(FSemanticVersion& Version)
+void USemanticVersionBlueprintLibrary::IncrementSemVerPatchVersion(FSemanticVersion& Version)
 {
 	return Version.IncrementPatchVersion();
 }
 
-bool USemanticVersionBlueprintLibrary::TryIncrementSemanticPreReleaseVersion(FSemanticVersion& Version)
+bool USemanticVersionBlueprintLibrary::TryIncrementSemVerPreReleaseVersion(FSemanticVersion& Version)
 {
 	return Version.TryIncrementPreReleaseVersion();
 }
 
-bool USemanticVersionBlueprintLibrary::SemanticVersionsEqualPrecedence(const FSemanticVersion& A, const FSemanticVersion& B)
+bool USemanticVersionBlueprintLibrary::SemVerEqualPrecedence(const FSemanticVersion& A, const FSemanticVersion& B)
 {
 	return A.EqualsPrecedence(B);
 }
@@ -67,12 +67,12 @@ FString USemanticVersionBlueprintLibrary::Conv_SemVerString(const FSemanticVersi
 	return InSemanticVersion.ToString();
 }
 
-bool USemanticVersionBlueprintLibrary::TryParseSemanticVersionReleaseIdentifierString(const FString& SourceString, ESemVerParsingStrictness Strictness, FSemVerPreReleaseIdentifier& OutReleaseIdentifier)
+bool USemanticVersionBlueprintLibrary::TryParseSemVerPreReleaseIdentifierString(const FString& SourceString, ESemVerParsingStrictness Strictness, FSemVerPreReleaseIdentifier& OutReleaseIdentifier)
 {
 	return OutReleaseIdentifier.TryParseString(SourceString, Strictness);
 }
 
-bool USemanticVersionBlueprintLibrary::TryIncrementSemanticVersionReleaseIdentifier(FSemVerPreReleaseIdentifier& PreReleaseIdentifier)
+bool USemanticVersionBlueprintLibrary::TryIncrementSemVerPreReleaseIdentifier(FSemVerPreReleaseIdentifier& PreReleaseIdentifier)
 {
 	return PreReleaseIdentifier.TryIncrement();
 }
