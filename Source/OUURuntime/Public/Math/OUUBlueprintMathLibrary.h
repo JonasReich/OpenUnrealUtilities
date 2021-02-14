@@ -20,10 +20,10 @@ public:
 	//
 
 	/** Returns addition of Rotator A and Rotator B (A + B) */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "rotator + rotator", CompactNodeTitle = "+", Keywords = "+ add plus", CommutativeAssociativeBinaryOperator = "true"), Category = "Math|Rotator")
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "rotator + rotator", CompactNodeTitle = "+", Keywords = "+ add plus", CommutativeAssociativeBinaryOperator = "true"), Category = "Open Unreal Utilities|Math|Rotator")
 	static FRotator Add_RotatorRotator(const FRotator& A, const FRotator& B);
 
 	/** Returns subtraction of Rotator A and Rotator B (A - B) */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "rotator - rotator", CompactNodeTitle = "-", Keywords = "- subtract minus"), Category = "Math|Rotator")
+	UFUNCTION(BlueprintPure, meta = (DisplayName = "rotator - rotator", CompactNodeTitle = "-", Keywords = "- subtract minus"), Category = "Open Unreal Utilities|Math|Rotator")
 	static FRotator Subtract_RotatorRotator(const FRotator& A, const FRotator& B);
 };

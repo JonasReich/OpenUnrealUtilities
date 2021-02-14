@@ -89,28 +89,28 @@ class OUURUNTIME_API URegexFunctionLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 public:
 	/** @returns if the pattern matches the test string at least once */
-	UFUNCTION(BlueprintPure, Category = Regex)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Regex")
 	static bool MatchesRegex(const FString& RegexPattern, const FString& TestString);
 
 	/** @returns if there is a single match from test string beginning to test string end (all characters included). */
-	UFUNCTION(BlueprintPure, Category = Regex)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Regex")
 	static bool MatchesRegexExact(const FString& RegexPattern, const FString& TestString);
 
 	/** @returns how often the pattern was found in the test string */
-	UFUNCTION(BlueprintPure, Category = Regex)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Regex")
 	static int32 CountRegexMatches(const FString& RegexPattern, const FString& TestString);
 
 	/** @returns all of the matches of the pattern in the test string */
-	UFUNCTION(BlueprintPure, Category = Regex)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Regex")
 	static TArray<FRegexMatch> GetRegexMatches(const FString& RegexPattern, const FString& TestString);
 
 	/** @returns all of the matches of the pattern in the test string together with all of the capture groups */
-	UFUNCTION(BlueprintPure, Category = Regex)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Regex")
 	static TArray<FRegexGroups> GetRegexMatchesAndGroups(const FString& RegexPattern, int32 GroupCount, const FString& TestString);
 
 	/** @returns the single regex match of the pattern in the test string together with all of the capture groups,
 	 * IF the match ranges from the beginning to the end of the test string (all characters included). */
-	UFUNCTION(BlueprintPure, Category = Regex)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Regex")
 	static FRegexGroups GetRegexMatchAndGroupsExact(const FString& RegexPattern, int32 GroupCount, const FString& TestString);
 };
 

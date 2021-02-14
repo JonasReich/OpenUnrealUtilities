@@ -21,7 +21,7 @@ public:
 	 * Get the FName of a message log name enum.
 	 * Can be used to get the predefined engine message log names.
 	 */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Message Log")
     static FName GetMessageLogName(EMessageLogName MessageLogName);
 
 	/**
@@ -30,7 +30,7 @@ public:
 	 * @param MessageText: Complete text of the message
 	 * @param Severity: The severity level of the message
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Message Log")
 	static void AddTextMessageLogMessage(FName MessageLogName, FText MessageText, EMessageLogSeverity Severity = EMessageLogSeverity::Info);
 	
 	/**
@@ -40,7 +40,7 @@ public:
 	 * @param MessageTokens: All tokens the message consists of
 	 * @param Severity: The severity level of the message
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Message Log")
 	static void AddTokenizedMessageLogMessage(FName MessageLogName, TArray<FMessageLogToken> MessageTokens, EMessageLogSeverity Severity = EMessageLogSeverity::Info);
 
 	/**
@@ -48,7 +48,7 @@ public:
 	 * @param InMinSeverity: Minimum severity of the messages being displayed. (e.g. Info displays all messages, Warning only Warnings and Errors)
 	 * @param bOpenEvenIfEmpty: Force to open the message log even if it does not contain any messages
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Message Log")
 	static void OpenMessageLog(FName MessageLogName, EMessageLogSeverity InMinSeverity = EMessageLogSeverity::Info, bool bOpenEvenIfEmpty = false );
 
 	// -------------
@@ -60,7 +60,7 @@ public:
 	 * @param AssetName: Name/path of the asset to link to.
 	 * @param OptionalLabelOverride: If not empty, this text is displayed as clickable link instead of the asset name itself
 	 */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Message Log")
 	static FMessageLogToken CreateAssetNameMessageLogToken(FString AssetName, FText OptionalLabelOverride);
 
 	/**
@@ -68,11 +68,11 @@ public:
 	 * @param Object: Object to link to.
 	 * @param OptionalLabelOverride: If not empty, this text is displayed as clickable link instead of the object name itself
 	 */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Message Log")
 	static FMessageLogToken CreateObjectMessageLogToken(UObject* Object, FText OptionalLabelOverride);
 
 	/** Creates a message log token from a text */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Message Log")
     static FMessageLogToken CreateTextMessageLogToken(FText Text);
 
 	/**
@@ -80,6 +80,6 @@ public:
 	 * @param URL: URL to link to
 	 * @param OptionalLabelOverride: If not empty, this text is displayed as clickable link instead of the URL itself
 	 */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Message Log")
     static FMessageLogToken CreateURLMessageLogToken(FString URL, FText OptionalLabelOverride);
 };

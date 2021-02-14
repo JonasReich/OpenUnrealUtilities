@@ -14,18 +14,18 @@ class UOUUCoreBlueprintLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 public:
 	/** @returns the mutable class default object of the specified class. Proceed with caution! */
-	UFUNCTION(BlueprintPure, Category = "Class")
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Class")
 	static UObject* GetClassDefaultObject(TSubclassOf<UObject> Class);
 
 	/** @returns the mutable class default object of the objects class. Proceed with caution! */
-	UFUNCTION(BlueprintPure, Category = "Class")
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Class")
     static UObject* GetClassDefaultObjectFromObject(UObject* Object);
 
 	/**
 	 * Attempts to get the world from a world context object.
 	 * Returns nullptr if no world was found.
 	 */
-	UFUNCTION(BlueprintPure, Category = "World")
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|World")
 	static UWorld* TryGetWorldFromObject(UObject* WorldContextObject);
 
 	/**
@@ -33,6 +33,6 @@ public:
 	 * Functionally the same as TryGetWorldFromObject(), but this version auto-populates the WorldContextObject parameter in Blueprints.
 	 * Returns nullptr if not world was found.
 	 */
-	UFUNCTION(BlueprintPure, Category = "World", meta = (DisplayName = "Try Get World", WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|World", meta = (DisplayName = "Try Get World", WorldContext = "WorldContextObject"))
 	static UWorld* TryGetWorldFromObject_K2(UObject* WorldContextObject);
 };

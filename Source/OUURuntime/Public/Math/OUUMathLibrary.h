@@ -15,11 +15,11 @@ class OUURUNTIME_API UOUUMathLibrary : public UBlueprintFunctionLibrary
 public:
 
 	/** Get the absolute angle between two vectors A and B. */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Math")
 	static float AngleBetweenVectors(FVector A, FVector B);
 
 	/** Get the signed angle between two vectors A and B, determining the sign with an Up vector. */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Math")
 	static float SignedAngleBetweenVectors(FVector A, FVector B, FVector Up);
 
 	/** Clamp a value into a range, using the fallback values if the range is not bound at the respective end. */

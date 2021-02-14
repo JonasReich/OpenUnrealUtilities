@@ -21,7 +21,7 @@ public:
 	 * Compute the average color of a TextureRenderTarget.
 	 * Warning: Very slow (but still a lot faster than doing it in BP)!
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Texture Render Target")
 	static FLinearColor GetAverageColor(UObject* WorldContextObject, UTextureRenderTarget2D* TextureRenderTarget);
 
 private:

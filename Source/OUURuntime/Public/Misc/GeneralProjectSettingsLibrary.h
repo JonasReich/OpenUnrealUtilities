@@ -12,46 +12,46 @@ class OUURUNTIME_API UGeneralProjectSettingsLibrary : public UBlueprintFunctionL
 	GENERATED_BODY()
 public:
 	/** @returns the name of the company (author, provider) that created the project. */
-	UFUNCTION(BlueprintPure, Category = Publisher)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|General Project Settings|Publisher")
 	static FString GetProjectCompanyName();
 
 	/** @returns the distinguished name of the company (author, provider) that created the project. */
-	UFUNCTION(BlueprintPure, Category = Publisher)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|General Project Settings|Publisher")
 	static FString GetProjectCompanyDistinguishedName();
 
 	/** @returns the project's copyright and/or trademark notices. */
-	UFUNCTION(BlueprintPure, Category = Legal)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|General Project Settings|Legal")
 	static FString GetProjectCopyrightNotice();
 
 	/** @returns the project's description text. */
-	UFUNCTION(BlueprintPure, Category = About)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|General Project Settings|About")
 	static FString GetProjectDescription();
 
 	/** @returns the project's homepage URL. */
-	UFUNCTION(BlueprintPure, Category = Publisher)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|General Project Settings|Publisher")
 	static FString GetProjectHomepageUrl();
 
 	/** @returns the project's licensing terms. */
-	UFUNCTION(BlueprintPure, Category = Legal)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|General Project Settings|Legal")
 	static FString GetProjectLicensingTerms();
 
 	/** @returns the project's privacy policy. */
-	UFUNCTION(BlueprintPure, Category = Legal)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|General Project Settings|Legal")
 	static FString GetProjectPrivacyPolicy();
 
 	/** @returns the project's unique identifier. */
-	UFUNCTION(BlueprintPure, Category = About)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|General Project Settings|About")
 	static FGuid GetProjectID();
 
 	/** @returns the project's name. */
-	UFUNCTION(BlueprintPure, Category = About)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|General Project Settings|About")
 	static FString GetProjectName();
 
 	/** @returns the project's version number. */
-	UFUNCTION(BlueprintPure, Category = About)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|General Project Settings|About")
 	static FString GetProjectVersion();
 
 	/** @returns the project's support contact information. */
-	UFUNCTION(BlueprintPure, Category = Publisher)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|General Project Settings|Publisher")
 	static FString GetProjectSupportContact();
 };

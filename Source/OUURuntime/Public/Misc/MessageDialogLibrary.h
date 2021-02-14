@@ -53,7 +53,7 @@ public:
 	 * @param OptionalTitle Optional title to use (defaults to "Message" if left empty)
 	 * @param Message Text of message to show
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Messsage Dialog")
 	static void ShowMessageDialogueNotification(FText OptionalTitle, FText Message);
 
 	/**
@@ -62,7 +62,7 @@ public:
 	 * @param OptionalTitle Optional title to use (defaults to "Message")
 	 * @param Message Text of message to show
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Messsage Dialog")
 	static EBlueprintAppReturnType OpenMessageDialog(EBlueprintAppMsgType MessageType, FText OptionalTitle, FText Message);
 
 	/**
@@ -72,7 +72,7 @@ public:
 	 * @param OptionalTitle Optional title to use (defaults to "Message")
 	 * @param Message Text of message to show
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Messsage Dialog")
 	static EBlueprintAppReturnType OpenMessageDialogWithDefaultValue(EBlueprintAppMsgType MessageType, EBlueprintAppReturnType DefaultValue, FText OptionalTitle, FText Message);
 
 private:
