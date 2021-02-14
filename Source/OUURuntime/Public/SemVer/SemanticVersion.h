@@ -99,9 +99,7 @@ public:
 	 */
 	void IncrementPatchVersion();
 
-	/**
-	 * If the pre-release version ends in digits
-	 */
+	/** Increments the pre-release version, if it ends in digits */
 	bool TryIncrementPreReleaseVersion();
 
 	/**

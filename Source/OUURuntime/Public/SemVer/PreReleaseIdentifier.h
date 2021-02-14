@@ -43,7 +43,7 @@ public:
 
 	/**
 	 * Try to increment this pre-release identifier. Only works if the last identifier has only digits or is empty.
-	 * @returns if incrementing the pre-release was successful.
+	 * @returns if incrementing the pre-release was successful
 	 */
 	bool TryIncrement();
 
