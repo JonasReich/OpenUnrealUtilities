@@ -7,7 +7,7 @@
 #include "SemVer/SemanticVersion.h"
 #include "SemVer/SemVerTests.h"
 
-BEGIN_DEFINE_SPEC(FSemanticVersionSpec, "OpenUnrealUtilities.SemanticVersion.SemVer", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FSemanticVersionSpec, "OpenUnrealUtilities.SemVer.SemanticVersion", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FSemanticVersionSpec)
 
 void FSemanticVersionSpec::Define()

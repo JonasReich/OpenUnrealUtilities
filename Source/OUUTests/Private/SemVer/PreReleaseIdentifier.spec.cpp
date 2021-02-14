@@ -6,7 +6,7 @@
 
 #include "SemVer/PreReleaseIdentifier.h"
 
-BEGIN_DEFINE_SPEC(FSemVerPreReleaseIdentifierSpec, "OpenUnrealUtilities.SemanticVersion.PreReleaseIdentifier", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FSemVerPreReleaseIdentifierSpec, "OpenUnrealUtilities.SemVer.PreReleaseIdentifier", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FSemVerPreReleaseIdentifierSpec)
 
 void FSemVerPreReleaseIdentifierSpec::Define()

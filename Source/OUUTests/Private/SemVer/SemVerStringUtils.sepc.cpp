@@ -7,7 +7,7 @@
 #include "SemVer/SemVerTests.h"
 #include "SemVer/SemVerParsingStrictness.h"
 
-BEGIN_DEFINE_SPEC(FSemVerStringUtilsSpec, "OpenUnrealUtilities.SemanticVersion.StringUtils", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FSemVerStringUtilsSpec, "OpenUnrealUtilities.SemVer.StringUtils", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FSemVerStringUtilsSpec)
 void FSemVerStringUtilsSpec::Define()
 {
