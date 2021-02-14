@@ -131,4 +131,5 @@ public:
 
 private:
 	bool TryParseString_Internal(const FString & SourceString, ESemVerParsingStrictness Strictness);
+	bool ComparePrecedence_Internal(const FSemanticVersion& Other, bool bSmallerThan) const;
 };

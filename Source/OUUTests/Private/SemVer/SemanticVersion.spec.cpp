@@ -7,8 +7,9 @@
 #include "SemVer/SemanticVersion.h"
 #include "SemVer/SemVerTests.h"
 
-BEGIN_DEFINE_SPEC(FSemanticVersionSpec, "OpenUnrealUtilities.SemVer.SemanticVersion", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FSemanticVersionSpec, "OpenUnrealUtilities.SemanticVersion.SemVer", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FSemanticVersionSpec)
+
 void FSemanticVersionSpec::Define()
 {
 	Describe("Constructing a SemVer", [this]()
@@ -44,13 +45,13 @@ void FSemanticVersionSpec::Define()
 
 		It("should add a pre-release suffix if it's specified", [this]()
 		{
-			FSemanticVersion SemVer(42, 69, 404, { "alpha" });
+			FSemanticVersion SemVer(42, 69, 404, {"alpha"});
 			SPEC_TEST_EQUAL(SemVer.ToString(), "42.69.404-alpha");
 		});
 
 		It("should add build metadata if it's specified", [this]()
 		{
-			FSemanticVersion SemVer(42, 69, 404, { "alpha" }, { "build1234.6789" });
+			FSemanticVersion SemVer(42, 69, 404, {"alpha"}, {"build1234.6789"});
 			SPEC_TEST_EQUAL(SemVer.ToString(), "42.69.404-alpha+build1234.6789");
 		});
 
@@ -88,7 +89,7 @@ void FSemanticVersionSpec::Define()
 
 		It("should strip pre-release identifier and build metadata", [this]()
 		{
-			FSemanticVersion SemVer(42, 69, 404, { "alpha" }, { "build1234.6789" });
+			FSemanticVersion SemVer(42, 69, 404, {"alpha"}, {"build1234.6789"});
 			SemVer.IncrementMajorVersion();
 			SPEC_TEST_EQUAL(SemVer, (FSemanticVersion{ 43, 0, 0 }));
 		});
@@ -112,7 +113,7 @@ void FSemanticVersionSpec::Define()
 
 		It("should strip pre-release identifier and build metadata", [this]()
 		{
-			FSemanticVersion SemVer(42, 69, 404, { "alpha" }, { "build1234.6789" });
+			FSemanticVersion SemVer(42, 69, 404, {"alpha"}, {"build1234.6789"});
 			SemVer.IncrementMinorVersion();
 			SPEC_TEST_EQUAL(SemVer, (FSemanticVersion{ 42, 70, 0 }));
 		});
@@ -129,7 +130,7 @@ void FSemanticVersionSpec::Define()
 
 		It("should strip pre-release identifier and build metadata", [this]()
 		{
-			FSemanticVersion SemVer(42, 69, 404, { "alpha" }, { "build1234.6789" });
+			FSemanticVersion SemVer(42, 69, 404, {"alpha"}, {"build1234.6789"});
 			SemVer.IncrementPatchVersion();
 			SPEC_TEST_EQUAL(SemVer, (FSemanticVersion{ 42, 69, 405 }));
 		});
@@ -139,7 +140,7 @@ void FSemanticVersionSpec::Define()
 	{
 		It("should increase the pre-release version if it's a simple number", [this]()
 		{
-			FSemanticVersion SemVer(1, 0, 0, { "4" });
+			FSemanticVersion SemVer(1, 0, 0, {"4"});
 			bool bSuccess = SemVer.TryIncrementPreReleaseVersion();
 			SPEC_TEST_TRUE(bSuccess);
 			SPEC_TEST_EQUAL(SemVer, (FSemanticVersion{ 1, 0, 0, { "5" } }));
@@ -147,7 +148,7 @@ void FSemanticVersionSpec::Define()
 
 		It("should fail to increase the pre-release version if it's a string", [this]()
 		{
-			FSemanticVersion SemVer(1, 0, 0, { "alpha" });
+			FSemanticVersion SemVer(1, 0, 0, {"alpha"});
 			bool bSuccess = SemVer.TryIncrementPreReleaseVersion();
 			SPEC_TEST_FALSE(bSuccess);
 			SPEC_TEST_EQUAL(SemVer, (FSemanticVersion{ 1, 0, 0, { "alpha" } }));
@@ -155,7 +156,7 @@ void FSemanticVersionSpec::Define()
 
 		It("should increase the pre-release version if the last identifier in it is a number", [this]()
 		{
-			FSemanticVersion SemVer(1, 0, 0, { "alpha.2" });
+			FSemanticVersion SemVer(1, 0, 0, {"alpha.2"});
 			bool bSuccess = SemVer.TryIncrementPreReleaseVersion();
 			SPEC_TEST_TRUE(bSuccess);
 			SPEC_TEST_EQUAL(SemVer, (FSemanticVersion{ 1, 0, 0, { "alpha.3" } }));
@@ -163,7 +164,7 @@ void FSemanticVersionSpec::Define()
 
 		It("should fail to increase the pre-release version if the second-to-last identifier is a number but the last identifier is a string", [this]()
 		{
-			FSemanticVersion SemVer(1, 0, 0, { "alpha.2.x" });
+			FSemanticVersion SemVer(1, 0, 0, {"alpha.2.x"});
 			bool bSuccess = SemVer.TryIncrementPreReleaseVersion();
 			SPEC_TEST_FALSE(bSuccess);
 			SPEC_TEST_EQUAL(SemVer, (FSemanticVersion{ 1, 0, 0, { "alpha.2.x" } }));
@@ -354,6 +355,152 @@ void FSemanticVersionSpec::Define()
 				SPEC_TEST_TRUE(bResult);
 				SPEC_TEST_EQUAL(ResultString, "1.2.3-alpha+build");
 			});
+		});
+
+		Describe("EqualsPrecedence", [this]()
+		{
+			It("should return false for semvers with different build numbers", [this]()
+			{
+				FSemanticVersion A("1.2.3");
+				FSemanticVersion B("2.3.4");
+				SPEC_TEST_FALSE(A.EqualsPrecedence(B));
+				SPEC_TEST_FALSE(B.EqualsPrecedence(A));
+			});
+
+			It("should return false for semvers with different pre-release identifier", [this]()
+			{
+				FSemanticVersion A("1.2.3-alpha");
+				FSemanticVersion B("1.2.3-beta");
+				SPEC_TEST_FALSE(A.EqualsPrecedence(B));
+				SPEC_TEST_FALSE(B.EqualsPrecedence(A));
+			});
+
+			It("should return true for matching semvers", [this]()
+			{
+				FSemanticVersion A("1.2.3-alpha+build2");
+				FSemanticVersion B("1.2.3-alpha+build2");
+				SPEC_TEST_TRUE(A.EqualsPrecedence(B));
+				SPEC_TEST_TRUE(B.EqualsPrecedence(A));
+			});
+
+			It("should ignore differences in build number", [this]()
+			{
+				FSemanticVersion A("1.2.3-alpha+build2");
+				FSemanticVersion B("1.2.3-alpha+build3");
+				SPEC_TEST_TRUE(A.EqualsPrecedence(B));
+				SPEC_TEST_TRUE(B.EqualsPrecedence(A));
+			});
+		});
+	});
+
+	Describe("comparison operators", [this]()
+	{
+		Describe("==", [this]()
+		{
+			It("should return false for semvers with different build numbers", [this]()
+			{
+				FSemanticVersion A("1.2.3");
+				FSemanticVersion B("2.3.4");
+				SPEC_TEST_FALSE(A == B);
+				SPEC_TEST_FALSE(B == A);
+			});
+
+			It("should return false for semvers with different pre-release identifier", [this]()
+			{
+				FSemanticVersion A("1.2.3-alpha");
+				FSemanticVersion B("1.2.3-beta");
+				SPEC_TEST_FALSE(A == B);
+				SPEC_TEST_FALSE(B == A);
+			});
+
+			It("should return true for matching semvers", [this]()
+			{
+				FSemanticVersion A("1.2.3-alpha+build2");
+				FSemanticVersion B("1.2.3-alpha+build2");
+				SPEC_TEST_TRUE(A == B);
+				SPEC_TEST_TRUE(B == A);
+			});
+
+			It("should NOT ignore differences in build number", [this]()
+			{
+				FSemanticVersion A("1.2.3-alpha+build2");
+				FSemanticVersion B("1.2.3-alpha+build3");
+				SPEC_TEST_FALSE(A == B);
+				SPEC_TEST_FALSE(B == A);
+			});
+		});
+
+		Describe("precedence comparison operators", [this]()
+		{
+			const TArray<FSemanticVersion> InSemVers{
+				{"2.0.0"},
+				{"1.3.0-alpha"},
+				{"1.3.0"},
+				{"1.2.0-beta"},
+				{"1.2.0-alpha"},
+			};
+
+			const TArray<FSemanticVersion> ExpectedSorting{
+				{"1.2.0-alpha"},
+				{"1.2.0-beta"},
+				{"1.3.0-alpha"},
+				{"1.3.0"},
+				{"2.0.0"}
+			};
+
+			It("operator<.should be usable to sort semvers by precedence", [this, InSemVers, ExpectedSorting]()
+			{
+				TArray<FSemanticVersion> SemVerWorkingCopy = InSemVers;
+				SemVerWorkingCopy.Sort([](auto& A, auto& B) -> bool { return A < B; });
+				TestArraysEqual(*this, "semvers sorted by precedence", SemVerWorkingCopy, ExpectedSorting, true);
+			});
+
+			It("operator>.should be usable to sort semvers by precedence (reverse order)", [this, InSemVers, ExpectedSorting]()
+			{
+				TArray<FSemanticVersion> SemVerWorkingCopy = InSemVers;
+				SemVerWorkingCopy.Sort([](auto& A, auto& B) -> bool { return A > B; });
+				TArray<FSemanticVersion> ReverseExpectedSorting = ExpectedSorting;
+				Algo::Reverse(ReverseExpectedSorting);
+				TestArraysEqual(*this, "semvers sorted by precedence (>)", SemVerWorkingCopy, ReverseExpectedSorting, true);
+			});
+
+			for (int32 i = 0; i < ExpectedSorting.Num(); i++)
+			{
+				for (int32 j = 0; j < ExpectedSorting.Num(); j++)
+				{
+					auto A = ExpectedSorting[i];
+					auto B = ExpectedSorting[j];
+					if (i < j)
+					{
+						It("operator<." + EscapeTestName(FString::Printf(TEXT("%s should be smaller than %s"), *A.ToString(), *B.ToString())), [this, A, B]()
+						{
+							TestTrue(FString::Printf(TEXT("%s < %s"), *A.ToString(), *B.ToString()), A < B);
+						});
+					}
+					else
+					{
+						It("operator<." + EscapeTestName(FString::Printf(TEXT("%s should NOT be smaller than %s"), *A.ToString(), *B.ToString())), [this, A, B]()
+                        {
+							TestFalse(FString::Printf(TEXT("%s < %s"), *A.ToString(), *B.ToString()), A < B);
+                        });
+					}
+
+					if (i > j)
+					{
+						It("operator>." + EscapeTestName(FString::Printf(TEXT("%s should be greater than %s"), *A.ToString(), *B.ToString())), [this, A, B]()
+                        {
+							TestTrue(FString::Printf(TEXT("%s > %s"), *A.ToString(), *B.ToString()), A > B);
+                        });
+					}
+					else
+					{
+						It("operator>." + EscapeTestName(FString::Printf(TEXT("%s should NOT be greater than %s"), *A.ToString(), *B.ToString())), [this, A, B]()
+                        {
+							TestFalse(FString::Printf(TEXT("%s > %s"), *A.ToString(), *B.ToString()), A > B);
+                        });
+					}
+				}
+			}
 		});
 	});
 }

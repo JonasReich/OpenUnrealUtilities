@@ -35,8 +35,20 @@ void TestArraysEqual(
 	FAutomationTestBase& AutomationTest,
 	const FString& What,
 	const TArray<ElementType, AllocatorType>& ActualArray,
-	const TArray<ElementType, AllocatorType>& ExpectedArray)
+	const TArray<ElementType, AllocatorType>& ExpectedArray,
+	const bool bPrintEntireArrayOnError = false)
 {
+	auto ConditionalPrintEntireArrayContents = [&]()
+	{
+		if (bPrintEntireArrayOnError)
+		{
+			AutomationTest.AddError(FString::Printf(TEXT("%s: Expected array: %s"),
+				*What, *ArrayToString(ExpectedArray)));
+			AutomationTest.AddError(FString::Printf(TEXT("%s: Actual array: %s"),
+				*What, *ArrayToString(ActualArray)));
+		}
+	};
+
 	// Quick initial test: Compare element counts
 	int32 ActualNum = ActualArray.Num();
 	int32 ExpectedNum = ExpectedArray.Num();
@@ -45,6 +57,7 @@ void TestArraysEqual(
 		AutomationTest.AddError(
 			FString::Printf(TEXT("%s: The two arrays have different length (expected %i, but it was %i)."),
 				*What, ExpectedNum, ActualNum), 1);
+		ConditionalPrintEntireArrayContents();
 		return;
 	}
 
@@ -54,6 +67,7 @@ void TestArraysEqual(
 		if (ActualArray[i] != ExpectedArray[i])
 		{
 			OUUTests_Internal::AddArrayValueError(AutomationTest, What, i, ActualArray[i], ExpectedArray[i]);
+			ConditionalPrintEntireArrayContents();
 			return;
 		}
 	}

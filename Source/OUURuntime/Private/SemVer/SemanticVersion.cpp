@@ -118,16 +118,7 @@ bool FSemanticVersion::operator!=(const FSemanticVersion& Other) const
 
 bool FSemanticVersion::operator<(const FSemanticVersion& Other) const
 {
-	if (MajorVersion < Other.MajorVersion)
-		return true;
-	if (MinorVersion < Other.MinorVersion)
-		return true;
-	if (PatchVersion < Other.PatchVersion)
-		return true;
-	if (PreReleaseIdentifier < Other.PreReleaseIdentifier)
-		return true;
-	else
-		return false;
+	return ComparePrecedence_Internal(Other, true);
 }
 
 bool FSemanticVersion::operator<=(const FSemanticVersion& Other) const
@@ -137,16 +128,7 @@ bool FSemanticVersion::operator<=(const FSemanticVersion& Other) const
 
 bool FSemanticVersion::operator>(const FSemanticVersion& Other) const
 {
-	if (MajorVersion > Other.MajorVersion)
-		return true;
-	if (MinorVersion > Other.MinorVersion)
-		return true;
-	if (PatchVersion > Other.PatchVersion)
-		return true;
-	if (PreReleaseIdentifier > Other.PreReleaseIdentifier)
-		return true;
-	else
-		return false;
+	return ComparePrecedence_Internal(Other, false);
 }
 
 bool FSemanticVersion::operator>=(const FSemanticVersion& Other) const
@@ -191,4 +173,26 @@ bool FSemanticVersion::TryParseString_Internal(const FString& SourceString, ESem
 	BuildMetadata = { Result.CaptureGroups[5].MatchString, Strictness };
 
 	return true;
+}
+
+bool FSemanticVersion::ComparePrecedence_Internal(const FSemanticVersion& Other, bool bSmallerThan) const
+{
+	if (MajorVersion < Other.MajorVersion)
+		return bSmallerThan;
+	if (MajorVersion > Other.MajorVersion)
+		return !bSmallerThan;
+	if (MinorVersion < Other.MinorVersion)
+		return bSmallerThan;
+	if (MinorVersion > Other.MinorVersion)
+		return !bSmallerThan;
+	if (PatchVersion < Other.PatchVersion)
+		return bSmallerThan;
+	if (PatchVersion > Other.PatchVersion)
+		return !bSmallerThan;
+	if (PreReleaseIdentifier < Other.PreReleaseIdentifier)
+		return bSmallerThan;
+	if (PreReleaseIdentifier > Other.PreReleaseIdentifier)
+		return !bSmallerThan;
+
+	return false;
 }
