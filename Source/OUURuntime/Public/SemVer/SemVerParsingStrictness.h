@@ -14,7 +14,7 @@
 UENUM(BlueprintType)
 enum class ESemVerParsingStrictness : uint8
 {
-	// Only allow semvar strings that 100% spec compliant.
+	// Only allow SemVer strings that 100% spec compliant.
 	// Fail parsing for all suffixes, prefixes or invalid characters/digits.
 	Strict,
 	

@@ -54,7 +54,7 @@ void FSemanticVersionSpec::Define()
 			SPEC_TEST_EQUAL(SemVer.ToString(), "42.69.404-alpha+build1234.6789");
 		});
 
-		It("should initialize the SemVar from a valid SemVar string", [this]()
+		It("should initialize the SemVer from a valid SemVer string", [this]()
 		{
 			FString SourceString = "42.69.404-alpha+build1234.6789";
 			FSemanticVersion SemVer(SourceString);

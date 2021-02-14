@@ -6,7 +6,7 @@
 
 #if WITH_AUTOMATION_WORKER
 
-// Valid semvars taken from official sample at https://regex101.com/r/Ly7O1x/3/
+// Valid SemVers taken from official sample at https://regex101.com/r/Ly7O1x/3/
 const TArray<FString> ValidSemVers = {
 	"0.0.4",
 	"1.2.3",
@@ -43,7 +43,7 @@ const TArray<FString> ValidSemVers = {
 	"1.0.0-0A.is.legal"
 };
 
-// Invalid semvars taken from official sample at https://regex101.com/r/Ly7O1x/3/
+// Invalid SemVers taken from official sample at https://regex101.com/r/Ly7O1x/3/
 const TArray<FString> InvalidSemVers = {
 	"1",
 	"1.2",
