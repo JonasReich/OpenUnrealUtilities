@@ -8,7 +8,7 @@
 template <typename T>
 struct TIsStringType
 {
-	// Ensure that implicitly convertible types (e.g. FString, TCHAR*) are automatically quoted
+	// Ensure that implicitly convertible types to FString (e.g. FString, TCHAR*) are automatically treated as string
 	// and we only have to add a minimum set of type overloads
 	enum { Value = TIsConstructible<FString, T>::Value };
 };
