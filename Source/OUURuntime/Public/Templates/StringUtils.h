@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#include "Traits/IsStringType.h"
 #include "Traits/StringConversionTraits.h"
 
 /** LexToString overload for UObject pointers */
@@ -37,22 +39,30 @@ FString LexToString(T Object, int32 iOverloadArg = 0)
 template<typename T, typename = typename TEnableIf<
 	TIsPointer<T>::Value == false &&
 	TModels<CMemberToStringConvertable, T>::Value
->::Type>
+	>::Type>
 FString LexToString(const T& Object)
 {
 	return Object.ToString();
 }
 
+/**
+ * Interprets all elements of an array as LexToString-convertible objects and joins them
+ * in a comma separated list enclosed by square brackets.
+ * Any string types will be quoted. 
+ */
 template<typename T>
 FString ArrayToString(const TArray<T>& Array)
 {
-	static_assert(TModels<CLexToStringConvertable, T>::Value, "T must be string convertible with LexToString()!");
-	FString Result = "{";
-	for (int32 i = 0; i < Array.Num()-1; i++)
+	static_assert(TModels<CLexToStringConvertible, T>::Value, "T must be string convertible with LexToString()!");
+	return FString::Printf(TEXT("[%s]"), *FString::JoinBy(Array, TEXT(", "), [](auto& Element)
 	{
-		const T& Element = Array[i];
-		Result.Append(LexToString(Element)).Append(", ");
-	}
-	Result.Append(LexToString(Array.Last())).Append("}");
-	return Result;
+		if (TIsStringType<T>::Value)
+		{
+			return FString::Printf(TEXT("\"%s\""), *LexToString(Element));
+		}
+		else
+		{			
+			return LexToString(Element);
+		}
+	}));
 }

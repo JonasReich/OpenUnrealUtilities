@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 
 /** Concept for a class that supports string conversion via LexToString() */
-struct CLexToStringConvertable
+struct CLexToStringConvertible
 {
 	template<typename ElementType>
 	auto Requires(ElementType It) -> decltype(LexToString(DeclVal<ElementType>()));

@@ -31,12 +31,13 @@ enum class EStringUtilsTestEnum2
 	Gamma
 };
 
-static_assert(TModels<CLexToStringConvertable, EStringUtilsTestEnum2>::Value == false,
+static_assert(TModels<CLexToStringConvertible, EStringUtilsTestEnum2>::Value == false,
 	"Enum classes must not be LexToString()-convertable without a special LexToString() overload!");
 
 struct FStringUtilsTestStruct
 {
 	FString S;
+
 	FString ToString() const
 	{
 		return S;
@@ -45,6 +46,7 @@ struct FStringUtilsTestStruct
 
 BEGIN_DEFINE_SPEC(FStringUtilsSpec, "OpenUnrealUtilities.Templates.StringUtils", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FStringUtilsSpec)
+
 void FStringUtilsSpec::Define()
 {
 	Describe("LexToString", [this]()
@@ -124,6 +126,63 @@ void FStringUtilsSpec::Define()
 				FString S = LexToString(Struct);
 				TestEqual("Stringified Struct", S, Struct.S);
 			});
+		});
+	});
+
+	Describe("ArrayToString", [this]()
+	{
+		It("should return an empty set of brackets for an empty array", [this]()
+		{
+			const TArray<int32> SourceArray;
+			const FString Result = ArrayToString(SourceArray);
+			SPEC_TEST_EQUAL(Result, "[]");
+		});
+
+		It("should return a comma separated list of elements (, )", [this]()
+		{
+			const TArray<int32> SourceArray = {1, 2, 3, 4};
+			const FString Result = ArrayToString(SourceArray);
+			SPEC_TEST_EQUAL(Result, "[1, 2, 3, 4]");
+		});
+
+		It("should quote strings", [this]()
+		{
+			const TArray<FString> SourceArray = {"apple", "banana", "citrus", "dragon fruit"};
+			const FString Result = ArrayToString(SourceArray);
+			SPEC_TEST_EQUAL(Result, "[\"apple\", \"banana\", \"citrus\", \"dragon fruit\"]");
+		});
+
+		It("should quote c-strings", [this]()
+		{
+			const TArray<FString> SourceStringArray = {"apple", "banana", "citrus", "dragon fruit"};
+			const TArray<const TCHAR*> SourceCharPtrArray = {*SourceStringArray[0], *SourceStringArray[1], *SourceStringArray[2], *SourceStringArray[3]};
+			const FString Result = ArrayToString(SourceCharPtrArray);
+			SPEC_TEST_EQUAL(Result, "[\"apple\", \"banana\", \"citrus\", \"dragon fruit\"]");
+		});
+
+		It("should quote names", [this]()
+		{
+			const TArray<FName> SourceArray = {"apple", "banana", "citrus", "dragon fruit"};
+			const FString Result = ArrayToString(SourceArray);
+			SPEC_TEST_EQUAL(Result, "[\"apple\", \"banana\", \"citrus\", \"dragon fruit\"]");
+		});
+
+		It("should quote texts", [this]()
+		{
+			const TArray<FText> SourceArray = {INVTEXT("apple"), INVTEXT("banana"), INVTEXT("citrus"), INVTEXT("dragon fruit")};
+			const FString Result = ArrayToString(SourceArray);
+			SPEC_TEST_EQUAL(Result, "[\"apple\", \"banana\", \"citrus\", \"dragon fruit\"]");
+		});
+
+		It("should work with custom types like enums", [this]()
+		{
+			const TArray<EStringUtilsTestEnum> SourceArray = {
+				EStringUtilsTestEnum::Alpha,
+				EStringUtilsTestEnum::Beta,
+				EStringUtilsTestEnum::Gamma
+			};
+			const FString Result = ArrayToString(SourceArray);
+			SPEC_TEST_EQUAL(Result, "[Alpha, Beta, Gamma]");
 		});
 	});
 }
