@@ -1,16 +1,17 @@
 
 # Open Unreal Utilities
+
 The Open Unreal Utilities plugin is a general purpose utility plugin for Unreal Engine 4.
 
 ## 1.0 TODOs
-The following tasks must be adressed before we can release a 1.0 version:
 
-- [ ] Add style guides for Blueprint code
+The following tasks must be addressed before we can release a 1.0 version:
+
 - [ ] Add functional testing utilities
 - [ ] Check if we need some gameplay debugger utils
-- [ ] Add guide for git subtree usage with plugin so it can be embedded while continuing development?
 
 ## Contents
+
 So far the plugin mainly contains runtime utilities and some automated testing helpers. These utilities include:
 
 - **Camera:** Blueprint utility functions for scene projections and render target handling
@@ -29,6 +30,7 @@ For a more detailed overview of all utilities you should check out the plugin so
 as most of the documentation is provided in the form of source code comments and automation tests.
 
 ## Versions
+
 - Plugin version: 0.1.0
 - Supported UE4 versions: 4.25
 
@@ -43,18 +45,21 @@ Planned workflow after 1.0:
 - UE4 Marketplace release is *not* planned at the moment, but possible
 
 ## Automated Testing
+
 A big majority of the utilities has unit tests that can be executed via the Session Frontend from within Unreal.
 These tests are written with the help of testing utilities contained in the OpenUnrealUtilitiesTests module.
 Said testing utilities are prepared for usage in other plugins or game code. The actual tests should serve as examples how
 both the testing utilities as well as the targeted components are meant to be used.
 
 ### Getting Started (with Automated Testing)
+
 If you want to use the testing utilities, it should be sufficient to
 
 - include OUUTests.h and
 - add the OpenUnrealUtilitiesTests module to the private dependencies of the module implementing the tests
 
 ### Overview
+
 The automation testing utilities contain the following components:
 
 - **FAutomationTestWorld** is a utility object that allows creation of a simple world and game framework objects for tests
@@ -87,17 +92,18 @@ the description or break the test case down into separate smaller test cases tha
 
 ## Coding Conventions
 
-Generally the plugin attempts to follow the [UE4 Coding Standard](https://docs.unrealengine.com/en-US/ProductionPipelines/DevelopmentSetup/CodingStandard/index.html) (especially concerning naming, capitalization, etc.) to replicate the engine's code style for easier integration into third party projects.
-Assets follow the [Gamemakin UE4 Style Guide](https://github.com/Allar/ue4-style-guide).
+The plugin adheres to the [Open Unreal Conventions](https://jonasreich.github.io/OpenUnrealConventions/) which are extended coding conventions based on Epic Games' coding guidelines. 
 
 Some plugin specific conventions:
 - Types or functions that are not namespaced which are likely to cause naming conflicts with future engine types or third/project code should be prefixed with OUU
 - The full name of the plugin 'OpenUnrealUtilities' should be avoided to keep type names short and consistent
-- All module names in the plugin must start with OUU_ prefix
+- All module names in the plugin must start with OUU prefix
 
 ## Licensing
+
 Both Open Unreal Utilities plugin and [sample project](https://github.com/JonasReich/OpenUnrealUtilitiesSampleProject) are licensed under the MIT license.
 
 ## Contributing
+
 You are invited to create pull-requests to the github source for any additions or modifications you make to the plugin:
 https://github.com/JonasReich/OpenUnrealUtilities
