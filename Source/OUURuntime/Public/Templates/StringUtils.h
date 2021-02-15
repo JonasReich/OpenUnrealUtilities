@@ -14,32 +14,35 @@ FORCEINLINE FString LexToString(const UObject* O)
 }
 
 /** LexToString overload for pointers to objects that are themselves string convertable with LexToString() */
-template<typename T, typename = typename TEnableIf<
-	TIsPointer<T>::Value == true &&
-	TPointerIsConvertibleFromTo<TRemovePointer<T>::Type, const UObject>::Value == false &&
-	TModels<CMemberToStringConvertable, TRemovePointer<T>::Type>::Value == false
-	>::Type>
+template <typename T,
+          typename = typename TEnableIf<
+	          TIsPointer<T>::Value == true &&
+	          TPointerIsConvertibleFromTo<typename TRemovePointer<T>::Type, const UObject>::Value == false &&
+	          TModels<CMemberToStringConvertable, typename TRemovePointer<T>::Type>::Value == false
+          >::Type>
 FString LexToString(T Object)
 {
 	return (Object != nullptr) ? LexToString(*Object) : TEXT("nullptr");
 }
 
 /** LexToString overload for pointers to objects that have a ToString member */
-template<typename T, typename = typename TEnableIf<
-	TIsPointer<T>::Value == true &&
-	TPointerIsConvertibleFromTo<TRemovePointer<T>::Type, const UObject>::Value == false &&
-	TModels<CMemberToStringConvertable, TRemovePointer<T>::Type>::Value == true
-	>::Type>
+template <typename T,
+          typename = typename TEnableIf<
+	          TIsPointer<T>::Value == true &&
+	          TPointerIsConvertibleFromTo<typename TRemovePointer<T>::Type, const UObject>::Value == false &&
+	          TModels<CMemberToStringConvertable, typename TRemovePointer<T>::Type>::Value == true
+          >::Type>
 FString LexToString(T Object, int32 iOverloadArg = 0)
 {
 	return (Object != nullptr) ? Object->ToString() : TEXT("nullptr");
 }
 
 /** LexToString overload for references to objects that have a ToString member */
-template<typename T, typename = typename TEnableIf<
-	TIsPointer<T>::Value == false &&
-	TModels<CMemberToStringConvertable, T>::Value
-	>::Type>
+template <typename T,
+          typename = typename TEnableIf<
+	          TIsPointer<T>::Value == false &&
+	          TModels<CMemberToStringConvertable, T>::Value
+          >::Type>
 FString LexToString(const T& Object)
 {
 	return Object.ToString();
@@ -50,7 +53,7 @@ FString LexToString(const T& Object)
  * in a comma separated list enclosed by square brackets.
  * Any string types will be quoted. 
  */
-template<typename T>
+template <typename T>
 FString ArrayToString(const TArray<T>& Array)
 {
 	static_assert(TModels<CLexToStringConvertible, T>::Value, "T must be string convertible with LexToString()!");
@@ -61,7 +64,7 @@ FString ArrayToString(const TArray<T>& Array)
 			return FString::Printf(TEXT("\"%s\""), *LexToString(Element));
 		}
 		else
-		{			
+		{
 			return LexToString(Element);
 		}
 	}));
