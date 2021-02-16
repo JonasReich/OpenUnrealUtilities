@@ -22,20 +22,26 @@ So far the plugin mainly contains runtime utilities and some automated testing h
 For a more detailed overview of all utilities you should check out the plugin source code,
 as most of the documentation is provided in the form of source code comments and automation tests.
 
-## Versions
+## Workflows
 
-- Plugin version: 0.1.0
+### Versions
+
+- Plugin version: 0.2.0
 - Supported UE4 versions: 4.25
 
 The plugin is still in a pre-1.0 development phase, so the API of many utilities is still up to change a lot.
 
-Planned workflow after 1.0:
+### Branch Strategy
 
-- Continue development on master
+- Active development on develop
+- (Semi) stable releases on master
 - Tag releases with plugin version number
-- Add branches for supported engine versions (e.g. UE4.25), which are updated along with releases
+
+### Future Workflow Changes
+
+- Add branches or tags for supported engine versions (e.g. UE4.25), which are updated along with releases
 - No updates of deprecated code. As soon as the plugin breaks for an old engine version we drop support for it
-- UE4 Marketplace release is *not* planned at the moment, but possible
+- UE4 Marketplace release is not planned at the moment, but possible
 
 ## Automated Testing
 
