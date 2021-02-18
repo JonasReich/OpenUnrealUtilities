@@ -6,6 +6,10 @@
 #include "Algo/MinElement.h"
 #include "Traits/IsInteger.h"
 
+/**
+ * Ring buffer that aggregates numeric data.
+ * Useful e.g. for tracking data of the last X frames.
+ */
 template <typename ElementType, typename AllocatorType>
 class TRingAggregator_Base
 {
@@ -25,14 +29,28 @@ public:
 		return Storage.Num();
 	}
 
+	bool HasData() const
+	{
+		return Num() > 0;
+	}
+
 	ElementType Get(int32 Index) const
 	{
-		return Storage[GetWrappedRingIndex(Index)];
+		return HasData() ? Storage[GetWrappedRingIndex(Index)] : 0;
 	}
 
 	ElementType Last() const
 	{
 		return Get(-1);
+	}
+
+	ElementType Oldest() const
+	{
+		if (Storage.GetSlack())
+		{
+			return Get(0);
+		}
+		return Get(WriteIndex);
 	}
 	
 	ElementType Sum() const
@@ -47,25 +65,23 @@ public:
 	
 	ElementType Average() const
 	{
-		return Sum() / Num();
+		return HasData() ? (Sum() / Num()) : 0;
 	}
 
 	ElementType Max() const
 	{
-		return Algo::MaxElement(Storage);
+		return HasData() ? (*Algo::MaxElement(Storage)) : 0;
 	}
 
 	ElementType Min() const
 	{
-		return Algo::MinElement(Storage);
+		return HasData() ? (*Algo::MinElement(Storage)) : 0;
 	}
 
-	// Expose Storage for ranged-based for loops
-	auto begin() const { return Storage.begin(); }
-	auto begin() { return Storage.begin(); }
-	auto end() const { return Storage.end(); }
-	auto end() { return Storage.end(); }
-	// --
+	const TArray<ElementType, AllocatorType>& GetStorage() const
+	{
+		return Storage;
+	}
 
 protected:
 	TArray<ElementType, AllocatorType> Storage;
@@ -91,7 +107,7 @@ protected:
 		A += B;
 		ElementType SignAfter = FMath::Sign(A);
 
-		ensure(SignBefore != SignAfter && FMath::Abs(SignBefore) + FMath::Abs(SignAfter)
+		ensureMsgf(SignBefore != SignAfter && FMath::Abs(SignBefore) + FMath::Abs(SignAfter)
 			&& SignBefore == FMath::Sign(B), TEXT("integer overflow detected"));
 	}
 

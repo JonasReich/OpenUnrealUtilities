@@ -53,13 +53,13 @@ FString LexToString(const T& Object)
  * in a comma separated list enclosed by square brackets.
  * Any string types will be quoted. 
  */
-template <typename T>
-FString ArrayToString(const TArray<T>& Array)
+template <typename ElementType, typename AllocatorType>
+FString ArrayToString(const TArray<ElementType, AllocatorType>& Array)
 {
-	static_assert(TModels<CLexToStringConvertible, T>::Value, "T must be string convertible with LexToString()!");
+	static_assert(TModels<CLexToStringConvertible, ElementType>::Value, "T must be string convertible with LexToString()!");
 	return FString::Printf(TEXT("[%s]"), *FString::JoinBy(Array, TEXT(", "), [](auto& Element)
 	{
-		if (TIsStringType<T>::Value)
+		if (TIsStringType<ElementType>::Value)
 		{
 			return FString::Printf(TEXT("\"%s\""), *LexToString(Element));
 		}
