@@ -10,13 +10,13 @@
  * Ring buffer that aggregates numeric data.
  * Useful e.g. for tracking data of the last X frames.
  */
-template <typename ElementType, typename AllocatorType>
+template <class ChildClass, typename ElementType, typename AllocatorType>
 class TRingAggregator_Base
 {
 public:
 	void Add(ElementType Element)
 	{
-		if (Storage.GetSlack())
+		if (IsPreWrap())
 		{
 			Storage.AddUninitialized(1);
 		}
@@ -36,21 +36,29 @@ public:
 
 	ElementType Get(int32 Index) const
 	{
-		return HasData() ? Storage[GetWrappedRingIndex(Index)] : 0;
+		if (HasData())
+		{
+			const int32 Idx = GetWrappedRingIndex(Index);
+			check(Storage.IsValidIndex(Idx));
+			return Storage[Idx];
+		}
+		return 0;
 	}
 
 	ElementType Last() const
 	{
-		return Get(-1);
+		const int32 LastIdx = WriteIndex-1;
+		const int32 LastIdxWrapped = LastIdx >= 0 ? LastIdx : LastIdx + Num();
+		return Storage[LastIdxWrapped];
 	}
 
 	ElementType Oldest() const
 	{
-		if (Storage.GetSlack())
+		if (IsPreWrap())
 		{
-			return Get(0);
+			return Storage[0];
 		}
-		return Get(WriteIndex);
+		return Storage[WriteIndex];
 	}
 	
 	ElementType Sum() const
@@ -58,7 +66,7 @@ public:
 		ElementType ResultSum = 0;
 		for (ElementType Element : Storage)
 		{
-			AddNumbersEnsured(ResultSum, Element);
+			AddNumbersEnsured<ElementType>(ResultSum, Element);
 		}
 		return ResultSum;
 	}
@@ -89,9 +97,14 @@ protected:
 
 	int32 ArrayMax() const
 	{
-		return Storage.GetSlack() + Num();
+		return static_cast<const ChildClass*>(this)->ArrayMax_Implementation();
 	}
 
+	bool IsPreWrap() const
+	{
+		return Num() < ArrayMax();
+	}
+	
 	int32 GetWrappedRingIndex(int32 Index) const
 	{
 		const int32 RingIndex = (WriteIndex - 1 - Index);
@@ -100,18 +113,16 @@ protected:
 	}
 
 	/** Overload for builds with ensure macros that checks for integer overflow */
-	template<typename T, typename = typename TEnableIf<TIsInteger<T>::Value && DO_CHECK>::Type>
+	template<typename T, typename = typename TEnableIf<TIsInteger<T>::Value && static_cast<bool>(DO_CHECK)>::Type>
 	static void AddNumbersEnsured(T& A, T B)
 	{
 		ElementType SignBefore = FMath::Sign(A);
 		A += B;
 		ElementType SignAfter = FMath::Sign(A);
-
-		ensureMsgf(SignBefore != SignAfter && FMath::Abs(SignBefore) + FMath::Abs(SignAfter)
-			&& SignBefore == FMath::Sign(B), TEXT("integer overflow detected"));
+		ensureMsgf(SignBefore == SignAfter || ((SignBefore + SignAfter) != 0 || SignBefore != FMath::Sign(B)), TEXT("integer overflow detected"));
 	}
 
-	template<typename T>
+	template<typename T, typename = typename TEnableIf<TIsInteger<T>::Value == false || static_cast<bool>(DO_CHECK) == false>::Type>
     static void AddNumbersEnsured(T& A, T B, int32 = 0)
 	{
 		A += B;
@@ -119,18 +130,34 @@ protected:
 };
 
 /** "Normal" ring aggregator that can be initialized with different size depending on dynamic conditions */
-template<typename ElementType, int32 ElementNum>
-class TRingAggregator : public TRingAggregator_Base<ElementType, FDefaultAllocator>
+template<typename ElementType>
+class TRingAggregator : public TRingAggregator_Base<TRingAggregator<ElementType>, ElementType, FDefaultAllocator>
 {
-	using Super = TRingAggregator_Base<ElementType, FDefaultAllocator>;
+public:
+	using Super = TRingAggregator_Base<TRingAggregator<ElementType>, ElementType, FDefaultAllocator>;
+	friend class Super;
 	TRingAggregator(int32 InitialSize)
 	{
-		static_cast<Super*>(this)->Storage.SetNum(InitialSize);
+		MaxNum = InitialSize;
+	}
+
+private:
+	int32 MaxNum = INDEX_NONE;
+
+	int32 ArrayMax_Implementation() const
+	{
+		return MaxNum;
 	}
 };
 
 /** Ring aggregator that has a compile time fixed size of elements */
-template<typename ElementType, int32 ElementNum>
-class TFixedSizeRingAggregator : public TRingAggregator_Base<ElementType, TFixedAllocator<ElementNum>>
+template<typename ElementType, uint32 ElementNum>
+class TFixedSizeRingAggregator : public TRingAggregator_Base<TFixedSizeRingAggregator<ElementType, ElementNum>, ElementType, TFixedAllocator<ElementNum>>
 {
+private:
+	friend class TRingAggregator_Base<TFixedSizeRingAggregator<ElementType, ElementNum> ,ElementType, TFixedAllocator<ElementNum>>;
+	static int32 ArrayMax_Implementation()
+	{
+		return ElementNum;
+	}
 };
