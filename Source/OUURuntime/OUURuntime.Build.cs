@@ -24,7 +24,8 @@ public class OUURuntime : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
-				"EngineSettings"
+				"EngineSettings",
+				"HeadMountedDisplay"
 			}
 			);
 	}

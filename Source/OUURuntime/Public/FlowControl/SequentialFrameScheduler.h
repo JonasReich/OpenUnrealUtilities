@@ -6,6 +6,12 @@
 
 #include "Templates/RingAggregator.h"
 
+#if UE_BUILD_DEBUG || UE_BUILD_DEVELOPMENT || UE_BUILD_TEST
+#define DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER 1
+#else
+#define DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER 0
+#endif
+
 /** A task that is registered in the SequentialFrameScheduler */
 class OUURUNTIME_API FSequentialFrameTask
 {
@@ -171,12 +177,18 @@ private:
 	static const int32 NumFramesBufferSize = 60;
 	TFixedSizeRingAggregator<float, NumFramesBufferSize> DeltaTimeRingBuffer;
 
-	// Debugging metrics
+#if DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER
+	// Various debugging metrics.
+	// None of these are used by the plugin, but they will be really useful to display in a gameplay debugger
+	// to show if the configuration of the debugger is balanced appropriately.
+	// No gameplay debugger is provided at this time because the integration into various other systems will impact
+	// how exactly the scheduler will be integrated / where it will be located.
 	TFixedSizeRingAggregator<float, NumFramesBufferSize> MaxDelaySecondsRingBuffer;
 	TFixedSizeRingAggregator<float, NumFramesBufferSize> AverageDelaySecondsRingBuffer;
 	TFixedSizeRingAggregator<float, NumFramesBufferSize> MaxDelayFractionRingBuffer;
 	TFixedSizeRingAggregator<float, NumFramesBufferSize> AverageDelayFractionRingBuffer;
 	TFixedSizeRingAggregator<int32, NumFramesBufferSize> NumTasksExecutedRingBuffer;
+#endif
 
 	// Counter to track which task IDs we already handed out.
 	// Simple incrementation with overflow check should suffice as the system is

@@ -40,15 +40,18 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 	if (TaskQueue.Num() <= 0)
 		return;
 
+#if DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER
 	float MaxOvertimeSeconds = 0.f;
 	float MaxOvertimeFraction = 0.f;
 	float SumOvertimeSeconds = 0.f;
 	float SumOvertimeFraction = 0.f;
+#endif
 	for (auto& KeyValuePair : TaskHandlesToTaskInfos)
 	{
 		auto Task = KeyValuePair.Value.ToSharedRef();
 		Task->SetTimeNow(Now);
 
+#if DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER
 		const float TaskOvertimeSeconds = Task->GetOvertimeSeconds();
 		const float TaskOvertimeSecondsClamped = bClampStats ? FMath::Clamp(TaskOvertimeSeconds, 0.f, MAX_FLT) : TaskOvertimeSeconds;
 		SumOvertimeSeconds += TaskOvertimeSecondsClamped;
@@ -58,13 +61,16 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 		const float TaskOvertimeFractionClamped = bClampStats ? FMath::Clamp(TaskOvertimeFraction, 0.f, MAX_FLT) : TaskOvertimeFraction;
 		SumOvertimeFraction += TaskOvertimeFractionClamped;
 		MaxOvertimeFraction = FMath::Max(MaxOvertimeFraction, TaskOvertimeFractionClamped);
+#endif
 	}
 
+#if DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER
 	const float NumTasksFloat = static_cast<float>(TaskHandlesToTaskInfos.Num());
 	MaxDelaySecondsRingBuffer.Add(MaxOvertimeSeconds);
 	AverageDelaySecondsRingBuffer.Add(SumOvertimeSeconds / NumTasksFloat);
 	MaxDelayFractionRingBuffer.Add(MaxOvertimeFraction);
 	AverageDelayFractionRingBuffer.Add(SumOvertimeFraction / NumTasksFloat);
+#endif
 
 	TaskQueue.Sort([&](const FTaskHandle& HandleA, const FTaskHandle& HandleB) -> bool
 	{
@@ -105,7 +111,9 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 
 		ActualNumTasksExecutedThisFrame++;
 	}
+#if DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER
 	NumTasksExecutedRingBuffer.Add(ActualNumTasksExecutedThisFrame);
+#endif
 }
 
 void FSequentialFrameScheduler::RemoveTask(FTaskHandle Handle)
