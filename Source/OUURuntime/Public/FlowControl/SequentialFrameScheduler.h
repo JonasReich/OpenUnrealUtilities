@@ -31,21 +31,16 @@ public:
 	 * We can't just alias the types because then they can't be easily used in dependent types.
 	 * The next best thing is inheriting from them, so here we go :)
 	 */
-	struct FTaskUnifiedDelegate : public FTimerUnifiedDelegate
-	{
-		FTaskUnifiedDelegate() {};
-		FTaskUnifiedDelegate(FTimerDelegate const& D) : FTimerUnifiedDelegate(D) {};
-		FTaskUnifiedDelegate(FTimerDynamicDelegate const& D) : FTimerUnifiedDelegate(D) {};
-		FTaskUnifiedDelegate(TFunction<void(void)>&& Callback) : FTimerUnifiedDelegate(MoveTemp(Callback)) {}
-	};
-	struct FTaskDelegate : public FTimerDelegate {};
-	struct FTaskDynamicDelegate : public FTimerDynamicDelegate {};
+	using FTaskUnifiedDelegate = FTimerUnifiedDelegate;
+	using FTaskDelegate = FTimerDelegate;
+	using FTaskDynamicDelegate = FTimerDynamicDelegate;
 	//-------------------------
-
 
 	FTaskHandle Handle;
 
 	float Period = 0.03f;
+	bool bTickAsOftenAsPossible = true;
+
 	float LastInvocationTime = 0.f;
 
 	FTaskUnifiedDelegate Delegate;
@@ -80,46 +75,31 @@ FORCEINLINE uint32 OUURUNTIME_API GetTypeHash(const FSequentialFrameTask::FTaskH
 	return Handle.Index;
 }
 
+/**
+ * The sequential frame scheduler allows organizing the invocation of time consuming tasks over multiple frames.
+ *
+ * Imagine a game simulation that requires system updates of various different types:
+ * Each single one of these systems is required to be called regularly but not necessarily every single frame
+ * (e.g. AI update every 0.2 seconds, environment queries every 0.5 seconds, etc.)
+ * You can theoretically achieve this using individual timers, but especially if the individual tasks have different
+ * periods, you are likely to end in an unlucky situation where two or more of those system ticks are called in the
+ * same frame resulting in an ugly hitch/spike.
+ *
+ * This scheduler will help in these situations ensuring that only a predefined number of tasks will ever be executed in
+ * the same frame (default: just a single task).
+ */
 class OUURUNTIME_API FSequentialFrameScheduler
 {
+public:
 	using FTaskHandle = FSequentialFrameTask::FTaskHandle;
 	using FTaskUnifiedDelegate = FSequentialFrameTask::FTaskUnifiedDelegate;
 	using FTaskDelegate = FSequentialFrameTask::FTaskDelegate;
 	using FTaskDynamicDelegate = FSequentialFrameTask::FTaskDynamicDelegate;
-	/**
-	 * Algorithm as pseudo code:
-	 *
-	 * prepare
-	 * - enqueue all tasks in task_queue
-	 *		- t.update_time = time_now
-	 * - create dt_buffer[DELTA_TIME_BUFFER_SIZE] as ring buffer
-	 * 
-	 * for every frame:counter f:
-	 * 		- push time_dt into dt_buffer
-	 * 		- dt_predicted = weighted_avg(dt_buffer[]) 
-	 * 		- for task t in task_queue:
-	 *				- t.overtime_abs = t.update_time - time_now
-	 *				- t.overtime_perc = t.overtime_abs / t.period
-	 *				- t.overtime_perc_per_frame = dt_predicted / t.period
-	 * 		- sort task_queue by:
-	 *				1. t.overtime_perc
-	 *				2. t.overtime_perc + t.overtime_perc_per_frame * 1
-	 *				3. t.overtime_perc + t.overtime_perc_per_frame * n for n < MAX_FRAMES_PREDICT
-	 * 		- for task t in (NUM_TASKS_PER_FRAME from top of task_queue):
-	 *				- t.execute()
-	 *				- t.update_time = time_now
-	 *
-	 * Debug data:
-	 * - avg delays % and s
-	 * - max delays % and s
-	 * - avg number of tasks executed per frame (x frames)
-	 * - min number of tasks executed in last x frames
-	 * - max number of tasks executed in last x frames
-	 * 
-	 */
-	/////////////////////////////////////////////////////////////////////////////
 
-public:
+	const bool bClampStats = true;
+	int32 MaxNumTasksToExecutePerFrame = 2;
+	const int32 NumFramesToLookAheadForSorting = 3;
+
 	/**
 	 * Tick the frame scheduler with delta time.
 	 * This function must be called a single time from one central place every frame.
@@ -133,33 +113,33 @@ public:
 	 * All overloads return a task handle that can be used to remove the task again.
 	 */
 	template <class UserClass>
-	FORCEINLINE FTaskHandle AddTask(UserClass* InObj, typename FTaskDelegate::TUObjectMethodDelegate<UserClass>::FMethodPtr InTaskMethod, float InPeriod)
+	FORCEINLINE FTaskHandle AddTask(UserClass* InObj, typename FTaskDelegate::TUObjectMethodDelegate<UserClass>::FMethodPtr InTaskMethod, float InPeriod, bool bTickAsOftenAsPossible = true)
 	{
-		return InternalAddTask(FTaskUnifiedDelegate(FTaskDelegate::CreateUObject(InObj, InTaskMethod)), InPeriod);
+		return InternalAddTask(FTaskUnifiedDelegate(FTaskDelegate::CreateUObject(InObj, InTaskMethod)), InPeriod, bTickAsOftenAsPossible);
 	}
 
 	template <class UserClass>
-	FORCEINLINE FTaskHandle AddTask(UserClass* InObj, typename FTaskDelegate::TUObjectMethodDelegate_Const<UserClass>::FMethodPtr InTaskMethod, float InPeriod)
+	FORCEINLINE FTaskHandle AddTask(UserClass* InObj, typename FTaskDelegate::TUObjectMethodDelegate_Const<UserClass>::FMethodPtr InTaskMethod, float InPeriod, bool bTickAsOftenAsPossible = true)
 	{
-		return InternalAddTask(FTaskUnifiedDelegate(FTaskDelegate::CreateUObject(InObj, InTaskMethod)), InPeriod);
+		return InternalAddTask(FTaskUnifiedDelegate(FTaskDelegate::CreateUObject(InObj, InTaskMethod)), InPeriod, bTickAsOftenAsPossible);
 	}
 
 	/** Version that takes any generic delegate. */
-	FORCEINLINE FTaskHandle AddTask(FTaskDelegate const& InDelegate, float InPeriod)
+	FORCEINLINE FTaskHandle AddTask(FTaskDelegate const& InDelegate, float InPeriod, bool bTickAsOftenAsPossible = true)
 	{
-		return InternalAddTask(FTaskUnifiedDelegate(InDelegate), InPeriod);
+		return InternalAddTask(FTaskUnifiedDelegate(InDelegate), InPeriod, bTickAsOftenAsPossible);
 	}
 
 	/** Version that takes a dynamic delegate (e.g. for UFunctions). */
-	FORCEINLINE FTaskHandle AddTask(FTaskDynamicDelegate const& InDynDelegate, float InPeriod)
+	FORCEINLINE FTaskHandle AddTask(FTaskDynamicDelegate const& InDynDelegate, float InPeriod, bool bTickAsOftenAsPossible = true)
 	{
-		return InternalAddTask( FTaskUnifiedDelegate(InDynDelegate), InPeriod);
+		return InternalAddTask( FTaskUnifiedDelegate(InDynDelegate), InPeriod, bTickAsOftenAsPossible);
 	}
 
 	/** Version that takes a TFunction */
-	FORCEINLINE FTaskHandle AddTask(TFunction<void(void)>&& Callback, float InPeriod)
+	FORCEINLINE FTaskHandle AddTask(TFunction<void(void)>&& Callback, float InPeriod, bool bTickAsOftenAsPossible = true)
 	{
-		return InternalAddTask(FTaskUnifiedDelegate(MoveTemp(Callback)), InPeriod);
+		return InternalAddTask(FTaskUnifiedDelegate(MoveTemp(Callback)), InPeriod, bTickAsOftenAsPossible);
 	}
 
 	void RemoveTask(FTaskHandle Handle);
@@ -208,12 +188,10 @@ private:
 	// DeltaTime values passed into Tick().
 	float Now = 0.f;
 
-	FTaskHandle InternalAddTask(FTaskUnifiedDelegate&& Delegate, float InPeriod);
+	FTaskHandle InternalAddTask(FTaskUnifiedDelegate&& Delegate, float InPeriod, bool bTickAsOftenAsPossible);
 
 	void AddPendingTasksToQueue();
 	void RemovePendingTaskFromQueue();
 
 	FSequentialFrameTask& GetTask(const FTaskHandle& Handle);
-
-	void ExecuteTask(int32 QueueIndex);
 };
