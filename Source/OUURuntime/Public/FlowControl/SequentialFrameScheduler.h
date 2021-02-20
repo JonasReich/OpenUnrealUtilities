@@ -6,34 +6,86 @@
 
 #include "Templates/RingAggregator.h"
 
-struct FSequentialFrameTaskHandle
+/** A task that is registered in the SequentialFrameScheduler */
+class OUURUNTIME_API FSequentialFrameTask
 {
-	int32 Idx = 0;
-};
+public:
+	/** Handle to a task registered in the scheduler */
+	struct FTaskHandle
+	{
+		FTaskHandle() = default;
+		FTaskHandle(int32 InIndex) : Index(InIndex) {}
 
-class FSequentialFrameTask
-{
-	FSequentialFrameTaskHandle Handle;
+		int32 Index = INDEX_NONE;
+
+		bool operator==(const FTaskHandle& Other) const
+		{
+			return Index == Other.Index;
+		}
+	};
+
+	/**
+	 * Sequential frame tasks use extended unified timer delegates,
+	 * because we don't want to reinvent the wheel and make it usable with everything
+	 * that was usable with timer manager before.
+	 * We can't just alias the types because then they can't be easily used in dependent types.
+	 * The next best thing is inheriting from them, so here we go :)
+	 */
+	struct FTaskUnifiedDelegate : public FTimerUnifiedDelegate
+	{
+		FTaskUnifiedDelegate() {};
+		FTaskUnifiedDelegate(FTimerDelegate const& D) : FTimerUnifiedDelegate(D) {};
+		FTaskUnifiedDelegate(FTimerDynamicDelegate const& D) : FTimerUnifiedDelegate(D) {};
+		FTaskUnifiedDelegate(TFunction<void(void)>&& Callback) : FTimerUnifiedDelegate(MoveTemp(Callback)) {}
+	};
+	struct FTaskDelegate : public FTimerDelegate {};
+	struct FTaskDynamicDelegate : public FTimerDynamicDelegate {};
+	//-------------------------
+
+
+	FTaskHandle Handle;
 
 	float Period = 0.03f;
+	float LastInvocationTime = 0.f;
 
-	// Uses unified timer delegate, because we don't want to reinvent the wheel and make it usable with everything
-	// that was usable with timer manager before.
-	FTimerUnifiedDelegate Delegate;
+	FTaskUnifiedDelegate Delegate;
+
+	/** Get the next time this task wants to be invoked in seconds. */
+	float GetNextDesiredInvocationTimeSeconds() const;
+
+	void SetTimeNow(float Now);
 
 	float GetOvertimeSeconds() const;
-	/** Get the overtime for this task as a percentage of invocation period */
-	float GetOvertimePercent() const;
+
+	/** Get the overtime for this task as a fraction of invocation period (0.5 = 50% overtime). */
+	float GetOvertimeFraction() const;
+
+	/** Get a prediction for overtime in a future number of frames */ 
+	float GetPredictedOvertimeFraction(float PredictedDeltaTime, int32 NumFrames) const;
 
 	// Movable only (required because of FTimerUnifiedDelegate)
+	FSequentialFrameTask() = default;
 	FSequentialFrameTask(FSequentialFrameTask&&) = default;
 	FSequentialFrameTask(const FSequentialFrameTask&) = delete;
 	FSequentialFrameTask& operator=(FSequentialFrameTask&&) = default;
 	FSequentialFrameTask& operator=(FSequentialFrameTask&) = delete;
+
+private:
+	float CachedOvertimeSeconds = 0.f;
+	float CachedOvertimeFraction = 0.f;
 };
 
-class FSequentialFrameScheduler
+FORCEINLINE uint32 OUURUNTIME_API GetTypeHash(const FSequentialFrameTask::FTaskHandle& Handle)
 {
+	return Handle.Index;
+}
+
+class OUURUNTIME_API FSequentialFrameScheduler
+{
+	using FTaskHandle = FSequentialFrameTask::FTaskHandle;
+	using FTaskUnifiedDelegate = FSequentialFrameTask::FTaskUnifiedDelegate;
+	using FTaskDelegate = FSequentialFrameTask::FTaskDelegate;
+	using FTaskDynamicDelegate = FSequentialFrameTask::FTaskDynamicDelegate;
 	/**
 	 * Algorithm as pseudo code:
 	 *
@@ -68,42 +120,71 @@ class FSequentialFrameScheduler
 	/////////////////////////////////////////////////////////////////////////////
 
 public:
-	/** Tick the frame scheduler with delta time */
+	/**
+	 * Tick the frame scheduler with delta time.
+	 * This function must be called a single time from one central place every frame.
+	 */
 	void Tick(float DeltaTime);
-	
+
+	/**
+	 * Add a task to the scheduler.
+	 * Has multiple overloads similar to the Timer Manager that allow
+	 * easy binding with various different types of functions and delegates.
+	 * All overloads return a task handle that can be used to remove the task again.
+	 */
 	template <class UserClass>
-	FORCEINLINE void AddTask(FSequentialFrameTaskHandle& InOutHandle, UserClass* InObj, typename FTimerDelegate::TUObjectMethodDelegate<UserClass>::FMethodPtr InTaskMethod, float InPeriod)
+	FORCEINLINE FTaskHandle AddTask(UserClass* InObj, typename FTaskDelegate::TUObjectMethodDelegate<UserClass>::FMethodPtr InTaskMethod, float InPeriod)
 	{
-		InternalAddTask(InOutHandle, FTimerUnifiedDelegate(FTimerDelegate::CreateUObject(InObj, InTaskMethod)), InPeriod);
+		return InternalAddTask(FTaskUnifiedDelegate(FTaskDelegate::CreateUObject(InObj, InTaskMethod)), InPeriod);
 	}
 
 	template <class UserClass>
-	FORCEINLINE void AddTask(FSequentialFrameTaskHandle& InOutHandle, UserClass* InObj, typename FTimerDelegate::TUObjectMethodDelegate_Const<UserClass>::FMethodPtr InTaskMethod, float InPeriod)
+	FORCEINLINE FTaskHandle AddTask(UserClass* InObj, typename FTaskDelegate::TUObjectMethodDelegate_Const<UserClass>::FMethodPtr InTaskMethod, float InPeriod)
 	{
-		InternalAddTask(InOutHandle, FTimerUnifiedDelegate(FTimerDelegate::CreateUObject(InObj, InTaskMethod)), InPeriod);
+		return InternalAddTask(FTaskUnifiedDelegate(FTaskDelegate::CreateUObject(InObj, InTaskMethod)), InPeriod);
 	}
 
 	/** Version that takes any generic delegate. */
-	FORCEINLINE void AddTask(FSequentialFrameTaskHandle& InOutHandle, FTimerDelegate const& InDelegate, float InPeriod)
+	FORCEINLINE FTaskHandle AddTask(FTaskDelegate const& InDelegate, float InPeriod)
 	{
-		InternalAddTask(InOutHandle, FTimerUnifiedDelegate(InDelegate), InPeriod);
+		return InternalAddTask(FTaskUnifiedDelegate(InDelegate), InPeriod);
 	}
 
 	/** Version that takes a dynamic delegate (e.g. for UFunctions). */
-	FORCEINLINE void AddTask(FSequentialFrameTaskHandle& InOutHandle, FTimerDynamicDelegate const& InDynDelegate, float InPeriod)
+	FORCEINLINE FTaskHandle AddTask(FTaskDynamicDelegate const& InDynDelegate, float InPeriod)
 	{
-		InternalAddTask(InOutHandle, FTimerUnifiedDelegate(InDynDelegate), InPeriod);
+		return InternalAddTask( FTaskUnifiedDelegate(InDynDelegate), InPeriod);
 	}
 
 	/** Version that takes a TFunction */
-	FORCEINLINE void AddTask(FSequentialFrameTaskHandle& InOutHandle, TFunction<void(void)>&& Callback, float InPeriod)
+	FORCEINLINE FTaskHandle AddTask(TFunction<void(void)>&& Callback, float InPeriod)
 	{
-		InternalAddTask(InOutHandle, FTimerUnifiedDelegate(MoveTemp(Callback)), InPeriod);
+		return InternalAddTask(FTaskUnifiedDelegate(MoveTemp(Callback)), InPeriod);
 	}
 
+	void RemoveTask(FTaskHandle Handle);
+
 protected:
-	TMap<FSequentialFrameTaskHandle, FSequentialFrameTask> TaskHandlesToTaskInfos;
-	TArray<FSequentialFrameTaskHandle> TaskQueue;
+	/**
+	 * Map that point the task handles to the actual task object that store all the state of
+	 * the tasks apart from it's position in the queue (see TaskQueue below).
+	 */
+	TMap<FTaskHandle, TSharedPtr<FSequentialFrameTask>> TaskHandlesToTaskInfos;
+
+	/**
+	 * Actively managed queue of task handles.
+	 * This is the queue that is sorted and executed.
+	 * The queue stores handles instead of the task objects themselves to make sorting faster.
+	 */
+	TArray<FTaskHandle> TaskQueue;
+
+	/**
+	 * Tasks that wait to be added to the active task queue.
+	 * Used so we can add tasks at any time without disturbing task execution.
+	 * Same for TasksPendingForRemoval;
+	 */
+	TArray<FTaskHandle> TasksPendingForAdd;
+	TArray<FTaskHandle> TasksPendingForRemoval;
 
 private:
 	// Store the delta times of last 60 frames to better predict delta time for next frame
@@ -113,9 +194,26 @@ private:
 	// Debugging metrics
 	TFixedSizeRingAggregator<float, NumFramesBufferSize> MaxDelaySecondsRingBuffer;
 	TFixedSizeRingAggregator<float, NumFramesBufferSize> AverageDelaySecondsRingBuffer;
-	TFixedSizeRingAggregator<float, NumFramesBufferSize> MaxDelayPercentRingBuffer;
-	TFixedSizeRingAggregator<float, NumFramesBufferSize> AverageDelayPercentRingBuffer;
+	TFixedSizeRingAggregator<float, NumFramesBufferSize> MaxDelayFractionRingBuffer;
+	TFixedSizeRingAggregator<float, NumFramesBufferSize> AverageDelayFractionRingBuffer;
 	TFixedSizeRingAggregator<int32, NumFramesBufferSize> NumTasksExecutedRingBuffer;
 
-	void InternalAddTask(FSequentialFrameTaskHandle& InOutHandle, FTimerUnifiedDelegate&& Delegate, float InPeriod);
+	// Counter to track which task IDs we already handed out.
+	// Simple incrementation with overflow check should suffice as the system is
+	// not really designed to be used with > INT_MAX task additions/removals.
+	int32 TaskIdCounter = 0;
+
+	// Internal time tracker. No need to manually sync this with any of the game times.
+	// The scale at which this time tracker advances is directly determined by the
+	// DeltaTime values passed into Tick().
+	float Now = 0.f;
+
+	FTaskHandle InternalAddTask(FTaskUnifiedDelegate&& Delegate, float InPeriod);
+
+	void AddPendingTasksToQueue();
+	void RemovePendingTaskFromQueue();
+
+	FSequentialFrameTask& GetTask(const FTaskHandle& Handle);
+
+	void ExecuteTask(int32 QueueIndex);
 };
