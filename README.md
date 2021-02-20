@@ -26,7 +26,7 @@ as most of the documentation is provided in the form of source code comments and
 
 ### Versions
 
-- Plugin version: 0.2.0
+- Plugin version: 0.3.0
 - Supported UE4 versions: 4.26
 
 The plugin is still in a pre-1.0 development phase, so the API of many utilities is still up to change a lot.
