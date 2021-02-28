@@ -1,7 +1,5 @@
 // Copyright (c) 2021 Jonas Reich
 
-#include "OUUEditorModule.h"
+#include "CoreMinimal.h"
 
-DEFINE_LOG_CATEGORY(LogOpenUnrealUtilitiesEditor);
-	
 IMPLEMENT_MODULE(FDefaultModuleImpl, OUUEditor)

@@ -1,7 +1,7 @@
 ﻿// Copyright (c) 2021 Jonas Reich
 
 #include "SlowEditorTaskLibrary.h"
-#include "OUUEditorModule.h"
+#include "LogOpenUnrealUtilities.h"
 #include "Misc/ScopedSlowTask.h"
 
 FSlowEditorTaskHandle::FSlowEditorTaskHandle(FGuid InNewGuid):
@@ -31,7 +31,7 @@ void USlowEditorTaskLibrary::MakeSlowTaskDialogDelayed(const FSlowEditorTaskHand
 	}
 	else
 	{
-		UE_LOG(LogOpenUnrealUtilitiesEditor, Warning, TEXT("MakeSlowTaskDialogDelayed called with invalid slow task handle"));
+		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("MakeSlowTaskDialogDelayed called with invalid slow task handle"));
 	}
 	
 }
@@ -44,7 +44,7 @@ void USlowEditorTaskLibrary::MakeSlowTaskDialog(const FSlowEditorTaskHandle& Slo
 	}
 	else
 	{
-		UE_LOG(LogOpenUnrealUtilitiesEditor, Warning, TEXT("MakeSlowTaskDialog called with invalid slow task handle"));
+		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("MakeSlowTaskDialog called with invalid slow task handle"));
 	}
 }
 
@@ -56,7 +56,7 @@ void USlowEditorTaskLibrary::EnterSlowTaskProgressFrame(const FSlowEditorTaskHan
 	}
 	else
 	{
-		UE_LOG(LogOpenUnrealUtilitiesEditor, Warning, TEXT("EnterSlowTaskProgressFrame called with invalid slow task handle"));
+		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("EnterSlowTaskProgressFrame called with invalid slow task handle"));
 	}
 }
 
