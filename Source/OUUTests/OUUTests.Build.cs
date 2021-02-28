@@ -17,7 +17,7 @@ public class OUUTests : ModuleRules
 			"UMG",
 
 			// Plugin
-			"OUURuntime",
+			"OUURuntime"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]
