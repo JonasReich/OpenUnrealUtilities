@@ -23,7 +23,7 @@ enum class EOUURequestState : uint8
 	Failed
 };
 
-FString OUURUNTIME_API LexToString(EOUURequestState E);
+FString OUURUNTIME_API LexToString(EOUURequestState State);
 
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnRequestStatusChangedDelegate, UOUURequest*, Request, EOUURequestState, State);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnRequestStatusChanged, UOUURequest*, Request, EOUURequestState, State);
@@ -31,13 +31,17 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FOnRequestRaisedDelegate, UOUURequest*, Reques
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRequestRaised, UOUURequest*, Request);
 
 /**
- * Request object that represents a request from one component to another. Requests may be succeed, fail or be canceled.
- * A request can be triggered multiple times from multiple sources, but will only result in one outcome.
- * This is useful in many situations, e.g. save requests.
- * If you need a request that will be acted on for each individual call, consider using UOUURequestQueue instead.
- * Requests objects may be reset and reused after completion.
- * ----
- * Request payload data should be added as class members of child classes and may be used bidirectionally (from caller to responder and vice versa).
+ * Request object that represents a request from one component to another.
+ * One possible application for requests are blueprint callbacks where a C++ system makes a request and binds to the OnCompleted delegate
+ * and a blueprint fulfills the request, which calls the previously bound callback. 
+ * 
+ * Requests can succeed, fail or be canceled and may be reset and reused after completion.
+ * A request can be triggered multiple times from multiple sources, but will only propagate the first of these calls.
+ * This is useful in many situations, e.g. save requests. If this is not sufficient and you need a request that will be acted on for each
+ * individual call, consider using a UOUURequestQueue instead.
+ * 
+ * Request payload data should be added as class members of child classes and can be set up with bidirectional read/write access
+ * (from caller to responder and vice versa).
  */
 UCLASS(BlueprintType, Blueprintable)
 class OUURUNTIME_API UOUURequest : public UObject
