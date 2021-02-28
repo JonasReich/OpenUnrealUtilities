@@ -66,11 +66,11 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct OUURUNTIME_API FSlateNotificationHandle
+struct OUUBLUEPRINTRUNTIME_API FSlateNotificationHandle
 {
 	GENERATED_BODY()
 public:
-	friend OUURUNTIME_API uint32 GetTypeHash(const FSlateNotificationHandle&);
+	friend OUUBLUEPRINTRUNTIME_API uint32 GetTypeHash(const FSlateNotificationHandle&);
 
 	void NewGuid();
 	bool IsValid() const;
@@ -84,7 +84,7 @@ private:
 	FGuid NotificationId = FGuid();	
 };
 
-OUURUNTIME_API uint32 GetTypeHash(const FSlateNotificationHandle& Handle);
+OUUBLUEPRINTRUNTIME_API uint32 GetTypeHash(const FSlateNotificationHandle& Handle);
 
 UENUM(BlueprintType)
 enum class ESlateNotificationState : uint8
@@ -95,11 +95,11 @@ enum class ESlateNotificationState : uint8
 	Fail
 };
 
-OUURUNTIME_API ESlateNotificationState SlateNotificationState_ConvertSlateToBlueprint(SNotificationItem::ECompletionState State);
-OUURUNTIME_API SNotificationItem::ECompletionState SlateNotificationState_ConvertBlueprintToSlate(ESlateNotificationState State);
+OUUBLUEPRINTRUNTIME_API ESlateNotificationState SlateNotificationState_ConvertSlateToBlueprint(SNotificationItem::ECompletionState State);
+OUUBLUEPRINTRUNTIME_API SNotificationItem::ECompletionState SlateNotificationState_ConvertBlueprintToSlate(ESlateNotificationState State);
 
 UCLASS()
-class USlateNotificationLibrary : public UBlueprintFunctionLibrary
+class OUUBLUEPRINTRUNTIME_API USlateNotificationLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "UMG/ActivatableWidget.h"
-#include "OUURuntimeModule.h"
+#include "LogOpenUnrealUtilities.h"
 #include "UMG/UMGInputBinding.h"
 #include "UMG/UMGUtils.h"
 

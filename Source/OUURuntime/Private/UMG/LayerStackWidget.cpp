@@ -4,7 +4,7 @@
 #include "Templates/CastObjectRange.h"
 #include "UMG/LayerWidget.h"
 #include "Components/Overlay.h"
-#include "OUURuntimeModule.h"
+#include "LogOpenUnrealUtilities.h"
 
 UOUULayerStackWidget::UOUULayerStackWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {

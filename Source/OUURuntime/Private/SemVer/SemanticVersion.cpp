@@ -3,7 +3,7 @@
 #include "SemVer/SemanticVersion.h"
 #include "SemVer/SemVerRegex.h"
 #include "Misc/RegexUtils.h"
-#include "OUURuntimeModule.h"
+#include "LogOpenUnrealUtilities.h"
 
 FSemanticVersion::FSemanticVersion(int32 Major, int32 Minor, int32 Patch, FSemVerPreReleaseIdentifier PreRelease /*= {}*/, FSemVerBuildMetadata Metadata /*= {}*/) :
 	MajorVersion(Major), MinorVersion(Minor), PatchVersion(Patch), PreReleaseIdentifier(PreRelease), BuildMetadata(Metadata)

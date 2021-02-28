@@ -4,7 +4,7 @@
 #include "Widgets/SWidget.h"
 #include "Widgets/SViewport.h"
 #include "Framework/Application/SlateApplication.h"
-#include "OUURuntimeModule.h"
+#include "LogOpenUnrealUtilities.h"
 #include "UMG/UMGUtils.h"
 #include "UMG/UMGInputBinding.h"
 

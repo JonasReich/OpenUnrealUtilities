@@ -22,7 +22,7 @@ public:
 	 * Can be used to get the predefined engine message log names.
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Message Log")
-    static FName GetMessageLogName(EMessageLogName MessageLogName);
+	static FName GetMessageLogName(EMessageLogName MessageLogName);
 
 	/**
 	 * Add a raw text message to the message log.
@@ -32,7 +32,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Message Log")
 	static void AddTextMessageLogMessage(FName MessageLogName, FText MessageText, EMessageLogSeverity Severity = EMessageLogSeverity::Info);
-	
+
 	/**
 	 * Add a tokenized message to the message log.
 	 * Tokens allow composition of text messages containing interactive content other than just plain text.
@@ -49,7 +49,7 @@ public:
 	 * @param bOpenEvenIfEmpty: Force to open the message log even if it does not contain any messages
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Message Log")
-	static void OpenMessageLog(FName MessageLogName, EMessageLogSeverity InMinSeverity = EMessageLogSeverity::Info, bool bOpenEvenIfEmpty = false );
+	static void OpenMessageLog(FName MessageLogName, EMessageLogSeverity InMinSeverity = EMessageLogSeverity::Info, bool bOpenEvenIfEmpty = false);
 
 	// -------------
 	// FMessageLogToken constructor wrappers
@@ -73,7 +73,7 @@ public:
 
 	/** Creates a message log token from a text */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Message Log")
-    static FMessageLogToken CreateTextMessageLogToken(FText Text);
+	static FMessageLogToken CreateTextMessageLogToken(FText Text);
 
 	/**
 	 * Creates a message log token from a hyperlink URL. Can be clicked to open a browser to navigate to the linked webpage.
@@ -81,5 +81,5 @@ public:
 	 * @param OptionalLabelOverride: If not empty, this text is displayed as clickable link instead of the URL itself
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Message Log")
-    static FMessageLogToken CreateURLMessageLogToken(FString URL, FText OptionalLabelOverride);
+	static FMessageLogToken CreateURLMessageLogToken(FString URL, FText OptionalLabelOverride);
 };

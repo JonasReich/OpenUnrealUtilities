@@ -11,7 +11,7 @@
  * Custom functionality that is not yet path of any engine utility class is defined in UOUUMathLibrary instead.
  */
 UCLASS()
-class OUURUNTIME_API UOUUBlueprintMathLibrary : public UBlueprintFunctionLibrary
+class OUUBLUEPRINTRUNTIME_API UOUUBlueprintMathLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:

@@ -2,7 +2,7 @@
 
 #include "UMG/UMGInputBinding.h"
 #include "Blueprint/UserWidget.h"
-#include "OUURuntimeModule.h"
+#include "LogOpenUnrealUtilities.h"
 #include "GameFramework/PlayerInput.h"
 
 void UUMGInputActionBindingStack::SetOwningPlayerInput(UPlayerInput* InOwningPlayerInput)

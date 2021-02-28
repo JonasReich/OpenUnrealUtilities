@@ -2,7 +2,7 @@
 
 #include "UMG/InteractableUserWidget.h"
 #include "UMG/UMGInputBinding.h"
-#include "OUURuntimeModule.h"
+#include "LogOpenUnrealUtilities.h"
 
 UUMGInputActionBindingStack* UInteractableUserWidget::GetInputActionBindingStack()
 {

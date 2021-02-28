@@ -7,22 +7,28 @@ public class OUUTests : ModuleRules
 	public OUUTests(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				// Engine
-				"Core",
-				"CoreUObject",
-				"Engine",
-				"InputCore",
-				"SlateCore",
-				"UMG",
-				"EditorScriptingUtilities",
 
-				// Plugin
-				"OUURuntime"
-			}
-			);
+		PublicDependencyModuleNames.AddRange(new string[]
+		{
+			// Engine
+			"Core",
+			"CoreUObject",
+			"Engine",
+			"UMG",
+
+			// Plugin
+			"OUURuntime",
+		});
+
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
+			// Engine
+			"InputCore",
+			"SlateCore",
+			"EditorScriptingUtilities",
+
+			// Plugin
+			"OUUBlueprintRuntime"
+		});
 	}
 }

@@ -44,7 +44,7 @@ static_assert(EBlueprintAppMsgType::Ok == static_cast<EBlueprintAppMsgType>(EApp
 * Library to open blocking message dialog popups from blueprint (editor utilities).
 */
 UCLASS()
-class OUURUNTIME_API UMessageDialogLibrary : public UBlueprintFunctionLibrary
+class OUUBLUEPRINTRUNTIME_API UMessageDialogLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:

@@ -57,7 +57,7 @@ void UMessageLogBlueprintLibrary::AddTokenizedMessageLogMessage(FName MessageLog
 }
 
 void UMessageLogBlueprintLibrary::OpenMessageLog(FName MessageLogName, EMessageLogSeverity InMinSeverity,
-	bool bOpenEvenIfEmpty)
+                                                 bool bOpenEvenIfEmpty)
 {
 	FMessageLog(MessageLogName).Open(StaticCast<EMessageSeverity::Type>(InMinSeverity), bOpenEvenIfEmpty);
 }

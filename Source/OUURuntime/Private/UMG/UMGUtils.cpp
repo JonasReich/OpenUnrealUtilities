@@ -2,7 +2,7 @@
 
 #include "UMG/UMGUtils.h"
 #include "Widgets/SWidget.h"
-#include "OUURuntimeModule.h"
+#include "LogOpenUnrealUtilities.h"
 
 namespace UMGUtils
 {

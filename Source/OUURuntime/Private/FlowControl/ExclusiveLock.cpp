@@ -1,7 +1,7 @@
 // Copyright (c) 2021 Jonas Reich
 
 #include "FlowControl/ExclusiveLock.h"
-#include "OUURuntimeModule.h"
+#include "LogOpenUnrealUtilities.h"
 
 bool UExclusiveLock::TryLock(UObject* Key)
 {

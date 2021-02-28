@@ -1,7 +1,7 @@
 // Copyright (c) 2021 Jonas Reich
 
 #include "FlowControl/SharedLock.h"
-#include "OUURuntimeModule.h"
+#include "LogOpenUnrealUtilities.h"
 
 void USharedLock::Lock(UObject* Key)
 {

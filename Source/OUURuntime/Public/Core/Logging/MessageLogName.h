@@ -19,7 +19,7 @@ enum class EMessageLogName : uint8
 	// ----
 	// Miscellaneous logs to display during Play in Editor gameplay. Comparable to "LogTemp" 
 	PIE,
-	
+
 	// ----
 	// EDITOR
 	// ----
@@ -32,7 +32,7 @@ enum class EMessageLogName : uint8
 	// Asset check/validation
 	AssetCheck,
 	// Asset (re)import  
-    AssetReimport,
+	AssetReimport,
 
 	// ----
 	// Special engine subsystem logs.
@@ -42,31 +42,31 @@ enum class EMessageLogName : uint8
 	// Special editor logs
 	AnimBlueprintLog,
 	// Automation testing. Visible in session frontend.
-    // All logs during text execution will be automatically mirrored here.
-    AutomationTestingLog,
-    // Level build errors (lighting, navigation, etc)
-    BuildAndSubmitErrors,
+	// All logs during text execution will be automatically mirrored here.
+	AutomationTestingLog,
+	// Level build errors (lighting, navigation, etc)
+	BuildAndSubmitErrors,
 	// Blueprint editor + compiler
 	Blueprint,
-    BlueprintLog,
+	BlueprintLog,
 	// HLOD generation
-    HLODResults,
+	HLODResults,
 	// Lighting/lightmap generation
-    LightingResults,
-    // Asset loading
+	LightingResults,
+	// Asset loading
 	LoadErrors,
 	// Localization dashboard
-    LocalizationService,	
+	LocalizationService,
 	// Project packaging after build 
 	PackagingResults,
 	// Internal slate messages
-    SlateStyleLog,
-    // Source control plugins (git, perforce, etc)
+	SlateStyleLog,
+	// Source control plugins (git, perforce, etc)
 	SourceControl,
 	// Translation editing
 	TranslationEditor,
 	// UDN documentation parser
-    UDNParser,
-    // UMG + Slate widget events displayed in the widget reflector
-    WidgetEvents
+	UDNParser,
+	// UMG + Slate widget events displayed in the widget reflector
+	WidgetEvents
 };

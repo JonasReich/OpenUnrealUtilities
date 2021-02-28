@@ -2,8 +2,7 @@
 
 #include "Slate/SlateNotificationLibrary.h"
 
-
-#include "OUURuntimeModule.h"
+#include "LogOpenUnrealUtilities.h"
 #include "Components/Widget.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "Widgets/Notifications/SNotificationList.h"

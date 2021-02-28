@@ -7,7 +7,7 @@
 
 /** Expose project info config values from UGeneralProjectSettings to Blueprint */
 UCLASS()
-class OUURUNTIME_API UGeneralProjectSettingsLibrary : public UBlueprintFunctionLibrary
+class OUUBLUEPRINTRUNTIME_API UGeneralProjectSettingsLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:

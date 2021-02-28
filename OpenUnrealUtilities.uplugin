@@ -21,6 +21,11 @@
 			"LoadingPhase": "Default"
 		},
 		{
+			"Name": "OUUBlueprintRuntime",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "OUUEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
