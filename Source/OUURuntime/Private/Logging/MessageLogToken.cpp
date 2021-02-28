@@ -1,6 +1,6 @@
 ﻿// Copyright (c) 2021 Jonas Reich
 
-#include "Core/Logging/MessageLogToken.h"
+#include "Logging/MessageLogToken.h"
 
 #include "Misc/UObjectToken.h"
 

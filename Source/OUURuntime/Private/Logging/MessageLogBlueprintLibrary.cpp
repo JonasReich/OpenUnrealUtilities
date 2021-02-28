@@ -1,8 +1,8 @@
 ﻿// Copyright (c) 2021 Jonas Reich
 
-#include "Core/Logging/MessageLogBlueprintLibrary.h"
+#include "Logging/MessageLogBlueprintLibrary.h"
 
-#include "Core/Logging/MessageLogToken.h"
+#include "Logging/MessageLogToken.h"
 
 FName UMessageLogBlueprintLibrary::GetMessageLogName(EMessageLogName MessageLogName)
 {
