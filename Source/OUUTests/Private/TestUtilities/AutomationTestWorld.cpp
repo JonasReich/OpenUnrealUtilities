@@ -6,7 +6,7 @@
 
 #if WITH_AUTOMATION_WORKER
 
-#include "OUUTestsModule.h"
+#include "LogOpenUnrealUtilities.h"
 #include "GameFramework/GameModeBase.h"
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
@@ -41,7 +41,7 @@ void FAutomationTestWorld::BeginPlay()
 {
 	if (!IsValid(World))
 	{
-		UE_LOG(LogOpenUnrealUtilitiesTests, Error, TEXT("Could not send BeginPlay to invalid world!"));
+		UE_LOG(LogOpenUnrealUtilities, Error, TEXT("Could not send BeginPlay to invalid world!"));
 		return;
 	}
 	World->InitializeActorsForPlay(URL);
@@ -50,7 +50,7 @@ void FAutomationTestWorld::BeginPlay()
 
 #define CHECK_INIT_GAME_CONDITION(Condition, ErrorString) \
 if (Condition) { \
-	UE_LOG(LogOpenUnrealUtilitiesTests, Error, TEXT("%s"), ToCStr(ErrorString)); \
+	UE_LOG(LogOpenUnrealUtilities, Error, TEXT("%s"), ToCStr(ErrorString)); \
 	return false; \
 }
 
@@ -58,7 +58,7 @@ bool FAutomationTestWorld::InitializeGame()
 {
 	if (!IsValid(World))
 	{
-		UE_LOG(LogOpenUnrealUtilitiesTests, Error, TEXT("Could not InitiailizeGame invalid world!"));
+		UE_LOG(LogOpenUnrealUtilities, Error, TEXT("Could not InitiailizeGame invalid world!"));
 		return false;
 	}
 

@@ -9,7 +9,7 @@
 #include "Traits/StringConversionTraits.h"
 #include "Templates/IsEnumClass.h"
 #include "Templates/UnrealTypeTraits.h"
-#include "OUUTestsModule.h"
+#include "LogOpenUnrealUtilities.h"
 
 namespace OUUTests_Internal
 {
@@ -94,7 +94,7 @@ public:
 	{
 		if (!Parameters.IsValidIndex(Index))
 		{
-			UE_LOG(LogOpenUnrealUtilitiesTests, Error, TEXT("Failed to parse parameter with index %i: Index out of range!"), Index);
+			UE_LOG(LogOpenUnrealUtilities, Error, TEXT("Failed to parse parameter with index %i: Index out of range!"), Index);
 			return T();
 		}
 
@@ -107,7 +107,7 @@ public:
 		TArray<T> Result;
 		if (!Parameters.IsValidIndex(Index))
 		{
-			UE_LOG(LogOpenUnrealUtilitiesTests, Error, TEXT("Failed to parse parameter with index %i: Index out of range!"), Index);
+			UE_LOG(LogOpenUnrealUtilities, Error, TEXT("Failed to parse parameter with index %i: Index out of range!"), Index);
 			return Result;
 		}
 
