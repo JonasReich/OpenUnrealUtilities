@@ -19,7 +19,7 @@ public:
 
 	/** @returns the mutable class default object of the objects class. Proceed with caution! */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Class")
-    static UObject* GetClassDefaultObjectFromObject(UObject* Object);
+	static UObject* GetClassDefaultObjectFromObject(UObject* Object);
 
 	/**
 	 * Attempts to get the world from a world context object.
@@ -35,4 +35,12 @@ public:
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|World", meta = (DisplayName = "Try Get World", WorldContext = "WorldContextObject"))
 	static UWorld* TryGetWorldFromObject_K2(UObject* WorldContextObject);
+
+	/**
+	* Mark an object as modified.
+	* If we are currently recording into the transaction buffer (undo/redo),
+	* save a copy of this object into the buffer and mark the package as needing to be saved.
+	*/
+	UFUNCTION(BlueprintCallable)
+	static void ModifyObject(UObject* Object);
 };

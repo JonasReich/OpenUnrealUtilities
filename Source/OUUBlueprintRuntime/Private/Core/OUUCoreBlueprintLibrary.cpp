@@ -21,3 +21,11 @@ UWorld* UOUUCoreBlueprintLibrary::TryGetWorldFromObject_K2(UObject* WorldContext
 {
 	return TryGetWorldFromObject(WorldContextObject);
 }
+
+void UOUUCoreBlueprintLibrary::ModifyObject(UObject* Object)
+{
+	if (IsValid(Object))
+	{
+		Object->Modify();
+	}
+}
