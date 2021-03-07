@@ -20,7 +20,10 @@ public:
 	struct FTaskHandle
 	{
 		FTaskHandle() = default;
-		FTaskHandle(int32 InIndex) : Index(InIndex) {}
+
+		FTaskHandle(int32 InIndex) : Index(InIndex)
+		{
+		}
 
 		int32 Index = INDEX_NONE;
 
@@ -61,7 +64,7 @@ public:
 	/** Get the overtime for this task as a fraction of invocation period (0.5 = 50% overtime). */
 	float GetOvertimeFraction() const;
 
-	/** Get a prediction for overtime in a future number of frames */ 
+	/** Get a prediction for overtime in a future number of frames */
 	float GetPredictedOvertimeFraction(float PredictedDeltaTime, int32 NumFrames) const;
 
 	// Movable only (required because of FTimerUnifiedDelegate)
@@ -112,6 +115,14 @@ public:
 	 */
 	void Tick(float DeltaTime);
 
+	template <typename... ArgumentTypes>
+	FORCEINLINE FTaskHandle AddNamedTask(const FName TaskName, ArgumentTypes ... Args)
+	{
+		const FTaskHandle TaskHandle = AddTask(Args...);
+		AddTaskDebugName(TaskHandle, TaskName);
+		return TaskHandle;
+	}
+
 	/**
 	 * Add a task to the scheduler.
 	 * Has multiple overloads similar to the Timer Manager that allow
@@ -139,7 +150,7 @@ public:
 	/** Version that takes a dynamic delegate (e.g. for UFunctions). */
 	FORCEINLINE FTaskHandle AddTask(FTaskDynamicDelegate const& InDynDelegate, float InPeriod, bool bTickAsOftenAsPossible = true)
 	{
-		return InternalAddTask( FTaskUnifiedDelegate(InDynDelegate), InPeriod, bTickAsOftenAsPossible);
+		return InternalAddTask(FTaskUnifiedDelegate(InDynDelegate), InPeriod, bTickAsOftenAsPossible);
 	}
 
 	/** Version that takes a TFunction */
@@ -148,7 +159,10 @@ public:
 		return InternalAddTask(FTaskUnifiedDelegate(MoveTemp(Callback)), InPeriod, bTickAsOftenAsPossible);
 	}
 
-	void RemoveTask(FTaskHandle Handle);
+	void RemoveTask(const FTaskHandle& Handle);
+
+	/** Give the task a somewhat recognizable name for debugging purposes. */
+	void AddTaskDebugName(const FTaskHandle& Handle, const FName TaskName);
 
 protected:
 	/**
@@ -172,24 +186,37 @@ protected:
 	TArray<FTaskHandle> TasksPendingForAdd;
 	TArray<FTaskHandle> TasksPendingForRemoval;
 
-private:
 	// Store the delta times of last 60 frames to better predict delta time for next frame
 	static const int32 NumFramesBufferSize = 60;
 	TFixedSizeRingAggregator<float, NumFramesBufferSize> DeltaTimeRingBuffer;
 
 #if DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER
-	// Various debugging metrics.
-	// None of these are used by the plugin, but they will be really useful to display in a gameplay debugger
-	// to show if the configuration of the debugger is balanced appropriately.
-	// No gameplay debugger is provided at this time because the integration into various other systems will impact
-	// how exactly the scheduler will be integrated / where it will be located.
-	TFixedSizeRingAggregator<float, NumFramesBufferSize> MaxDelaySecondsRingBuffer;
-	TFixedSizeRingAggregator<float, NumFramesBufferSize> AverageDelaySecondsRingBuffer;
-	TFixedSizeRingAggregator<float, NumFramesBufferSize> MaxDelayFractionRingBuffer;
-	TFixedSizeRingAggregator<float, NumFramesBufferSize> AverageDelayFractionRingBuffer;
-	TFixedSizeRingAggregator<int32, NumFramesBufferSize> NumTasksExecutedRingBuffer;
+	struct FDebugData
+	{
+		/**
+		 * Task names for identifying tasks when debugging them
+		 * Assigning names is optional, so some if not all tasks may be unnamed.
+		 */
+		TMap<FTaskHandle, FName> TaskDebugNames;
+
+		// Various debugging metrics.
+		// None of these are used by the plugin, but they will be really useful to display in a gameplay debugger
+		// to show if the configuration of the debugger is balanced appropriately.
+		// No gameplay debugger is provided at this time because the integration into various other systems will impact
+		// how exactly the scheduler will be integrated / where it will be located.
+		TFixedSizeRingAggregator<float, NumFramesBufferSize> MaxDelaySecondsRingBuffer;
+		TFixedSizeRingAggregator<float, NumFramesBufferSize> AverageDelaySecondsRingBuffer;
+		TFixedSizeRingAggregator<float, NumFramesBufferSize> MaxDelayFractionRingBuffer;
+		TFixedSizeRingAggregator<float, NumFramesBufferSize> AverageDelayFractionRingBuffer;
+		TFixedSizeRingAggregator<int32, NumFramesBufferSize> NumTasksExecutedRingBuffer;
+
+		// Which tasks were actually executed in the last frames.
+		// TTuple: [TickCounter, TaskId]
+		TFixedSizeRingAggregator<TTuple<uint32, FTaskHandle>, NumFramesBufferSize> TaskHistory;
+	} DebugData;
 #endif
 
+private:
 	// Counter to track which task IDs we already handed out.
 	// Simple incrementation with overflow check should suffice as the system is
 	// not really designed to be used with > INT_MAX task additions/removals.
@@ -199,6 +226,9 @@ private:
 	// The scale at which this time tracker advances is directly determined by the
 	// DeltaTime values passed into Tick().
 	float Now = 0.f;
+
+	// Tick/frame counter
+	uint32 TickCounter = 0;
 
 	FTaskHandle InternalAddTask(FTaskUnifiedDelegate&& Delegate, float InPeriod, bool bTickAsOftenAsPossible);
 

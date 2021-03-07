@@ -30,6 +30,7 @@ float FSequentialFrameTask::GetPredictedOvertimeFraction(float PredictedDeltaTim
 
 void FSequentialFrameScheduler::Tick(float DeltaTime)
 {
+	TickCounter++;
 	Now += DeltaTime;
 	DeltaTimeRingBuffer.Add(DeltaTime);
 	const float PredictedDeltaTimeNextFrames = DeltaTimeRingBuffer.Average();
@@ -66,10 +67,10 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 
 #if DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER
 	const float NumTasksFloat = static_cast<float>(TaskHandlesToTaskInfos.Num());
-	MaxDelaySecondsRingBuffer.Add(MaxOvertimeSeconds);
-	AverageDelaySecondsRingBuffer.Add(SumOvertimeSeconds / NumTasksFloat);
-	MaxDelayFractionRingBuffer.Add(MaxOvertimeFraction);
-	AverageDelayFractionRingBuffer.Add(SumOvertimeFraction / NumTasksFloat);
+	DebugData.MaxDelaySecondsRingBuffer.Add(MaxOvertimeSeconds);
+	DebugData.AverageDelaySecondsRingBuffer.Add(SumOvertimeSeconds / NumTasksFloat);
+	DebugData.MaxDelayFractionRingBuffer.Add(MaxOvertimeFraction);
+	DebugData.AverageDelayFractionRingBuffer.Add(SumOvertimeFraction / NumTasksFloat);
 #endif
 
 	TaskQueue.Sort([&](const FTaskHandle& HandleA, const FTaskHandle& HandleB) -> bool
@@ -110,16 +111,27 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 		CurrentTask->Delegate.Execute();
 
 		ActualNumTasksExecutedThisFrame++;
+
+#if DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER
+		DebugData.TaskHistory.Add(TTuple<uint32, FTaskHandle>{TickCounter, CurrentTask->Handle});
+#endif
 	}
 #if DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER
-	NumTasksExecutedRingBuffer.Add(ActualNumTasksExecutedThisFrame);
+	DebugData.NumTasksExecutedRingBuffer.Add(ActualNumTasksExecutedThisFrame);
 #endif
 }
 
-void FSequentialFrameScheduler::RemoveTask(FTaskHandle Handle)
+void FSequentialFrameScheduler::RemoveTask(const FTaskHandle& Handle)
 {
 	TasksPendingForRemoval.Add(Handle);
 	TasksPendingForAdd.Remove(Handle);
+}
+
+void FSequentialFrameScheduler::AddTaskDebugName(const FTaskHandle& Handle, const FName TaskName)
+{
+#if DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER
+	DebugData.TaskDebugNames.Add(Handle, TaskName);
+#endif
 }
 
 FSequentialFrameTask::FTaskHandle FSequentialFrameScheduler::InternalAddTask(FTaskUnifiedDelegate&& Delegate, float InPeriod, bool bTickAsOftenAsPossible)
