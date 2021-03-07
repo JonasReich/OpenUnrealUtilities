@@ -21,13 +21,13 @@ void FRingAggregatorSpec::Define()
 			});
 
 			It("should return true after the first element was added", [this]()
-            {
-                TFixedSizeRingAggregator<int32, 3> TestAggregator;
+			{
+				TFixedSizeRingAggregator<int32, 3> TestAggregator;
 				TestAggregator.Add(1);
-                SPEC_TEST_TRUE(TestAggregator.HasData());
-            });
+				SPEC_TEST_TRUE(TestAggregator.HasData());
+			});
 		});
-		
+
 		It("should wrap around and overwrite the first elements after the fixed size was reached", [this]()
 		{
 			TFixedSizeRingAggregator<int32, 3> TestAggregator;
@@ -54,16 +54,16 @@ void FRingAggregatorSpec::Define()
 			});
 
 			It("should return the number of items still stored as soon as the aggregator wrapped and already overwrote some elements", [this]()
-            {
-                TFixedSizeRingAggregator<int32, 3> TestAggregator;
-                TestAggregator.Add(1);
-                TestAggregator.Add(2);
-                TestAggregator.Add(3);
-                TestAggregator.Add(4);
-                TestAggregator.Add(5);
-                TestAggregator.Add(6);
-                SPEC_TEST_EQUAL(TestAggregator.Num(), 3);
-            });
+			{
+				TFixedSizeRingAggregator<int32, 3> TestAggregator;
+				TestAggregator.Add(1);
+				TestAggregator.Add(2);
+				TestAggregator.Add(3);
+				TestAggregator.Add(4);
+				TestAggregator.Add(5);
+				TestAggregator.Add(6);
+				SPEC_TEST_EQUAL(TestAggregator.Num(), 3);
+			});
 		});
 
 		It("Average", [this]()
@@ -113,16 +113,16 @@ void FRingAggregatorSpec::Define()
 			It("should return the first indexed item immediately after wrap-around", [this]()
 			{
 				TFixedSizeRingAggregator<int32, 3> TestAggregator;
-                TestAggregator.Add(1);
-                TestAggregator.Add(2);
-                TestAggregator.Add(3);
-                TestAggregator.Add(4);
-                const int32 Last = TestAggregator.Last();
-                SPEC_TEST_EQUAL(Last, 4);
+				TestAggregator.Add(1);
+				TestAggregator.Add(2);
+				TestAggregator.Add(3);
+				TestAggregator.Add(4);
+				const int32 Last = TestAggregator.Last();
+				SPEC_TEST_EQUAL(Last, 4);
 
-                TestAggregator.Add(5);
-                const int32 LastStepTwo = TestAggregator.Last();
-                SPEC_TEST_EQUAL(LastStepTwo, 5);
+				TestAggregator.Add(5);
+				const int32 LastStepTwo = TestAggregator.Last();
+				SPEC_TEST_EQUAL(LastStepTwo, 5);
 			});
 		});
 
@@ -131,56 +131,91 @@ void FRingAggregatorSpec::Define()
 			It("should return 3 for the sequence 1,2,3", [this]()
 			{
 				TFixedSizeRingAggregator<int32, 3> TestAggregator;
-                TestAggregator.Add(1);
-                TestAggregator.Add(2);
-                TestAggregator.Add(3);
+				TestAggregator.Add(1);
+				TestAggregator.Add(2);
+				TestAggregator.Add(3);
 				SPEC_TEST_EQUAL(TestAggregator.Max(), 3);
 			});
 			It("should return 3 for the sequence 3,2,1", [this]()
-            {
+			{
 				TFixedSizeRingAggregator<int32, 3> TestAggregator;
-                TestAggregator.Add(3);
-                TestAggregator.Add(2);
-                TestAggregator.Add(1);
-                SPEC_TEST_EQUAL(TestAggregator.Max(), 3);
-            });
+				TestAggregator.Add(3);
+				TestAggregator.Add(2);
+				TestAggregator.Add(1);
+				SPEC_TEST_EQUAL(TestAggregator.Max(), 3);
+			});
 			It("should return 3 for the sequence 2,3,1", [this]()
-            {
+			{
 				TFixedSizeRingAggregator<int32, 3> TestAggregator;
-                TestAggregator.Add(2);
-                TestAggregator.Add(3);
-                TestAggregator.Add(1);
-                SPEC_TEST_EQUAL(TestAggregator.Max(), 3);
-            });
+				TestAggregator.Add(2);
+				TestAggregator.Add(3);
+				TestAggregator.Add(1);
+				SPEC_TEST_EQUAL(TestAggregator.Max(), 3);
+			});
 		});
 
 		Describe("Min", [this]()
-        {
-            It("should return 1 for the sequence 1,2,3", [this]()
-            {
-                TFixedSizeRingAggregator<int32, 3> TestAggregator;
-                TestAggregator.Add(1);
-                TestAggregator.Add(2);
-                TestAggregator.Add(3);
-                SPEC_TEST_EQUAL(TestAggregator.Max(), 3);
-            });
-            It("should return 1 for the sequence 3,2,1", [this]()
-            {
-                TFixedSizeRingAggregator<int32, 3> TestAggregator;
-                TestAggregator.Add(3);
-                TestAggregator.Add(2);
-                TestAggregator.Add(1);
-                SPEC_TEST_EQUAL(TestAggregator.Max(), 3);
-            });
-            It("should return 1 for the sequence 2,3,1", [this]()
-            {
-                TFixedSizeRingAggregator<int32, 3> TestAggregator;
-                TestAggregator.Add(2);
-                TestAggregator.Add(3);
-                TestAggregator.Add(1);
-                SPEC_TEST_EQUAL(TestAggregator.Max(), 3);
-            });
-        });
+		{
+			It("should return 1 for the sequence 1,2,3", [this]()
+			{
+				TFixedSizeRingAggregator<int32, 3> TestAggregator;
+				TestAggregator.Add(1);
+				TestAggregator.Add(2);
+				TestAggregator.Add(3);
+				SPEC_TEST_EQUAL(TestAggregator.Max(), 3);
+			});
+			It("should return 1 for the sequence 3,2,1", [this]()
+			{
+				TFixedSizeRingAggregator<int32, 3> TestAggregator;
+				TestAggregator.Add(3);
+				TestAggregator.Add(2);
+				TestAggregator.Add(1);
+				SPEC_TEST_EQUAL(TestAggregator.Max(), 3);
+			});
+			It("should return 1 for the sequence 2,3,1", [this]()
+			{
+				TFixedSizeRingAggregator<int32, 3> TestAggregator;
+				TestAggregator.Add(2);
+				TestAggregator.Add(3);
+				TestAggregator.Add(1);
+				SPEC_TEST_EQUAL(TestAggregator.Max(), 3);
+			});
+		});
+
+		Describe("ranged-based for loops", [this]()
+		{
+			It("should match a range-based floor on underlying data as long before wrap-around", [this]()
+			{
+				TFixedSizeRingAggregator<int32, 3> TestAggregator;
+				TestAggregator.Add(1);
+				TestAggregator.Add(2);
+				TestAggregator.Add(3);
+				TArray<int32> NumbersInRangedFor = {};
+				for (int32 i : TestAggregator)
+				{
+					NumbersInRangedFor.Add(i);
+				}
+				const TArray<int32> ExpectedNumbers = {1, 2, 3};
+				TestArraysEqual(*this, "items returned from ranged-based for loop", NumbersInRangedFor, ExpectedNumbers, true);
+			});
+
+			It("should still return all items in chronological order after wrap-around", [this]()
+			{
+				TFixedSizeRingAggregator<int32, 3> TestAggregator;
+				TestAggregator.Add(1);
+				TestAggregator.Add(2);
+				TestAggregator.Add(3);
+				TestAggregator.Add(4);
+				TestAggregator.Add(5);
+				TArray<int32> NumbersInRangedFor = {};
+				for (int32 i : TestAggregator)
+				{
+					NumbersInRangedFor.Add(i);
+				}
+				const TArray<int32> ExpectedNumbers = {3, 4, 5};
+				TestArraysEqual(*this, "items returned from ranged-based for loop", NumbersInRangedFor, ExpectedNumbers, true);
+			});
+		});
 	});
 
 	Describe("TRingAggregator", [this]()
