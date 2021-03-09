@@ -15,7 +15,7 @@
  * - FGameplayEffectsTest::RunTest()
  * - FTimerManagerTest::RunTest()
  */
-struct OUUTESTS_API FAutomationTestWorld
+struct OUUTESTUTILITIES_API FAutomationTestWorld
 {
 public:
 	FAutomationTestWorld() = default;
@@ -87,7 +87,7 @@ protected:
  * reused across scopes.
  * When using this Scoped alternative you should not call CreateWorld() and DestroyWorld anymore!
  */
-struct OUUTESTS_API FScopedAutomationTestWorld : public FAutomationTestWorld
+struct OUUTESTUTILITIES_API FScopedAutomationTestWorld : public FAutomationTestWorld
 {
 public:
 	using Super = FAutomationTestWorld;

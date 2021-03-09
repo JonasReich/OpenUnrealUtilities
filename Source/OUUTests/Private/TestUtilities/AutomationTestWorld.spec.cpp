@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "OUUTests.h"
+#include "OUUTestUtilities.h"
 
 #if WITH_AUTOMATION_WORKER
 
-#include "TestUtilities/AutomationTestWorld.h"
+#include "AutomationTestWorld.h"
 #include "GameFramework/GameModeBase.h"
 
 BEGIN_DEFINE_SPEC(FAutomationTestWorldSpec, "OpenUnrealUtilities.TestUtilities.AutomationTestWorld", DEFAULT_OUU_TEST_FLAGS)

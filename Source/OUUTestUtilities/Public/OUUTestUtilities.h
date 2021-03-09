@@ -11,11 +11,11 @@
 // AutomationTest utilities.
 //////////////////////////////////////////////////////////////////////////
 
-#include "TestUtilities/AutomationSpecTestMacros.h"
-#include "TestUtilities/AutomationTestWorld.h"
-#include "TestUtilities/AutomationTestParameterParser.h"
-#include "TestUtilities/CollectionTestFunctions.h"
-#include "TestUtilities/OUUTestMacros.h"
-#include "TestUtilities/OUUTestObject.h"
+#include "AutomationSpecTestMacros.h"
+#include "AutomationTestWorld.h"
+#include "AutomationTestParameterParser.h"
+#include "CollectionTestFunctions.h"
+#include "OUUTestMacros.h"
+#include "OUUTestObject.h"
 
 #endif

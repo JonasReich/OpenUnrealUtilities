@@ -36,6 +36,11 @@
 			"LoadingPhase": "Default"
 		},
 		{
+			"Name": "OUUTestUtilities",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "OUUUMG",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"

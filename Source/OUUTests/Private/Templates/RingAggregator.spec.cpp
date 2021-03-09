@@ -1,9 +1,10 @@
 // Copyright (c) 2021 Jonas Reich
 
-#include "OUUTests.h"
-#include "Templates/RingAggregator.h"
+#include "OUUTestUtilities.h"
 
 #if WITH_AUTOMATION_WORKER
+
+#include "Templates/RingAggregator.h"
 
 BEGIN_DEFINE_SPEC(FRingAggregatorSpec, "OpenUnrealUtilities.Templates.RingAggregator", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FRingAggregatorSpec)

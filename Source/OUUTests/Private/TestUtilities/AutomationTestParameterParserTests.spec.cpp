@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "OUUTests.h"
+#include "OUUTestUtilities.h"
 
 #if WITH_AUTOMATION_WORKER
 

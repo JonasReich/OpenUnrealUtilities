@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "TestUtilities/AutomationTestWorld.h"
+#include "AutomationTestWorld.h"
 
 #if WITH_AUTOMATION_WORKER
 

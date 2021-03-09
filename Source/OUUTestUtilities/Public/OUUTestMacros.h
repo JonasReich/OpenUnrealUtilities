@@ -22,7 +22,7 @@
  */
 const int32 DEFAULT_OUU_TEST_FLAGS = EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter;
 
-FORCEINLINE FString OUUTESTS_API EscapeTestName(FString InTestName)
+FORCEINLINE FString OUUTESTUTILITIES_API EscapeTestName(FString InTestName)
 {
 	return InTestName.Replace(TEXT("."), TEXT("<dot>"));
 }

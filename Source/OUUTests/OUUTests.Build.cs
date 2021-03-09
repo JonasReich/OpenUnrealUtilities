@@ -29,7 +29,8 @@ public class OUUTests : ModuleRules
 
 			// Plugin
 			"OUUBlueprintRuntime",
-			"OUUUMG"
+			"OUUUMG",
+			"OUUTestUtilities"
 		});
 	}
 }
