@@ -4,7 +4,7 @@
 
 #if WITH_AUTOMATION_WORKER
 
-#include "FlowControl/SequentialFrameScheduler.h"
+#include "SequentialFrameScheduler/SequentialFrameScheduler.h"
 
 class FTestTaskTarget
 {

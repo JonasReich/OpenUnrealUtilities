@@ -4,85 +4,8 @@
 
 #include "CoreMinimal.h"
 
+#include "SequentialFrameScheduler/SequentialFrameTask.h"
 #include "Templates/RingAggregator.h"
-
-#if UE_BUILD_DEBUG || UE_BUILD_DEVELOPMENT || UE_BUILD_TEST
-#define DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER 1
-#else
-#define DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER 0
-#endif
-
-/** A task that is registered in the SequentialFrameScheduler */
-class OUURUNTIME_API FSequentialFrameTask
-{
-public:
-	/** Handle to a task registered in the scheduler */
-	struct FTaskHandle
-	{
-		FTaskHandle() = default;
-
-		FTaskHandle(int32 InIndex) : Index(InIndex)
-		{
-		}
-
-		int32 Index = INDEX_NONE;
-
-		bool operator==(const FTaskHandle& Other) const
-		{
-			return Index == Other.Index;
-		}
-	};
-
-	/**
-	 * Sequential frame tasks use extended unified timer delegates,
-	 * because we don't want to reinvent the wheel and make it usable with everything
-	 * that was usable with timer manager before.
-	 * We can't just alias the types because then they can't be easily used in dependent types.
-	 * The next best thing is inheriting from them, so here we go :)
-	 */
-	using FTaskUnifiedDelegate = FTimerUnifiedDelegate;
-	using FTaskDelegate = FTimerDelegate;
-	using FTaskDynamicDelegate = FTimerDynamicDelegate;
-	//-------------------------
-
-	FTaskHandle Handle;
-
-	float Period = 0.03f;
-	bool bTickAsOftenAsPossible = true;
-
-	float LastInvocationTime = 0.f;
-
-	FTaskUnifiedDelegate Delegate;
-
-	/** Get the next time this task wants to be invoked in seconds. */
-	float GetNextDesiredInvocationTimeSeconds() const;
-
-	void SetTimeNow(float Now);
-
-	float GetOvertimeSeconds() const;
-
-	/** Get the overtime for this task as a fraction of invocation period (0.5 = 50% overtime). */
-	float GetOvertimeFraction() const;
-
-	/** Get a prediction for overtime in a future number of frames */
-	float GetPredictedOvertimeFraction(float PredictedDeltaTime, int32 NumFrames) const;
-
-	// Movable only (required because of FTimerUnifiedDelegate)
-	FSequentialFrameTask() = default;
-	FSequentialFrameTask(FSequentialFrameTask&&) = default;
-	FSequentialFrameTask(const FSequentialFrameTask&) = delete;
-	FSequentialFrameTask& operator=(FSequentialFrameTask&&) = default;
-	FSequentialFrameTask& operator=(FSequentialFrameTask&) = delete;
-
-private:
-	float CachedOvertimeSeconds = 0.f;
-	float CachedOvertimeFraction = 0.f;
-};
-
-FORCEINLINE uint32 OUURUNTIME_API GetTypeHash(const FSequentialFrameTask::FTaskHandle& Handle)
-{
-	return Handle.Index;
-}
 
 /**
  * The sequential frame scheduler allows organizing the invocation of time consuming tasks over multiple frames.
@@ -99,6 +22,10 @@ FORCEINLINE uint32 OUURUNTIME_API GetTypeHash(const FSequentialFrameTask::FTaskH
  */
 class OUURUNTIME_API FSequentialFrameScheduler
 {
+#if WITH_GAMEPLAY_DEBUGGER
+	friend class FGameplayDebuggerCategory_SequentialFrameScheduler;
+#endif
+
 public:
 	using FTaskHandle = FSequentialFrameTask::FTaskHandle;
 	using FTaskUnifiedDelegate = FSequentialFrameTask::FTaskUnifiedDelegate;
@@ -106,7 +33,7 @@ public:
 	using FTaskDynamicDelegate = FSequentialFrameTask::FTaskDynamicDelegate;
 
 	const bool bClampStats = true;
-	int32 MaxNumTasksToExecutePerFrame = 2;
+	int32 MaxNumTasksToExecutePerFrame = 1;
 	const int32 NumFramesToLookAheadForSorting = 3;
 
 	/**
@@ -164,6 +91,10 @@ public:
 	/** Give the task a somewhat recognizable name for debugging purposes. */
 	void AddTaskDebugName(const FTaskHandle& Handle, const FName TaskName);
 
+	bool IsTaskPaused(const FTaskHandle& Handle) const;
+	void PauseTask(const FTaskHandle& Handle);
+	void UnPauseTask(const FTaskHandle& Handle);
+
 protected:
 	/**
 	 * Map that point the task handles to the actual task object that store all the state of
@@ -190,7 +121,7 @@ protected:
 	static const int32 NumFramesBufferSize = 60;
 	TFixedSizeRingAggregator<float, NumFramesBufferSize> DeltaTimeRingBuffer;
 
-#if DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER
+#if WITH_GAMEPLAY_DEBUGGER
 	struct FDebugData
 	{
 		/**
@@ -221,11 +152,6 @@ private:
 	// Simple incrementation with overflow check should suffice as the system is
 	// not really designed to be used with > INT_MAX task additions/removals.
 	int32 TaskIdCounter = 0;
-
-	// Internal time tracker. No need to manually sync this with any of the game times.
-	// The scale at which this time tracker advances is directly determined by the
-	// DeltaTime values passed into Tick().
-	float Now = 0.f;
 
 	// Tick/frame counter
 	uint32 TickCounter = 0;

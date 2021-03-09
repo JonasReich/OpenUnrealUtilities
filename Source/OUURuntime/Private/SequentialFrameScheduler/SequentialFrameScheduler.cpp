@@ -1,37 +1,10 @@
 // Copyright (c) 2021 Jonas Reich
 
-#include "FlowControl/SequentialFrameScheduler.h"
-
-float FSequentialFrameTask::GetNextDesiredInvocationTimeSeconds() const
-{
-	return (LastInvocationTime + Period);
-}
-
-void FSequentialFrameTask::SetTimeNow(float Now)
-{
-	CachedOvertimeSeconds = Now - GetNextDesiredInvocationTimeSeconds();
-	CachedOvertimeFraction = CachedOvertimeSeconds / Period;;
-}
-
-float FSequentialFrameTask::GetOvertimeSeconds() const
-{
-	return CachedOvertimeSeconds;
-}
-
-float FSequentialFrameTask::GetOvertimeFraction() const
-{
-	return CachedOvertimeFraction;
-}
-
-float FSequentialFrameTask::GetPredictedOvertimeFraction(float PredictedDeltaTime, int32 NumFrames) const
-{
-	return CachedOvertimeFraction + ((PredictedDeltaTime / Period) * NumFrames); 
-}
+#include "SequentialFrameScheduler/SequentialFrameScheduler.h"
 
 void FSequentialFrameScheduler::Tick(float DeltaTime)
 {
 	TickCounter++;
-	Now += DeltaTime;
 	DeltaTimeRingBuffer.Add(DeltaTime);
 	const float PredictedDeltaTimeNextFrames = DeltaTimeRingBuffer.Average();
 
@@ -41,7 +14,7 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 	if (TaskQueue.Num() <= 0)
 		return;
 
-#if DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER
+#if WITH_GAMEPLAY_DEBUGGER
 	float MaxOvertimeSeconds = 0.f;
 	float MaxOvertimeFraction = 0.f;
 	float SumOvertimeSeconds = 0.f;
@@ -50,9 +23,9 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 	for (auto& KeyValuePair : TaskHandlesToTaskInfos)
 	{
 		auto Task = KeyValuePair.Value.ToSharedRef();
-		Task->SetTimeNow(Now);
+		Task->Tick(DeltaTime);
 
-#if DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER
+#if WITH_GAMEPLAY_DEBUGGER
 		const float TaskOvertimeSeconds = Task->GetOvertimeSeconds();
 		const float TaskOvertimeSecondsClamped = bClampStats ? FMath::Clamp(TaskOvertimeSeconds, 0.f, MAX_FLT) : TaskOvertimeSeconds;
 		SumOvertimeSeconds += TaskOvertimeSecondsClamped;
@@ -65,7 +38,7 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 #endif
 	}
 
-#if DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER
+#if WITH_GAMEPLAY_DEBUGGER
 	const float NumTasksFloat = static_cast<float>(TaskHandlesToTaskInfos.Num());
 	DebugData.MaxDelaySecondsRingBuffer.Add(MaxOvertimeSeconds);
 	DebugData.AverageDelaySecondsRingBuffer.Add(SumOvertimeSeconds / NumTasksFloat);
@@ -107,16 +80,15 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 			continue;
 		}
 
-		CurrentTask->LastInvocationTime = Now;
-		CurrentTask->Delegate.Execute();
+		CurrentTask->Execute();
 
 		ActualNumTasksExecutedThisFrame++;
 
-#if DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER
+#if WITH_GAMEPLAY_DEBUGGER
 		DebugData.TaskHistory.Add(TTuple<uint32, FTaskHandle>{TickCounter, CurrentTask->Handle});
 #endif
 	}
-#if DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER
+#if WITH_GAMEPLAY_DEBUGGER
 	DebugData.NumTasksExecutedRingBuffer.Add(ActualNumTasksExecutedThisFrame);
 #endif
 }
@@ -129,9 +101,28 @@ void FSequentialFrameScheduler::RemoveTask(const FTaskHandle& Handle)
 
 void FSequentialFrameScheduler::AddTaskDebugName(const FTaskHandle& Handle, const FName TaskName)
 {
-#if DEBUG_SEQUENTIAL_FRAME_TASK_SCHEDULER
+#if WITH_GAMEPLAY_DEBUGGER
 	DebugData.TaskDebugNames.Add(Handle, TaskName);
 #endif
+}
+
+bool FSequentialFrameScheduler::IsTaskPaused(const FTaskHandle& Handle) const
+{
+	if (auto* Task = TaskHandlesToTaskInfos.Find(Handle))
+	{
+		return Task->Get()->bIsPaused;
+	}
+	return false;
+}
+
+void FSequentialFrameScheduler::PauseTask(const FTaskHandle& Handle)
+{
+	GetTask(Handle).bIsPaused = true;
+}
+
+void FSequentialFrameScheduler::UnPauseTask(const FTaskHandle& Handle)
+{
+	GetTask(Handle).bIsPaused = false;
 }
 
 FSequentialFrameTask::FTaskHandle FSequentialFrameScheduler::InternalAddTask(FTaskUnifiedDelegate&& Delegate, float InPeriod, bool bTickAsOftenAsPossible)
@@ -161,7 +152,7 @@ void FSequentialFrameScheduler::AddPendingTasksToQueue()
 		// Pretend the task needs immediate invocation when initially adding it to the queue.
 		// This mainly ensures that tasks being added after minutes/hours of play don't get unproportionally large overtime
 		// and tasks added as bTickAsOftenAsPossible=false at least get the initial tick as soon as possible.
-		GetTask(TaskHandle).LastInvocationTime = Now - GetTask(TaskHandle).Period;
+		GetTask(TaskHandle).LastInvocationTime = -1.0f * GetTask(TaskHandle).Period;
 	}
 	TasksPendingForAdd.Empty();
 }
