@@ -15,7 +15,7 @@ class APlayerController;
  * Utility library that allows arbitrary projection from world to screen space and vice versa.
  */
 UCLASS()
-class OUURUNTIME_API USceneProjectionLibrary : public UBlueprintFunctionLibrary
+class OUURUNTIME_API UOUUSceneProjectionLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:

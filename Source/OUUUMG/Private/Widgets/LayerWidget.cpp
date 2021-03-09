@@ -1,12 +1,12 @@
 // Copyright (c) 2021 Jonas Reich
 
-#include "UMG/LayerWidget.h"
+#include "Widgets/LayerWidget.h"
 #include "Widgets/SWidget.h"
 #include "Widgets/SViewport.h"
 #include "Framework/Application/SlateApplication.h"
 #include "LogOpenUnrealUtilities.h"
 #include "UMG/UMGUtils.h"
-#include "UMG/UMGInputBinding.h"
+#include "UMGInputBinding.h"
 
 void UOUULayerWidget::UpdateLayer(const UOUULayerWidget* LayerAbove)
 {

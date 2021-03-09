@@ -45,7 +45,7 @@ enum class EUMGInputActionKeyEventConsumeMode : uint8
  * Only works for Input ACTION mappings, not Axis mappings.
  */
 USTRUCT(BlueprintType)
-struct OUURUNTIME_API FUMGInputAction
+struct OUUUMG_API FUMGInputAction
 {
 	GENERATED_BODY()
 public:
@@ -99,7 +99,7 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FUMGInputActionDelegate, EUMGInputActionKeyEve
  * up in the hierarchy.
  */
 UCLASS(BlueprintType)
-class OUURUNTIME_API UUMGInputActionBindingStack : public UObject
+class OUUUMG_API UUMGInputActionBindingStack : public UObject
 {
 	GENERATED_BODY()
 public:

@@ -4,7 +4,7 @@
 
 #if WITH_AUTOMATION_WORKER
 
-#include "UMG/ActivatableWidget.h"
+#include "Widgets/ActivatableWidget.h"
 // UMG classes
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetTree.h"
@@ -40,7 +40,7 @@ void CreateComplexUserWidget(FAutomationTestWorld& TestWorld, UOUUActivatableWid
 	}
 }
 
-BEGIN_DEFINE_SPEC(FActivatableWidgetSpec, "OpenUnrealUtilities.UMG.ActivatableWidget", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FActivatableWidgetSpec, "OpenUnrealUtilities.UMG.Widgets.ActivatableWidget", DEFAULT_OUU_TEST_FLAGS)
 FAutomationTestWorld TestWorld;
 UOUUActivatableWidget* Widget;
 END_DEFINE_SPEC(FActivatableWidgetSpec)

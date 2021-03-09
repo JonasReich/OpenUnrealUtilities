@@ -4,8 +4,8 @@
 
 #if WITH_AUTOMATION_WORKER
 
-#include "UMG/LayerStackWidget.h"
-#include "LayerStackWidgetTests.h"
+#include "Widgets/LayerStackWidget.h"
+#include "UMG/Widgets/LayerStackWidgetTests.h"
 
 TArray<const UOUULayerWidget*> UTestUOUULayerStackWidget::UpdatedLayers;
 TArray<const UOUULayerWidget*> UTestUOUULayerStackWidget::LayersAboveUpdatedLayers;
@@ -18,7 +18,7 @@ void TickLayerStackViaSlate(UOUULayerStackWidget* LayerStack)
 	SlateWidget->Tick(Geo, 0.f, 0.f);
 }
 
-BEGIN_DEFINE_SPEC(FLayerStackWidgetSpec, "OpenUnrealUtilities.UMG.LayerStackWidget", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FLayerStackWidgetSpec, "OpenUnrealUtilities.UMG.Widgets.LayerStackWidget", DEFAULT_OUU_TEST_FLAGS)
 FAutomationTestWorld TestWorld;
 UTestUOUULayerStackWidget* StackWidget;
 UTestUOUULayerStackWidget* SecondStackWidget;

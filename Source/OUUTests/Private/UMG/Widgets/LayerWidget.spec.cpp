@@ -4,7 +4,7 @@
 
 #if WITH_AUTOMATION_WORKER
 
-#include "UMG/LayerWidget.h"
+#include "Widgets/LayerWidget.h"
 #include "Components/HorizontalBox.h"
 #include "Components/Button.h"
 #include "Blueprint/UserWidget.h"
@@ -36,7 +36,7 @@ void SetVisiblityOfAllChildren(UWidget* Widget, ESlateVisibility Visibility)
 	});
 }
 
-BEGIN_DEFINE_SPEC(FLayerWidgetSpec, "OpenUnrealUtilities.UMG.LayerWidget", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FLayerWidgetSpec, "OpenUnrealUtilities.UMG.Widgets.LayerWidget", DEFAULT_OUU_TEST_FLAGS)
 FAutomationTestWorld TestWorld;
 UOUULayerWidget* FirstLayerWidget;
 UOUULayerWidget* SecondLayerWidget;

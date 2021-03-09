@@ -5,12 +5,10 @@
 
 #if WITH_AUTOMATION_WORKER
 
-#include "UMG/UMGInputBinding.h"
-#include "Engine/World.h"
+#include "UMGInputBinding.h"
 #include "OUUMacros.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerInput.h"
-#include "Templates/BoolRange.h"
 
 FKeyEvent SimulateKeyEvent(UPlayerInput* PlayerInput, UUMGInputBindingTestWidget* Widget, FKey Key, EInputEvent Event)
 {
@@ -20,7 +18,7 @@ FKeyEvent SimulateKeyEvent(UPlayerInput* PlayerInput, UUMGInputBindingTestWidget
 	PlayerInput->ProcessInputStack(InputComponents, 0.f, false);
 	switch (Event)
 	{
-	case EInputEvent::IE_Pressed:
+	case IE_Pressed:
 	{
 		Widget->NativeOnKeyDown(FGeometry(), KeyEvent);
 		break;

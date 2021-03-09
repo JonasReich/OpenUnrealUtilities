@@ -4,15 +4,15 @@
 
 #if WITH_AUTOMATION_WORKER
 
-#include "UMG/InteractableUserWidget.h"
-#include "InteractableUserWidgetTests.h"
+#include "Widgets/InteractableUserWidget.h"
+#include "UMG/Widgets/InteractableUserWidgetTests.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Button.h"
 #include "Components/HorizontalBox.h"
 
-BEGIN_DEFINE_SPEC(FInteractableUserWidgetSpec, "OpenUnrealUtilities.UMG.InteractableUserWidget", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FInteractableUserWidgetSpec, "OpenUnrealUtilities.UMG.Widgets.InteractableUserWidget", DEFAULT_OUU_TEST_FLAGS)
 FAutomationTestWorld TestWorld;
-UInteractableUserWidget* Widget;
+UOUUInteractableUserWidget* Widget;
 UWidgetTree* WidgetTree;
 END_DEFINE_SPEC(FInteractableUserWidgetSpec)
 void FInteractableUserWidgetSpec::Define()
@@ -21,7 +21,7 @@ void FInteractableUserWidgetSpec::Define()
 	{
 		TestWorld.CreateWorld();
 		TestWorld.InitializeGame();
-		Widget = CreateWidget<UInteractableUserWidget>(TestWorld.PlayerController);
+		Widget = CreateWidget<UOUUInteractableUserWidget>(TestWorld.PlayerController);
 		WidgetTree = Widget->WidgetTree;
 	});
 

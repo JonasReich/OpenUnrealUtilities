@@ -10,7 +10,7 @@
 #include "SceneViewExtension.h"
 #include "GameFramework/WorldSettings.h"
 
-bool USceneProjectionLibrary::GetViewProjectionData(UCameraComponent* TargetCamera, APlayerController const* Player, FSceneViewProjectionData& OutProjectionData)
+bool UOUUSceneProjectionLibrary::GetViewProjectionData(UCameraComponent* TargetCamera, APlayerController const* Player, FSceneViewProjectionData& OutProjectionData)
 {
 	ULocalPlayer* const LocalPlayer = Player ? Player->GetLocalPlayer() : nullptr;
 	if (!LocalPlayer || !LocalPlayer->ViewportClient)
@@ -103,7 +103,7 @@ bool USceneProjectionLibrary::GetViewProjectionData(UCameraComponent* TargetCame
 	return true;
 }
 
-bool USceneProjectionLibrary::ProjectWorldToScreen(UCameraComponent* TargetCamera, APlayerController const* Player, const FVector& WorldPosition, FVector2D& OutScreenPosition, bool bPlayerViewportRelative /*= true*/)
+bool UOUUSceneProjectionLibrary::ProjectWorldToScreen(UCameraComponent* TargetCamera, APlayerController const* Player, const FVector& WorldPosition, FVector2D& OutScreenPosition, bool bPlayerViewportRelative /*= true*/)
 {
 	FSceneViewProjectionData ProjectionData;
 	if (GetViewProjectionData(TargetCamera, Player, ProjectionData))
@@ -122,7 +122,7 @@ bool USceneProjectionLibrary::ProjectWorldToScreen(UCameraComponent* TargetCamer
 	return false;
 }
 
-bool USceneProjectionLibrary::DeprojectScreenToWorld(UCameraComponent* TargetCamera, APlayerController const* Player, const FVector2D& ScreenPosition, FVector& OutWorldPosition, FVector& OutWorldDirection)
+bool UOUUSceneProjectionLibrary::DeprojectScreenToWorld(UCameraComponent* TargetCamera, APlayerController const* Player, const FVector2D& ScreenPosition, FVector& OutWorldPosition, FVector& OutWorldDirection)
 {
 	FSceneViewProjectionData ProjectionData;
 	if (GetViewProjectionData(TargetCamera, Player, ProjectionData))

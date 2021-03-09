@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "UMG/UserFocusResetableWidget.h"
+#include "Widgets/UserFocusResetableWidget.h"
 #include "InteractableUserWidget.generated.h"
 
 class UUMGInputActionBindingStack;
@@ -14,9 +14,9 @@ class UUMGInputActionBindingStack;
  * to implement the IUserFocusResettableWidget interface using the template TUserFocusResetableWidget_Impl<T>.
  */
 UCLASS()
-class OUURUNTIME_API UInteractableUserWidget : public UUserWidget,
+class OUUUMG_API UOUUInteractableUserWidget : public UUserWidget,
 	public IUserFocusResetableWidget,
-	public TUserFocusResetableWidget_Impl<UInteractableUserWidget>
+	public TUserFocusResetableWidget_Impl<UOUUInteractableUserWidget>
 {
 	GENERATED_BODY()
 protected:

@@ -28,7 +28,8 @@ public class OUUTests : ModuleRules
 			"EditorScriptingUtilities",
 
 			// Plugin
-			"OUUBlueprintRuntime"
+			"OUUBlueprintRuntime",
+			"OUUUMG"
 		});
 	}
 }

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "UMG/UserFocusResetableWidget.h"
+#include "Widgets/UserFocusResetableWidget.h"
 #include "InteractableUserWidgetTests.generated.h"
 
 UCLASS(meta = (Hidden, HideDropDown))

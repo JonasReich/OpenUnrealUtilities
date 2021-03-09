@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "UMG/UMGInputBinding.h"
+#include "UMGInputBinding.h"
 #include "UMGInputBindingTests.generated.h"
 
 class UUMGInputActionBindingStack;

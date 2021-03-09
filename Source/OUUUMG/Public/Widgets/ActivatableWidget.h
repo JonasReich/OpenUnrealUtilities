@@ -15,7 +15,7 @@ class UUMGInputActionBindingStack;
  * creation of user widgets that handle input and focus events for gamepad interactable widgets.
  */
 UCLASS()
-class OUURUNTIME_API UOUUActivatableWidget : public UUserWidget,
+class OUUUMG_API UOUUActivatableWidget : public UUserWidget,
 	public IUserFocusResetableWidget,
 	public TUserFocusResetableWidget_Impl<UOUUActivatableWidget>
 {

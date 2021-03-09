@@ -8,7 +8,7 @@
 #include "UserFocusResetableWidget.generated.h"
 
 UINTERFACE()
-class OUURUNTIME_API UUserFocusResetableWidget : public UInterface
+class OUUUMG_API UUserFocusResetableWidget : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -17,7 +17,7 @@ class OUURUNTIME_API UUserFocusResetableWidget : public UInterface
  * Base widget that shows how you can integrate UUMGInputActionBindingStack and how
  * to implement the IUserFocusResettableWidget interface
  */
-class OUURUNTIME_API IUserFocusResetableWidget : public IInterface
+class OUUUMG_API IUserFocusResetableWidget : public IInterface
 {
 	GENERATED_BODY()
 public:

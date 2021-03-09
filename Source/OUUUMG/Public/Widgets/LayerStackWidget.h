@@ -23,7 +23,7 @@ class UOUULayerWidget;
  * is a useful approach that should be taken when  switching between bigger contexts (e.g. based on game mode).
  */
 UCLASS()
-class OUURUNTIME_API UOUULayerStackWidget : public UUserWidget
+class OUUUMG_API UOUULayerStackWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:

@@ -1,10 +1,9 @@
 // Copyright (c) 2021 Jonas Reich
 
-#include "UMG/InteractableUserWidget.h"
-#include "UMG/UMGInputBinding.h"
-#include "LogOpenUnrealUtilities.h"
+#include "Widgets/InteractableUserWidget.h"
+#include "UMGInputBinding.h"
 
-UUMGInputActionBindingStack* UInteractableUserWidget::GetInputActionBindingStack()
+UUMGInputActionBindingStack* UOUUInteractableUserWidget::GetInputActionBindingStack()
 {
 	if (!IsValid(InputActionBindingStack))
 	{
@@ -13,7 +12,7 @@ UUMGInputActionBindingStack* UInteractableUserWidget::GetInputActionBindingStack
 	return InputActionBindingStack;
 }
 
-FReply UInteractableUserWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+FReply UOUUInteractableUserWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
 	if (IsValid(InputActionBindingStack))
 	{
@@ -26,7 +25,7 @@ FReply UInteractableUserWidget::NativeOnKeyDown(const FGeometry& InGeometry, con
 	return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
 
-FReply UInteractableUserWidget::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+FReply UOUUInteractableUserWidget::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
 	if (IsValid(InputActionBindingStack))
 	{
@@ -39,7 +38,7 @@ FReply UInteractableUserWidget::NativeOnKeyUp(const FGeometry& InGeometry, const
 	return Super::NativeOnKeyUp(InGeometry, InKeyEvent);
 }
 
-bool UInteractableUserWidget::ResetUserFocus_Implementation()
+bool UOUUInteractableUserWidget::ResetUserFocus_Implementation()
 {
 	return ResetUserFocus_TemplateImplementation();
 }

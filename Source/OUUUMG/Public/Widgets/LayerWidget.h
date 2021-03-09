@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UMG/UserFocusResetableWidget.h"
+#include "Widgets/UserFocusResetableWidget.h"
 #include "LayerWidget.generated.h"
 
 class UUMGInputActionBindingStack;
@@ -20,7 +20,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRequestResetFocusToHighestLayer);
  *		from the visibility of contained widgets (see UpdateLayer() and CheckIsInputVisible()).
  */
 UCLASS()
-class OUURUNTIME_API UOUULayerWidget : public UUserWidget,
+class OUUUMG_API UOUULayerWidget : public UUserWidget,
 	public IUserFocusResetableWidget,
 	public TUserFocusResetableWidget_Impl<UOUULayerWidget>
 {

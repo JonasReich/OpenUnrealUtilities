@@ -1,6 +1,6 @@
 // Copyright (c) 2021 Jonas Reich
 
-#include "UMG/UMGInputBinding.h"
+#include "UMGInputBinding.h"
 #include "Blueprint/UserWidget.h"
 #include "LogOpenUnrealUtilities.h"
 #include "GameFramework/PlayerInput.h"

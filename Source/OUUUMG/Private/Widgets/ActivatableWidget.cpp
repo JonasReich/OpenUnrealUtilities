@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "UMG/ActivatableWidget.h"
+#include "Widgets/ActivatableWidget.h"
 #include "LogOpenUnrealUtilities.h"
-#include "UMG/UMGInputBinding.h"
+#include "UMGInputBinding.h"
 #include "UMG/UMGUtils.h"
 
 UUMGInputActionBindingStack* UOUUActivatableWidget::GetInputActionBindingStack()

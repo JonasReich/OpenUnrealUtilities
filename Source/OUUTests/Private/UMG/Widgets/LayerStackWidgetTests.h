@@ -1,7 +1,7 @@
 // Copyright (c) 2021 Jonas Reich
 
-#include "UMG/LayerStackWidget.h"
-#include "UMG/LayerWidget.h"
+#include "Widgets/LayerStackWidget.h"
+#include "Widgets/LayerWidget.h"
 #include "Components/Overlay.h"
 #include "LayerStackWidgetTests.generated.h"
 
