@@ -10,7 +10,7 @@
 template <typename T>
 struct TIsInteger
 {
-    enum { Value = false };
+	enum { Value = false };
 };
 
 template <> struct TIsInteger<uint8> { enum { Value = true }; };

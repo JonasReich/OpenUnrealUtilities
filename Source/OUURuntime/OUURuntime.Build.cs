@@ -26,7 +26,7 @@ public class OUURuntime : ModuleRules
 		
 		if (Target.bBuildDeveloperTools || (Target.Configuration != UnrealTargetConfiguration.Shipping && Target.Configuration != UnrealTargetConfiguration.Test))
 		{
-			PrivateDependencyModuleNames.Add("GameplayDebugger");
+			PublicDependencyModuleNames.Add("GameplayDebugger");
 			PublicDefinitions.Add("WITH_GAMEPLAY_DEBUGGER=1");
 		}
 		else
