@@ -42,6 +42,8 @@ public:
 	 */
 	void Tick(float DeltaTime);
 
+	bool TaskExists(const FTaskHandle& Handle) const;
+
 	template <typename... ArgumentTypes>
 	FORCEINLINE FTaskHandle AddNamedTask(const FName TaskName, ArgumentTypes ... Args)
 	{
@@ -142,8 +144,8 @@ protected:
 		TFixedSizeRingAggregator<int32, NumFramesBufferSize> NumTasksExecutedRingBuffer;
 
 		// Which tasks were actually executed in the last frames.
-		// TTuple: [TickCounter, TaskId]
-		TFixedSizeRingAggregator<TTuple<uint32, FTaskHandle>, NumFramesBufferSize> TaskHistory;
+		// TTuple: [TickCounter, TaskId, TimeBetweenUpdates]
+		TFixedSizeRingAggregator<TTuple<uint32, FTaskHandle, float>, NumFramesBufferSize> TaskHistory;
 	} DebugData;
 #endif
 

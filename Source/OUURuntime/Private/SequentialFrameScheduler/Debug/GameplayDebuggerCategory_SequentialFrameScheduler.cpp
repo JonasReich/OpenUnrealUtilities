@@ -75,11 +75,11 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(APlayerControl
 
 	const float MaxDelaySeconds = DebugScheduler->DebugData.MaxDelaySecondsRingBuffer.Max();
 	const float MaxDelayFraction = DebugScheduler->DebugData.MaxDelayFractionRingBuffer.Max();
-	CanvasContext.Printf(TEXT("Max Delay: %fs \t(%f%%)"), MaxDelaySeconds, MaxDelayFraction);
+	CanvasContext.Printf(TEXT("Max Delay: %.2fms \t(%f%%)"), MaxDelaySeconds * 1000.f, MaxDelayFraction);
 
 	const float AverageDelaySeconds = DebugScheduler->DebugData.AverageDelaySecondsRingBuffer.Average();
 	const float AverageDelayFraction = DebugScheduler->DebugData.AverageDelayFractionRingBuffer.Average();
-	CanvasContext.Printf(TEXT("Avg Delay: %fs \t(%f%%)"), AverageDelaySeconds, AverageDelayFraction);
+	CanvasContext.Printf(TEXT("Avg Delay: %.2fms \t(%f%%)"), AverageDelaySeconds * 1000.f, AverageDelayFraction);
 
 	const int32 MaxNumTasksExecuted = DebugScheduler->DebugData.NumTasksExecutedRingBuffer.Max();
 	CanvasContext.Printf(TEXT("Max num tasks / frame: %i"), MaxNumTasksExecuted);
@@ -91,11 +91,14 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(APlayerControl
 	FString HistoryString = "";
 	for (int32 i = 0; i < TaskHistory.Num() && i < 20; i++)
 	{
-		TTuple<uint32, FSequentialFrameTask::FTaskHandle>& HistoryEntry = TaskHistory[i]; 
-		auto TaskHandle =  HistoryEntry.Get<1>();
+		int32 FrameNumber;
+		FSequentialFrameTask::FTaskHandle TaskHandle;
+		float TimeBetweenUpdates;
+		Tie(FrameNumber, TaskHandle, TimeBetweenUpdates) = TaskHistory[i];
+
 		FName TaskName = DebugScheduler->DebugData.TaskDebugNames[TaskHandle];
 		TSharedPtr<FSequentialFrameTask> TaskInfo = DebugScheduler->TaskHandlesToTaskInfos[TaskHandle];
-		HistoryString += FString::Printf(TEXT("\n- %i %s (period: %.2f)"), HistoryEntry.Get<0>(), *TaskName.ToString(), TaskInfo->Period);
+		HistoryString += FString::Printf(TEXT("\n- #%i tick time: %.2fms, period: %.2fms %s"), FrameNumber, TimeBetweenUpdates * 1000.f, TaskInfo->Period * 1000.f, *TaskName.ToString());
 	}
 	CanvasContext.Print(HistoryString);
 }

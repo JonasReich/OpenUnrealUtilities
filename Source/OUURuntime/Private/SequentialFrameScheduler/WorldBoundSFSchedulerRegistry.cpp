@@ -24,12 +24,12 @@ bool AWorldBoundSFSchedulerRegistry::FPrioritizedScheduler::operator<(const FPri
 	return Priority < Other.Priority;
 }
 
-AWorldBoundSFSchedulerRegistry::FPrioritizedScheduler& AWorldBoundSFSchedulerRegistry::GetDefaultScheduler(UObject* WorldContextObject)
+AWorldBoundSFSchedulerRegistry::FPrioritizedScheduler& AWorldBoundSFSchedulerRegistry::GetDefaultScheduler(const UObject* WorldContextObject)
 {
 	return GetNamedScheduler(WorldContextObject, TEXT("Default"), TG_PrePhysics);
 }
 
-AWorldBoundSFSchedulerRegistry::FPrioritizedScheduler& AWorldBoundSFSchedulerRegistry::GetNamedScheduler(UObject* WorldContextObject, FName SchedulerName, ETickingGroup TickingGroup)
+AWorldBoundSFSchedulerRegistry::FPrioritizedScheduler& AWorldBoundSFSchedulerRegistry::GetNamedScheduler(const UObject* WorldContextObject, FName SchedulerName, ETickingGroup TickingGroup)
 {
 	AWorldBoundSFSchedulerRegistry& TypedThis = GetWorldSingleton(WorldContextObject);
 	if (FSchedulerPtr* Scheduler = TypedThis.SchedulersByName.Find(SchedulerName))
@@ -101,7 +101,7 @@ void AWorldBoundSFSchedulerRegistry::TickActor(float DeltaTime, ELevelTick TickT
 	}
 }
 
-AWorldBoundSFSchedulerRegistry& AWorldBoundSFSchedulerRegistry::GetWorldSingleton(UObject* WorldContextObject)
+AWorldBoundSFSchedulerRegistry& AWorldBoundSFSchedulerRegistry::GetWorldSingleton(const UObject* WorldContextObject)
 {
 	check(IsValid(WorldContextObject));
 	UWorld* World = WorldContextObject->GetWorld();

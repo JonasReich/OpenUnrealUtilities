@@ -80,17 +80,24 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 			continue;
 		}
 
+		const float LastInvocationTimeBefore = CurrentTask->LastInvocationTime;
 		CurrentTask->Execute();
+		const float TaskWaitTime = CurrentTask->Now - LastInvocationTimeBefore;
 
 		ActualNumTasksExecutedThisFrame++;
 
 #if WITH_GAMEPLAY_DEBUGGER
-		DebugData.TaskHistory.Add(TTuple<uint32, FTaskHandle>{TickCounter, CurrentTask->Handle});
+		DebugData.TaskHistory.Add(TTuple<uint32, FTaskHandle, float>{TickCounter, CurrentTask->Handle, TaskWaitTime});
 #endif
 	}
 #if WITH_GAMEPLAY_DEBUGGER
 	DebugData.NumTasksExecutedRingBuffer.Add(ActualNumTasksExecutedThisFrame);
 #endif
+}
+
+bool FSequentialFrameScheduler::TaskExists(const FTaskHandle& Handle) const
+{
+	return TaskHandlesToTaskInfos.Contains(Handle);
 }
 
 void FSequentialFrameScheduler::RemoveTask(const FTaskHandle& Handle)
@@ -117,12 +124,18 @@ bool FSequentialFrameScheduler::IsTaskPaused(const FTaskHandle& Handle) const
 
 void FSequentialFrameScheduler::PauseTask(const FTaskHandle& Handle)
 {
-	GetTask(Handle).bIsPaused = true;
+	if (TaskExists(Handle))
+	{
+		GetTask(Handle).bIsPaused = true;
+	}
 }
 
 void FSequentialFrameScheduler::UnPauseTask(const FTaskHandle& Handle)
 {
-	GetTask(Handle).bIsPaused = false;
+	if (TaskExists(Handle))
+	{
+		GetTask(Handle).bIsPaused = false;
+	}
 }
 
 FSequentialFrameTask::FTaskHandle FSequentialFrameScheduler::InternalAddTask(FTaskUnifiedDelegate&& Delegate, float InPeriod, bool bTickAsOftenAsPossible)

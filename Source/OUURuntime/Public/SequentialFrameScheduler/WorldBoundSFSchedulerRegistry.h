@@ -37,8 +37,8 @@ public:
 	AWorldBoundSFSchedulerRegistry();
 
 	/** Get the default scheduler (PrePhysics tick and default name) */
-	static FPrioritizedScheduler& GetDefaultScheduler(UObject* WorldContextObject);
-	static FPrioritizedScheduler& GetNamedScheduler(UObject* WorldContextObject, FName SchedulerName, ETickingGroup TickingGroup);
+	static FPrioritizedScheduler& GetDefaultScheduler(const UObject* WorldContextObject);
+	static FPrioritizedScheduler& GetNamedScheduler(const UObject* WorldContextObject, FName SchedulerName, ETickingGroup TickingGroup);
 
 	// - AActor
 	virtual void RegisterActorTickFunctions(bool bRegister) override;
@@ -58,5 +58,5 @@ private:
 	/** Store a priority sorted list for each tick group. Used to propagate Tick() to schedulers */
 	TMap<ETickingGroup, TArray<FSchedulerPtr>> TickGroupToSchedulerPriorityList;
 
-	static AWorldBoundSFSchedulerRegistry& GetWorldSingleton(UObject* WorldContextObject);
+	static AWorldBoundSFSchedulerRegistry& GetWorldSingleton(const UObject* WorldContextObject);
 };

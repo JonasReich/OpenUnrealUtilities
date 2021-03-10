@@ -44,6 +44,7 @@ public:
 
 	float Now = 0.f;
 	float LastInvocationTime = 0.f;
+	float SecondToLastInvocationTime = 0.f;
 
 	bool bIsPaused = false;
 
