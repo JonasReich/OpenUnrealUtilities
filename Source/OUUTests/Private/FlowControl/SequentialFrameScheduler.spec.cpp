@@ -57,6 +57,7 @@ void FSequentialFrameSchedulerSpec::Define()
 
 		It("should not disturb the execution of any other registered tasks", [this]()
 		{
+			Scheduler->MaxNumTasksToExecutePerFrame = 2;
 			FSequentialFrameScheduler::FTaskDelegate Delegate = FSequentialFrameScheduler::FTaskDelegate::CreateRaw(TargetObjectOne.Get(), &FTestTaskTarget::Tick);
 			auto Handle = Scheduler->AddTask(Delegate, 1.f);
 			FSequentialFrameScheduler::FTaskDelegate DelegateTwo = FSequentialFrameScheduler::FTaskDelegate::CreateRaw(TargetObjectTwo.Get(), &FTestTaskTarget::Tick);

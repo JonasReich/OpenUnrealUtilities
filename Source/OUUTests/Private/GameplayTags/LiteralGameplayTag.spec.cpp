@@ -6,14 +6,25 @@
 
 #include "GameplayTags/LiteralGameplayTag.h"
 
+/**
+ * Literal gameplay tag hierarchy used for FLiteralGameplayTagSpec.
+ *
+ * Note that the tags declared here are most likely not part of your projects GameplayTags.ini configuration.
+ * However, without the tags being present in the actual project configuration the gameplay tags manager will
+ * not be able to locate them and throw an ensure.
+ * Mandating those tags to be present would severely limit the portability of the Open Unreal Utilities plugin.
+ *
+ * Therefore, the spec below does not test the Get() function that returns actual gameplay tags and instead only
+ * tests the underlying functions for name composition.
+ */
 struct FTestGameplayTags : public FLiteralGameplayTagRoot
 {
-	OUU_GTAG(Player);
-	OUU_GTAG_GROUP(NPC)
-		OUU_GTAG_GROUP(Mobility)
-			OUU_GTAG(Driving);
-			OUU_GTAG(OnFoot);
-			OUU_GTAG(StandingUp);
+	OUU_GTAG(Foo);
+	OUU_GTAG_GROUP(Bar)
+		OUU_GTAG_GROUP(Letter)
+			OUU_GTAG(Alpha);
+			OUU_GTAG(Beta);
+			OUU_GTAG(Gamma);
 		};
 	};
 };
@@ -23,16 +34,41 @@ END_DEFINE_SPEC(FLiteralGameplayTagSpec)
 
 void FLiteralGameplayTagSpec::Define()
 {
-	It("should work", [this]()
+	Describe("GetName", [this]()
 	{
-		FGameplayTag Tag = FTestGameplayTags::NPC::Mobility::Driving::Get();
+		It("should return a matching name for simple tags", [this]()
+		{
+			const FString Name = FTestGameplayTags::Foo::GetName();
+			SPEC_TEST_EQUAL(Name, FString("Foo"));
+		});
 
-		SPEC_TEST_EQUAL(Tag.GetTagName(), FName("NPC.Mobility.Driving"));
-		FString Name = FTestGameplayTags::NPC::Mobility::Driving::GetName();
-		UE_LOG(LogTemp, Log, TEXT("TAG: %s; TAG NAME: %s"), *Tag.GetTagName().ToString(), *Name);
+		It("should return a matching name for nested tags", [this]()
+		{
+			const FString Name = FTestGameplayTags::Bar::Letter::Alpha::GetName();
+			SPEC_TEST_EQUAL(Name, FString("Bar.Letter.Alpha"));
+		});
+	});
 
-		FGameplayTag PlayerTag = FTestGameplayTags::Player::Get();
-		SPEC_TEST_EQUAL(PlayerTag.GetTagName(), FName("Player"));
+	Describe("GetRelativeName", [this]()
+	{
+		It("should return the full name for simple tags", [this]()
+		{
+			const FString FullName = FTestGameplayTags::Foo::GetName();
+			const FString RelativeName = FTestGameplayTags::Foo::GetRelativeName();
+			SPEC_TEST_EQUAL(FullName, FullName);
+		});
+
+		It ("should return only the specified highest tag element for nested container tags", [this]()
+		{
+			const FString Name = FTestGameplayTags::Bar::Letter::GetRelativeName();
+            SPEC_TEST_EQUAL(Name, FString("Letter"));
+		});
+
+		It("should return only the leaf tag element for nested simple tags", [this]()
+		{
+			const FString Name = FTestGameplayTags::Bar::Letter::Alpha::GetRelativeName();
+			SPEC_TEST_EQUAL(Name, FString("Alpha"));
+		});
 	});
 }
 
