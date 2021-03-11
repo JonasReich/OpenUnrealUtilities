@@ -5,22 +5,21 @@ The Open Unreal Utilities plugin is a general purpose utility plugin for Unreal 
 
 ## Contents
 
-So far the plugin mainly contains runtime utilities and some automated testing helpers. These utilities include:
+The plugin is divided into several modules for different application purposes:
 
-- **Camera:** Blueprint utility functions for scene projections and render target handling
-- **Flow Control:** Generic lock and request objects
-- **Math:** Some math utility functions and blueprint exposure of FMath functionality
-- **Templates:**
-	- Container utilities (e.g. reverse iterator)
-	- UE4 style adaptation of std::tie
-	- Utility functions for interface pointer / TScriptInterface handling
-	- Bitmask manipulation functions for native C++ and Blueprint compatible bitmask definitions
-- **Traits:** Additional type traits
-- **UMG:** Base widgets and utilities for input handling, user focus management and input bindings in widget contexts
-- **Automated Testing:** *see [Automated Testing] section below*
+- **OUUBlueprintRuntime:** Blueprint exposed functionality that is already present in C++ UE4 off-the-shelf
+- **OUUEditor:** Functionality that only works when running the Editor
+- **OUURuntime:** Main runtime plugin. These utilties should be useful in all kinds of different contexts
+	ranging from container templates, execution flow helpers, etc
+- **OUUTests:** Automated tests that test test the plugin functionality. Only contains private content.
+	You will never need to reference this from other modules!
+- **OUUTestUtilities:** Testing utilities that help writing automated tests. Almost all of the tests in OUUTests
+	use at least some of the functionality from here.
+- **OUUUMG:** UMG Widgets and UI implementation helpers
 
 For a more detailed overview of all utilities you should check out the plugin source code,
-as most of the documentation is provided in the form of source code comments and automation tests.
+as most of the documentation is provided in the form of source code comments.
+If you want to know how a type is meant to be used, it can be useful to check the automation tests.
 
 ## Workflows
 
@@ -54,8 +53,8 @@ both the testing utilities as well as the targeted components are meant to be us
 
 If you want to use the testing utilities, it should be sufficient to
 
-- include OUUTests.h and
-- add the OpenUnrealUtilitiesTests module to the private dependencies of the module implementing the tests
+- include OUUTestUtilities.h and
+- add the OUUTestUtilities module to the private dependencies of the module implementing the tests
 
 ### Overview
 
