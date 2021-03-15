@@ -11,7 +11,7 @@
 #include "Components/HorizontalBox.h"
 
 BEGIN_DEFINE_SPEC(FInteractableUserWidgetSpec, "OpenUnrealUtilities.UMG.Widgets.InteractableUserWidget", DEFAULT_OUU_TEST_FLAGS)
-FAutomationTestWorld TestWorld;
+FOUUAutomationTestWorld TestWorld;
 UOUUInteractableWidget* Widget;
 UWidgetTree* WidgetTree;
 END_DEFINE_SPEC(FInteractableUserWidgetSpec)

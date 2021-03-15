@@ -15,11 +15,11 @@
  * - FGameplayEffectsTest::RunTest()
  * - FTimerManagerTest::RunTest()
  */
-struct OUUTESTUTILITIES_API FAutomationTestWorld
+struct OUUTESTUTILITIES_API FOUUAutomationTestWorld
 {
 public:
-	FAutomationTestWorld() = default;
-	virtual ~FAutomationTestWorld();
+	FOUUAutomationTestWorld() = default;
+	virtual ~FOUUAutomationTestWorld();
 
 	// Travel URL that will be used for game BeginPlay()
 	FURL URL;
@@ -87,12 +87,12 @@ protected:
  * reused across scopes.
  * When using this Scoped alternative you should not call CreateWorld() and DestroyWorld anymore!
  */
-struct OUUTESTUTILITIES_API FScopedAutomationTestWorld : public FAutomationTestWorld
+struct OUUTESTUTILITIES_API FOUUScopedAutomationTestWorld : public FOUUAutomationTestWorld
 {
 public:
-	using Super = FAutomationTestWorld;
-	FScopedAutomationTestWorld();
-	~FScopedAutomationTestWorld();
+	using Super = FOUUAutomationTestWorld;
+	FOUUScopedAutomationTestWorld();
+	~FOUUScopedAutomationTestWorld();
 
 	// - FAutomationTestWorld
 	void CreateWorld() override;

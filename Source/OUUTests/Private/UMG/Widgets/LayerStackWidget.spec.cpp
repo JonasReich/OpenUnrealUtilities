@@ -19,7 +19,7 @@ void TickLayerStackViaSlate(UOUULayerStackWidget* LayerStack)
 }
 
 BEGIN_DEFINE_SPEC(FLayerStackWidgetSpec, "OpenUnrealUtilities.UMG.Widgets.LayerStackWidget", DEFAULT_OUU_TEST_FLAGS)
-FAutomationTestWorld TestWorld;
+FOUUAutomationTestWorld TestWorld;
 UTestUOUULayerStackWidget* StackWidget;
 UTestUOUULayerStackWidget* SecondStackWidget;
 UTestUOUULayerStackWidget* ThirdStackWidget;

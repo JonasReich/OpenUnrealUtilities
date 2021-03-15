@@ -13,7 +13,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 
-void CreateComplexUserWidget(FAutomationTestWorld& TestWorld, UOUUActivatableWidget* Widget, bool bAddButton)
+void CreateComplexUserWidget(FOUUAutomationTestWorld& TestWorld, UOUUActivatableWidget* Widget, bool bAddButton)
 {
 	UWidgetTree* WidgetTree = Widget->WidgetTree;
 
@@ -41,7 +41,7 @@ void CreateComplexUserWidget(FAutomationTestWorld& TestWorld, UOUUActivatableWid
 }
 
 BEGIN_DEFINE_SPEC(FActivatableWidgetSpec, "OpenUnrealUtilities.UMG.Widgets.ActivatableWidget", DEFAULT_OUU_TEST_FLAGS)
-FAutomationTestWorld TestWorld;
+FOUUAutomationTestWorld TestWorld;
 UOUUActivatableWidget* Widget;
 END_DEFINE_SPEC(FActivatableWidgetSpec)
 void FActivatableWidgetSpec::Define()

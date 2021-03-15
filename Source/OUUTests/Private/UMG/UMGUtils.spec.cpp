@@ -11,7 +11,7 @@
 #include "Components/Image.h"
 #include "Components/Button.h"
 
-void CreateComplexUserWidget(FAutomationTestWorld& TestWorld, UOUUTestWidget* Widget, UWidgetTree* WidgetTree)
+void CreateComplexUserWidget(FOUUAutomationTestWorld& TestWorld, UOUUTestWidget* Widget, UWidgetTree* WidgetTree)
 {
 	UHorizontalBox* HorizontalBox = WidgetTree->ConstructWidget<UHorizontalBox>();
 	WidgetTree->RootWidget = HorizontalBox;
@@ -31,7 +31,7 @@ void CreateComplexUserWidget(FAutomationTestWorld& TestWorld, UOUUTestWidget* Wi
 }
 
 BEGIN_DEFINE_SPEC(FUMGUtilsSpec, "OpenUnrealUtilities.UMG.Utils", DEFAULT_OUU_TEST_FLAGS)
-FAutomationTestWorld TestWorld;
+FOUUAutomationTestWorld TestWorld;
 UOUUTestWidget* Widget;
 UWidgetTree* WidgetTree;
 int32 PredicateCallCount;

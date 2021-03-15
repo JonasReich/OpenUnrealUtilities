@@ -10,7 +10,7 @@
 #include "GameFramework/GameModeBase.h"
 
 BEGIN_DEFINE_SPEC(FAutomationTestWorldSpec, "OpenUnrealUtilities.TestUtilities.AutomationTestWorld", DEFAULT_OUU_TEST_FLAGS)
-FAutomationTestWorld TestWorld;
+FOUUAutomationTestWorld TestWorld;
 END_DEFINE_SPEC(FAutomationTestWorldSpec)
 void FAutomationTestWorldSpec::Define()
 {
@@ -49,7 +49,7 @@ void FAutomationTestWorldSpec::Define()
 
 			It("should fail without crash and throw an error if the world was not created prior", [this]()
 			{
-				FAutomationTestWorld LocalTempWorldContext;
+				FOUUAutomationTestWorld LocalTempWorldContext;
 				AddExpectedError("Could not send BeginPlay to invalid world!", EAutomationExpectedErrorFlags::Exact, 1);
 				LocalTempWorldContext.BeginPlay();
 			});
@@ -81,7 +81,7 @@ void FAutomationTestWorldSpec::Define()
 			
 			It("should fail without crash and throw an error if the world was not created prior", [this]()
 			{
-				FAutomationTestWorld LocalTempWorldContext;
+				FOUUAutomationTestWorld LocalTempWorldContext;
 				AddExpectedError("Could not InitiailizeGame invalid world!", EAutomationExpectedErrorFlags::Exact, 1);
 				LocalTempWorldContext.InitializeGame();
 			});

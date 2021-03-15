@@ -14,7 +14,7 @@
 #include "Engine/EngineTypes.h"
 #include "UObject/CoreOnline.h"
 
-FAutomationTestWorld::~FAutomationTestWorld()
+FOUUAutomationTestWorld::~FOUUAutomationTestWorld()
 {
 	if (!ensureMsgf(!bHasWorld, TEXT("Undestroyed world found! You must always explicitly delete/cleanup automation test worlds that are not FScopedAutomationTestWorlds!!!")))
 	{
@@ -22,22 +22,22 @@ FAutomationTestWorld::~FAutomationTestWorld()
 	}
 }
 
-void FAutomationTestWorld::CreateWorld()
+void FOUUAutomationTestWorld::CreateWorld()
 {
 	CreateWorldImplementation();
 }
 
-FWorldContext& FAutomationTestWorld::GetWorldContext() const
+FWorldContext& FOUUAutomationTestWorld::GetWorldContext() const
 {
 	return GEngine->GetWorldContextFromWorldChecked(World);
 }
 
-FTimerManager& FAutomationTestWorld::GetTimerManager() const
+FTimerManager& FOUUAutomationTestWorld::GetTimerManager() const
 {
 	return World->GetTimerManager();
 }
 
-void FAutomationTestWorld::BeginPlay()
+void FOUUAutomationTestWorld::BeginPlay()
 {
 	if (!IsValid(World))
 	{
@@ -54,7 +54,7 @@ if (Condition) { \
 	return false; \
 }
 
-bool FAutomationTestWorld::InitializeGame()
+bool FOUUAutomationTestWorld::InitializeGame()
 {
 	if (!IsValid(World))
 	{
@@ -90,12 +90,12 @@ bool FAutomationTestWorld::InitializeGame()
 }
 #undef CHECK_INIT_GAME_CONDITION
 
-void FAutomationTestWorld::DestroyWorld()
+void FOUUAutomationTestWorld::DestroyWorld()
 {
 	DestroyWorldImplementation();
 }
 
-void FAutomationTestWorld::CreateWorldImplementation()
+void FOUUAutomationTestWorld::CreateWorldImplementation()
 {
 	if (!ensureMsgf(!bHasWorld, TEXT("Undestroyed world found! You must always explicitly delete/cleanup automation test worlds that are not FScopedAutomationTestWorlds!!!")))
 	{
@@ -105,11 +105,12 @@ void FAutomationTestWorld::CreateWorldImplementation()
 	World = UWorld::CreateWorld(EWorldType::Game, false);
 	auto& WorldContext = GEngine->CreateNewWorldContext(EWorldType::Game);
 	WorldContext.SetCurrentWorld(World);
+	World->GetWorldSettings()->DefaultGameMode = AGameModeBase::StaticClass();
 
 	bHasWorld = true;
 }
 
-void FAutomationTestWorld::DestroyWorldImplementation()
+void FOUUAutomationTestWorld::DestroyWorldImplementation()
 {
 	GEngine->DestroyWorldContext(World);
 	World->DestroyWorld(false);
@@ -125,22 +126,22 @@ void FAutomationTestWorld::DestroyWorldImplementation()
 	CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
 }
 
-FScopedAutomationTestWorld::FScopedAutomationTestWorld()
+FOUUScopedAutomationTestWorld::FOUUScopedAutomationTestWorld()
 {
 	CreateWorldImplementation();
 }
 
-FScopedAutomationTestWorld::~FScopedAutomationTestWorld()
+FOUUScopedAutomationTestWorld::~FOUUScopedAutomationTestWorld()
 {
 	DestroyWorldImplementation();
 }
 
-void FScopedAutomationTestWorld::CreateWorld()
+void FOUUScopedAutomationTestWorld::CreateWorld()
 {
 	ensureMsgf(false, TEXT("CreateWorld must not be called on scoped automation worlds! Let RAII take care of world creation/destruction!"));
 }
 
-void FScopedAutomationTestWorld::DestroyWorld()
+void FOUUScopedAutomationTestWorld::DestroyWorld()
 {
 	ensureMsgf(false, TEXT("DestroyWorld must not be called on scoped automation worlds! Let RAII take care of world creation/destruction!"));
 }

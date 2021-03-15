@@ -11,7 +11,7 @@
 #include "Blueprint/WidgetTree.h"
 #include "UMG/UMGUtils.h"
 
-UOUULayerWidget* CreateLayer(FAutomationTestWorld& TestWorld)
+UOUULayerWidget* CreateLayer(FOUUAutomationTestWorld& TestWorld)
 {
 	UOUULayerWidget* ResultLayer = CreateWidget<UOUULayerWidget>(TestWorld.PlayerController);
 	UWidgetTree* WidgetTree = ResultLayer->WidgetTree;
@@ -37,7 +37,7 @@ void SetVisiblityOfAllChildren(UWidget* Widget, ESlateVisibility Visibility)
 }
 
 BEGIN_DEFINE_SPEC(FLayerWidgetSpec, "OpenUnrealUtilities.UMG.Widgets.LayerWidget", DEFAULT_OUU_TEST_FLAGS)
-FAutomationTestWorld TestWorld;
+FOUUAutomationTestWorld TestWorld;
 UOUULayerWidget* FirstLayerWidget;
 UOUULayerWidget* SecondLayerWidget;
 END_DEFINE_SPEC(FLayerWidgetSpec)
