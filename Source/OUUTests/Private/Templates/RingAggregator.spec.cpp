@@ -217,6 +217,35 @@ void FRingAggregatorSpec::Define()
 				TestArraysEqual(*this, "items returned from ranged-based for loop", NumbersInRangedFor, ExpectedNumbers, true);
 			});
 		});
+
+		Describe("operator[]", [this]()
+		{
+			It("should allow access to the correct elements (before wrap)", [this]()
+			{
+				TFixedSizeRingAggregator<int32, 3> TestAggregator;
+				TestAggregator.Add(42);
+				SPEC_TEST_EQUAL(TestAggregator[0], 42);
+				TestAggregator.Add(3);
+				SPEC_TEST_EQUAL(TestAggregator[0], 42);
+				SPEC_TEST_EQUAL(TestAggregator[1], 3);
+				TestAggregator.Add(4);
+				SPEC_TEST_EQUAL(TestAggregator[0], 42);
+				SPEC_TEST_EQUAL(TestAggregator[1], 3);
+				SPEC_TEST_EQUAL(TestAggregator[2], 4);
+			});
+
+			It("should allow access to the correct elements (after wrap)", [this]()
+			{
+				TFixedSizeRingAggregator<int32, 3> TestAggregator;
+				TestAggregator.Add(42);
+				TestAggregator.Add(3);
+				TestAggregator.Add(4);
+				TestAggregator.Add(69);
+				SPEC_TEST_EQUAL(TestAggregator[0], 3);
+				SPEC_TEST_EQUAL(TestAggregator[1], 4);
+				SPEC_TEST_EQUAL(TestAggregator[2], 69);
+			});
+		});
 	});
 
 	Describe("TRingAggregator", [this]()

@@ -118,8 +118,10 @@ protected:
 
 	int32 GetWrappedRingIndex(int32 Index) const
 	{
+		checkf(Storage.IsValidIndex(Index), TEXT("%i is an invalid index for storage with size %i. "
+			"You must stick to indices >= 0 and < Num just like with regular arrays!"), Index, Num());
 		const int32 RingIndex = (WriteIndex + Index);
-		const int32 WrappedRingIndex = (RingIndex >= Num()) ? (RingIndex - ArrayMax()) : RingIndex;
+		const int32 WrappedRingIndex = (RingIndex >= Num()) ? (RingIndex - Num()) : RingIndex;
 		return WrappedRingIndex;
 	}
 
