@@ -4,13 +4,21 @@
 
 #include "CoreMinimal.h"
 
+#include "InterfaceUtils.h"
 #include "Traits/IsStringType.h"
 #include "Traits/StringConversionTraits.h"
 
 /** LexToString overload for UObject pointers */
 FORCEINLINE FString LexToString(const UObject* O)
 {
-	return IsValid(O) ? O->GetName() : "Invalid";
+	return IsValid(O) ? O->GetName() : "None";
+}
+
+/** LexToString overload for TScriptInterface pointers */
+template<typename T>
+FORCEINLINE FString LexToString(TScriptInterface<T> Interface)
+{
+	return IsValidInterface(Interface) ? Interface.GetObject()->GetName() : "None";
 }
 
 /** LexToString overload for pointers to objects that are themselves string convertable with LexToString() */
@@ -54,10 +62,10 @@ FString LexToString(const T& Object)
  * Any string types will be quoted. 
  */
 template <typename ElementType, typename AllocatorType>
-FString ArrayToString(const TArray<ElementType, AllocatorType>& Array)
+FString ArrayToString(const TArray<ElementType, AllocatorType>& Array, const TCHAR* Separator = TEXT(", "))
 {
-	static_assert(TModels<CLexToStringConvertible, ElementType>::Value, "T must be string convertible with LexToString()!");
-	return FString::Printf(TEXT("[%s]"), *FString::JoinBy(Array, TEXT(", "), [](auto& Element)
+	static_assert(TModels<CLexToStringConvertible, ElementType>::Value, "ElementType must be string convertible with LexToString()!");
+	return FString::Printf(TEXT("[%s]"), *FString::JoinBy(Array, Separator, [](auto& Element)
 	{
 		if (TIsStringType<ElementType>::Value)
 		{
