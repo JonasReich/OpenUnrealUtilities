@@ -1,5 +1,7 @@
 ﻿// Copyright (c) 2021 Jonas Reich
 
+#pragma once
+
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "EngineGlobalsLibrary.generated.h"
 
