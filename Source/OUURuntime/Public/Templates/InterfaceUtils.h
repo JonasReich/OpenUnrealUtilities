@@ -68,15 +68,15 @@ FORCEINLINE bool IsValidInterface(T* InterfaceObject)
 template<typename T, typename = TIsIInterface_T<T>>
 FORCEINLINE bool IsValidInterface(TScriptInterface<T>& InterfaceObject)
 {
-	UObject* ObjectPoiner = InterfaceObject.GetObject();
-	bool bResult = IsValidInterface<T>(ObjectPoiner);
-	InterfaceObject.SetInterface(bResult ? Cast<T>(ObjectPoiner) : nullptr);
+	UObject* ObjectPointer = InterfaceObject.GetObject();
+	bool bResult = IsValidInterface<T>(ObjectPointer);
+	InterfaceObject.SetInterface(bResult ? Cast<T>(ObjectPointer) : nullptr);
 	return bResult;
 }
 
 /** Override to throw compile time error for using const TScriptInterface<T> or const TScriptInterface<T>& */
 template<typename T, typename = typename TIsIInterface_T<T>>
-FORCEINLINE bool IsValIsValidInterfaceid(const TScriptInterface<T>& InterfaceObject)
+FORCEINLINE bool IsValidInterface(const TScriptInterface<T>& InterfaceObject)
 {
 	static_assert(false, "You should not use const TScriptInterface<T>! Three reasons why:\n"
 		"\t- No memory benefit over passing by value\n"
