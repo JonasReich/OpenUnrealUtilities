@@ -39,7 +39,7 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(APlayerControl
 		return;
 	}
 
-	AWorldBoundSFSchedulerRegistry& FrameSchedulerRegistry = AWorldBoundSFSchedulerRegistry::GetWorldSingleton(OwnerPC);
+	AWorldBoundSFSchedulerRegistry& FrameSchedulerRegistry = *AWorldBoundSFSchedulerRegistry::GetWorldSingleton(OwnerPC);
 	TArray<FSchedulerPtr> Schedulers;
 	FrameSchedulerRegistry.SchedulersByName.GenerateValueArray(Schedulers);
 

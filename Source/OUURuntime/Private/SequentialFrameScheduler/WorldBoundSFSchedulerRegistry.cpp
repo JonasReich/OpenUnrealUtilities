@@ -24,24 +24,27 @@ bool AWorldBoundSFSchedulerRegistry::FPrioritizedScheduler::operator<(const FPri
 	return Priority < Other.Priority;
 }
 
-AWorldBoundSFSchedulerRegistry::FPrioritizedScheduler& AWorldBoundSFSchedulerRegistry::GetDefaultScheduler(const UObject* WorldContextObject)
+AWorldBoundSFSchedulerRegistry::FSchedulerPtr AWorldBoundSFSchedulerRegistry::GetDefaultScheduler(const UObject* WorldContextObject)
 {
 	return GetNamedScheduler(WorldContextObject, TEXT("Default"), TG_PrePhysics);
 }
 
-AWorldBoundSFSchedulerRegistry::FPrioritizedScheduler& AWorldBoundSFSchedulerRegistry::GetNamedScheduler(const UObject* WorldContextObject, FName SchedulerName, ETickingGroup TickingGroup)
+AWorldBoundSFSchedulerRegistry::FSchedulerPtr AWorldBoundSFSchedulerRegistry::GetNamedScheduler(const UObject* WorldContextObject, FName SchedulerName, ETickingGroup TickingGroup)
 {
-	AWorldBoundSFSchedulerRegistry& TypedThis = GetWorldSingleton(WorldContextObject);
-	if (FSchedulerPtr* Scheduler = TypedThis.SchedulersByName.Find(SchedulerName))
+	AWorldBoundSFSchedulerRegistry* TypedThis = GetWorldSingleton(WorldContextObject);
+	if (!IsValid(TypedThis))
+		return nullptr;
+
+	if (FSchedulerPtr* Scheduler = TypedThis->SchedulersByName.Find(SchedulerName))
 	{
 		check(Scheduler->IsValid());
-		return *(Scheduler->Get());
+		return *Scheduler;
 	}
 	const FSchedulerPtr NewScheduler = MakeShared<FPrioritizedScheduler>();
-	TypedThis.TickGroupToSchedulerPriorityList.FindOrAdd(TickingGroup).Add(NewScheduler);
-	TypedThis.SchedulersByName.Add(SchedulerName, NewScheduler);
+	TypedThis->TickGroupToSchedulerPriorityList.FindOrAdd(TickingGroup).Add(NewScheduler);
+	TypedThis->SchedulersByName.Add(SchedulerName, NewScheduler);
 	NewScheduler->Name = SchedulerName;
-	return *NewScheduler;
+	return NewScheduler;
 }
 
 void AWorldBoundSFSchedulerRegistry::RegisterActorTickFunctions(bool bRegister)
@@ -101,15 +104,14 @@ void AWorldBoundSFSchedulerRegistry::TickActor(float DeltaTime, ELevelTick TickT
 	}
 }
 
-AWorldBoundSFSchedulerRegistry& AWorldBoundSFSchedulerRegistry::GetWorldSingleton(const UObject* WorldContextObject)
+AWorldBoundSFSchedulerRegistry* AWorldBoundSFSchedulerRegistry::GetWorldSingleton(const UObject* WorldContextObject)
 {
 	check(IsValid(WorldContextObject));
 	UWorld* World = WorldContextObject->GetWorld();
 	if (const auto Itr = TActorIterator<AWorldBoundSFSchedulerRegistry>(World))
 	{
-		return **Itr;
+		return *Itr;
 	}
 	auto* NewRegistry = World->SpawnActor<AWorldBoundSFSchedulerRegistry>();
-	check(IsValid(NewRegistry));
-	return *NewRegistry;
+	return NewRegistry;
 }
