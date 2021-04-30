@@ -2,6 +2,7 @@
 
 #include "Logging/MessageLogToken.h"
 
+#include "Logging/MessageLog.h"
 #include "Misc/UObjectToken.h"
 
 FString LexToString(EMessageLogTokenType Type)

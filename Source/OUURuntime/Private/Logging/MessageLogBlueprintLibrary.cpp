@@ -2,6 +2,7 @@
 
 #include "Logging/MessageLogBlueprintLibrary.h"
 
+#include "Logging/MessageLog.h"
 #include "Logging/MessageLogToken.h"
 
 FName UMessageLogBlueprintLibrary::GetMessageLogName(EMessageLogName MessageLogName)

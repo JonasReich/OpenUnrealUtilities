@@ -22,8 +22,16 @@ public class OUURuntime : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
 			"HeadMountedDisplay",
-			"Slate"
+			"Slate",
+			"AIModule"
 		});
+
+		// - Editor only dependencies
+		if (Target.bBuildEditor)
+		{
+			PrivateDependencyModuleNames.Add("UnrealEd");
+		}
+		// --
 		
 		if (Target.bBuildDeveloperTools || (Target.Configuration != UnrealTargetConfiguration.Shipping && Target.Configuration != UnrealTargetConfiguration.Test))
 		{
