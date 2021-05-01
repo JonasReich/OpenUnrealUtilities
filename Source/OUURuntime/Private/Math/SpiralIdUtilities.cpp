@@ -9,6 +9,11 @@ int32 USpiralIdUtilities::ConvertCoordinatesToSpiralId(const int32 X, const int3
 	return A * A + Sign * (A + X - Y);
 }
 
+int32 USpiralIdUtilities::ConvertCoordinatePointToSpiralId(const FIntPoint& Point)
+{
+	return ConvertCoordinatesToSpiralId(Point.X, Point.Y);
+}
+
 int32 USpiralIdUtilities::ConvertWorldLocation2DToSpiralId(const FVector2D& Location, float GridSize)
 {
 	return ConvertCoordinatesToSpiralId(
@@ -53,7 +58,7 @@ FIntPoint USpiralIdUtilities::ConvertSpiralIdToCoordinates(const int32 SpiralId)
 	return Coordinates;
 }
 
-FVector2D USpiralIdUtilities::ConvertSpiralIdToCenterLocation(const int32 SpiralId, float GridSize)
+FVector2D USpiralIdUtilities::ConvertSpiralIdToCenterLocation(const int32 SpiralId, const float GridSize)
 {
 	FVector2D Result(0.5f, -0.5f);
 	Result += ConvertSpiralIdToCoordinates(SpiralId);
@@ -61,15 +66,15 @@ FVector2D USpiralIdUtilities::ConvertSpiralIdToCenterLocation(const int32 Spiral
 	return Result;
 }
 
-FBox2D USpiralIdUtilities::ConvertSpiralIdToBounds(int32 SpiralId, float GridSize)
+FBox2D USpiralIdUtilities::ConvertSpiralIdToBounds(const int32 SpiralId, const float GridSize)
 {
 	const FIntPoint MinPoint = ConvertSpiralIdToCoordinates(SpiralId);
 	const FIntPoint MaxPoint = MinPoint + FIntPoint(1,-1);
 	return {MinPoint * GridSize, MaxPoint * GridSize};
 }
 
-FBox USpiralIdUtilities::ConvertSpiralIdToBounds3D(int32 SpiralId, float GridSize, float BoundsHeight)
+FBox USpiralIdUtilities::ConvertSpiralIdToBounds3D(const int32 SpiralId, const float GridSize, const float BoundsHeight, const float BoundsElevation)
 {
 	const FBox2D Box2D = ConvertSpiralIdToBounds(SpiralId, GridSize);
-	return FBox (FVector(Box2D.Min.X, Box2D.Min.Y, 0), FVector(Box2D.Max.X, Box2D.Max.Y, 0) + FVector(0,0,BoundsHeight));
+	return FBox (FVector(Box2D.Min.X, Box2D.Min.Y, BoundsElevation), FVector(Box2D.Max.X, Box2D.Max.Y, BoundsElevation) + FVector(0,0,BoundsHeight));
 }
