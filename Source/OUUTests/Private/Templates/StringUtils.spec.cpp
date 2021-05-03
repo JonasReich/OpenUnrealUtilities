@@ -85,11 +85,11 @@ void FStringUtilsSpec::Define()
 
 		Describe("executed on UObject pointers", [this]()
 		{
-			It("should return the string 'Invalid' if the pointer is null or otherwise fails an IsValid() check", [this]()
+			It("should return the string 'None' if the pointer is null or otherwise fails an IsValid() check", [this]()
 			{
 				UObject* Object = nullptr;
 				FString S = LexToString(Object);
-				TestEqual("Stringified Object pointer", S, "Invalid");
+				TestEqual("Stringified Object pointer", S, "None");
 			});
 
 			It("should return the object name if the pointer is valid", [this]()
