@@ -15,11 +15,13 @@ struct OUURUNTIME_API FRegexMatch
 	GENERATED_BODY()
 public:
 	FRegexMatch() = default;
+
 	FRegexMatch(int32 Beginning, int32 Ending, FString InMatchString) :
 		MatchBeginning(Beginning),
 		MatchEnding(Ending),
 		MatchString(InMatchString)
-	{}
+	{
+	}
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int32 MatchBeginning;
@@ -38,8 +40,8 @@ public:
 	FORCEINLINE bool operator==(const FRegexMatch& Other) const
 	{
 		return MatchBeginning == Other.MatchBeginning
-			&& MatchEnding == Other.MatchEnding 
-			&& MatchString == Other.MatchString;
+				&& MatchEnding == Other.MatchEnding
+				&& MatchString == Other.MatchString;
 	}
 
 	FORCEINLINE bool operator!=(const FRegexMatch& Other) const
@@ -55,8 +57,21 @@ struct OUURUNTIME_API FRegexGroups
 	GENERATED_BODY()
 public:
 	FRegexGroups() = default;
-	FRegexGroups(TArray<FRegexMatch> InCaptureGroups) : CaptureGroups(InCaptureGroups) {}
-	FRegexGroups(FRegexMatch InMatch) : CaptureGroups({ InMatch }) {}
+
+	FRegexGroups(TArray<FRegexMatch> InCaptureGroups) :
+		CaptureGroups(InCaptureGroups)
+	{
+	}
+
+	FRegexGroups(FRegexMatch InMatch) :
+		CaptureGroups({InMatch})
+	{
+	}
+
+	static FRegexGroups Invalid()
+	{
+		return FRegexGroups();
+	}
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<FRegexMatch> CaptureGroups;
@@ -107,6 +122,10 @@ public:
 	/** @returns all of the matches of the pattern in the test string together with all of the capture groups */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Regex")
 	static TArray<FRegexGroups> GetRegexMatchesAndGroups(const FString& RegexPattern, int32 GroupCount, const FString& TestString);
+
+	/** @returns first of the matches of the pattern in the test string together with all of the capture groups */
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Regex")
+	static FRegexGroups GetFirstRegexMatchAndGroups(const FString& RegexPattern, int32 GroupCount, const FString& TestString);
 
 	/** @returns the single regex match of the pattern in the test string together with all of the capture groups,
 	 * IF the match ranges from the beginning to the end of the test string (all characters included). */

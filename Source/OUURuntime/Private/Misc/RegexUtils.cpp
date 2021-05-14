@@ -164,3 +164,9 @@ TArray<FRegexGroups> URegexFunctionLibrary::GetRegexMatchesAndGroups(const FStri
 {
 	return GetRegexMatchesAndGroups_Recursive(RegexPattern, GroupCount + 1, TestString, 0);
 }
+
+FRegexGroups URegexFunctionLibrary::GetFirstRegexMatchAndGroups(const FString& RegexPattern, int32 GroupCount, const FString& TestString)
+{
+	auto Result = GetRegexMatchesAndGroups(RegexPattern, GroupCount, TestString);
+	return Result.Num() > 0 ? Result[0] : FRegexGroups::Invalid();
+}
