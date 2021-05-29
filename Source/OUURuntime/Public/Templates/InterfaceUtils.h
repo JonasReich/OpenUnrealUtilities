@@ -31,9 +31,18 @@ UObject* GetInterfaceObject(T* InterfaceObject)
 
 /**
  * Get the underlying object from an interface so you can call Execute_* functions on it.
- * This overload for UObject* is useful for templates (see CALL_INTERFACE macro above).
+ * This overload for non-const UObject* is useful for templates (see CALL_INTERFACE macro above).
  */
 FORCEINLINE UObject* GetInterfaceObject(UObject* InterfaceObject)
+{
+	return InterfaceObject;
+}
+
+/**
+ * Get the underlying object from an interface so you can call Execute_* functions on it.
+ * This overload for const UObject* is useful for templates (see CALL_INTERFACE macro above).
+ */
+FORCEINLINE const UObject* GetInterfaceObject(const UObject* InterfaceObject)
 {
 	return InterfaceObject;
 }
@@ -54,7 +63,7 @@ UObject* GetInterfaceObject(TScriptInterface<T> InterfaceObject)
  * - TScriptInterface<T>
  */
 template <typename T>
-FORCEINLINE bool IsValidInterface(UObject* InterfaceObject)
+FORCEINLINE bool IsValidInterface(const UObject* InterfaceObject)
 {
 	return IsValid(InterfaceObject) && InterfaceObject->GetClass()->ImplementsInterface(T::UClassType::StaticClass());
 }
