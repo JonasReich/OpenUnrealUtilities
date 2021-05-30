@@ -25,10 +25,46 @@ If you want to know how a type is meant to be used, it can be useful to check th
 
 ### Versions
 
-- Plugin version: 0.6.0
+- Latest plugin version: 0.6.0
 - Supported UE4 versions: 4.26
 
 The plugin is still in a pre-1.0 development phase, so the API of many utilities is still up to change a lot.
+
+#### Versions History (Summary)
+
+Short summary of version changes so you don't have to sift through the entire history to find out what changed (roughly):
+
+- **0.6.0**
+	- New Utilities: Spiral IDs, GarbageCollectionListener
+	- Various smaller bug fixes, improvements and cleanups
+- **0.5.1**
+	- Stability Fixes
+- **0.5.0**
+	- New Utilities: Literal Gameplay Tags, WorldBoundSFSchedulerRegistry
+	- Renamed/moved a bunch of utilities to reduce conflicts with other projects
+- **0.4.0**
+	- Various fixes and stability improvements
+	- Unified plugin log category usages
+- **0.3.0**
+	- Upgrade to 4.26
+	- New Utilities: Ring Aggregator, Sequential Frame Scheduler
+	- Module Cleanup
+- **0.2.0** Split repo into master and develop branches
+- **0.1.0** Base set of utilities (All changes prior to 0.2.0 with no clear versioning strategy)
+
+#### Increasing Version
+
+Follow the following steps to promote changes from develop to master:
+
+1. Increase version number to the next desired version in the following three files:
+	- [README.md](./README.md) _(this file)_ - Plugin Version section
+	- [OpenUnrealUtilities.uplugin](./OpenUnrealUtilities.uplugin) VersionName field
+	- [.version](./.version)
+2. Summarize the most important changes included with the new version in the history summary section above
+3. Submit only these changes (no functional code changes included) with message "Increased version to major.minor.patch", e.g. "Increased version to 0.6.0"
+4. Tag the submit with annotated tag that matches the version number: Tag and annotation message should match exactly, e.g. both could be "v0.6.0"
+5. Fast-forward merge develop into master
+6. Push develop, master _and(!)_ tags
 
 ### Branch Strategy
 
@@ -40,7 +76,6 @@ The plugin is still in a pre-1.0 development phase, so the API of many utilities
 
 - Add branches or tags for supported engine versions (e.g. UE4.25), which are updated along with releases
 - No updates of deprecated code. As soon as the plugin breaks for an old engine version we drop support for it
-- UE4 Marketplace release is not planned at the moment, but possible
 
 ## Automated Testing
 
