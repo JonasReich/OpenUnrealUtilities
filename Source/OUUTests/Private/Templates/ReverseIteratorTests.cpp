@@ -6,6 +6,7 @@
 
 #include "Engine/EngineTypes.h"
 #include "Templates/ReverseIterator.h"
+#include "Templates/StringUtils.h"
 #include "Algo/IsSorted.h"
 
 #define OUU_TEST_CATEGORY OpenUnrealUtilities.Templates
@@ -95,6 +96,9 @@ namespace ReverseIteratorTests
 		TestArraysEqual(AutomationTest, "Checking reverse iterated array against expected result", ResultArray, ExpectedResult);
 	}
 }
+
+static_assert(TModels<CMemberToStringConvertable, ReverseIteratorTests::FFoo>::Value, "Sanity check: FFoo has ToString() member");
+static_assert(TModels<CLexToStringConvertible, ReverseIteratorTests::FFoo>::Value, "Sanity check: Because FFoo has ToString() member it should be ToStringConvertable()!");
 
 //////////////////////////////////////////////////////////////////////////
 

@@ -24,6 +24,9 @@ FString LexToString(EStringUtilsTestEnum e)
 	}
 }
 
+static_assert(TModels<CLexToStringConvertible, EStringUtilsTestEnum>::Value == true,
+    "Enum classes must be LexToString()-convertible with a special LexToString() overload!");
+
 enum class EStringUtilsTestEnum2
 {
 	Alpha,
@@ -32,7 +35,7 @@ enum class EStringUtilsTestEnum2
 };
 
 static_assert(TModels<CLexToStringConvertible, EStringUtilsTestEnum2>::Value == false,
-	"Enum classes must not be LexToString()-convertable without a special LexToString() overload!");
+	"Enum classes must not be LexToString()-convertible without a special LexToString() overload!");
 
 struct FStringUtilsTestStruct
 {
@@ -43,6 +46,9 @@ struct FStringUtilsTestStruct
 		return S;
 	}
 };
+
+static_assert(TModels<CLexToStringConvertible, FStringUtilsTestStruct>::Value,
+	"Structs with ToString() member function must be lex to string convertible if 'Templates/StringUtils.h' is included");
 
 BEGIN_DEFINE_SPEC(FStringUtilsSpec, "OpenUnrealUtilities.Templates.StringUtils", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FStringUtilsSpec)

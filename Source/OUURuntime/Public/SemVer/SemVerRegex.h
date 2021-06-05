@@ -7,7 +7,7 @@
 template<ESemVerParsingStrictness Strictness>
 struct TSemVerRegex
 {
-	static_assert(Strictness == -1, "Strictness must be one of the three enum cases Strict, Regular or Liberal");
+	static_assert(static_cast<int32>(Strictness) == -1, "Strictness must be one of the three enum cases Strict, Regular or Liberal");
 };
 
 namespace SemVerRegex_Internal

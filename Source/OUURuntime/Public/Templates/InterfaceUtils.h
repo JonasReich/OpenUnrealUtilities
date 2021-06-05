@@ -94,7 +94,7 @@ FORCEINLINE bool IsValidInterface(TScriptInterface<T>& InterfaceObject)
 template <typename T, typename = TIsIInterface_T<T>>
 FORCEINLINE bool IsValidInterface(const TScriptInterface<T>& InterfaceObject)
 {
-	static_assert(false, "You should not use const TScriptInterface<T>! Three reasons why:\n"
+	static_assert(sizeof(T) == -1, "You should not use const TScriptInterface<T>! Three reasons why:\n"
 		"\t- No memory benefit over passing by value\n"
 		"\t- const TScriptInterface<T> cannot be invalidated when it turns stale or corrected by IsValid() check\n"
 		"\t- No const safeness for pointer target, because const TScriptInterface<T> still allows calling non-const functions");

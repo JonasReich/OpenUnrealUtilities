@@ -61,6 +61,10 @@ struct CHasRelativeTagName
 	);
 };
 
+// Forward declaration of TLiteralGameplayTag template to be usable in CIsLiteralGameplayTag
+template <typename InSelfTagType, typename InParentTagType>
+struct TLiteralGameplayTag;
+
 struct CIsLiteralGameplayTag
 {
 	template <typename A, typename B>
@@ -72,12 +76,17 @@ struct CIsLiteralGameplayTag
 	);
 };
 
+/** Base class for literal gameplay tags. Used for inheritance checks, but nothing else. */
+class FLiteralGameplayTagBase
+{
+};
+
 /**
- * The base class for literal gameplay tag types.
- * Derived types should be declared with the GTAG and GTAG_GROUP macros defined below.1
- */
+* The base class for literal gameplay tag types.
+* Derived types should be declared with the GTAG and GTAG_GROUP macros defined below.1
+*/
 template <typename InSelfTagType, typename InParentTagType>
-struct TLiteralGameplayTag
+struct TLiteralGameplayTag : FLiteralGameplayTagBase
 {
 	using ThisType = TLiteralGameplayTag<InSelfTagType, InParentTagType>;
 	using SelfTagType = InSelfTagType;

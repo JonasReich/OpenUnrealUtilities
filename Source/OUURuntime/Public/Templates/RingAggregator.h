@@ -148,7 +148,7 @@ class TRingAggregator : public TRingAggregator_Base<TRingAggregator<ElementType>
 {
 public:
 	using Super = TRingAggregator_Base<TRingAggregator<ElementType>, ElementType, FDefaultAllocator>;
-	friend class Super;
+	friend class TRingAggregator_Base<TRingAggregator<ElementType>, ElementType, FDefaultAllocator>;
 
 	TRingAggregator(int32 InitialSize)
 	{

@@ -66,10 +66,10 @@ namespace UMGUtils
 	//////////////////////////////////////////////////////////////////////////
 
 	// Explicit instantiations of the widget tree iteration templates above
-	template bool OUURUNTIME_API ForEachWidget<UWidget>(UWidget* RootWidget, TFunctionRef<bool(UWidget*)> Predicate);
-	template bool OUURUNTIME_API ForEachWidget<const UWidget>(const UWidget* RootWidget, TFunctionRef<bool(const UWidget*)> Predicate);
-	template bool OUURUNTIME_API ForEachWidgetAndDescendants<UWidget>(UWidget* RootWidget, bool bIncludeRootWidget, TFunctionRef<bool(UWidget*)> Predicate);
-	template bool OUURUNTIME_API ForEachWidgetAndDescendants<const UWidget>(const UWidget* RootWidget, bool bIncludeRootWidget, TFunctionRef<bool(const UWidget*)> Predicate);
-	template bool OUURUNTIME_API ForChildWidgets<UWidget>(UWidget* Widget, TFunctionRef<bool(UWidget*)> Predicate);
-	template bool OUURUNTIME_API ForChildWidgets<const UWidget>(const UWidget* Widget, TFunctionRef<bool(const UWidget*)> Predicate);
+	extern template bool ForEachWidget<UWidget>(UWidget* RootWidget, TFunctionRef<bool(UWidget*)> Predicate);
+	extern template bool ForEachWidget<const UWidget>(const UWidget* RootWidget, TFunctionRef<bool(const UWidget*)> Predicate);
+	extern template bool ForEachWidgetAndDescendants<UWidget>(UWidget* RootWidget, bool bIncludeRootWidget, TFunctionRef<bool(UWidget*)> Predicate);
+	extern template bool ForEachWidgetAndDescendants<const UWidget>(const UWidget* RootWidget, bool bIncludeRootWidget, TFunctionRef<bool(const UWidget*)> Predicate);
+	extern template bool ForChildWidgets<UWidget>(UWidget* Widget, TFunctionRef<bool(UWidget*)> Predicate);
+	extern template bool ForChildWidgets<const UWidget>(const UWidget* Widget, TFunctionRef<bool(const UWidget*)> Predicate);
 }

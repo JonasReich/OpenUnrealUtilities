@@ -9,7 +9,7 @@ UOUURequestQueue::UOUURequestQueue()
 
 UOUURequest* UOUURequestQueue::CreateNewRequest()
 {
-	UClass* RequestClassToUse = ensure(RequestClass) ? RequestClass : UOUURequest::StaticClass();
+	UClass* RequestClassToUse = ensure(*RequestClass) ? *RequestClass : UOUURequest::StaticClass();
 	UOUURequest* Request = NewObject<UOUURequest>(GetTransientPackage(), RequestClassToUse);
 	RequestQueue.Add(Request);
 	Request->OnCompleted.AddDynamic(this, &UOUURequestQueue::HandleRequestCompleted);

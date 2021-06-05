@@ -67,8 +67,8 @@ CONSTEXPR auto CreateCastObjectIterator(IteratorType Iterator)
 }
 
 template<typename ContainerType, typename CastTargetType,
-	typename BeginIteratorType = typename decltype(IteratorUtils::begin(DeclVal<ContainerType>())),
-	typename EndIteratorType = typename decltype(IteratorUtils::end(DeclVal<ContainerType>()))>
+	typename BeginIteratorType = decltype(IteratorUtils::begin(DeclVal<ContainerType>())),
+	typename EndIteratorType = decltype(IteratorUtils::end(DeclVal<ContainerType>()))>
 	class TCastObjectRangeAdaptor
 {
 private:
