@@ -27,7 +27,7 @@ If you want to know how a type is meant to be used, it can be useful to check th
 
 ### Versions
 
-- Latest plugin version: 0.6.0
+- Latest plugin version: 0.7.0
 - Supported UE4 versions: 4.26
 
 The plugin is still in a pre-1.0 development phase, so the API of many utilities is still up to change a lot.
@@ -36,6 +36,9 @@ The plugin is still in a pre-1.0 development phase, so the API of many utilities
 
 Short summary of version changes so you don't have to sift through the entire history to find out what changed (roughly):
 
+- **0.7.0**
+	- Added plugin logo (matching to Open Unreal Conventions)
+	- Improved clang compatibility for PS4/Linux targets (still not guaranteed to run on those platforms)
 - **0.6.0**
 	- New Utilities: Spiral IDs, GarbageCollectionListener
 	- Various smaller bug fixes, improvements and cleanups
