@@ -1,6 +1,8 @@
 
 # Open Unreal Utilities
 
+![OUU logo](./Resources/ouu.png)
+
 The Open Unreal Utilities plugin is a general purpose utility plugin for Unreal Engine 4.
 
 ## Contents
