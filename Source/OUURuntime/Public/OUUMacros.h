@@ -9,8 +9,8 @@
  * Similar to BindDynamic()/AddDynamic() utility macros.
  */
 #define CreateDynamic(DynamicDelegateType, UserObject, FuncName) \
-[&]() -> DynamicDelegateType {\
-DynamicDelegateType Delegate; \
-Delegate.BindDynamic(UserObject, FuncName); \
-return Delegate; \
-}()
+	[&]() -> DynamicDelegateType {\
+		DynamicDelegateType Delegate; \
+		Delegate.BindDynamic(UserObject, FuncName); \
+		return Delegate; \
+	}()
