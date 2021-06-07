@@ -132,7 +132,7 @@ The plugin adheres to the [Open Unreal Conventions](https://jonasreich.github.io
 Some plugin specific conventions:
 - Types or functions that are not namespaced which are likely to cause naming conflicts with future engine types or third/project code should be prefixed with OUU
 - The full name of the plugin 'OpenUnrealUtilities' should be avoided to keep type names short and consistent
-- All module names in the plugin must start with OUU prefix
+- All module names in the plugin must start with OUU prefix to make them easily distinguishable in Dependencies lists of Build.cs files
 
 ## Licensing
 
