@@ -10,7 +10,7 @@
  * Comparison operators for lexical core types (FString, FName).
  */
 UCLASS()
-class UOUULexicalOperatorLibrary : public UBlueprintFunctionLibrary
+class OUUBLUEPRINTRUNTIME_API UOUULexicalOperatorLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:

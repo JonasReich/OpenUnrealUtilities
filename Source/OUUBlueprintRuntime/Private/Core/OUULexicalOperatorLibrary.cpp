@@ -39,5 +39,5 @@ bool UOUULexicalOperatorLibrary::LessEqual_NameName(const FName& A, const FName&
 
 bool UOUULexicalOperatorLibrary::GreaterEqual_NameName(const FName& A, const FName& B)
 {
-	return (A != B) && (!Less_NameName(A, B)); 
+	return (A == B) || !Less_NameName(A, B); 
 }
