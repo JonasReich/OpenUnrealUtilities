@@ -5,7 +5,7 @@
 #if WITH_AUTOMATION_WORKER
 
 #include "Templates/InterfaceUtils.h"
-#include "Templates/InterfaceUtilsTests_Implementations.h"
+#include "Runtime/Templates/InterfaceUtilsTests_Implementations.h"
 
 class FInterfaceUtilsSpec;
 

@@ -4,10 +4,10 @@
 
 #if WITH_AUTOMATION_WORKER
 
-#include "FlowControl/LockTestHelpers.h"
+#include "Runtime/FlowControl/LockTestHelpers.h"
 #include "EditorLevelLibrary.h"
 
-BEGIN_DEFINE_SPEC(FExclusiveLockSpec, "OpenUnrealUtilities.FlowControl.ExclusiveLock", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FExclusiveLockSpec, "OpenUnrealUtilities.Runtime.FlowControl.ExclusiveLock", DEFAULT_OUU_TEST_FLAGS)
 TSharedPtr<FOUULockTestEnvironment<UExclusiveLock>> Env;
 END_DEFINE_SPEC(FExclusiveLockSpec)
 void FExclusiveLockSpec::Define()

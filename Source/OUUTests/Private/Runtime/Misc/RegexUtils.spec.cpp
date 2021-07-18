@@ -6,7 +6,7 @@
 
 #include "Misc/RegexUtils.h"
 
-BEGIN_DEFINE_SPEC(FRegexUtilsSpec, "OpenUnrealUtilities.Misc.Regex", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FRegexUtilsSpec, "OpenUnrealUtilities.Runtime.Misc.Regex", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FRegexUtilsSpec)
 void FRegexUtilsSpec::Define()
 {

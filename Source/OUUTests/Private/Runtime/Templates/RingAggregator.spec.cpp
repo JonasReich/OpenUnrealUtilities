@@ -6,7 +6,7 @@
 
 #include "Templates/RingAggregator.h"
 
-BEGIN_DEFINE_SPEC(FRingAggregatorSpec, "OpenUnrealUtilities.Templates.RingAggregator", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FRingAggregatorSpec, "OpenUnrealUtilities.Runtime.Templates.RingAggregator", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FRingAggregatorSpec)
 
 void FRingAggregatorSpec::Define()

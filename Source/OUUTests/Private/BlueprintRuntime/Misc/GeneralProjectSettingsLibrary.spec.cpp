@@ -6,7 +6,7 @@
 
 #include "Misc/GeneralProjectSettingsLibrary.h"
 
-BEGIN_DEFINE_SPEC(FGeneralProjectSettingsLibrarySpec, "OpenUnrealUtilities.Misc.GeneralProjectSettingsLibrary", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FGeneralProjectSettingsLibrarySpec, "OpenUnrealUtilities.BlueprintRuntime.Misc.GeneralProjectSettingsLibrary", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FGeneralProjectSettingsLibrarySpec)
 void FGeneralProjectSettingsLibrarySpec::Define()
 {

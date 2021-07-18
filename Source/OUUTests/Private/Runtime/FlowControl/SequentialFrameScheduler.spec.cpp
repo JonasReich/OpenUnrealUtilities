@@ -17,7 +17,7 @@ public:
 	}
 };
 
-BEGIN_DEFINE_SPEC(FSequentialFrameSchedulerSpec, "OpenUnrealUtilities.FlowControl.SequentialFrameScheduler", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FSequentialFrameSchedulerSpec, "OpenUnrealUtilities.Runtime.FlowControl.SequentialFrameScheduler", DEFAULT_OUU_TEST_FLAGS)
 	TSharedPtr<FSequentialFrameScheduler> Scheduler;
 	TSharedPtr<FTestTaskTarget> TargetObjectOne;
 	TSharedPtr<FTestTaskTarget> TargetObjectTwo;

@@ -51,7 +51,7 @@ namespace CastObjectRangeTests
 
 //////////////////////////////////////////////////////////////////////////
 
-BEGIN_DEFINE_SPEC(FCastObjectRangeSpec, "OpenUnrealUtilities.Templates.CastObjectRange", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FCastObjectRangeSpec, "OpenUnrealUtilities.Runtime.Templates.CastObjectRange", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FCastObjectRangeSpec)
 void FCastObjectRangeSpec::Define()
 {

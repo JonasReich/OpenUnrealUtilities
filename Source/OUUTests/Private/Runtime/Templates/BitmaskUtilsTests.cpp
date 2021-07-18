@@ -6,7 +6,7 @@
 
 #include "Templates/BitmaskUtils.h"
 
-#define OUU_TEST_CATEGORY OpenUnrealUtilities.Templates
+#define OUU_TEST_CATEGORY OpenUnrealUtilities.Runtime.Templates
 #define OUU_TEST_TYPE BitmaskUtils
 
 //////////////////////////////////////////////////////////////////////////

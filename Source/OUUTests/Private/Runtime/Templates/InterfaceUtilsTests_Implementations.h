@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Templates/InterfaceUtilsTests_Interfaces.h"
+#include "Runtime/Templates/InterfaceUtilsTests_Interfaces.h"
 #include "InterfaceUtilsTests_Implementations.generated.h"
 
 // ------------------------

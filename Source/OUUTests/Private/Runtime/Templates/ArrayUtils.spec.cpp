@@ -6,7 +6,7 @@
 
 #include "Templates/ArrayUtils.h"
 
-BEGIN_DEFINE_SPEC(FArrayUtilsSpec, "OpenUnrealUtilities.Templates.ArrayUtils", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FArrayUtilsSpec, "OpenUnrealUtilities.Runtime.Templates.ArrayUtils", DEFAULT_OUU_TEST_FLAGS)
 TArray<int32> WorkingArray;
 END_DEFINE_SPEC(FArrayUtilsSpec)
 void FArrayUtilsSpec::Define()

@@ -1,6 +1,6 @@
 // Copyright (c) 2021 Jonas Reich
 
-#include "FlowControl/LockTestHelpers.h"
+#include "Runtime/FlowControl/LockTestHelpers.h"
 #include "OUUTestUtilities.h"
 
 #if WITH_AUTOMATION_WORKER
@@ -9,7 +9,7 @@
 #include "FlowControl/SharedLock.h"
 #include "EditorLevelLibrary.h"
 
-#define OUU_TEST_CATEGORY OpenUnrealUtilities.FlowControl
+#define OUU_TEST_CATEGORY OpenUnrealUtilities.Runtime.FlowControl
 
 //////////////////////////////////////////////////////////////////////////
 // Exclusive Lock tests

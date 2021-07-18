@@ -50,7 +50,7 @@ struct FStringUtilsTestStruct
 static_assert(TModels<CLexToStringConvertible, FStringUtilsTestStruct>::Value,
 	"Structs with ToString() member function must be lex to string convertible if 'Templates/StringUtils.h' is included");
 
-BEGIN_DEFINE_SPEC(FStringUtilsSpec, "OpenUnrealUtilities.Templates.StringUtils", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FStringUtilsSpec, "OpenUnrealUtilities.Runtime.Templates.StringUtils", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FStringUtilsSpec)
 
 void FStringUtilsSpec::Define()

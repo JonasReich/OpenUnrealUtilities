@@ -7,7 +7,7 @@
 #include "Templates/BoolRange.h"
 #include "Templates/ReverseIterator.h"
 
-BEGIN_DEFINE_SPEC(FBoolRangeSpec, "OpenUnrealUtilities.Templates.BoolRange", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FBoolRangeSpec, "OpenUnrealUtilities.Runtime.Templates.BoolRange", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FBoolRangeSpec)
 void FBoolRangeSpec::Define()
 {

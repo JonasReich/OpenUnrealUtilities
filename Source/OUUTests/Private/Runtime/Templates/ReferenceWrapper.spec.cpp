@@ -16,7 +16,7 @@ struct FRefWrapFoo
 	}
 };
 
-BEGIN_DEFINE_SPEC(FReferenceWrapperSpec, "OpenUnrealUtilities.Templates.ReferenceWrapper", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FReferenceWrapperSpec, "OpenUnrealUtilities.Runtime.Templates.ReferenceWrapper", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FReferenceWrapperSpec)
 
 void FReferenceWrapperSpec::Define()

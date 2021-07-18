@@ -29,7 +29,7 @@ struct FTestGameplayTags : public FLiteralGameplayTagRoot
 	};
 };
 
-BEGIN_DEFINE_SPEC(FLiteralGameplayTagSpec, "OpenUnrealUtilities.GameplayTags.LiteralGameplayTag", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FLiteralGameplayTagSpec, "OpenUnrealUtilities.Runtime.GameplayTags.LiteralGameplayTag", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FLiteralGameplayTagSpec)
 
 void FLiteralGameplayTagSpec::Define()

@@ -30,7 +30,7 @@ const TMap<int32, FVector2D> SampleBounds =
 	{237, {-67500, 112500}}
 };
 
-BEGIN_DEFINE_SPEC(FSpiralIdUtilitiesSpec, "OpenUnrealUtilities.Math.SpiralIdUtilities", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FSpiralIdUtilitiesSpec, "OpenUnrealUtilities.Runtime.Math.SpiralIdUtilities", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FSpiralIdUtilitiesSpec)
 
 void FSpiralIdUtilitiesSpec::Define()

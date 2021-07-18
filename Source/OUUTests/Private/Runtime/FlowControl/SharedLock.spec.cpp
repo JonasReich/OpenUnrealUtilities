@@ -4,10 +4,10 @@
 
 #if WITH_AUTOMATION_WORKER
 
-#include "FlowControl/LockTestHelpers.h"
+#include "Runtime/FlowControl/LockTestHelpers.h"
 #include "EditorLevelLibrary.h"
 
-BEGIN_DEFINE_SPEC(FSharedLockSpec, "OpenUnrealUtilities.FlowControl.SharedLock", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FSharedLockSpec, "OpenUnrealUtilities.Runtime.FlowControl.SharedLock", DEFAULT_OUU_TEST_FLAGS)
 TSharedPtr<FOUULockTestEnvironment<USharedLock>> Env;
 END_DEFINE_SPEC(FSharedLockSpec)
 void FSharedLockSpec::Define()

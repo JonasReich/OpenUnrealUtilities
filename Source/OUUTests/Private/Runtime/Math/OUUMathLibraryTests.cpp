@@ -7,7 +7,7 @@
 #include "Math/OUUMathLibrary.h"
 #include "Engine/EngineTypes.h"
 
-#define OUU_TEST_CATEGORY OpenUnrealUtilities
+#define OUU_TEST_CATEGORY OpenUnrealUtilities.Runtime.Math
 #define OUU_TEST_TYPE MathLibrary
 
 //////////////////////////////////////////////////////////////////////////
