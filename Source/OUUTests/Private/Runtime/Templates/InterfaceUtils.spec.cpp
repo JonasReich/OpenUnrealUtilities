@@ -60,7 +60,7 @@ public:
 	}
 };
 
-BEGIN_DEFINE_SPEC(FInterfaceUtilsSpec, "OpenUnrealUtilities.Templates.InterfaceUtils", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(FInterfaceUtilsSpec, "OpenUnrealUtilities.Runtime.Templates.InterfaceUtils", DEFAULT_OUU_TEST_FLAGS)
 public:
 	UObject* TargetObject;
 	IInterfaceUtilsTests_CppInterface* InterfacePtr;
