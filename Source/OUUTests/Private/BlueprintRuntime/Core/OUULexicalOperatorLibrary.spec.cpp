@@ -15,15 +15,15 @@ BEGIN_DEFINE_SPEC(FOUULexicalOperatorLibrarySpec, "OpenUnrealUtilities.Blueprint
 	{
 		It(FString::Printf(TEXT("should return %s for strings A (%s) and B (%s)"), *LexToString(AB_Result), *LexToString(A), *LexToString(B)), [=, this]()
 		{
-			SPEC_TEST_TRUE(OperatorFunc(A, B) == AB_Result);
+			SPEC_TEST_EQUAL(OperatorFunc(A, B), AB_Result);
 		});
 		It(FString::Printf(TEXT("should return %s for strings A (%s) and A (%s)"), *LexToString(AA_Result), *LexToString(A), *LexToString(A)), [=, this]()
 		{
-			SPEC_TEST_TRUE(OperatorFunc(A, A) == AA_Result);
+			SPEC_TEST_EQUAL(OperatorFunc(A, A), AA_Result);
 		});
 		It(FString::Printf(TEXT("should return %s for strings B (%s) and A (%s)"), *LexToString(BA_Result), *LexToString(B), *LexToString(A)), [=, this]()
 		{
-			SPEC_TEST_TRUE(OperatorFunc(B, A) == BA_Result);
+			SPEC_TEST_EQUAL(OperatorFunc(B, A), BA_Result);
 		});
 	}
 
