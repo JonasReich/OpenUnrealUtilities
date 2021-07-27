@@ -48,6 +48,6 @@ class UWorldBlueprintLibrary : public UBlueprintFunctionLibrary
 public:
 
 	/** Get the world type of a world */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|World")
 	static EBlueprintWorldType GetWorldType(UWorld* World);
 };
