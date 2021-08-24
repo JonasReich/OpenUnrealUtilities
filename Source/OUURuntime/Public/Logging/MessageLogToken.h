@@ -51,11 +51,25 @@ struct OUURUNTIME_API FMessageLogToken
 {
 	GENERATED_BODY()
 public:
-	static FMessageLogToken
-	CreateAssetNameMessageLogToken(const FString& AssetName, const FText& OptionalLabelOverride);
-	static FMessageLogToken CreateObjectMessageLogToken(UObject* Object, const FText& OptionalLabelOverride);
+	static FMessageLogToken CreateAssetNameMessageLogToken(const FString& AssetName, const FText& OptionalLabelOverride);
+	static FMessageLogToken CreateObjectMessageLogToken(const UObject* Object, const FText& OptionalLabelOverride);
 	static FMessageLogToken CreateTextMessageLogToken(const FText& Text);
 	static FMessageLogToken CreateURLMessageLogToken(const FString& URL, const FText& OptionalLabelOverride);
+
+	static FORCEINLINE FMessageLogToken Create(FText Text)
+	{
+		return CreateTextMessageLogToken(Text);
+	}
+
+	static FORCEINLINE FMessageLogToken Create(FString Text)
+	{
+		return CreateTextMessageLogToken(FText::FromString(Text));
+	}
+
+	static FORCEINLINE FMessageLogToken Create(const UObject* Object)
+	{
+		return CreateObjectMessageLogToken(Object, FText());
+	}
 
 	// Which of the payload data should be used
 	UPROPERTY(BlueprintReadWrite)
@@ -71,7 +85,7 @@ public:
 	FString AssetName = "";
 
 	UPROPERTY(BlueprintReadWrite)
-	UObject* Object = nullptr;
+	const UObject* Object = nullptr;
 
 	TSharedRef<IMessageToken> CreateNativeMessageToken() const;
 };

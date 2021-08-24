@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "MessageLogName.h"
-#include "MessageLogSeverity.h"
-#include "MessageLogToken.h"
+#include "Logging/MessageLogName.h"
+#include "Logging/MessageLogSeverity.h"
+#include "Logging/MessageLogToken.h"
 
 #include "MessageLogBlueprintLibrary.generated.h"
 
@@ -13,7 +13,7 @@
  * Can be used in C++ as well of course, but it doesn't offer many advantages over FMessageLog itself.
  */
 UCLASS()
-class UMessageLogBlueprintLibrary : public UBlueprintFunctionLibrary
+class OUURUNTIME_API UMessageLogBlueprintLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:

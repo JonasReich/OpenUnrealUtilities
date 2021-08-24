@@ -36,7 +36,7 @@ FMessageLogToken FMessageLogToken::CreateAssetNameMessageLogToken(const FString&
 	return Result;
 }
 
-FMessageLogToken FMessageLogToken::CreateObjectMessageLogToken(UObject* Object,
+FMessageLogToken FMessageLogToken::CreateObjectMessageLogToken(const UObject* Object,
                                                                const FText& OptionalLabelOverride)
 {
 	FMessageLogToken Result;

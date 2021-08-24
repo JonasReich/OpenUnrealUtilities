@@ -70,3 +70,9 @@ enum class EMessageLogName : uint8
 	// UMG + Slate widget events displayed in the widget reflector
 	WidgetEvents
 };
+
+/**
+ * Get the FName of a message log name enum.
+ * Can be used to get the predefined engine message log names.
+ */
+FName OUURUNTIME_API GetMessageLogName(EMessageLogName MesageLogName);
