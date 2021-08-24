@@ -102,7 +102,7 @@ void FOUUAutomationTestWorld::CreateWorldImplementation()
 		DestroyWorldImplementation();
 	}
 
-	World = UWorld::CreateWorld(EWorldType::Game, false);
+	World = UWorld::CreateWorld(EWorldType::Game, false, "OUUAutomationTestWorld");
 	auto& WorldContext = GEngine->CreateNewWorldContext(EWorldType::Game);
 	WorldContext.SetCurrentWorld(World);
 	World->GetWorldSettings()->DefaultGameMode = AGameModeBase::StaticClass();
@@ -123,7 +123,7 @@ void FOUUAutomationTestWorld::DestroyWorldImplementation()
 
 	bHasWorld = false;
 
-	CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+	CollectGarbage(RF_NoFlags);
 }
 
 FOUUScopedAutomationTestWorld::FOUUScopedAutomationTestWorld()
