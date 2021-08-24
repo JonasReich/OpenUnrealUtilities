@@ -37,6 +37,14 @@ struct TEnumSequenceTraits
 	static const EEnumSequenceType Type = EEnumSequenceType::Undefined;
 };
 
+/** Macro to define enum sequence trait in a single line */
+#define DECLARE_ENUM_SEQUENCE(EnumClass, SequenceType) \
+	template<> struct TEnumSequenceTraits<EnumClass> \
+	{ \
+		static const EEnumSequenceType Type = SequenceType; \
+	};
+
+
 /**
  * Utility functions to deal with bitmask creation and evaluation.
  * All of the functions require the following template arguments:

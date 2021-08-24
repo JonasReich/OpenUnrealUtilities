@@ -23,11 +23,7 @@ enum class ENaturalTestEnum : uint8
 	Four
 };
 
-template<>
-struct TEnumSequenceTraits<ENaturalTestEnum>
-{
-	static const EEnumSequenceType Type = EEnumSequenceType::Natural;
-};
+DECLARE_ENUM_SEQUENCE(ENaturalTestEnum, EEnumSequenceType::Natural);
 
 // Shared bitmask used for all TestAllBits_* and TestAnyBits_* tests
 const int32 TestMultipleNaturalBits_Bitmask = 7;
@@ -41,11 +37,7 @@ enum class EPow2TestEnum : uint8
 	FifthBit = 0b10000
 };
 
-template<>
-struct TEnumSequenceTraits<EPow2TestEnum>
-{
-	static const EEnumSequenceType Type = EEnumSequenceType::Pow2;
-};
+DECLARE_ENUM_SEQUENCE(EPow2TestEnum, EEnumSequenceType::Pow2);
 
 // Shared bitmask used for all TestAllBits_* and TestAnyBits_* tests
 const int32 TestMultiplePow2Bits_Bitmask = 7;
