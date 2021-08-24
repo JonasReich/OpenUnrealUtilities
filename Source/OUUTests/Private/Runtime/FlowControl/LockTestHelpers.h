@@ -3,6 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#include "AutomationTestWorld.h"
+#include "OUUTestObject.h"
 #include "FlowControl/SharedLock.h"
 #include "FlowControl/ExclusiveLock.h"
 #include "LockTestHelpers.generated.h"
@@ -54,9 +57,11 @@ struct FOUULockTestEnvironment
 	UObject* Key0;
 	UObject* Key1;
 
-	FOUULockTestEnvironment(UObject* Outer = GetTransientPackage())
+	FOUUScopedAutomationTestWorld TestWorld;
+
+	FOUULockTestEnvironment()
 	{
-		Lock = NewObject<LockType>(Outer);
+		Lock = NewObject<LockType>(TestWorld.World);
 		Helper = NewObject<ULockTestsHelper>();
 		Key0 = NewObject<UOUUTestObject>();
 		Key1 = NewObject<UOUUTestObject>();

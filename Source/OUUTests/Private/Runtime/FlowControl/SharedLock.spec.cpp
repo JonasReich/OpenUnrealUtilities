@@ -5,7 +5,6 @@
 #if WITH_AUTOMATION_WORKER
 
 #include "Runtime/FlowControl/LockTestHelpers.h"
-#include "EditorLevelLibrary.h"
 
 BEGIN_DEFINE_SPEC(FSharedLockSpec, "OpenUnrealUtilities.Runtime.FlowControl.SharedLock", DEFAULT_OUU_TEST_FLAGS)
 TSharedPtr<FOUULockTestEnvironment<USharedLock>> Env;
@@ -14,7 +13,7 @@ void FSharedLockSpec::Define()
 {
 	BeforeEach([this]()
 	{
-		Env = MakeShared<FOUULockTestEnvironment<USharedLock>>(UEditorLevelLibrary::GetEditorWorld());
+		Env = MakeShared<FOUULockTestEnvironment<USharedLock>>();
 	});
 
 	Describe("Lock", [this]()
@@ -146,22 +145,24 @@ void FSharedLockSpec::Define()
 
 	Describe("LockForDuration", [this]()
 	{
-		LatentIt("should lock the lock for specified duration", [this](const FDoneDelegate& DoneDelegate)
+		It("should lock the lock for specified duration", [this]()
 		{
 			Env->Lock->LockForDuration(Env->Key0, 6.f);
 
 			TestTrue("Is locked at beginning", Env->Lock->IsLocked());
 
-			UWorld* World = UEditorLevelLibrary::GetEditorWorld();
 			FTimerHandle InOutHandle;
-			World->GetTimerManager().SetTimer(InOutHandle, [this]() {
+			Env->TestWorld.World->GetTimerManager().SetTimer(InOutHandle, [this]() {
 				TestTrue("Is locked after half time", Env->Lock->IsLocked());
 			}, 3.f, false);
 
-			World->GetTimerManager().SetTimer(InOutHandle, [this, DoneDelegate]() {
+			Env->TestWorld.World->GetTimerManager().SetTimer(InOutHandle, [this]() {
 				TestFalse("Is locked after full time", Env->Lock->IsLocked());
-				DoneDelegate.Execute();
 			}, 6.01f, false);
+
+			Env->TestWorld.World->GetTimerManager().Tick(3.f);
+			Env->TestWorld.World->GetTimerManager().Tick(3.f);
+			Env->TestWorld.World->GetTimerManager().Tick(3.f);
 		});
 	});
 
