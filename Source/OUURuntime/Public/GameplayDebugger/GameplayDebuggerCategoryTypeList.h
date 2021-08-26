@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2021 Jonas Reich
+// Copyright (c) 2021 Jonas Reich
 
 #pragma once
 
@@ -69,14 +69,14 @@ public:
 	}
 
 private:
-	template <typename = typename TEnableIf<TModels<GameplayDebuggerCategoryConcepts::CHasExplicitInstanceMethod, GameplayDebuggerCategoryType>::Value == true>::Type>
-	FORCEINLINE static TSharedRef<FGameplayDebuggerCategory> MakeInstance_Internal()
+	template <bool bEnable = TModels<GameplayDebuggerCategoryConcepts::CHasExplicitInstanceMethod, GameplayDebuggerCategoryType>::Value>
+	FORCEINLINE static typename TEnableIf<bEnable, TSharedRef<FGameplayDebuggerCategory>>::Type MakeInstance_Internal()
 	{
 		return GameplayDebuggerCategoryType::MakeInstance();
 	}
 
-	template <typename = typename TEnableIf<TModels<GameplayDebuggerCategoryConcepts::CHasExplicitInstanceMethod, GameplayDebuggerCategoryType>::Value == false>::Type>
-	FORCEINLINE static TSharedRef<FGameplayDebuggerCategory> MakeInstance_Internal(int32 OverloadArg = 0)
+	template <bool bEnable = TModels<GameplayDebuggerCategoryConcepts::CHasExplicitInstanceMethod, GameplayDebuggerCategoryType>::Value == false>
+	FORCEINLINE static typename TEnableIf<bEnable, TSharedRef<FGameplayDebuggerCategory>>::Type MakeInstance_Internal(int32 OverloadArg = 0)
 	{
 		return MakeShared<GameplayDebuggerCategoryType>();
 	}
@@ -90,11 +90,10 @@ template <typename DebuggerCategoryType, typename ... OtherTypes>
 class TGameplayDebuggerCategoryTypeList
 {
 public:
-	using ThisType = TGameplayDebuggerCategoryTypeList<DebuggerCategoryType, OtherTypes...>;
 	using SingleType = TGameplayDebuggerCategoryTypeList<DebuggerCategoryType>;
 	using ExpandOtherTypes = TGameplayDebuggerCategoryTypeList<OtherTypes...>;
 
-	ThisType()
+	TGameplayDebuggerCategoryTypeList()
 	{
 		static_assert(sizeof(DebuggerCategoryType) == -1, "Do not construct instances of TGameplayDebuggerCategoryTypeList! The class is meant to be used with static invocations only.");
 	};
@@ -102,8 +101,8 @@ public:
 	template <EGameplayDebuggerCategoryState InitialState>
 	static void RegisterCategories(IGameplayDebugger& GameplayDebugger)
 	{
-		SingleType::RegisterCategories<InitialState>(GameplayDebugger);
-		ExpandOtherTypes::RegisterCategories<InitialState>(GameplayDebugger);
+		SingleType::template RegisterCategories<InitialState>(GameplayDebugger);
+		ExpandOtherTypes::template RegisterCategories<InitialState>(GameplayDebugger);
 	}
 
 	static void UnregisterCategories(IGameplayDebugger& GameplayDebugger)
@@ -122,12 +121,10 @@ template <typename DebuggerCategoryType>
 class TGameplayDebuggerCategoryTypeList<DebuggerCategoryType>
 {
 public:
-	using ThisType = TGameplayDebuggerCategoryTypeList<DebuggerCategoryType>;
-
 	static_assert(TIsDerivedFrom<DebuggerCategoryType, FGameplayDebuggerCategory>::Value,
         "GameplayDebuggerCategoryType must be derived from FGameplayDebuggerCategory");
 
-	ThisType()
+	TGameplayDebuggerCategoryTypeList()
 	{
 		static_assert(sizeof(DebuggerCategoryType) == -1, "Do not construct instances of TGameplayDebuggerCategoryTypeList! The class is meant to be used with static invocations only.");
 	};
