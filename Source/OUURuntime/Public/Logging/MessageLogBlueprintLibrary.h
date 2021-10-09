@@ -5,6 +5,7 @@
 #include "Logging/MessageLogName.h"
 #include "Logging/MessageLogSeverity.h"
 #include "Logging/MessageLogToken.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "MessageLogBlueprintLibrary.generated.h"
 

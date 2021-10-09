@@ -71,6 +71,25 @@ public:
 		return CreateObjectMessageLogToken(Object, FText());
 	}
 
+	static FORCEINLINE FMessageLogToken Create(FMessageLogToken Token)
+	{
+		return Token;
+	}
+
+	template<typename FirstType>
+	static TArray<FMessageLogToken> CreateList(FirstType FirstArgument)
+	{
+		return TArray<FMessageLogToken>{Create(FirstArgument)};
+	}
+
+	template<typename FirstType, typename... RemainingTypes>
+	static TArray<FMessageLogToken> CreateList(FirstType FirstArgument, RemainingTypes... RemainingArguments)
+	{
+		TArray<FMessageLogToken> ResultArray {Create(FirstArgument)};
+		ResultArray.Append(CreateList(RemainingArguments...));
+		return ResultArray;
+	}
+
 	// Which of the payload data should be used
 	UPROPERTY(BlueprintReadWrite)
 	EMessageLogTokenType Type = EMessageLogTokenType::Text;

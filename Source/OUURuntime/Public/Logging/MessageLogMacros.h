@@ -6,44 +6,25 @@
 #include "Logging/MessageLogBlueprintLibrary.h"
 
 /**
+* Macro for UE_LOG-like logging to the message log.
+* This version takes a list of tokenizable arguments instead of a format string. 
+* Example Usage:
+* UE_MESSAGELOG(PIE, Error, TEXT("PlayerPawnComponent "), PlayerPawnComponent, TEXT("is not attached to anything!"));
+*/
+#define UE_MESSAGELOG(Category, Severity, ...) \
+	(UMessageLogBlueprintLibrary::AddTokenizedMessageLogMessage( \
+		GetMessageLogName(EMessageLogName::Category), \
+		FMessageLogToken::CreateList( __VA_ARGS__ ), \
+		EMessageLogSeverity::Severity))
+
+/**
  * Macro for UE_LOG-like logging to the message log.
  * This version takes string formatting arguments like UE_LOG() or FString::Printf().
  * Example Usage:
- * UE_MESSAGELOG(PIE, Error, TEXT("PlayerPawnComponent is not attached to anything!"));
+ * UE_MESSAGELOG_FORMAT(PIE, Error, ContextObject, TEXT("PlayerPawnComponent %s is not attached to anything!"), *PlayerPawnComponent->GetName());
  */
-#define UE_MESSAGELOG(Category, Severity, ...) \
-	(UMessageLogBlueprintLibrary::AddTextMessageLogMessage( \
-		GetMessageLogName(EMessageLogName::Category), \
-		FText::FromString(FString::Printf( __VA_ARGS__ )), \
-		EMessageLogSeverity::Severity))
-
-/**
- * Macro for UE_LOG-like logging to the message log.
- * This version takes a UObject pointer and string formatting arguments like UE_LOG() or FString::Printf().
- * Example Usage:
- * UE_MESSAGELOG_OBJ(GetOwner(), PIE, Error, TEXT("PlayerPawnComponent is not attached to anything!"));
- */
-#define UE_MESSAGELOG_OBJ(Object, Category, Severity, ...) \
-	(UMessageLogBlueprintLibrary::AddTokenizedMessageLogMessage( \
-		GetMessageLogName(EMessageLogName::Category),\
-		{ \
-			FMessageLogToken::Create(Object), \
-			FMessageLogToken::Create(FString::Printf( __VA_ARGS__ )), \
-		}, \
-		EMessageLogSeverity::Severity))
-
-
-/**
- * Macro for UE_LOG-like logging to the message log.
- * This version takes a list of FMessageLogTokens instead of a format string. 
- * Example Usage:
- * UE_MESSAGELOG_OBJ(PIE, Error,
- *     FMessageLogToken::Create(TEXT("PlayerPawnComponent ")),
- *     FMessageLogToken::Create(PlayerPawnComponent),
- *     FMessageLogToken::Create(TEXT("is not attached to anything!")));
- */
-#define UE_MESSAGELOG_TOKENIZED(Category, Severity, ...) \
+#define UE_MESSAGELOG_FORMAT(Category, Severity, ContextObject, ...) \
 	(UMessageLogBlueprintLibrary::AddTokenizedMessageLogMessage( \
 		GetMessageLogName(EMessageLogName::Category), \
-		{ __VA_ARGS__ }, \
+		FMessageLogToken::CreateList(ContextObject, FText::FromString(FString::Printf( __VA_ARGS__ ))), \
 		EMessageLogSeverity::Severity))
