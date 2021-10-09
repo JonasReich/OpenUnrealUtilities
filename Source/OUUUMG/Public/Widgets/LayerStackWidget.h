@@ -51,7 +51,7 @@ protected:
 	 * Layer widgets should only be added/removed/reordered during design-time in the UMG designer.
 	 */
 	UPROPERTY(meta=(BindWidget))
-	UOverlay* WidgetStack;
+	UOverlay* WidgetStack = nullptr;
 
 	// - UUserWidget
 	virtual void NativeOnInitialized() override;

@@ -90,7 +90,7 @@ protected:
 private:
 	/** Input action binding stack. To be lazily created by GetInputActionBindingStack() function. */
 	UPROPERTY(Transient)
-	UUMGInputActionBindingStack* InputActionBindingStack;
+	UUMGInputActionBindingStack* InputActionBindingStack = nullptr;
 	
 	/**
 	 * Is there a concealing layer above? This info is still required even if the layer itself cannot be concealed,

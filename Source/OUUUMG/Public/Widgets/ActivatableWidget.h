@@ -125,5 +125,5 @@ private:
 
 	/** Input action binding stack. To be lazily created by GetInputActionBindingStack() function. */
 	UPROPERTY(Transient)
-	UUMGInputActionBindingStack* InputActionBindingStack;
+	UUMGInputActionBindingStack* InputActionBindingStack = nullptr;
 };
