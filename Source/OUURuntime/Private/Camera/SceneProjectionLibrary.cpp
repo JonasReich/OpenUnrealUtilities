@@ -72,6 +72,7 @@ bool UOUUSceneProjectionLibrary::GetViewProjectionData(UCameraComponent* TargetC
 		}
 	}
 
+	
 	// Create the view matrix
 	OutProjectionData.ViewOrigin = StereoViewLocation;
 	OutProjectionData.ViewRotationMatrix = FInverseRotationMatrix(ViewInfo.Rotation) * FMatrix(
@@ -84,10 +85,10 @@ bool UOUUSceneProjectionLibrary::GetViewProjectionData(UCameraComponent* TargetC
 	if (!bNeedStereo)
 	{
 		// Create the projection matrix (and possibly constrain the view rectangle)
-		FMinimalViewInfo::CalculateProjectionMatrixGivenView(ViewInfo, LocalPlayer->AspectRatioAxisConstraint, Viewport, /*inout*/ OutProjectionData);
+		FMinimalViewInfo::CalculateProjectionMatrixGivenView(ViewInfo, LocalPlayer->AspectRatioAxisConstraint, Viewport, IN OUT OutProjectionData);
 
-		for (auto& ViewExt : GEngine->ViewExtensions->GatherActiveExtensions())
-		{
+		for (auto& ViewExt : GEngine->ViewExtensions->GatherActiveExtensions(FSceneViewExtensionContext(Viewport)))
+        {
 			ViewExt->SetupViewProjectionMatrix(OutProjectionData);
 		};
 	}
