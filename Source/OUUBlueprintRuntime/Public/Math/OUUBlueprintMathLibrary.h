@@ -26,4 +26,16 @@ public:
 	/** Returns subtraction of Rotator A and Rotator B (A - B) */
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "rotator - rotator", CompactNodeTitle = "-", Keywords = "- subtract minus"), Category = "Open Unreal Utilities|Math|Rotator")
 	static FRotator Subtract_RotatorRotator(const FRotator& A, const FRotator& B);
+
+	/** @returns the forward vector of the given transform */
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Math|Transform")
+	static FVector GetTransformForwardVector(const FTransform& Transform);
+
+	/** @returns the right vector of the given transform */
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Math|Transform")
+	static FVector GetTransformRightVector(const FTransform& Transform);
+
+	/** @returns the up vector of the given transform */
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Math|Transform")
+	static FVector GetTransformUpVector(const FTransform& Transform);
 };

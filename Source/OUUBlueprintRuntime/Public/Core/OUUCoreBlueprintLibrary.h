@@ -45,4 +45,11 @@ public:
 	*/
 	UFUNCTION(BlueprintCallable)
 	static void ModifyObject(UObject* Object);
+
+	/** 
+	* Reruns the construction scripts of an actor
+	* Be careful when calling this
+	*/
+	UFUNCTION(BlueprintCallable)
+	static void RerunConstructionScripts(AActor* Actor);
 };

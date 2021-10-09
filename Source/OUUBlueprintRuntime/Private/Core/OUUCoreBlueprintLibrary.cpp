@@ -29,3 +29,11 @@ void UOUUCoreBlueprintLibrary::ModifyObject(UObject* Object)
 		Object->Modify();
 	}
 }
+
+void UOUUCoreBlueprintLibrary::RerunConstructionScripts(AActor* Actor)
+{
+	if (IsValid(Actor))
+	{
+		Actor->RerunConstructionScripts();
+	}
+}

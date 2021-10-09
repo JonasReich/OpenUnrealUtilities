@@ -11,3 +11,18 @@ FRotator UOUUBlueprintMathLibrary::Subtract_RotatorRotator(const FRotator& A, co
 {
 	return A - B;
 }
+
+FVector UOUUBlueprintMathLibrary::GetTransformForwardVector(const FTransform& Transform)
+{
+	return Transform.GetUnitAxis(EAxis::X);
+}
+
+FVector UOUUBlueprintMathLibrary::GetTransformRightVector(const FTransform& Transform)
+{
+	return Transform.GetUnitAxis(EAxis::Y);
+}
+
+FVector UOUUBlueprintMathLibrary::GetTransformUpVector(const FTransform& Transform)
+{
+	return Transform.GetUnitAxis(EAxis::Z);
+}
