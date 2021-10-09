@@ -48,8 +48,9 @@ FString LexToString(T Object, int32 iOverloadArg = 0)
 /** LexToString overload for references to objects that have a ToString member */
 template <typename T,
           typename = typename TEnableIf<
-	          TIsPointer<T>::Value == false &&
-	          TModels<CMemberToStringConvertable, T>::Value
+				TIsPointer<T>::Value == false &&
+				TIsArithmetic<T>::Value == false &&
+				TModels<CMemberToStringConvertable, T>::Value
           >::Type>
 FString LexToString(const T& Object)
 {
