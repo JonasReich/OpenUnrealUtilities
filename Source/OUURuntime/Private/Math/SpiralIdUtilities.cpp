@@ -15,20 +15,36 @@ int32 USpiralIdUtilities::ConvertCoordinatePointToSpiralId(const FIntPoint& Poin
 	return ConvertCoordinatesToSpiralId(Point.X, Point.Y);
 }
 
-int32 USpiralIdUtilities::ConvertWorldLocation2DToSpiralId(const FVector2D& Location, float GridSize)
+int32 USpiralIdUtilities::ConvertWorldLocation2DToSpiralId(const FVector2D& Location, float GridSize, ESpiralCoordinateSystemType CoordinateSystem)
 {
-	return ConvertCoordinatesToSpiralId(
-		FMath::FloorToInt(Location.X / GridSize),
-		// Flip Y axis for left handed UE4 coordinate system
-		FMath::FloorToInt(-Location.Y / GridSize));
+	int32 X = FMath::FloorToInt(Location.X / GridSize);
+	int32 Y = 0;
+	switch (CoordinateSystem)
+	{
+		case ESpiralCoordinateSystemType::RightHanded: 
+			Y = FMath::FloorToInt(Location.Y / GridSize); break;
+		case ESpiralCoordinateSystemType::LeftHanded:
+			Y = FMath::FloorToInt(-Location.Y / GridSize); break;
+		default: Y = 0;
+	}
+
+	return ConvertCoordinatesToSpiralId(X, Y);
 }
 
-int32 USpiralIdUtilities::ConvertWorldLocationToSpiralId(const FVector& Location, float GridSize)
+int32 USpiralIdUtilities::ConvertWorldLocationToSpiralId(const FVector& Location, float GridSize, ESpiralCoordinateSystemType CoordinateSystem)
 {
-	return ConvertCoordinatesToSpiralId(
-		FMath::FloorToInt(Location.X / GridSize),
-		// Flip Y axis for left handed UE4 coordinate system
-		FMath::FloorToInt(-Location.Y / GridSize));
+	int32 X = FMath::FloorToInt(Location.X / GridSize);
+	int32 Y = 0;
+	switch (CoordinateSystem)
+	{
+		case ESpiralCoordinateSystemType::RightHanded:
+			Y = FMath::FloorToInt(Location.Y / GridSize); break;
+		case ESpiralCoordinateSystemType::LeftHanded:
+			Y = FMath::FloorToInt(-Location.Y / GridSize); break;
+		default: Y = 0;
+	}
+
+	return ConvertCoordinatesToSpiralId(X, Y);
 }
 
 FIntPoint USpiralIdUtilities::ConvertSpiralIdToCoordinates(const int32 SpiralId)
@@ -62,28 +78,33 @@ FIntPoint USpiralIdUtilities::ConvertSpiralIdToCoordinates(const int32 SpiralId)
 	return Coordinates;
 }
 
-FVector2D USpiralIdUtilities::ConvertSpiralIdToCenterLocation(const int32 SpiralId, const float GridSize)
+FVector2D USpiralIdUtilities::ConvertSpiralIdToCenterLocation(const int32 SpiralId, const float GridSize, ESpiralCoordinateSystemType CoordinateSystem)
 {
 	FIntPoint Coordinates = ConvertSpiralIdToCoordinates(SpiralId);
-	// Flip Y axis for left handed UE4 coordinate system
-	Coordinates.Y *= -1;
+	if (CoordinateSystem == ESpiralCoordinateSystemType::LeftHanded)
+	{
+		Coordinates.Y *= -1;
+	}
+
 	FVector2D Result(0.5f, -0.5f);
 	Result += Coordinates;
 	Result *= GridSize;
 	return Result;
 }
 
-FBox2D USpiralIdUtilities::ConvertSpiralIdToBounds(const int32 SpiralId, const float GridSize)
+FBox2D USpiralIdUtilities::ConvertSpiralIdToBounds(const int32 SpiralId, const float GridSize, ESpiralCoordinateSystemType CoordinateSystem)
 {
 	FIntPoint MinPoint = ConvertSpiralIdToCoordinates(SpiralId);
-	// Flip Y axis for left handed UE4 coordinate system
-	MinPoint.Y *= -1;
+	if (CoordinateSystem == ESpiralCoordinateSystemType::LeftHanded)
+	{
+		MinPoint.Y *= -1;
+	}
 	const FIntPoint MaxPoint = MinPoint + FIntPoint(1,-1);
 	return {MinPoint * GridSize, MaxPoint * GridSize};
 }
 
-FBox USpiralIdUtilities::ConvertSpiralIdToBounds3D(const int32 SpiralId, const float GridSize, const float BoundsHeight, const float BoundsElevation)
+FBox USpiralIdUtilities::ConvertSpiralIdToBounds3D(const int32 SpiralId, const float GridSize, ESpiralCoordinateSystemType CoordinateSystem, const float BoundsHeight, const float BoundsElevation)
 {
-	const FBox2D Box2D = ConvertSpiralIdToBounds(SpiralId, GridSize);
+	const FBox2D Box2D = ConvertSpiralIdToBounds(SpiralId, GridSize, CoordinateSystem);
 	return FBox (FVector(Box2D.Min.X, Box2D.Min.Y, BoundsElevation), FVector(Box2D.Max.X, Box2D.Max.Y, BoundsElevation + BoundsHeight));
 }

@@ -52,10 +52,10 @@ public:
 template<class LockType>
 struct FOUULockTestEnvironment
 {
-	LockType* Lock;
-	ULockTestsHelper* Helper;
-	UObject* Key0;
-	UObject* Key1;
+	LockType* Lock = nullptr;
+	ULockTestsHelper* Helper = nullptr;
+	UObject* Key0 = nullptr;
+	UObject* Key1 = nullptr;
 
 	FOUUScopedAutomationTestWorld TestWorld;
 

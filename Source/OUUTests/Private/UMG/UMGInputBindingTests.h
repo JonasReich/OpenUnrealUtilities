@@ -15,7 +15,7 @@ class UUMGInputBindingTestWidget : public UUserWidget
 	GENERATED_BODY()
 public:
 	UPROPERTY()
-	UUMGInputActionBindingStack* Stack;
+	UUMGInputActionBindingStack* Stack = nullptr;
 
 	bool bLastNativeOnKeyDownWasHandled = false;
 	bool bLastNativeOnKeyUpWasHandled = false;

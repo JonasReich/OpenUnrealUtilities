@@ -64,8 +64,8 @@ void FSpiralIdUtilitiesSpec::Define()
 			const int32 ExpectedSpiralId = Entry.Key;
 			const FVector2D ExpectedLocation = Entry.Value;
 			const float GridSize = 15000;
-			const FVector2D ResultLocation = USpiralIdUtilities::ConvertSpiralIdToCenterLocation(ExpectedSpiralId, GridSize);
-			const int32 ResultSpiralId = USpiralIdUtilities::ConvertWorldLocation2DToSpiralId(ExpectedLocation, GridSize);
+			const FVector2D ResultLocation = USpiralIdUtilities::ConvertSpiralIdToCenterLocation(ExpectedSpiralId, GridSize, ESpiralCoordinateSystemType::LeftHanded);
+			const int32 ResultSpiralId = USpiralIdUtilities::ConvertWorldLocation2DToSpiralId(ExpectedLocation, GridSize, ESpiralCoordinateSystemType::LeftHanded);
 
 			SPEC_TEST_EQUAL(ResultSpiralId, ExpectedSpiralId);
 			SPEC_TEST_EQUAL(ResultLocation, ExpectedLocation);

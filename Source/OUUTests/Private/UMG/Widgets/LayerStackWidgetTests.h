@@ -43,9 +43,9 @@ class UTestUOUULayerStackWidget : public UOUULayerStackWidget
 {
 	GENERATED_BODY()
 public:
-	UOUULayerStackTickTestLayer* TopLayer;
-	UOUULayerStackTickTestLayer* MiddleLayer;
-	UOUULayerStackTickTestLayer* BottomLayer;
+	UOUULayerStackTickTestLayer* TopLayer = nullptr;
+	UOUULayerStackTickTestLayer* MiddleLayer = nullptr;
+	UOUULayerStackTickTestLayer* BottomLayer = nullptr;
 
 	static TArray<const UOUULayerWidget*> UpdatedLayers;
 	static TArray<const UOUULayerWidget*> LayersAboveUpdatedLayers;
