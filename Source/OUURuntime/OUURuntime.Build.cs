@@ -16,7 +16,9 @@ public class OUURuntime : ModuleRules
 			"InputCore",
 			"UMG",
 			"SlateCore",
-			"GameplayTags"
+			"GameplayAbilities",
+			"GameplayTags",
+			"GameplayTasks"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]
