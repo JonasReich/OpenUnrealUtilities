@@ -24,19 +24,19 @@ public:
 
 	/** The fade in duration for the notification */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slate Notification|Timing")
-	float FadeInDuration;
+	float FadeInDuration = 0.f;
 
 	/** The fade out duration for the notification */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slate Notification|Timing")
-	float FadeOutDuration;
+	float FadeOutDuration = 0.f;
 
 	/** The duration before a fadeout for the notification */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slate Notification|Timing")
-	float ExpireDuration;
+	float ExpireDuration = 0.f;
 
 	/** When true an image is displayed next to the text */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slate Notification")
-	bool bShowImage;
+	bool bShowImage = false;
 	
 	/** The icon image to display next to the text */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slate Notification")
@@ -44,23 +44,23 @@ public:
 	
 	/** Controls whether or not to add the animated throbber */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slate Notification|Styling")
-	bool bUseThrobber;
+	bool bUseThrobber = false;
 
 	/** Controls whether or not to display the success and fail icons */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slate Notification|Styling")
-	bool bUseSuccessFailIcons;
+	bool bUseSuccessFailIcons = false;
 
 	/** When true the larger bolder font will be used to display the message */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slate Notification|Styling")
-	bool bUseLargeFont;
+	bool bUseLargeFont = false;
 
 	/** When set to a bigger value than zero this forces the width of the box, used to stop resizing on text change */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slate Notification|Styling")
-	float WidthOverride;
+	float WidthOverride = 0.f;
 
 	/** When true the notification will automatically time out after the expire duration. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slate Notification|Misc")
-	bool bFireAndForget;
+	bool bFireAndForget = false;
 
 	FNotificationInfo ToNativeNotificationInfo() const;
 };

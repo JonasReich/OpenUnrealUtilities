@@ -24,13 +24,13 @@ public:
 	}
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	int32 MatchBeginning;
+	int32 MatchBeginning = INDEX_NONE;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	int32 MatchEnding;
+	int32 MatchEnding = INDEX_NONE;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	FString MatchString;
+	FString MatchString = "";
 
 	FORCEINLINE FString ToString() const
 	{

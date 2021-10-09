@@ -29,7 +29,7 @@ public:
 
 	/** When the event occured (compare with FDateTime::Now()) */
 	UPROPERTY()
-	FDateTime Timestamp;
+	FDateTime Timestamp = FDateTime::MinValue();
 
 	/** Tag of the event that triggered this */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GameplayAbilityTriggerPayload)
@@ -45,7 +45,7 @@ public:
 
 	/** The magnitude of the triggering event */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GameplayAbilityTriggerPayload)
-	float EventMagnitude;
+	float EventMagnitude = 0.f;
 };
 
 /**
