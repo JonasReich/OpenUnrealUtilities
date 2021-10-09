@@ -252,18 +252,29 @@ void FRingAggregatorSpec::Define()
 	{
 		It("should be reconstructable with different sizes", [this]()
 		{
-			TRingAggregator<int32> TestAggregator(0);
-			// Iterate from 5 to 1, decreasing the number of available elements per iteration.
+			const int32 MaxNum = 5;
+
+			TRingAggregator<int32> TestAggregator(MaxNum);
+			// Iterate from 10 (=5*2) to 1, decreasing the number of available elements per iteration.
 			// That way we can be sure that the test does not succeed simply because
 			// there is still space allocated because of the previous iteration.
-			for (int32 i = 5; i > 0; i--)
+			for (int32 i = MaxNum * 2; i > 0; i--)
 			{
-				TestAggregator = TRingAggregator<int32>(i);
-				for (int32 j = 0; j < i + 1; j++)
+				auto SourceAggregator = TRingAggregator<int32>(MaxNum);
+				TestAggregator = SourceAggregator;
+
+				for (int32 j = 0; j < i; j++)
 				{
 					TestAggregator.Add(j);
 				}
-				SPEC_TEST_EQUAL(TestAggregator.Num(), i);
+				if (i <= MaxNum)
+				{
+					SPEC_TEST_EQUAL(TestAggregator.Num(), i);
+				}
+				else
+				{
+					SPEC_TEST_EQUAL(TestAggregator.Num(), MaxNum);
+				}
 			}
 		});
 	});

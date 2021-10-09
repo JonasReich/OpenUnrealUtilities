@@ -45,6 +45,7 @@ public:
 	/** Explicit access  */
 	constexpr T& Get() const noexcept
 	{
+		check(Pointer != nullptr);
 		return *Pointer;
 	}
 

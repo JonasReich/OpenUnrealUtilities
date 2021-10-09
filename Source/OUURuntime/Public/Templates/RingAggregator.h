@@ -2,8 +2,10 @@
 
 #pragma once
 
+#include "CircularArrayAdaptor.h"
 #include "Algo/MaxElement.h"
 #include "Algo/MinElement.h"
+#include "Containers/Array.h"
 #include "Traits/IsInteger.h"
 
 /**
@@ -11,46 +13,51 @@
  * Useful e.g. for tracking data of the last X frames.
  */
 template <class ChildClass, typename InElementType, typename AllocatorType>
-class TRingAggregator_Base
+class TRingAggregator_Base : public TCircularArrayAdaptor_Base<ChildClass, InElementType, AllocatorType>
 {
 public:
 	using ElementType = InElementType;
-	using SizeType = typename AllocatorType::SizeType;
+	using Super = TCircularArrayAdaptor_Base<ChildClass, InElementType, AllocatorType>;
+	using ArrayType = TArray<ElementType, AllocatorType>;
 
-	void Add(ElementType Element)
+	TRingAggregator_Base() :
+		Super(Storage, 32),
+		Storage({})
 	{
-		if (IsPreWrap())
-		{
-			Storage.AddUninitialized(1);
-		}
-		Storage[WriteIndex] = Element;
-		WriteIndex = (WriteIndex + 1) % ArrayMax();
+		Super::StorageReference = Storage;
 	}
 
-	SizeType Num() const
+	TRingAggregator_Base(int32 MaxNum) :
+		Super(Storage, MaxNum),
+		Storage({})
 	{
-		return Storage.Num();
+		Super::StorageReference = Storage;
+		Storage.Reserve(MaxNum);
+		check(&Storage == &GetStorage());
+		check(Storage == GetStorage());
 	}
 
-	bool HasData() const
+	TRingAggregator_Base(const TRingAggregator_Base& Other) : TRingAggregator_Base()
 	{
-		return Num() > 0;
+		*this = Other;
 	}
-
-	ElementType Last() const
+	TRingAggregator_Base(TRingAggregator_Base&& Other) noexcept : TRingAggregator_Base()
 	{
-		const int32 LastIdx = WriteIndex - 1;
-		const int32 LastIdxWrapped = LastIdx >= 0 ? LastIdx : LastIdx + Num();
-		return Storage[LastIdxWrapped];
+		*this = MoveTemp(Other);
 	}
-
-	ElementType Oldest() const
+	TRingAggregator_Base& operator=(const TRingAggregator_Base& Other)
 	{
-		if (IsPreWrap())
-		{
-			return Storage[0];
-		}
-		return Storage[WriteIndex];
+		*(static_cast<Super*>(this)) = Other;
+		Storage = Other.Storage;
+		Super::StorageReference = Storage;
+		return *this;
+	}
+	TRingAggregator_Base& operator=(TRingAggregator_Base&& Other) noexcept
+	{
+		*(static_cast<Super*>(this)) = MoveTemp(Other);
+		Storage = MoveTemp(Other.Storage);
+		Super::StorageReference = Storage;
+		return *this;
 	}
 
 	ElementType Sum() const
@@ -83,47 +90,8 @@ public:
 		return Storage;
 	}
 
-	bool IsValidIndex(SizeType Index)
-	{
-		return Storage.IsValidIndex(GetWrappedRingIndex(Index));
-	}
-
-	ElementType& operator[](SizeType Index)
-	{
-		return Storage[GetWrappedRingIndex(Index)];
-	}
-
-	// Iterators
-	using TIterator = TIndexedContainerIterator<TRingAggregator_Base, ElementType, SizeType> ;
-	using TConstIterator = TIndexedContainerIterator<const TRingAggregator_Base, const ElementType, SizeType>;
-
-	FORCEINLINE TIterator begin() { return TIterator(*this, 0); }
-	FORCEINLINE TConstIterator begin() const { return TConstIterator(*this, 0); }
-	FORCEINLINE TIterator end() { return TIterator(*this, Num()); }
-	FORCEINLINE TConstIterator end() const { return TConstIterator(*this, Num()); }
-
 protected:
-	TArray<ElementType, AllocatorType> Storage;
-	int32 WriteIndex = 0;
-
-	int32 ArrayMax() const
-	{
-		return static_cast<const ChildClass*>(this)->ArrayMax_Implementation();
-	}
-
-	bool IsPreWrap() const
-	{
-		return Num() < ArrayMax();
-	}
-
-	int32 GetWrappedRingIndex(int32 Index) const
-	{
-		checkf(Storage.IsValidIndex(Index), TEXT("%i is an invalid index for storage with size %i. "
-			"You must stick to indices >= 0 and < Num just like with regular arrays!"), Index, Num());
-		const int32 RingIndex = (WriteIndex + Index);
-		const int32 WrappedRingIndex = (RingIndex >= Num()) ? (RingIndex - Num()) : RingIndex;
-		return WrappedRingIndex;
-	}
+	TArray<ElementType, AllocatorType> Storage = {};
 
 	/** Overload for builds with ensure macros that checks for integer overflow */
 	template <typename T, typename = typename TEnableIf<TIsInteger<T>::Value && static_cast<bool>(DO_CHECK)>::Type>
@@ -148,31 +116,16 @@ class TRingAggregator : public TRingAggregator_Base<TRingAggregator<ElementType>
 {
 public:
 	using Super = TRingAggregator_Base<TRingAggregator<ElementType>, ElementType, FDefaultAllocator>;
-	friend class TRingAggregator_Base<TRingAggregator<ElementType>, ElementType, FDefaultAllocator>;
-
-	TRingAggregator(int32 InitialSize)
-	{
-		MaxNum = InitialSize;
-	}
-
-private:
-	int32 MaxNum = INDEX_NONE;
-
-	int32 ArrayMax_Implementation() const
-	{
-		return MaxNum;
-	}
+	TRingAggregator() = default;
+	TRingAggregator(int32 MaxNum) : Super(MaxNum) {}
 };
 
 /** Ring aggregator that has a compile time fixed size of elements */
 template <typename ElementType, uint32 ElementNum>
 class TFixedSizeRingAggregator : public TRingAggregator_Base<TFixedSizeRingAggregator<ElementType, ElementNum>, ElementType, TFixedAllocator<ElementNum>>
 {
-private:
-	friend class TRingAggregator_Base<TFixedSizeRingAggregator<ElementType, ElementNum>, ElementType, TFixedAllocator<ElementNum>>;
-
-	static int32 ArrayMax_Implementation()
-	{
-		return ElementNum;
-	}
+public:
+	using Super = TRingAggregator_Base<TFixedSizeRingAggregator<ElementType, ElementNum>, ElementType, TFixedAllocator<ElementNum>>;
+	TFixedSizeRingAggregator() : Super(ElementNum) {}
+	// no constructor with MaxNum parameter, because it's a compile time constant ("ElementNum")
 };
