@@ -7,7 +7,7 @@
 #include "BehaviorTree/BTNode.h"
 #include "Components/Widget.h"
 
-static TAutoConsoleVariable<bool> bCVarAccumulateGCCounts(TEXT("ouu.GC.AccumulateDumps"),
+static TAutoConsoleVariable<bool> bCVarAccumulateGCCounts(TEXT("ouu.debug.GC.AccumulateDumps"),
 	true,
 	TEXT("If true GC reports are only logged at the moment dumping is shut off. Otherwise every GC call triggers a log dump"),
 	ECVF_Cheat);
