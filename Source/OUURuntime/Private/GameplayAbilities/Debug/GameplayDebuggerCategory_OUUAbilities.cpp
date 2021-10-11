@@ -23,7 +23,7 @@
 #include "Templates/StringUtils.h"
 
 TAutoConsoleVariable<FString> AbilityFilter {
-	TEXT("ouu.debug.ability.filter"),
+	TEXT("ouu.Debug.Ability.Filter"),
 	TEXT(".*"),
 	TEXT("Regular expression filter for ability names. Default value: '.*' (allow all)."),
 	ECVF_Cheat

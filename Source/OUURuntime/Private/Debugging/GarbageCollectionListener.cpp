@@ -7,7 +7,7 @@
 #include "BehaviorTree/BTNode.h"
 #include "Components/Widget.h"
 
-static TAutoConsoleVariable<bool> bCVarAccumulateGCCounts(TEXT("ouu.debug.GC.AccumulateDumps"),
+static TAutoConsoleVariable<bool> bCVarAccumulateGCCounts(TEXT("ouu.Debug.GC.AccumulateDumps"),
 	true,
 	TEXT("If true GC reports are only logged at the moment dumping is shut off. Otherwise every GC call triggers a log dump"),
 	ECVF_Cheat);
@@ -233,7 +233,7 @@ public:
 TUniquePtr<FGarbageCollectionListener> FGarbageCollectionListener::GGarbageCollectionListener;
 
 static FAutoConsoleCommand DumpGarbageCollection(
-	TEXT("ouu.GC.DumpNext"),
+	TEXT("ouu.Debug.GC.DumpNext"),
 	TEXT("Dump a summary of the next garbage collection that is triggered into the output log"),
 	FConsoleCommandDelegate::CreateStatic(
 		[]()
@@ -243,7 +243,7 @@ static FAutoConsoleCommand DumpGarbageCollection(
 	);
 
 static FAutoConsoleCommand StartGarbageCollectionDumping(
-	TEXT("ouu.GC.StartDump"),
+	TEXT("ouu.Debug.GC.StartDump"),
 	TEXT("Start dumping summaries of all following garbage collections into the output log until this process is stopped with ouu.GC.StopDump"),
 	FConsoleCommandDelegate::CreateStatic(
 		[]()
@@ -253,7 +253,7 @@ static FAutoConsoleCommand StartGarbageCollectionDumping(
 	);
 
 static FAutoConsoleCommand StopGarbageCollectionDumping(
-	TEXT("ouu.GC.StopDump"),
+	TEXT("ouu.Debug.GC.StopDump"),
 	TEXT("Stop dumping garbage collection summaries into the output log"),
 	FConsoleCommandDelegate::CreateStatic(
 		[]()
