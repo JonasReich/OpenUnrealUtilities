@@ -87,8 +87,9 @@ bool UOUUSceneProjectionLibrary::GetViewProjectionData(UCameraComponent* TargetC
 		// Create the projection matrix (and possibly constrain the view rectangle)
 		FMinimalViewInfo::CalculateProjectionMatrixGivenView(ViewInfo, LocalPlayer->AspectRatioAxisConstraint, Viewport, IN OUT OutProjectionData);
 
-		for (auto& ViewExt : GEngine->ViewExtensions->GatherActiveExtensions(FSceneViewExtensionContext(Viewport)))
-        {
+		FSceneViewExtensionContext ViewExtensionContext(Viewport);
+		for (auto& ViewExt : GEngine->ViewExtensions->GatherActiveExtensions(ViewExtensionContext))
+		{
 			ViewExt->SetupViewProjectionMatrix(OutProjectionData);
 		};
 	}
