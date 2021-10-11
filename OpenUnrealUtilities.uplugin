@@ -26,6 +26,11 @@
 			"LoadingPhase": "Default"
 		},
 		{
+			"Name": "OUUDeveloper",
+			"Type": "Developer",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "OUUEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default"
