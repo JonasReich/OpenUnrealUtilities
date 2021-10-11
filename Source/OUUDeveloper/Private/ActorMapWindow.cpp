@@ -33,7 +33,7 @@ public:
 		checkf(!IsValid(TargetWorld), TEXT("OpenWindowForCurrentWorld() must not be called twice on the same object"));
 
 		TargetWorld = GetCurrentTargetWorld();
-		GEngine->OnWorldDestroyed().AddRaw(this, &HandleWorldDestroyed);
+		GEngine->OnWorldDestroyed().AddRaw(this, &FActorMapWindowBootstrapper::HandleWorldDestroyed);
 	}
 
 	void HandleWorldDestroyed(UWorld* WorldDestroyed)

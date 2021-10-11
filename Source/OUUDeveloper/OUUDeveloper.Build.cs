@@ -13,17 +13,15 @@ public class OUUDeveloper : ModuleRules
 			"CoreUObject",
 			"Engine",
 			"Core",
-			"InputCore",
 			"UMG",
 			"SlateCore",
-			"GameplayAbilities",
-			"GameplayTags",
-			"GameplayTasks"
+
+			"OUURuntime",
+			"OUUUMG"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
-			"HeadMountedDisplay",
 			"Slate",
 			"AIModule"
 		});
@@ -34,7 +32,8 @@ public class OUUDeveloper : ModuleRules
 			PrivateDependencyModuleNames.Add("UnrealEd");
 		}
 		// --
-		
+
+		// #TODO-j.reich Figure out if it makes sense to move the gameplay debugger stuff into this module as well!
 		if (Target.bBuildDeveloperTools || (Target.Configuration != UnrealTargetConfiguration.Shipping && Target.Configuration != UnrealTargetConfiguration.Test))
 		{
 			PublicDependencyModuleNames.Add("GameplayDebugger");

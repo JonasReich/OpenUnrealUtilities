@@ -27,7 +27,7 @@
 		},
 		{
 			"Name": "OUUDeveloper",
-			"Type": "Developer",
+			"Type": "DeveloperTool",
 			"LoadingPhase": "Default"
 		},
 		{
