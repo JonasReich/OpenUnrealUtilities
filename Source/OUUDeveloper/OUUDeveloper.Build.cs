@@ -13,6 +13,7 @@ public class OUUDeveloper : ModuleRules
 			"CoreUObject",
 			"Engine",
 			"Core",
+			"InputCore",
 			"UMG",
 			"SlateCore",
 
