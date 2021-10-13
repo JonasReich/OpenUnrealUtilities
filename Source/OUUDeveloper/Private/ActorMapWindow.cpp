@@ -2,14 +2,14 @@
 
 #include "CoreMinimal.h"
 
-
 #include "EngineUtils.h"
 #include "LogOpenUnrealUtilities.h"
 #include "Brushes/SlateColorBrush.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Engine/SceneCapture2D.h"
-#include "Engine/StaticMeshActor.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "Misc/RegexUtils.h"
+#include "PropertyEditor/Private/SSingleProperty.h"
 #include "Widgets/SWindow.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Input/SVectorInputBox.h"
@@ -19,6 +19,127 @@ FSlateColorBrush DarkGrey(FColor(6, 6, 6, 255));
 FSlateColorBrush MediumGrey(FColor(13, 13, 13, 255));
 FSlateColorBrush White(FColor::White);
 
+TArray<FColor> DefaultColors = {
+	FColorList::Red,
+	FColorList::Green,
+	FColorList::Blue,
+	FColorList::Magenta,
+	FColorList::Cyan,
+	FColorList::Yellow
+};
+
+struct FActorQueryResult
+{
+public:
+	TArray<AActor*> Actors;
+};
+
+class FActorQuery
+{
+public:
+	FColor QueryColor;
+	FString NameFilter;
+	FString NameRegexPattern;
+	FString ActorClassSearchString;
+	FActorQueryResult CachedQueryResult;
+
+	bool MatchesActor(const AActor* Actor) const
+	{
+		bool bAtLeastOneFilterActive = false;
+
+		const FString ActorName = Actor->GetName();
+		if (!NameFilter.IsEmpty())
+		{
+			bAtLeastOneFilterActive = true;
+			if (!ActorName.Contains(NameFilter))
+				return false;
+		}
+
+		if (!NameRegexPattern.IsEmpty())
+		{
+			bAtLeastOneFilterActive = true;
+			if (!FRegexUtils::MatchesRegex(NameRegexPattern, ActorName))
+				return false;
+		}
+
+		// Perform this check last, because it's the most expensive
+		if (!ActorClassSearchString.IsEmpty())
+		{
+			bAtLeastOneFilterActive = true;
+			if (!MatchesActorClassSearchString(Actor))
+				return false;
+		}
+
+		return bAtLeastOneFilterActive;
+	}
+
+	bool MatchesActorClassSearchString(const AActor* Actor) const
+	{
+		auto* Class = Actor->GetClass();
+		// Iterate through all parent classes to find a match
+		while (Class != UStruct::StaticClass() && Class != UClass::StaticClass() && Class != AActor::StaticClass())
+		{
+			if (Class->GetName().Contains(ActorClassSearchString))
+				return true;
+			Class = Class->GetSuperClass();
+		}
+		return false;
+	}
+
+	FActorQueryResult ExecuteQuery(UWorld* World) const
+	{
+		FActorQueryResult ResultList;
+		for (AActor* Actor : TActorRange<AActor>(World))
+		{
+			if (!IsValid(Actor))
+				continue;
+
+			if (MatchesActor(Actor))
+			{
+				ResultList.Actors.Add(Actor);
+			}
+		}
+		return ResultList;
+	}
+
+	FActorQueryResult& ExecuteAndCacheQuery(UWorld* World)
+	{
+		CachedQueryResult = ExecuteQuery(World);
+		return CachedQueryResult;
+	}
+};
+
+struct FColumnSizeData
+{
+	TAttribute<float> LeftColumnWidth;
+	TAttribute<float> RightColumnWidth;
+	SSplitter::FOnSlotResized OnWidthChanged;
+
+	void SetColumnWidth(float InWidth) { OnWidthChanged.ExecuteIfBound(InWidth); }
+
+	TSharedRef<SWidget> DetailsSplitter(FText Label, FText Tooltip, TSharedRef<SWidget> RightWidget)
+	{
+		return SNew(SSplitter)
+			+ SSplitter::Slot()
+			  .SizeRule(SSplitter::ESizeRule::FractionOfParent)
+			  .Value(LeftColumnWidth)
+			  .OnSlotResized(OnWidthChanged)
+			[
+				SNew(STextBlock)
+				.Text(Label)
+				.ToolTipText(Tooltip)
+			]
+			+ SSplitter::Slot()
+			  .SizeRule(SSplitter::ESizeRule::FractionOfParent)
+			  .Value(RightColumnWidth)
+			  .OnSlotResized(OnWidthChanged)
+			[
+				RightWidget
+			];
+	}
+};
+
+
 class SActorLocationOverlay : public SLeafWidget
 {
 	using Super = SLeafWidget;
@@ -27,23 +148,20 @@ SLATE_BEGIN_ARGS(SActorLocationOverlay)
 		{
 		}
 
-		SLATE_ATTRIBUTE(const TArray<AActor*>*, ActorList);
+		SLATE_ATTRIBUTE(const TArray<TSharedPtr<FActorQuery>>*, ActorQueries);
 		SLATE_ATTRIBUTE(FVector, ReferencePosition);
 		SLATE_ATTRIBUTE(float, MapSize);
-		SLATE_ATTRIBUTE(FLinearColor, MarkerColor);
 	SLATE_END_ARGS()
 
-	TAttribute<const TArray<AActor*>*> ActorList;
+	TAttribute<const TArray<TSharedPtr<FActorQuery>>*> ActorQueries;
 	TAttribute<FVector> ReferencePosition = FVector::ZeroVector;
 	TAttribute<float> MapSize = 0.f;
-	TAttribute<FLinearColor> MarkerColor = FLinearColor::Red;
 
 	void Construct(const FArguments& InArgs)
 	{
-		ActorList = InArgs._ActorList;
+		ActorQueries = InArgs._ActorQueries;
 		ReferencePosition = InArgs._ReferencePosition;
 		MapSize = InArgs._MapSize;
-		MarkerColor = InArgs._MarkerColor;
 	}
 
 	virtual FVector2D ComputeDesiredSize(float LayoutScaleMultiplier) const override
@@ -54,7 +172,7 @@ SLATE_BEGIN_ARGS(SActorLocationOverlay)
 
 	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override
 	{
-		if (!ActorList.IsBound() || ActorList.Get() == nullptr)
+		if (ActorQueries.Get() == nullptr)
 			return LayerId;
 
 		// Used to track the layer ID we will return.
@@ -76,71 +194,132 @@ SLATE_BEGIN_ARGS(SActorLocationOverlay)
 		const FVector HalfMapSizeVector = FVector(MapSizeActual / 2.f, MapSizeActual / 2.f, 0);
 		const FVector TopLeftCorner = ReferencePosition.Get() - HalfMapSizeVector;
 		FBox BBox(TopLeftCorner, ReferencePosition.Get() + HalfMapSizeVector);
-		const TArray<AActor*>& ActualActorList = *ActorList.Get();
-		for (AActor* Actor : ActualActorList)
+		auto ActualActorQueries = *ActorQueries.Get();
+		for (auto Query : ActualActorQueries)
 		{
-			if (!IsValid(Actor))
+			if (!Query.IsValid())
 				continue;
 
-			const FVector WorldLocation = Actor->GetActorLocation();
-			if (!BBox.IsInsideXY(WorldLocation))
-				continue;
+			for (AActor* Actor : Query->CachedQueryResult.Actors)
+			{
+				if (!IsValid(Actor))
+					continue;
 
-			const FVector RelativeLocation3D = WorldLocation - TopLeftCorner;
-			const FVector2D RelativeRotation2D{RelativeLocation3D.X, RelativeLocation3D.Y};
-			const FVector2D WidgetSpaceLocationNormalized = RelativeRotation2D / MapSizeActual;
-			const FVector2D WidgetSpaceLocation = Position + WidgetSpaceLocationNormalized * Size;
+				const FVector WorldLocation = Actor->GetActorLocation();
+				if (!BBox.IsInsideXY(WorldLocation))
+					continue;
 
-			const float MarkerSize = 6.f;
-			FSlateDrawElement::MakeBox(
+				const FVector RelativeLocation3D = WorldLocation - TopLeftCorner;
+				const FVector2D RelativeLocation2D{RelativeLocation3D.X, RelativeLocation3D.Y};
+				const FVector2D RelativeLocation2D_Normalized = RelativeLocation2D / MapSizeActual;
+				// Need to remap coordinates from world space when looking down (x is up, y is right) to UI space (x is right, y is down)
+				const FVector2D WidgetSpaceLocationNormalized {RelativeLocation2D_Normalized.Y, 1.f-RelativeLocation2D_Normalized.X};
+				const FVector2D WidgetSpaceLocation = Position + WidgetSpaceLocationNormalized * Size;
+
+				const float MarkerSize = 6.f;
+				FSlateDrawElement::MakeBox(
+					OutDrawElements,
+					RetLayerId++,
+					AllottedGeometry.ToPaintGeometry(WidgetSpaceLocation - (MarkerSize / 2.f), FVector2D(MarkerSize, MarkerSize)),
+					&White,
+					DrawEffects,
+					Query->QueryColor
+				);
+
+				auto& Style = FCoreStyle::Get().GetWidgetStyle< FTextBlockStyle >("SmallText");
+				const FSlateFontInfo FontInfo = Style.Font;
+				FSlateDrawElement::MakeText(
 				OutDrawElements,
-				RetLayerId++,
-				AllottedGeometry.ToPaintGeometry(WidgetSpaceLocation - (MarkerSize / 2.f), FVector2D(MarkerSize, MarkerSize)),
-				&White,
-				DrawEffects,
-				MarkerColor.Get()
-			);
+                RetLayerId++,
+                AllottedGeometry.ToPaintGeometry(WidgetSpaceLocation - (MarkerSize / 2.f) + FVector2D(0, MarkerSize), FVector2D(MarkerSize, MarkerSize)),
+                FText::FromString(Actor->GetName()),
+                FontInfo,
+                DrawEffects,
+                Query->QueryColor);
+			}
 		}
 
-
-		// Complete rect
-		/*FSlateDrawElement::MakeBox(
-			OutDrawElements,
-			RetLayerId++,
-			AllottedGeometry.ToPaintGeometry(Position, Size),
-			&White,
-			DrawEffects,
-			ColorAndOpacitySRGB * FLinearColor(1, 1, 1, 0.1f)
-		);
-		*/
-
-		/*
-			// Draw all bars
-			for( int32 EventIndex = 0; EventIndex < Events.Num(); ++EventIndex )
-			{
-				TSharedPtr< FVisualizerEvent > Event = Events[ EventIndex ];
-				float StartX, EndX;
-				if( CalculateEventGeometry( Event.Get(), AllottedGeometry, StartX, EndX ) )
-				{
-					// Draw Event bar
-					FSlateDrawElement::MakeBox(
-						OutDrawElements,
-						RetLayerId++,
-						AllottedGeometry.ToPaintGeometry(
-							FVector2D( StartX, 0.0f ),
-							FVector2D( EndX - StartX, AllottedGeometry.GetLocalSize().Y )),
-						Event->IsSelected ? SelectedImage : FillImage,
-						DrawEffects,
-						Event->IsSelected ? SelectedBarColor : ColorPalette[Event->ColorIndex % (sizeof(ColorPalette) / sizeof(ColorPalette[0]))]
-					);
-				}
-			}
-	*/
 		return RetLayerId - 1;
 	}
 };
 
-class FActorMap : public TSharedFromThis<FActorMap>
+class SActorQueryRow : public STableRow<TSharedPtr<FActorQuery>>
+{
+public:
+SLATE_BEGIN_ARGS(SActorQueryRow)
+		{
+		}
+
+		// #TODO-j.reich Convert to shared pointer?
+		SLATE_ARGUMENT(FColumnSizeData*, ColumnSizeData)
+	SLATE_END_ARGS()
+
+	void Construct(const FArguments& InArgs, TSharedRef<STableViewBase> InOwnerTableView, TSharedPtr<FActorQuery>& InActorQuery)
+	{
+		ActorQuery = InActorQuery;
+		ensure(ActorQuery.IsValid());
+
+		ColumnSizeData = InArgs._ColumnSizeData;
+
+		STableRow<TSharedPtr<FActorQuery>>::Construct(
+			STableRow<TSharedPtr<FActorQuery>>::FArguments()
+			.Content()
+			[
+				SNew(SVerticalBox)
+				+ SVerticalBox::Slot()
+				[
+					SNew(SColorBlock)
+					.Color(ActorQuery->QueryColor)
+				]
+				+ SVerticalBox::Slot()
+				[
+					ColumnSizeData->DetailsSplitter(
+						INVTEXT("Name Filter"),
+						INVTEXT("Name string that must be contained within the actor names, for the actor to be included in the query."),
+						SNew(SEditableTextBox)
+						.Text(this, &SActorQueryRow::GetNameFilter_Text)
+						.HintText(INVTEXT("<empty>"))
+						.OnTextCommitted(this, &SActorQueryRow::SetNameFilter_Text)
+					)
+				]
+				+ SVerticalBox::Slot()
+				[
+					ColumnSizeData->DetailsSplitter(
+						INVTEXT("Name Regex Pattern"),
+						INVTEXT("Regular expression pattern that must match to actor names, for the actor to be included in the query."),
+						SNew(SEditableTextBox)
+						.Text(this, &SActorQueryRow::GetNameRegexPattern_Text)
+						.HintText(INVTEXT("<empty>"))
+						.OnTextCommitted(this, &SActorQueryRow::SetNameRegexPattern_Text)
+					)
+				]
+				+ SVerticalBox::Slot()
+				[
+					ColumnSizeData->DetailsSplitter(
+						INVTEXT("Class Filter"),
+						INVTEXT("Name string that must be contained within the actors class name or any of its super classes, for the actor to be included in the query."),
+						SNew(SEditableTextBox)
+						.Text(this, &SActorQueryRow::GetActorClassSearchString_Text)
+						.HintText(INVTEXT("<empty>"))
+						.OnTextCommitted(this, &SActorQueryRow::SetActorClassSearchString_Text)
+					)
+				]
+			], InOwnerTableView);
+	}
+
+private:
+	TSharedPtr<FActorQuery> ActorQuery;
+	FColumnSizeData* ColumnSizeData = nullptr;
+
+	FText GetNameFilter_Text() const { return ActorQuery.IsValid() ? FText::FromString(ActorQuery->NameFilter) : INVTEXT("<invalid>"); }
+	void SetNameFilter_Text(const FText& Text, ETextCommit::Type) const { if (ActorQuery.IsValid()) { ActorQuery->NameFilter = Text.ToString(); } }
+	FText GetNameRegexPattern_Text() const { return ActorQuery.IsValid() ? FText::FromString(ActorQuery->NameRegexPattern) : INVTEXT("<invalid>"); }
+	void SetNameRegexPattern_Text(const FText& Text, ETextCommit::Type) const { if (ActorQuery.IsValid()) { ActorQuery->NameRegexPattern = Text.ToString(); } }
+	FText GetActorClassSearchString_Text() const { return ActorQuery.IsValid() ? FText::FromString(ActorQuery->ActorClassSearchString) : INVTEXT("<invalid>"); }
+	void SetActorClassSearchString_Text(const FText& Text, ETextCommit::Type) const { if (ActorQuery.IsValid()) { ActorQuery->ActorClassSearchString = Text.ToString(); } }
+};
+
+class FActorMap : public TSharedFromThis<FActorMap>, public FTickableGameObject
 {
 public:
 	~FActorMap()
@@ -154,6 +333,53 @@ public:
 		MapBrush.SetResourceObject(nullptr);
 	}
 
+	// - FTickableGameObject
+	virtual bool IsTickableInEditor() const override { return true; }
+	virtual bool IsTickableWhenPaused() const override { return true; }
+
+	virtual TStatId GetStatId() const override
+	{
+		RETURN_QUICK_DECLARE_CYCLE_STAT(FActorMap, STATGROUP_Tickables);
+	}
+
+	virtual void Tick(float DeltaTime) override
+	{
+		AccumulatedDeltaTime += DeltaTime;
+
+		if (!ensure(TickRate > 0))
+			return;
+
+		if (AccumulatedDeltaTime >= TickRate)
+		{
+			while (AccumulatedDeltaTime >= TickRate)
+			{
+				AccumulatedDeltaTime -= TickRate;
+
+				// Do stuff that needs DT compensation in here
+			}
+
+			if (SceneCaptureActor.IsValid())
+			{
+				SceneCaptureActor->GetCaptureComponent2D()->CaptureScene();
+			}
+
+			// Update the actor queries
+			UWorld* World = TargetWorld.Get();
+			if (!IsValid(World))
+				return;
+
+			for (auto Query : ActorQueries)
+			{
+				if (!Query.IsValid())
+					continue;
+
+				Query->ExecuteAndCacheQuery(World);
+			}
+		}
+	}
+
+	// --
+
 	/** Separate initializer outside of constructor, so shared pointer from this works as expected */
 	void Initialize(UWorld* InTargetWorld)
 	{
@@ -162,12 +388,12 @@ public:
 		TargetWorld = InTargetWorld;
 
 		// Look down
-		const FRotator Direction(-90, -90, 0);
+		const FRotator Direction(-90, 0, 0);
 		SceneCaptureActor = TargetWorld->SpawnActor<ASceneCapture2D>(ReferencePosition, Direction);
 		auto* CaptureComponent = SceneCaptureActor->GetCaptureComponent2D();
 
-		// #TODO-j.reich Expose update rate via controlled ticking, etc
-		CaptureComponent->bCaptureEveryFrame = true;
+		CaptureComponent->bCaptureEveryFrame = false;
+		CaptureComponent->bCaptureOnMovement = false;
 		CaptureComponent->ProjectionType = ECameraProjectionMode::Orthographic;
 		CaptureComponent->OrthoWidth = OrthoWidth;
 		CaptureComponent->bEnableClipPlane = false;
@@ -192,9 +418,6 @@ public:
 		DetailsColumns.LeftColumnWidth = TAttribute<float>(this, &FActorMap::OnGetLeftDetailsColumnWidth);
 		DetailsColumns.RightColumnWidth = TAttribute<float>(this, &FActorMap::OnGetRightDetailsColumnWidth);
 		DetailsColumns.OnWidthChanged = SSplitter::FOnSlotResized::CreateSP(this, &FActorMap::OnSetDetailsColumnWidth);
-
-		// #TODO-j.reich Update the actor list some place else!
-		UpdateActorList();
 	}
 
 	UWorld* GetTargetWorld() const
@@ -258,6 +481,7 @@ protected:
 	TWeakObjectPtr<UWorld> TargetWorld = nullptr;
 	TWeakObjectPtr<ASceneCapture2D> SceneCaptureActor = nullptr;
 	FSlateBrush MapBrush;
+	float AccumulatedDeltaTime = 0.f;
 
 	static const TCHAR* GetWorldTypeString(EWorldType::Type Type)
 	{
@@ -282,13 +506,11 @@ protected:
 	float OrthoWidth = 10000.f;
 	float CaptureSize = 2048.f;
 	TOptional<float> OnGetOptionalOrthoWidth() const { return OrthoWidth; }
-	float GetOrthoWidth() const	{ return OrthoWidth; }
+	float GetOrthoWidth() const { return OrthoWidth; }
 
 	void OnSetOrthoWidth(float InOrthoSize)
 	{
-
 		OrthoWidth = InOrthoSize;
-		// #TODO-j.reich Move into proper tick
 		if (SceneCaptureActor.IsValid())
 		{
 			SceneCaptureActor->GetCaptureComponent2D()->OrthoWidth = OrthoWidth;
@@ -296,17 +518,8 @@ protected:
 	}
 
 
-	struct FColumnSizeData
-	{
-		TAttribute<float> LeftColumnWidth;
-		TAttribute<float> RightColumnWidth;
-		SSplitter::FOnSlotResized OnWidthChanged;
-
-		void SetColumnWidth(float InWidth) { OnWidthChanged.ExecuteIfBound(InWidth); }
-	};
-
 	FColumnSizeData MainColumns;
-	float MapColumnWidthFactor = 0.9f;
+	float MapColumnWidthFactor = 0.75f;
 	float OnGetDetailsWidth() const { return 1.0f - MapColumnWidthFactor; }
 	float OnGetMapWidth() const { return MapColumnWidthFactor; }
 	void OnSetMapWidth(float InWidth) { MapColumnWidthFactor = InWidth; }
@@ -321,44 +534,50 @@ protected:
 	TOptional<float> GetPositionX() const { return ReferencePosition.X; }
 	TOptional<float> GetPositionY() const { return ReferencePosition.Y; }
 	TOptional<float> GetPositionZ() const { return ReferencePosition.Z; }
-	FVector GetReferencePosition() const { return ReferencePosition; } 
+	FVector GetReferencePosition() const { return ReferencePosition; }
 
 	void OnSetPosition(float NewValue, ETextCommit::Type CommitInfo, int32 Axis)
 	{
 		ReferencePosition.Component(Axis) = NewValue;
-
-		// #TODO-j.reich Move into proper tick
 		if (SceneCaptureActor.IsValid())
 		{
 			SceneCaptureActor->SetActorLocation(ReferencePosition);
 		}
 	}
 
-	TArray<AActor*> ActorList;
-	const TArray<AActor*>* GetActorList() const
-	{
-		return &ActorList;
-	}
+	float TickRate = 0.1f;
+	TOptional<float> OnGetOptionalTickRate() const { return TickRate; }
+	float GetTickRate() const { return TickRate; }
+	void OnSetTickRate(float InTickRate) { TickRate = InTickRate; }
 
-	// #TODO-j.reich This must be done regularly in tick
-	// #TODO-j.reich We need to be able to support multiple actor lists. Need to check on which level!
-	void UpdateActorList()
+	TArray<TSharedPtr<FActorQuery>> ActorQueries;
+
+	void AddActorQuery()
 	{
-		ActorList.Empty();
-		for (AActor* Actor : TActorRange<AActor>(GetTargetWorld()))
+		const int32 NewIndex = ActorQueries.Add(MakeShared<FActorQuery>());
+		ActorQueries[NewIndex]->QueryColor = DefaultColors[NewIndex % DefaultColors.Num()];
+		if (ActorQueryListWidget.IsValid())
 		{
-			// #TODO-j.reich Implement actor filters
-
-			// Ignore AInfo actors, because they never have a valid location
-			if (Actor->IsA<AInfo>())
-				continue;
-
-			if (!Actor->IsA<AStaticMeshActor>())
-				continue;
-
-			ActorList.Add(Actor);
+			ActorQueryListWidget->RebuildList();
 		}
 	}
+
+	void RemoveLastActorQuery()
+	{
+		if (ActorQueries.Num() > 0)
+		{
+			ActorQueries.Pop();
+		}
+		if (ActorQueryListWidget.IsValid())
+		{
+			ActorQueryListWidget->RebuildList();
+		}
+	}
+
+	//------------------------
+	// Cached Widgets
+	//------------------------
+	TSharedPtr<SListView<TSharedPtr<FActorQuery>>> ActorQueryListWidget;
 
 	//------------------------
 	// Widget builder functions
@@ -366,14 +585,14 @@ protected:
 	TSharedRef<SWidget> DetailsWidget()
 	{
 		return SNew(SBox)
-        .MinDesiredWidth(200.f)
-        .Content()
+    		    		.MinDesiredWidth(200.f)
+    		    		.Content()
 		[
 			SNew(SVerticalBox)
 			+ SVerticalBox::Slot()
 			.AutoHeight()
 			[
-				DetailsSplitter(
+				DetailsColumns.DetailsSplitter(
 					INVTEXT("Ortho Width"),
 					INVTEXT("Orthographic height and width of the actor map. Always assumes a square map / render target background"),
 					SNew(SNumericEntryBox<float>)
@@ -384,60 +603,68 @@ protected:
 			+ SVerticalBox::Slot()
 			.AutoHeight()
 			[
-				DetailsSplitter(
+				DetailsColumns.DetailsSplitter(
 					INVTEXT("Origin"),
 					INVTEXT("The position from which the render capture of the world is made"),
 					SNew(SVectorInputBox)
-        			.X(this, &FActorMap::GetPositionX)
-        			.Y(this, &FActorMap::GetPositionY)
-        			.Z(this, &FActorMap::GetPositionZ)
-        			.AllowResponsiveLayout(true)
-        			.AllowSpin(true)
-        			.OnXCommitted(this, &FActorMap::OnSetPosition, 0)
-        			.OnYCommitted(this, &FActorMap::OnSetPosition, 1)
-        			.OnZCommitted(this, &FActorMap::OnSetPosition, 2)
+    		    					.X(this, &FActorMap::GetPositionX)
+    		    					.Y(this, &FActorMap::GetPositionY)
+    		    					.Z(this, &FActorMap::GetPositionZ)
+    		    					.AllowResponsiveLayout(true)
+    		    					.AllowSpin(true)
+    		    					.OnXCommitted(this, &FActorMap::OnSetPosition, 0)
+    		    					.OnYCommitted(this, &FActorMap::OnSetPosition, 1)
+    		    					.OnZCommitted(this, &FActorMap::OnSetPosition, 2)
 				)
 			]
 			+ SVerticalBox::Slot()
 			.AutoHeight()
 			[
-				DetailsSplitter(
-					INVTEXT("UPDATE RATE"),
-					INVTEXT("..."),
-					SNullWidget::NullWidget
+				DetailsColumns.DetailsSplitter(
+					INVTEXT("Tick Rate"),
+					INVTEXT("Time between two map updates in seconds"),
+					SNew(SNumericEntryBox<float>)
+					.Value(this, &FActorMap::OnGetOptionalTickRate)
+					.OnValueChanged(this, &FActorMap::OnSetTickRate)
 				)
+			]
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			[
+				SNew(SSpacer)
+				.Size(FVector2D{0.f, 20.f})
+			]
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				[
+					SNew(SButton)
+					.Text(INVTEXT("Add Actor Query"))
+					.OnPressed(this, &FActorMap::AddActorQuery)
+				]
+				+ SHorizontalBox::Slot()
+				[
+					SNew(SButton)
+					.Text(INVTEXT("Remove Last Actor Query"))
+					.OnPressed(this, &FActorMap::RemoveLastActorQuery)
+				]
 			]
 			+ SVerticalBox::Slot()
 			.FillHeight(1.f)
 			[
-				DetailsSplitter(
-					INVTEXT("VISUALIZER LIST"),
-					INVTEXT("..."),
-					SNullWidget::NullWidget
-				)
+				SAssignNew(ActorQueryListWidget, SListView<TSharedPtr<FActorQuery>>)
+				.ListItemsSource(&ActorQueries)
+				.OnGenerateRow(this, &FActorMap::OnGenerateActorQueryRow)
 			]
 		];
 	}
 
-	TSharedRef<SWidget> DetailsSplitter(FText Label, FText Tooltip, TSharedRef<SWidget> RightWidget)
+	TSharedRef<ITableRow> OnGenerateActorQueryRow(TSharedPtr<FActorQuery> InItem, const TSharedRef<STableViewBase>& OwnerTable)
 	{
-		return SNew(SSplitter)
-			+ SSplitter::Slot()
-			  .SizeRule(SSplitter::ESizeRule::FractionOfParent)
-			  .Value(DetailsColumns.LeftColumnWidth)
-			  .OnSlotResized(DetailsColumns.OnWidthChanged)
-			[
-				SNew(STextBlock)
-				.Text(Label)
-				.ToolTipText(Tooltip)
-			]
-			+ SSplitter::Slot()
-			  .SizeRule(SSplitter::ESizeRule::FractionOfParent)
-			  .Value(DetailsColumns.RightColumnWidth)
-			  .OnSlotResized(DetailsColumns.OnWidthChanged)
-			[
-				RightWidget
-			];
+		return SNew(SActorQueryRow, OwnerTable, InItem)
+			.ColumnSizeData(&DetailsColumns);
 	}
 
 	TSharedRef<SWidget> MapWidget()
@@ -459,16 +686,10 @@ protected:
 			+ SOverlay::Slot()
 			[
 				SNew(SActorLocationOverlay)
-				.ActorList(this, &FActorMap::GetActorList)
-				.MarkerColor(FLinearColor::Green)
+				.ActorQueries(&ActorQueries)
 				.MapSize(this, &FActorMap::GetOrthoWidth)
 				.ReferencePosition(this, &FActorMap::GetReferencePosition)
 			];
-	}
-
-	void HandleButtonPressed()
-	{
-		UE_LOG(LogTemp, Log, TEXT("world type: %s"), GetWorldTypeString(TargetWorld->WorldType));
 	}
 };
 
