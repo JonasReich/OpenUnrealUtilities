@@ -9,7 +9,6 @@
 #include "Engine/SceneCapture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Misc/RegexUtils.h"
-#include "PropertyEditor/Private/SSingleProperty.h"
 #include "Widgets/SWindow.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Input/SVectorInputBox.h"
