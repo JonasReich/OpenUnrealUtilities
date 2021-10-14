@@ -2,6 +2,7 @@
 
 #include "SequentialFrameScheduler/Debug/GameplayDebuggerCategory_SequentialFrameScheduler.h"
 #include "SequentialFrameScheduler/WorldBoundSFSchedulerRegistry.h"
+#include "GameFramework/PlayerController.h"
 
 #if WITH_GAMEPLAY_DEBUGGER
 
