@@ -27,8 +27,8 @@ If you want to know how a type is meant to be used, it can be useful to check th
 
 ### Versions
 
-- Latest plugin version: 0.7.0
-- Supported UE4 versions: 4.26
+- Latest plugin version: 0.8.0
+- Supported UE4 versions: 4.27
 
 The plugin is still in a pre-1.0 development phase, so the API of many utilities is still up to change a lot.
 
@@ -36,6 +36,16 @@ The plugin is still in a pre-1.0 development phase, so the API of many utilities
 
 Short summary of version changes so you don't have to sift through the entire history to find out what changed (roughly):
 
+- **0.8.0**
+	- Upgrade to UE 4.27
+	- Added lexical operators for Blueprint
+	- Simplified message log functions and added UE_LOG-like macros
+	- Reworked bitmask utilty functions to work with both engine enums and custom enums that implement OUU bitmask traits
+	- Debugging tools
+		- Added gameplay debugger category type list which simplifies registering of debugger categories
+		- Added enhanced ability system gameplay debugger category
+		- Added actor map window
+		- Moved all debugging tools into new module OUUDeveloper
 - **0.7.0**
 	- Added plugin logo (matching to Open Unreal Conventions)
 	- Improved clang compatibility for PS4/Linux targets (still not guaranteed to run on those platforms)
@@ -51,7 +61,7 @@ Short summary of version changes so you don't have to sift through the entire hi
 	- Various fixes and stability improvements
 	- Unified plugin log category usages
 - **0.3.0**
-	- Upgrade to 4.26
+	- Upgrade to UE 4.26
 	- New Utilities: Ring Aggregator, Sequential Frame Scheduler
 	- Module Cleanup
 - **0.2.0** Split repo into master and develop branches
