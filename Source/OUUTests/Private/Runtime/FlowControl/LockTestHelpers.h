@@ -57,7 +57,7 @@ struct FOUULockTestEnvironment
 	UObject* Key0 = nullptr;
 	UObject* Key1 = nullptr;
 
-	FOUUScopedAutomationTestWorld TestWorld;
+	FOUUScopedAutomationTestWorld TestWorld {"FOUULockTestEnvironment"};
 
 	FOUULockTestEnvironment()
 	{

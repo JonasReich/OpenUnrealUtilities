@@ -11,7 +11,7 @@
 #include "Components/HorizontalBox.h"
 
 BEGIN_DEFINE_SPEC(FInteractableUserWidgetSpec, "OpenUnrealUtilities.UMG.Widgets.InteractableUserWidget", DEFAULT_OUU_TEST_FLAGS)
-FOUUAutomationTestWorld TestWorld;
+TSharedPtr<FOUUScopedAutomationTestWorld> TestWorld;
 UOUUInteractableWidget* Widget;
 UWidgetTree* WidgetTree;
 END_DEFINE_SPEC(FInteractableUserWidgetSpec)
@@ -19,9 +19,9 @@ void FInteractableUserWidgetSpec::Define()
 {
 	BeforeEach([this]()
 	{
-		TestWorld.CreateWorld();
-		TestWorld.InitializeGame();
-		Widget = CreateWidget<UOUUInteractableWidget>(TestWorld.PlayerController);
+		TestWorld = MakeShared<FOUUScopedAutomationTestWorld>("FInteractableUserWidgetSpec");
+		TestWorld->InitializeGame();
+		Widget = CreateWidget<UOUUInteractableWidget>(TestWorld->PlayerController);
 		WidgetTree = Widget->WidgetTree;
 	});
 
@@ -99,7 +99,7 @@ void FInteractableUserWidgetSpec::Define()
 
 	AfterEach([this]()
 	{
-		TestWorld.DestroyWorld();
+		TestWorld.Reset();
 	});
 }
 

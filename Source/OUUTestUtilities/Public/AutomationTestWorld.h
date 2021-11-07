@@ -18,7 +18,7 @@
 struct OUUTESTUTILITIES_API FOUUAutomationTestWorld
 {
 public:
-	FOUUAutomationTestWorld() = default;
+	explicit FOUUAutomationTestWorld(FString InWorldName) : WorldName(InWorldName) {}
 	virtual ~FOUUAutomationTestWorld();
 
 	// Travel URL that will be used for game BeginPlay()
@@ -75,6 +75,7 @@ public:
 protected:
 	// Remember if we have a world that needs destruction
 	bool bHasWorld = false;
+	FString WorldName;
 
 	void CreateWorldImplementation();
 	void DestroyWorldImplementation();
@@ -91,12 +92,12 @@ struct OUUTESTUTILITIES_API FOUUScopedAutomationTestWorld : public FOUUAutomatio
 {
 public:
 	using Super = FOUUAutomationTestWorld;
-	FOUUScopedAutomationTestWorld();
-	~FOUUScopedAutomationTestWorld();
+	explicit FOUUScopedAutomationTestWorld(FString InWorldName);
+	virtual ~FOUUScopedAutomationTestWorld() override;
 
 	// - FAutomationTestWorld
-	void CreateWorld() override;
-	void DestroyWorld() override;
+	virtual void CreateWorld() override;
+	virtual void DestroyWorld() override;
 	// --
 };
 

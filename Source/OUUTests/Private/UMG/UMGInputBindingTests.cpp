@@ -33,7 +33,7 @@ FKeyEvent SimulateKeyEvent(UPlayerInput* PlayerInput, UUMGInputBindingTestWidget
 }
 
 BEGIN_DEFINE_SPEC(FUMGInputActionBindingSpec, "OpenUnrealUtilities.UMG.InputActionBinding", DEFAULT_OUU_TEST_FLAGS)
-FOUUAutomationTestWorld TestWorld;
+TSharedPtr<FOUUScopedAutomationTestWorld> TestWorld;
 UPlayerInput* PlayerInput;
 UUMGInputBindingTestWidget* Widget;
 UUMGInputActionBindingStack* Stack;
@@ -42,11 +42,11 @@ void FUMGInputActionBindingSpec::Define()
 {
 	BeforeEach([this]()
 	{
-		TestWorld.CreateWorld();
-		TestWorld.InitializeGame();
-		PlayerInput = TestWorld.PlayerController->PlayerInput;
+		TestWorld = MakeShared<FOUUScopedAutomationTestWorld>("FUMGInputActionBindingSpec");
+		TestWorld->InitializeGame();
+		PlayerInput = TestWorld->PlayerController->PlayerInput;
 
-		Widget = Cast<UUMGInputBindingTestWidget>(UUserWidget::CreateWidgetInstance(*TestWorld.PlayerController, UUMGInputBindingTestWidget::StaticClass(), NAME_None));
+		Widget = Cast<UUMGInputBindingTestWidget>(UUserWidget::CreateWidgetInstance(*TestWorld->PlayerController, UUMGInputBindingTestWidget::StaticClass(), NAME_None));
 		Widget->AddToPlayerScreen();
 		Stack = UUMGInputActionBindingStack::CreateUMGInputActionBindingStack(Widget);
 		Widget->Stack = Stack;
@@ -263,7 +263,7 @@ void FUMGInputActionBindingSpec::Define()
 
 	It("RemoveBindingByObject should remove only the bindings to the target object", [this]()
 	{
-		UUMGInputBindingTestWidget* SecondWidget = CreateWidget<UUMGInputBindingTestWidget>(TestWorld.PlayerController, UUMGInputBindingTestWidget::StaticClass(), NAME_None);
+		UUMGInputBindingTestWidget* SecondWidget = CreateWidget<UUMGInputBindingTestWidget>(TestWorld->PlayerController, UUMGInputBindingTestWidget::StaticClass(), NAME_None);
 
 		const FName FirstActionName = "FirstAction";
 		PlayerInput->AddActionMapping(FInputActionKeyMapping(FirstActionName, EKeys::One));
@@ -286,7 +286,7 @@ void FUMGInputActionBindingSpec::Define()
 
 	AfterEach([this]() 
 	{
-		TestWorld.DestroyWorld();
+		TestWorld.Reset();
 	});
 }
 

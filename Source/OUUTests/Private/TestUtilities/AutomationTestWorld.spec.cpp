@@ -10,13 +10,13 @@
 #include "GameFramework/GameModeBase.h"
 
 BEGIN_DEFINE_SPEC(FAutomationTestWorldSpec, "OpenUnrealUtilities.TestUtilities.AutomationTestWorld", DEFAULT_OUU_TEST_FLAGS)
-FOUUAutomationTestWorld TestWorld;
+TSharedPtr<FOUUAutomationTestWorld> TestWorld;
 END_DEFINE_SPEC(FAutomationTestWorldSpec)
 void FAutomationTestWorldSpec::Define()
 {
 	BeforeEach([this]()
 	{
-		TestWorld.CreateWorld();
+		TestWorld = MakeShared<FOUUAutomationTestWorld>("FAutomationTestWorldSpec");
 	});
 
 	Describe("", [this]()
@@ -25,7 +25,8 @@ void FAutomationTestWorldSpec::Define()
 		{
 			It("should create a valid test world", [this]()
 			{
-				TestTrue("TestWorld is valid", IsValid(TestWorld.World));
+				TestWorld->CreateWorld();
+				TestTrue("TestWorld is valid", IsValid(TestWorld->World));
 			});
 
 		});
@@ -34,8 +35,9 @@ void FAutomationTestWorldSpec::Define()
 		{
 			It("should point to the same world as the World pointer member", [this]()
 			{
-				FWorldContext& WorldContext = TestWorld.GetWorldContext();
-				TestEqual("World", TestWorld.World, WorldContext.World());
+				TestWorld->CreateWorld();
+				FWorldContext& WorldContext = TestWorld->GetWorldContext();
+				TestEqual("World", TestWorld->World, WorldContext.World());
 			});
 		});
 
@@ -43,15 +45,18 @@ void FAutomationTestWorldSpec::Define()
 		{
 			It("should initialize actors for play", [this]()
 			{
-				TestWorld.BeginPlay();
-				TestTrue("AreActorsInitialized", TestWorld.World->AreActorsInitialized());
+				TestWorld->CreateWorld();
+				TestWorld->BeginPlay();
+				TestTrue("AreActorsInitialized", TestWorld->World->AreActorsInitialized());
 			});
 
 			It("should fail without crash and throw an error if the world was not created prior", [this]()
 			{
-				FOUUAutomationTestWorld LocalTempWorldContext;
+				TSharedPtr<FOUUAutomationTestWorld> LocalTempWorldContext = MakeShared<FOUUAutomationTestWorld>("FAutomationTestWorldSpec_NestedSpec");
 				AddExpectedError("Could not send BeginPlay to invalid world!", EAutomationExpectedErrorFlags::Exact, 1);
-				LocalTempWorldContext.BeginPlay();
+				LocalTempWorldContext->BeginPlay();
+				LocalTempWorldContext->DestroyWorld();
+				LocalTempWorldContext.Reset();
 			});
 		});
 
@@ -61,35 +66,33 @@ void FAutomationTestWorldSpec::Define()
 			{
 				BeforeEach([this]()
 				{
-					bool bInitializeResult = TestWorld.InitializeGame();
+					TestWorld->CreateWorld();
+					bool bInitializeResult = TestWorld->InitializeGame();
 					TestTrue("initialization successful", bInitializeResult);
 				});
 
 				It("should initialize actors for play", [this]()
 				{
-					TestTrue("AreActorsInitialized", TestWorld.World->AreActorsInitialized());
+					TestTrue("AreActorsInitialized", TestWorld->World->AreActorsInitialized());
 				});
 				
 				It("should create a set of valid core game framework objects", [this]()
 				{
-					TestTrue("GameInstance", IsValid(TestWorld.GameInstance));
-					TestTrue("GameMode", IsValid(TestWorld.GameMode));
-					TestTrue("LocalPlayer", IsValid(TestWorld.LocalPlayer));
-					TestTrue("PlayerController", IsValid(TestWorld.PlayerController));
+					TestTrue("GameInstance", IsValid(TestWorld->GameInstance));
+					TestTrue("GameMode", IsValid(TestWorld->GameMode));
+					TestTrue("LocalPlayer", IsValid(TestWorld->LocalPlayer));
+					TestTrue("PlayerController", IsValid(TestWorld->PlayerController));
 				});
 			});
 			
 			It("should fail without crash and throw an error if the world was not created prior", [this]()
 			{
-				FOUUAutomationTestWorld LocalTempWorldContext;
+				TSharedPtr<FOUUAutomationTestWorld> LocalTempWorldContext = MakeShared<FOUUAutomationTestWorld>("FAutomationTestWorldSpec_NestedSpec");
 				AddExpectedError("Could not InitiailizeGame invalid world!", EAutomationExpectedErrorFlags::Exact, 1);
-				LocalTempWorldContext.InitializeGame();
+				LocalTempWorldContext->InitializeGame();
+				LocalTempWorldContext->DestroyWorld();
+				LocalTempWorldContext.Reset();
 			});
-		});
-
-		AfterEach([this]()
-		{
-			TestWorld.DestroyWorld();
 		});
 	});
 
@@ -97,19 +100,28 @@ void FAutomationTestWorldSpec::Define()
 	{
 		It("should reset the world to nullptr", [this]()
 		{
-			TestWorld.DestroyWorld();
-			TestNull("World pointer is null", TestWorld.World);
+			TestWorld->CreateWorld();
+			TestWorld->DestroyWorld();
+			TestNull("World pointer is null", TestWorld->World);
 		});
-		
+
 		It("should reset the pointers to game framework objects that were created with InitializeGame()", [this]()
 		{
-			TestWorld.InitializeGame();
-			TestWorld.DestroyWorld();
-			TestNull("GameInstance", TestWorld.GameInstance);
-			TestNull("GameMode", TestWorld.GameMode);
-			TestNull("LocalPlayer", TestWorld.LocalPlayer);
-			TestNull("PlayerController", TestWorld.PlayerController);
+			TestWorld->CreateWorld();
+			TestWorld->InitializeGame();
+			TestWorld->DestroyWorld();
+			TestNull("GameInstance", TestWorld->GameInstance);
+			TestNull("GameMode", TestWorld->GameMode);
+			TestNull("LocalPlayer", TestWorld->LocalPlayer);
+			TestNull("PlayerController", TestWorld->PlayerController);
 		});
+	});
+
+	AfterEach([this]()
+	{
+		// Just to make sure we don't have any memory leaks
+		TestWorld->DestroyWorld();
+		TestWorld.Reset();
 	});
 }
 

@@ -19,7 +19,7 @@ void TickLayerStackViaSlate(UOUULayerStackWidget* LayerStack)
 }
 
 BEGIN_DEFINE_SPEC(FLayerStackWidgetSpec, "OpenUnrealUtilities.UMG.Widgets.LayerStackWidget", DEFAULT_OUU_TEST_FLAGS)
-FOUUAutomationTestWorld TestWorld;
+TSharedPtr<FOUUScopedAutomationTestWorld> TestWorld;
 UTestUOUULayerStackWidget* StackWidget;
 UTestUOUULayerStackWidget* SecondStackWidget;
 UTestUOUULayerStackWidget* ThirdStackWidget;
@@ -28,8 +28,8 @@ void FLayerStackWidgetSpec::Define()
 {
 	BeforeEach([this]()
 	{
-		TestWorld.CreateWorld();
-		TestWorld.InitializeGame();
+		TestWorld = MakeShared<FOUUScopedAutomationTestWorld>("FLayerStackWidgetSpec");
+		TestWorld->InitializeGame();
 	});
 
 	Describe("NativeOnInitialized", [this]()
@@ -37,18 +37,18 @@ void FLayerStackWidgetSpec::Define()
 		It("checks if the widget stack is bound and throws an error if the widget stack is not set", [this]()
 		{
 			AddExpectedError("WidgetStack overlay widget is not bound");
-			CreateWidget<UOUULayerStackWidget>(TestWorld.PlayerController);
+			CreateWidget<UOUULayerStackWidget>(TestWorld->PlayerController);
 		});
 
 		It("checks if there are any widgets in the stack overlay and throws a warning if it doesn't have any layer children", [this]()
 		{
 			AddExpectedError("does not contain any UOUULayerWidget children");
-			CreateWidget<UTestUOUULayerStackWidget_Empty>(TestWorld.PlayerController);
+			CreateWidget<UTestUOUULayerStackWidget_Empty>(TestWorld->PlayerController);
 		});
 
 		It("doesn't throw any error if the widget stack layer widget is already set and filled with at least one layer", [this]()
 		{
-			CreateWidget<UTestUOUULayerStackWidget>(TestWorld.PlayerController);
+			CreateWidget<UTestUOUULayerStackWidget>(TestWorld->PlayerController);
 		});
 	});
 
@@ -56,9 +56,9 @@ void FLayerStackWidgetSpec::Define()
 	{
 		BeforeEach([this]()
 		{
-			StackWidget = CreateWidget<UTestUOUULayerStackWidget>(TestWorld.PlayerController);
-			SecondStackWidget = CreateWidget<UTestUOUULayerStackWidget>(TestWorld.PlayerController);
-			ThirdStackWidget = CreateWidget<UTestUOUULayerStackWidget>(TestWorld.PlayerController);
+			StackWidget = CreateWidget<UTestUOUULayerStackWidget>(TestWorld->PlayerController);
+			SecondStackWidget = CreateWidget<UTestUOUULayerStackWidget>(TestWorld->PlayerController);
+			ThirdStackWidget = CreateWidget<UTestUOUULayerStackWidget>(TestWorld->PlayerController);
 		});
 
 		It("IsLinkedStackHead should throw an error and return false on a stack that was not added to a linked stack", [this]()
@@ -253,7 +253,7 @@ void FLayerStackWidgetSpec::Define()
 
 	AfterEach([this]()
 	{
-		TestWorld.DestroyWorld();
+		TestWorld.Reset();
 	});
 }
 

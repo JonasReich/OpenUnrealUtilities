@@ -41,16 +41,16 @@ void CreateComplexUserWidget(FOUUAutomationTestWorld& TestWorld, UOUUActivatable
 }
 
 BEGIN_DEFINE_SPEC(FActivatableWidgetSpec, "OpenUnrealUtilities.UMG.Widgets.ActivatableWidget", DEFAULT_OUU_TEST_FLAGS)
-FOUUAutomationTestWorld TestWorld;
+TSharedPtr<FOUUScopedAutomationTestWorld> TestWorld;
 UOUUActivatableWidget* Widget;
 END_DEFINE_SPEC(FActivatableWidgetSpec)
 void FActivatableWidgetSpec::Define()
 {
 	BeforeEach([this]()
 	{
-		TestWorld.CreateWorld();
-		TestWorld.InitializeGame();
-		Widget = CreateWidget<UOUUActivatableWidget>(TestWorld.PlayerController);
+		TestWorld = MakeShared<FOUUScopedAutomationTestWorld>("FActivatableWidgetSpec");
+		TestWorld->InitializeGame();
+		Widget = CreateWidget<UOUUActivatableWidget>(TestWorld->PlayerController);
 	});
 
 	Describe("IsActivated", [this]()
@@ -58,7 +58,7 @@ void FActivatableWidgetSpec::Define()
 		It("should return false if bIsActivatedByDefault is disabled before initialization", [this]()
 		{
 			UOUUActivatableWidget* UninitializedWidget = NewObject<UOUUActivatableWidget>();
-			UninitializedWidget->SetPlayerContext(FLocalPlayerContext(TestWorld.LocalPlayer, TestWorld.World));
+			UninitializedWidget->SetPlayerContext(FLocalPlayerContext(TestWorld->LocalPlayer, TestWorld->World));
 			UninitializedWidget->bIsActivatedByDefault = false;
 			UninitializedWidget->Initialize();
 			TestFalse("IsActivated", UninitializedWidget->IsActivated());
@@ -67,7 +67,7 @@ void FActivatableWidgetSpec::Define()
 		It("should return true by default if bIsActivatedByDefault is enabled before initialization", [this]()
 		{
 			UOUUActivatableWidget* UninitializedWidget = NewObject<UOUUActivatableWidget>();
-			UninitializedWidget->SetPlayerContext(FLocalPlayerContext(TestWorld.LocalPlayer, TestWorld.World));
+			UninitializedWidget->SetPlayerContext(FLocalPlayerContext(TestWorld->LocalPlayer, TestWorld->World));
 			UninitializedWidget->bIsActivatedByDefault = true;
 			UninitializedWidget->Initialize();
 			TestTrue("IsActivated", UninitializedWidget->IsActivated());
@@ -146,7 +146,7 @@ void FActivatableWidgetSpec::Define()
 
 	AfterEach([this]()
 	{
-		TestWorld.DestroyWorld();
+		TestWorld.Reset();
 	});
 }
 

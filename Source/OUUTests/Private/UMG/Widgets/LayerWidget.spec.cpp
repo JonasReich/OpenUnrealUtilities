@@ -37,7 +37,7 @@ void SetVisiblityOfAllChildren(UWidget* Widget, ESlateVisibility Visibility)
 }
 
 BEGIN_DEFINE_SPEC(FLayerWidgetSpec, "OpenUnrealUtilities.UMG.Widgets.LayerWidget", DEFAULT_OUU_TEST_FLAGS)
-FOUUAutomationTestWorld TestWorld;
+TSharedPtr<FOUUScopedAutomationTestWorld> TestWorld;
 UOUULayerWidget* FirstLayerWidget;
 UOUULayerWidget* SecondLayerWidget;
 END_DEFINE_SPEC(FLayerWidgetSpec)
@@ -45,11 +45,11 @@ void FLayerWidgetSpec::Define()
 {
 	BeforeEach([this]()
 	{
-		TestWorld.CreateWorld();
-		TestWorld.InitializeGame();
+		TestWorld = MakeShared<FOUUScopedAutomationTestWorld>("FLayerWidgetSpec");
+		TestWorld->InitializeGame();
 
-		FirstLayerWidget = CreateLayer(TestWorld);
-		SecondLayerWidget = CreateLayer(TestWorld);
+		FirstLayerWidget = CreateLayer(*TestWorld);
+		SecondLayerWidget = CreateLayer(*TestWorld);
 	});
 
 	Describe("UpdateLayer updates input visibility of the widget, so calling IsLayerInputVisible", [this]()
@@ -300,7 +300,7 @@ void FLayerWidgetSpec::Define()
 
 		It("returns true if the layer has a concealing layer above and it's concealable from above even if the layer immediately above is not concealable itself", [this]()
 		{
-			UOUULayerWidget* ThirdLayerWidget = CreateLayer(TestWorld);
+			UOUULayerWidget* ThirdLayerWidget = CreateLayer(*TestWorld);
 
 			ThirdLayerWidget->bConcealLayersBelow = true;
 			SecondLayerWidget->bMayBeConcealedFromAbove = false;
@@ -322,7 +322,7 @@ void FLayerWidgetSpec::Define()
 
 	AfterEach([this]()
 	{
-		TestWorld.DestroyWorld();
+		TestWorld.Reset();
 	});
 }
 

@@ -15,6 +15,7 @@ public class OUUTestUtilities : ModuleRules
 			"CoreUObject",
 			"Engine",
 			"UMG",
+			"SignificanceManager",
 
 			// Plugin
 			"OUURuntime"
