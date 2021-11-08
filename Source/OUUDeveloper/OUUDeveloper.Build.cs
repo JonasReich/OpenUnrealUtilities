@@ -24,7 +24,9 @@ public class OUUDeveloper : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
 			"Slate",
-			"AIModule"
+			"AIModule",
+			"GameplayTags",
+			"GameplayAbilities"
 		});
 
 		// - Editor only dependencies

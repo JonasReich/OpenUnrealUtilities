@@ -1,23 +1,42 @@
 // Copyright (c) 2021 Jonas Reich
 
 #include "CoreMinimal.h"
+#include "AbilitySystemComponent.h"
 
 #include "EngineUtils.h"
+#include "GameplayTagContainer.h"
 #include "LogOpenUnrealUtilities.h"
 #include "Brushes/SlateColorBrush.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Engine/SceneCapture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "GameFramework/PlayerController.h"
+#include "GameplayTags/GameplayTagQueryParser.h"
 #include "Misc/RegexUtils.h"
 #include "Widgets/SWindow.h"
+#include "Widgets/Input/SCheckBox.h"
+#include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Input/SVectorInputBox.h"
 #include "Widgets/Layout/SScaleBox.h"
+#include "Widgets/Layout/SSpacer.h"
 
+#if WITH_EDITOR
+#include "LevelEditorViewport.h"
+#endif
+
+/**
+ * Hard coded editor colors, do not update with editor style config,
+ * but I did not want to deal with that at this time..
+ */
 FSlateColorBrush DarkGrey(FColor(6, 6, 6, 255));
 FSlateColorBrush MediumGrey(FColor(13, 13, 13, 255));
 FSlateColorBrush White(FColor::White);
 
+/**
+ * Default colors for actor overlays.
+ * The list contains the most extreme saturated colors only to make the stand out as much as possible.
+ */
 TArray<FColor> DefaultColors = {
 	FColorList::Red,
 	FColorList::Green,
@@ -27,23 +46,50 @@ TArray<FColor> DefaultColors = {
 	FColorList::Yellow
 };
 
-struct FActorQueryResult
-{
-public:
-	TArray<AActor*> Actors;
-};
-
+/**
+ * Utility class that allows querying actors matching certain filter conditions.
+ * Conditions are cumulative: All conditions must match for an actor to be included.
+ */
 class FActorQuery
 {
 public:
+	struct FResult
+	{
+	public:
+		TArray<AActor*> Actors;
+	};
+
+	/** Color in which the query results are displayed. */
 	FColor QueryColor;
+
+	/** String that must be contained within the actor name. Ignored if empty. */
 	FString NameFilter;
+
+	/** Regex pattern that actor names must match. Ignored if empty. */
 	FString NameRegexPattern;
-	FString ActorClassSearchString;
-	FActorQueryResult CachedQueryResult;
+
+	/**
+	 * Exact name of the actor class or any of its parent classes.
+	 * The name must be an exact match, e.g. StaticMeshActor for AStaticMeshActors
+	 */
+	FString ActorClassName;
+
+	/**
+	 * If this is valid, actors are expected to have a gameplay ability system component
+	 * of which the owned gameplay tags are compared with this query.
+	 */  
+	FGameplayTagQuery ActorTagQuery;
+
+	/**
+	 * Cached result from executing the query via ExecuteAndCacheQuery()
+	 */
+	FResult CachedQueryResult;
 
 	bool MatchesActor(const AActor* Actor) const
 	{
+		if (!IsValid(Actor))
+			return false;
+
 		bool bAtLeastOneFilterActive = false;
 
 		const FString ActorName = Actor->GetName();
@@ -62,11 +108,27 @@ public:
 		}
 
 		// Perform this check last, because it's the most expensive
-		if (!ActorClassSearchString.IsEmpty())
+		if (!ActorClassName.IsEmpty())
 		{
 			bAtLeastOneFilterActive = true;
 			if (!MatchesActorClassSearchString(Actor))
 				return false;
+		}
+
+		if (!ActorTagQuery.IsEmpty())
+		{
+			bAtLeastOneFilterActive = true;
+			if (UAbilitySystemComponent* AbilitySystemComponent = Actor->FindComponentByClass<UAbilitySystemComponent>())
+			{
+				FGameplayTagContainer OwnedTags;
+				AbilitySystemComponent->GetOwnedGameplayTags(OUT OwnedTags);
+				if (!ActorTagQuery.Matches(OwnedTags))
+					return false;
+			}
+			else
+			{
+				return false;
+			}
 		}
 
 		return bAtLeastOneFilterActive;
@@ -74,20 +136,26 @@ public:
 
 	bool MatchesActorClassSearchString(const AActor* Actor) const
 	{
+		if (!IsValid(Actor))
+			return false;
+
 		auto* Class = Actor->GetClass();
 		// Iterate through all parent classes to find a match
 		while (Class != UStruct::StaticClass() && Class != UClass::StaticClass() && Class != AActor::StaticClass())
 		{
-			if (Class->GetName().Contains(ActorClassSearchString))
+			if (Class->GetName().Equals(ActorClassName, ESearchCase::IgnoreCase))
 				return true;
 			Class = Class->GetSuperClass();
 		}
 		return false;
 	}
 
-	FActorQueryResult ExecuteQuery(UWorld* World) const
+	FResult ExecuteQuery(UWorld* World) const
 	{
-		FActorQueryResult ResultList;
+		FResult ResultList;
+		if (!IsValid(World))
+			return ResultList;
+
 		for (AActor* Actor : TActorRange<AActor>(World))
 		{
 			if (!IsValid(Actor))
@@ -101,22 +169,26 @@ public:
 		return ResultList;
 	}
 
-	FActorQueryResult& ExecuteAndCacheQuery(UWorld* World)
+	FResult& ExecuteAndCacheQuery(UWorld* World)
 	{
 		CachedQueryResult = ExecuteQuery(World);
 		return CachedQueryResult;
 	}
 };
 
+/** Utility structure for a SSplitter column */
 struct FColumnSizeData
 {
 	TAttribute<float> LeftColumnWidth;
 	TAttribute<float> RightColumnWidth;
 	SSplitter::FOnSlotResized OnWidthChanged;
 
-	void SetColumnWidth(float InWidth) { OnWidthChanged.ExecuteIfBound(InWidth); }
+	void SetColumnWidth(float InWidth) const
+	{
+		OnWidthChanged.ExecuteIfBound(InWidth);
+	}
 
-	TSharedRef<SWidget> DetailsSplitter(FText Label, FText Tooltip, TSharedRef<SWidget> RightWidget)
+	TSharedRef<SWidget> DetailsSplitter(const FText& Label, const FText& Tooltip, TSharedRef<SWidget> RightWidget) const
 	{
 		return SNew(SSplitter)
 			+ SSplitter::Slot()
@@ -138,7 +210,10 @@ struct FColumnSizeData
 	}
 };
 
-
+/**
+ * The actual overlay widget that paints actor locations, names, etc.
+ * on-top of the scene capture in the background.
+ */
 class SActorLocationOverlay : public SLeafWidget
 {
 	using Super = SLeafWidget;
@@ -242,6 +317,7 @@ SLATE_BEGIN_ARGS(SActorLocationOverlay)
 	}
 };
 
+/** Slate widget for entries of a list of actor queries. */  
 class SActorQueryRow : public STableRow<TSharedPtr<FActorQuery>>
 {
 public:
@@ -249,7 +325,6 @@ SLATE_BEGIN_ARGS(SActorQueryRow)
 		{
 		}
 
-		// #TODO-j.reich Convert to shared pointer?
 		SLATE_ARGUMENT(FColumnSizeData*, ColumnSizeData)
 	SLATE_END_ARGS()
 
@@ -303,21 +378,50 @@ SLATE_BEGIN_ARGS(SActorQueryRow)
 						.OnTextCommitted(this, &SActorQueryRow::SetActorClassSearchString_Text)
 					)
 				]
+				+ SVerticalBox::Slot()
+				[
+					ColumnSizeData->DetailsSplitter(
+						INVTEXT("Gameplay Tag Query"),
+						INVTEXT("Gameplay tag query. Must use the "),
+						SNew(SEditableTextBox)
+						.Text(this, &SActorQueryRow::GetGameplayTagQueryString_Text)
+						.HintText(INVTEXT("<empty>"))
+						.OnTextCommitted(this, &SActorQueryRow::SetGameplayTagQueryString_Text)
+					)
+				]
 			], InOwnerTableView);
 	}
 
 private:
 	TSharedPtr<FActorQuery> ActorQuery;
 	FColumnSizeData* ColumnSizeData = nullptr;
+	FString GameplayTagQueryString;
 
 	FText GetNameFilter_Text() const { return ActorQuery.IsValid() ? FText::FromString(ActorQuery->NameFilter) : INVTEXT("<invalid>"); }
 	void SetNameFilter_Text(const FText& Text, ETextCommit::Type) const { if (ActorQuery.IsValid()) { ActorQuery->NameFilter = Text.ToString(); } }
 	FText GetNameRegexPattern_Text() const { return ActorQuery.IsValid() ? FText::FromString(ActorQuery->NameRegexPattern) : INVTEXT("<invalid>"); }
 	void SetNameRegexPattern_Text(const FText& Text, ETextCommit::Type) const { if (ActorQuery.IsValid()) { ActorQuery->NameRegexPattern = Text.ToString(); } }
-	FText GetActorClassSearchString_Text() const { return ActorQuery.IsValid() ? FText::FromString(ActorQuery->ActorClassSearchString) : INVTEXT("<invalid>"); }
-	void SetActorClassSearchString_Text(const FText& Text, ETextCommit::Type) const { if (ActorQuery.IsValid()) { ActorQuery->ActorClassSearchString = Text.ToString(); } }
+	FText GetActorClassSearchString_Text() const { return ActorQuery.IsValid() ? FText::FromString(ActorQuery->ActorClassName) : INVTEXT("<invalid>"); }
+	void SetActorClassSearchString_Text(const FText& Text, ETextCommit::Type) const { if (ActorQuery.IsValid()) { ActorQuery->ActorClassName = Text.ToString(); } }
+	FText GetGameplayTagQueryString_Text() const { return ActorQuery.IsValid() ? FText::FromString(GameplayTagQueryString) : INVTEXT("<invalid>"); }
+	void SetGameplayTagQueryString_Text(const FText& Text, ETextCommit::Type)
+	{
+		FString TextAsString = Text.ToString();
+		if (TextAsString != GameplayTagQueryString)
+		{
+			GameplayTagQueryString = TextAsString;
+			if (ActorQuery.IsValid())
+			{
+				ActorQuery->ActorTagQuery = FGameplayTagQueryParser::ParseQuery(GameplayTagQueryString);
+			}
+		}
+	}
 };
 
+/**
+ * The data and core functionality of the actor map window:
+ * FActorMap takes care of creating objects, widgets and performing actor queries in tick.
+ */
 class FActorMap : public TSharedFromThis<FActorMap>, public FTickableGameObject
 {
 public:
@@ -353,12 +457,37 @@ public:
 			while (AccumulatedDeltaTime >= TickRate)
 			{
 				AccumulatedDeltaTime -= TickRate;
-
-				// Do stuff that needs DT compensation in here
 			}
 
 			if (SceneCaptureActor.IsValid())
 			{
+				LocalCameraLocation = FVector::ZeroVector;
+				if (bShouldFollowCamera)
+				{
+					bool bSetLocalCameraLocation = false;
+					if (auto* LocalPlayerController = TargetWorld->GetFirstPlayerController())
+					{
+						if (auto* Camera = LocalPlayerController->PlayerCameraManager)
+						{
+							bSetLocalCameraLocation = true;
+							LocalCameraLocation = Camera->GetCameraLocation();
+						}
+					}
+					if (!bSetLocalCameraLocation)
+					{
+#if WITH_EDITOR
+						for (FLevelEditorViewportClient* LevelVC : GEditor->GetLevelViewportClients())
+						{
+							if (LevelVC && LevelVC->IsPerspective())
+							{
+								LocalCameraLocation = LevelVC->GetViewLocation();
+							}
+						}
+#endif
+					}
+				}
+
+				SceneCaptureActor->SetActorLocation(LocalCameraLocation + ReferencePosition);
 				SceneCaptureActor->GetCaptureComponent2D()->CaptureScene();
 			}
 
@@ -395,6 +524,7 @@ public:
 		CaptureComponent->bCaptureOnMovement = false;
 		CaptureComponent->ProjectionType = ECameraProjectionMode::Orthographic;
 		CaptureComponent->OrthoWidth = OrthoWidth;
+		CaptureComponent->CaptureSource = ESceneCaptureSource::SCS_BaseColor;
 		CaptureComponent->bEnableClipPlane = false;
 
 		const FName TargetName = MakeUniqueObjectName(SceneCaptureActor.Get(), UTextureRenderTarget2D::StaticClass(), TEXT("SceneCaptureTextureTarget"));
@@ -533,15 +663,23 @@ protected:
 	TOptional<float> GetPositionX() const { return ReferencePosition.X; }
 	TOptional<float> GetPositionY() const { return ReferencePosition.Y; }
 	TOptional<float> GetPositionZ() const { return ReferencePosition.Z; }
-	FVector GetReferencePosition() const { return ReferencePosition; }
 
 	void OnSetPosition(float NewValue, ETextCommit::Type CommitInfo, int32 Axis)
 	{
 		ReferencePosition.Component(Axis) = NewValue;
-		if (SceneCaptureActor.IsValid())
-		{
-			SceneCaptureActor->SetActorLocation(ReferencePosition);
-		}
+	}
+
+	FVector LocalCameraLocation = FVector::ZeroVector;
+	FVector GetReferencePosition() const { return ReferencePosition + LocalCameraLocation; }
+
+	bool bShouldFollowCamera = false;
+	ECheckBoxState GetFollowCameraCheckBoxState() const
+	{
+		return bShouldFollowCamera ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
+	}
+	void OnFollowCameraCheckBoxStateChanged(ECheckBoxState CheckBoxState)
+	{
+		bShouldFollowCamera = CheckBoxState == ECheckBoxState::Checked;
 	}
 
 	float TickRate = 0.1f;
@@ -584,8 +722,8 @@ protected:
 	TSharedRef<SWidget> DetailsWidget()
 	{
 		return SNew(SBox)
-    		    		.MinDesiredWidth(200.f)
-    		    		.Content()
+		.MinDesiredWidth(200.f)
+		.Content()
 		[
 			SNew(SVerticalBox)
 			+ SVerticalBox::Slot()
@@ -606,15 +744,26 @@ protected:
 					INVTEXT("Origin"),
 					INVTEXT("The position from which the render capture of the world is made"),
 					SNew(SVectorInputBox)
-    		    					.X(this, &FActorMap::GetPositionX)
-    		    					.Y(this, &FActorMap::GetPositionY)
-    		    					.Z(this, &FActorMap::GetPositionZ)
-    		    					.AllowResponsiveLayout(true)
-    		    					.AllowSpin(true)
-    		    					.OnXCommitted(this, &FActorMap::OnSetPosition, 0)
-    		    					.OnYCommitted(this, &FActorMap::OnSetPosition, 1)
-    		    					.OnZCommitted(this, &FActorMap::OnSetPosition, 2)
+					.X(this, &FActorMap::GetPositionX)
+					.Y(this, &FActorMap::GetPositionY)
+					.Z(this, &FActorMap::GetPositionZ)
+					.AllowResponsiveLayout(true)
+					.AllowSpin(true)
+					.OnXCommitted(this, &FActorMap::OnSetPosition, 0)
+					.OnYCommitted(this, &FActorMap::OnSetPosition, 1)
+					.OnZCommitted(this, &FActorMap::OnSetPosition, 2)
 				)
+			]
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			[
+				DetailsColumns.DetailsSplitter(
+					INVTEXT("Follow Camera"),
+					INVTEXT("If to apply the Origin relative to the location of the currently possessed camera"),
+					SNew(SCheckBox)
+					.IsChecked(this, &FActorMap::GetFollowCameraCheckBoxState)
+					.OnCheckStateChanged(this, &FActorMap::OnFollowCameraCheckBoxStateChanged)
+					)
 			]
 			+ SVerticalBox::Slot()
 			.AutoHeight()
@@ -692,7 +841,11 @@ protected:
 	}
 };
 
-
+/**
+ * This is a bootstrapper class that opens the actor map inside a standalone editor window.
+ * This is separate from FActorMap to make it easier to use FActorMap in different contexts later on.
+ * The bootstrapper should also take care of automatically closing the actor map if the world is destroyed, etc.
+ */
 class FActorMapWindowBootstrapper
 {
 public:
@@ -789,6 +942,7 @@ public:
 // Use unique pointer for now, so we only have to support a single window using the cheat.
 TUniquePtr<FActorMapWindowBootstrapper> ActorMapWindowBootstrapper;
 
+/** Function to open the actor map window via singleton bootstrapper */
 void OpenActorMapWindowForCurrentWorld()
 {
 	if (ActorMapWindowBootstrapper.IsValid())
