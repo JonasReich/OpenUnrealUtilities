@@ -37,13 +37,13 @@ public:
 	TReferenceWrapper& operator=(const TReferenceWrapper&) noexcept = default;
 
 	/** Implicit access by conversion to T& */
-	constexpr operator T&() const noexcept
+	operator T&() const noexcept
 	{
 		return *Pointer;
 	}
 
 	/** Explicit access  */
-	constexpr T& Get() const noexcept
+	T& Get() const noexcept
 	{
 		check(Pointer != nullptr);
 		return *Pointer;
