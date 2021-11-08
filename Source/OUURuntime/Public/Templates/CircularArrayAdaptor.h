@@ -98,6 +98,12 @@ public:
 		return GetStorage()[GetWrappedRingIndex(Index)];
 	}
 
+	void Reset()
+	{
+		GetStorage().Reset();
+		WriteIndex = 0;
+	}
+
 	// Iterators
 	using TIterator = TIndexedContainerIterator<TCircularArrayAdaptor_Base, ElementType, SizeType>;
 	using TConstIterator = TIndexedContainerIterator<const TCircularArrayAdaptor_Base, const ElementType, SizeType>;
