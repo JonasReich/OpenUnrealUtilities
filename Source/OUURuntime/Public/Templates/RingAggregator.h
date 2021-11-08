@@ -72,17 +72,17 @@ public:
 
 	ElementType Average() const
 	{
-		return HasData() ? (Sum() / Num()) : 0;
+		return Super::HasData() ? (Sum() / Super::Num()) : 0;
 	}
 
 	ElementType Max() const
 	{
-		return HasData() ? (*Algo::MaxElement(Storage)) : 0;
+		return Super::HasData() ? (*Algo::MaxElement(Storage)) : 0;
 	}
 
 	ElementType Min() const
 	{
-		return HasData() ? (*Algo::MinElement(Storage)) : 0;
+		return Super::HasData() ? (*Algo::MinElement(Storage)) : 0;
 	}
 
 	const TArray<ElementType, AllocatorType>& GetStorage() const

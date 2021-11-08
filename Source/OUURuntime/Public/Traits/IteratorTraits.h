@@ -35,8 +35,8 @@ struct CBidirectionalIterator
 	auto Requires(IteratorType It) -> decltype(
 		--It,
 		++It,
-		*It,
-		TIteratorTraits<IteratorType>::ElementType(*It)
+		*It
+		//TIteratorTraits<IteratorType>::ElementType(*It) #TODO-j.reich move to ByValue iterator?
 		);
 };
 
