@@ -57,6 +57,13 @@ FString LexToString(const T& Object)
 	return Object.ToString();
 }
 
+/** LexToString overload for shared pointers */
+template<typename T>
+FString LexToString(TSharedPtr<T> Object)
+{
+	return Object.IsValid() ? LexToString(Object.Get()) : TEXT("nullptr");
+}
+
 /**
  * Interprets all elements of an array as LexToString-convertible objects and joins them
  * in a comma separated list enclosed by square brackets.
