@@ -4,69 +4,82 @@
 
 #if WITH_AUTOMATION_WORKER
 
+#include "GameplayTags/SampleGameplayTags.h"
 #include "GameplayTags/LiteralGameplayTag.h"
-
-/**
- * Literal gameplay tag hierarchy used for FLiteralGameplayTagSpec.
- *
- * Note that the tags declared here are most likely not part of your projects GameplayTags.ini configuration.
- * However, without the tags being present in the actual project configuration the gameplay tags manager will
- * not be able to locate them and throw an ensure.
- * Mandating those tags to be present would severely limit the portability of the Open Unreal Utilities plugin.
- *
- * Therefore, the spec below does not test the Get() function that returns actual gameplay tags and instead only
- * tests the underlying functions for name composition.
- */
-struct FTestGameplayTags : public FLiteralGameplayTagRoot
-{
-	OUU_GTAG(Foo);
-	OUU_GTAG_GROUP(Bar)
-		OUU_GTAG_GROUP(Letter)
-			OUU_GTAG(Alpha);
-			OUU_GTAG(Beta);
-			OUU_GTAG(Gamma);
-		};
-	};
-};
 
 BEGIN_DEFINE_SPEC(FLiteralGameplayTagSpec, "OpenUnrealUtilities.Runtime.GameplayTags.LiteralGameplayTag", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FLiteralGameplayTagSpec)
 
 void FLiteralGameplayTagSpec::Define()
 {
+	Describe("Get", [this]()
+	{
+		It("should return the matching tag for root tag groups", [this]()
+		{
+			const FGameplayTag Tag = FSampleGameplayTags::OUUTestTags::Get();
+			SPEC_TEST_EQUAL(Tag.GetTagName(), FName("OUUTestTags"));
+		});
+
+		It("should return the matching tag for a simple tag below the root tag group", [this]()
+		{
+			const FGameplayTag Tag = FSampleGameplayTags::OUUTestTags::Foo::Get();
+			SPEC_TEST_EQUAL(Tag.GetTagName(), FName("OUUTestTags.Foo"));
+		});
+
+		It("should return the matching tag for nested tags", [this]()
+		{
+			const FGameplayTag Tag = FSampleGameplayTags::OUUTestTags::Bar::Alpha::Get();
+			SPEC_TEST_EQUAL(Tag.GetTagName(), FName("OUUTestTags.Bar.Alpha"));
+		});
+
+		It("should return an invalid tag for tags that are not registered", [this]()
+		{
+			// Disable errors, otherwise we get a nasty ensureAlways from the gameplay tags manager
+			constexpr bool bErrorIfNotFound = false;
+			const FGameplayTag Tag = FSampleGameplayTags_NotRegsitered::OUUTestTag_NotRegistered::Get(bErrorIfNotFound);
+			SPEC_TEST_FALSE(Tag.IsValid());
+		});
+	});
+
 	Describe("GetName", [this]()
 	{
-		It("should return a matching name for simple tags", [this]()
+		It("should return a matching name for root tag groups", [this]()
 		{
-			const FString Name = FTestGameplayTags::Foo::GetName();
-			SPEC_TEST_EQUAL(Name, FString("Foo"));
+			const FString Name = FSampleGameplayTags::OUUTestTags::GetName();
+			SPEC_TEST_EQUAL(Name, FString("OUUTestTags"));
+		});
+
+		It("should return a matching name for a simple tag below the root tag group", [this]()
+		{
+			const FString Name = FSampleGameplayTags::OUUTestTags::Foo::GetName();
+			SPEC_TEST_EQUAL(Name, FString("OUUTestTags.Foo"));
 		});
 
 		It("should return a matching name for nested tags", [this]()
 		{
-			const FString Name = FTestGameplayTags::Bar::Letter::Alpha::GetName();
-			SPEC_TEST_EQUAL(Name, FString("Bar.Letter.Alpha"));
+			const FString Name = FSampleGameplayTags::OUUTestTags::Bar::Alpha::GetName();
+			SPEC_TEST_EQUAL(Name, FString("OUUTestTags.Bar.Alpha"));
 		});
 	});
 
 	Describe("GetRelativeName", [this]()
 	{
-		It("should return the full name for simple tags", [this]()
+		It("should return the full name for a root tag", [this]()
 		{
-			const FString FullName = FTestGameplayTags::Foo::GetName();
-			const FString RelativeName = FTestGameplayTags::Foo::GetRelativeName();
+			const FString FullName = FSampleGameplayTags::OUUTestTags::GetName();
+			const FString RelativeName = FSampleGameplayTags::OUUTestTags::GetRelativeName();
 			SPEC_TEST_EQUAL(FullName, FullName);
 		});
 
-		It ("should return only the specified highest tag element for nested container tags", [this]()
+		It ("should return only the specified highest tag element for nested group tags", [this]()
 		{
-			const FString Name = FTestGameplayTags::Bar::Letter::GetRelativeName();
-            SPEC_TEST_EQUAL(Name, FString("Letter"));
+			const FString Name = FSampleGameplayTags::OUUTestTags::Bar::GetRelativeName();
+            SPEC_TEST_EQUAL(Name, FString("Bar"));
 		});
 
 		It("should return only the leaf tag element for nested simple tags", [this]()
 		{
-			const FString Name = FTestGameplayTags::Bar::Letter::Alpha::GetRelativeName();
+			const FString Name = FSampleGameplayTags::OUUTestTags::Bar::Alpha::GetRelativeName();
 			SPEC_TEST_EQUAL(Name, FString("Alpha"));
 		});
 	});
