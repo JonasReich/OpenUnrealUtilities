@@ -118,7 +118,7 @@ namespace QueryParser
 		{
 			const FString InnerExpressionsString = FString::JoinBy(InnerExpressions, TEXT(", "), [](auto& Element)
 			{
-				return FString::Printf(TEXT("%s"), *LexToString(Element));
+				return FString::Printf(TEXT("%s"), *FString(Element ? Element->ToString() : ""));
 			});
 			const FString TagsString = FString::JoinBy(Tags, TEXT(", "), [](auto& Element)
 			{
