@@ -28,7 +28,7 @@ If you want to know how a type is meant to be used, it can be useful to check th
 ### Versions
 
 - Latest plugin version: 0.8.0
-- Supported UE4 versions: 4.27
+- Supported UE4 versions: 4.26, 4.27, 5.0-EA
 
 The plugin is still in a pre-1.0 development phase, so the API of many utilities is still up to change a lot.
 

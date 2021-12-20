@@ -6,7 +6,14 @@
 #include "GameplayTagsManager.h"
 #include "GameplayTagsModule.h"
 #include "Templates/UnrealTypeTraits.h"
+
+// If the NativeGameplayTags are available.
+// They are not necessarily required for the literal gameplay tags, but without them the tooltip descriptions won't be properly updated.
+#define WITH_NATIVE_GAMEPLAY_TAGS ENGINE_MAJOR_VERSION >= 4 && ENGINE_MINOR_VERSION >= 27
+
+#if WITH_NATIVE_GAMEPLAY_TAGS
 #include "NativeGameplayTags.h"
+#endif
 
 /**
  * --------------------------
@@ -116,13 +123,25 @@ struct TLiteralGameplayTag : FLiteralGameplayTagBase
 	}
 };
 
+template <typename OwningType>
+struct TConditionalNativeTag_Base
+{
+	static FGameplayTag Get(bool bErrorIfNotFound = true)
+	{
+		static FGameplayTag Tag = UGameplayTagsManager::Get().RequestGameplayTag(*OwningType::GetName(), bErrorIfNotFound);
+		return Tag;
+	}
+};
+
 template <typename OwningType, bool bAutoAddNativeTag>
-struct TConditionalNativeTag
+struct TConditionalNativeTag : public TConditionalNativeTag_Base<OwningType>
 {
 };
 
+#if WITH_NATIVE_GAMEPLAY_TAGS
+
 template <typename OwningType>
-struct TConditionalNativeTag<OwningType, true>
+struct TConditionalNativeTag<OwningType, true> 
 {
 	FNativeGameplayTag NativeInstance{OwningType::GetPluginName(), OwningType::GetModuleName(), *OwningType::GetName(), OwningType::GetDescription(), ENativeGameplayTagToken::PRIVATE_USE_MACRO_INSTEAD};
 
@@ -132,15 +151,25 @@ struct TConditionalNativeTag<OwningType, true>
 	}
 };
 
+#else
+
 template <typename OwningType>
-struct TConditionalNativeTag<OwningType, false>
+struct TConditionalNativeTag<OwningType, true>
 {
+	FGameplayTag NativeInstance;
+
+	TConditionalNativeTag()
+	{
+		NativeInstance = UGameplayTagsManager::Get().AddNativeGameplayTag(*OwningType::GetName(), OwningType::GetDescription());
+	}
+
 	static FGameplayTag Get(bool bErrorIfNotFound = true)
 	{
-		static FGameplayTag Tag = UGameplayTagsManager::Get().RequestGameplayTag(*OwningType::GetName(), bErrorIfNotFound);
-		return Tag;
+		return OwningType::GetInstance().NativeInstance;
 	}
 };
+
+#endif
 
 /**
  * The root of a literal gameplay tag collection.
@@ -183,8 +212,9 @@ struct TConditionalNativeTag<OwningType, false>
 #define OUU_GTAG(TagName, TagDescription) \
 	OUU_LITERAL_GTAG_START_IMPL(TagName, PREPROCESSOR_TO_STRING(TagName), TagDescription) } TagName ## _Instance;
 
+#if WITH_NATIVE_GAMEPLAY_TAGS
 
-// Internal macro
+// Internal macro for engine versions with native gameplay tags
 #define OUU_LITERAL_GTAG_START_IMPL(Tag, TagNameString, TagDescription) \
 	struct Tag : TLiteralGameplayTag<Tag, SelfTagType, RootTagType>, TConditionalNativeTag<Tag, RootTagType::bAutoAddNativeTag> \
 	{ \
@@ -194,3 +224,16 @@ struct TConditionalNativeTag<OwningType, false>
 		static FName GetModuleName() { return UE_MODULE_NAME; } \
 		static FName GetPluginName() { return UE_PLUGIN_NAME; } \
 		static Tag& GetInstance() { return ParentTagType::GetInstance(). ## Tag ## _Instance; }
+
+#else
+
+// Internal macro for engine versions without native gameplay tags
+#define OUU_LITERAL_GTAG_START_IMPL(Tag, TagNameString, TagDescription) \
+	struct Tag : TLiteralGameplayTag<Tag, SelfTagType, RootTagType>, TConditionalNativeTag<Tag, RootTagType::bAutoAddNativeTag> \
+	{ \
+	public: \
+		static FString GetRelativeName() { return FString(TagNameString); } \
+		static FString GetDescription() { return FString(TEXT(TagDescription)); } \
+		static Tag& GetInstance() { return ParentTagType::GetInstance(). ## Tag ## _Instance; }
+
+#endif
