@@ -22,12 +22,13 @@ void UMessageLogBlueprintLibrary::AddTokenizedMessageLogMessage(FName MessageLog
 	{
 		MessageTokens.Add(FMessageLogToken::CreateTextMessageLogToken(FText::FromString("<empty message>")));
 	}
-	TSharedRef<FTokenizedMessage> Message = FMessageLog(MessageLogName).Message(
-		StaticCast<EMessageSeverity::Type>(Severity));
+
+	TSharedRef<FTokenizedMessage> Message = FTokenizedMessage::Create(StaticCast<EMessageSeverity::Type>(Severity));
 	for (auto& Token : MessageTokens)
 	{
 		Message->AddToken(Token.CreateNativeMessageToken());
 	}
+	FMessageLog(MessageLogName).AddMessage(Message);
 }
 
 void UMessageLogBlueprintLibrary::OpenMessageLog(FName MessageLogName, EMessageLogSeverity InMinSeverity,
