@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
 #include "Window/OUUWindowParameters.h"
 
 #include "OUUWindow.generated.h"
@@ -15,7 +14,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnOUUWindowClosed, UOUUWindow*, Clo
 
 /**
  * Blueprint wrapper for root window that can be initialized with an arbitrary UWidget root.
- * This allows you to create new editor/engine windows from Blueprint and add user widget trees to them. 
+ * This allows you to create new editor/engine windows from Blueprint and add user widget trees to them.
  */
 UCLASS(BlueprintType)
 class UOUUWindow : public UObject
@@ -32,7 +31,7 @@ public:
 
 	/**
 	 * Open a new OUUWindow.
-	 * This should be the only way to create and initialize UOUUWindow objects. 
+	 * This should be the only way to create and initialize UOUUWindow objects.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "UMG|Window")
 	static UOUUWindow* OpenWindow(UWidget* InRootWidget, FOUUWindowParameters InWindowParameters, UObject* Outer);
@@ -52,13 +51,10 @@ public:
 
 	/** @returns a copy of the cached parameters with which the window was initialized when opening (see OpenWindow) */
 	UFUNCTION(BlueprintPure, Category = "UMG|Window")
-	FORCEINLINE FOUUWindowParameters GetWindowParameters() const
-	{
-		return WindowParameters;
-	}
+	FORCEINLINE FOUUWindowParameters GetWindowParameters() const { return WindowParameters; }
 
 protected:
-	/** Was the window initialized via Intialize() function? */ 
+	/** Was the window initialized via Intialize() function? */
 	bool bIsInitialized = false;
 
 	/** The slate window that was created for this window. */

@@ -2,11 +2,12 @@
 
 #pragma once
 
-#include "Traits/ConditionalType.h"
 #include "Misc/ScopeRWLock.h"
+#include "Traits/ConditionalType.h"
 
 /**
- * Base type for the TRWLockedVariable template that allows access to the lock member without having to know the template types.
+ * Base type for the TRWLockedVariable template that allows access to the lock member without having to know the
+ * template types.
  */
 class FRWLockedVariable_Base
 {
@@ -14,7 +15,8 @@ protected:
 	template <typename...>
 	friend class TScopedMultiRWLock;
 
-	// Lock must be mutable, so it can be locked/unlocked even when accessing it in const context when acquiring read-lock
+	// Lock must be mutable, so it can be locked/unlocked even when accessing it in const context when acquiring
+	// read-lock
 	mutable FRWLock Lock;
 };
 
@@ -41,37 +43,30 @@ public:
 	}
 
 	/** Acquire a scoped write lock reference to the variable */
-	auto Write()
-	{
-		return TScopedRWLockedVariableRef<VariableType, true>(Variable, Lock);
-	}
+	auto Write() { return TScopedRWLockedVariableRef<VariableType, true>(Variable, Lock); }
 
 	/**
 	 * Get a reference to the underlying variable.
 	 * This does not lock the variable, so USE WITH CAUTION!
 	 */
-	FORCEINLINE const VariableType& GetRefWithoutLocking_USE_WITH_CAUTION() const
-	{
-		return Variable;
-	}
+	FORCEINLINE const VariableType& GetRefWithoutLocking_USE_WITH_CAUTION() const { return Variable; }
 
 	/**
 	 * Get a reference to the underlying variable.
 	 * This does not lock the variable, so USE WITH CAUTION!
 	 */
-	FORCEINLINE VariableType& GetRefWithoutLocking_USE_WITH_CAUTION()
-	{
-		return Variable;
-	}
+	FORCEINLINE VariableType& GetRefWithoutLocking_USE_WITH_CAUTION() { return Variable; }
 
 private:
 	VariableType Variable = {};
 };
 
 /** Statically assert that a const reference obtained via TRWLockedVariable::Read() cannot be ... */
-#define ASSERT_CONST_REF_CANT(Operation) \
-	static_assert(TIsSame<ScopeLockType, FReadScopeLock>::Value == false, \
-	"TRWVarRef obtained via TRWLockedVariable::Read() is a constant reference to the underlying variable and cannot " Operation);
+#define ASSERT_CONST_REF_CANT(Operation)                                                                               \
+	static_assert(                                                                                                     \
+		TIsSame<ScopeLockType, FReadScopeLock>::Value == false,                                                        \
+		"TRWVarRef obtained via TRWLockedVariable::Read() is a constant reference to the underlying variable and "     \
+		"cannot " Operation);
 
 /**
  * Reference wrapper for a value from a TRWLockedVariable that locks the variable for the lifetime of this object.
@@ -84,15 +79,13 @@ class TScopedRWLockedVariableRef
 public:
 	static const bool bIsWriteLock = bInIsWriteLock;
 	// Native scope lock type used internally to lock/release the RWLock
-	using ScopeLockType = typename TConditionalType<bIsWriteLock, FWriteScopeLock, FReadScopeLock>::Type; 
+	using ScopeLockType = typename TConditionalType<bIsWriteLock, FWriteScopeLock, FReadScopeLock>::Type;
 
 	template <typename>
 	friend class TRWLockedVariable;
 
 	TScopedRWLockedVariableRef(TScopedRWLockedVariableRef&& Other) noexcept :
-		VariableRef(Other.VariableRef),
-		Lock(Other.Lock),
-		LockType(Other.LockType)
+		VariableRef(Other.VariableRef), Lock(Other.Lock), LockType(Other.LockType)
 	{
 	}
 
@@ -143,41 +136,21 @@ public:
 	// Comparison operators
 	// ---------------------
 
-	bool operator==(const VariableType& OtherVariableValueRef) const
-	{
-		return Get() == OtherVariableValueRef;
-	}
+	bool operator==(const VariableType& OtherVariableValueRef) const { return Get() == OtherVariableValueRef; }
 
-	bool operator!=(const VariableType& OtherVariableValueRef) const
-	{
-		return Get() != OtherVariableValueRef;
-	}
+	bool operator!=(const VariableType& OtherVariableValueRef) const { return Get() != OtherVariableValueRef; }
 
-	bool operator<=(const VariableType& OtherVariableValueRef) const
-	{
-		return Get() <= OtherVariableValueRef;
-	}
+	bool operator<=(const VariableType& OtherVariableValueRef) const { return Get() <= OtherVariableValueRef; }
 
-	bool operator>=(const VariableType& OtherVariableValueRef) const
-	{
-		return Get() >= OtherVariableValueRef;
-	}
+	bool operator>=(const VariableType& OtherVariableValueRef) const { return Get() >= OtherVariableValueRef; }
 
-	bool operator<(const VariableType& OtherVariableValueRef) const
-	{
-		return Get() < OtherVariableValueRef;
-	}
+	bool operator<(const VariableType& OtherVariableValueRef) const { return Get() < OtherVariableValueRef; }
 
-	bool operator>(const VariableType& OtherVariableValueRef) const
-	{
-		return Get() > OtherVariableValueRef;
-	}
+	bool operator>(const VariableType& OtherVariableValueRef) const { return Get() > OtherVariableValueRef; }
 
 private:
 	TScopedRWLockedVariableRef(VariableType& InVariableRef, FRWLock& InLock) :
-		VariableRef(InVariableRef),
-		Lock(InLock),
-		LockType()
+		VariableRef(InVariableRef), Lock(InLock), LockType()
 	{
 	}
 

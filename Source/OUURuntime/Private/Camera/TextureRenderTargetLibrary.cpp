@@ -1,6 +1,7 @@
 // Copyright (c) 2021 Jonas Reich
 
 #include "Camera/TextureRenderTargetLibrary.h"
+
 #include "Engine/TextureRenderTarget2D.h"
 
 // Copied from Private\KismetRenderingLibrary.cpp:220
@@ -22,7 +23,8 @@ EPixelFormat UTextureRenderTargetLibrary::ReadRenderTargetHelper(
 		return OutFormat;
 	}
 
-	FTextureRenderTarget2DResource* RTResource = (FTextureRenderTarget2DResource*)TextureRenderTarget->GameThread_GetRenderTargetResource();
+	FTextureRenderTarget2DResource* RTResource =
+		(FTextureRenderTarget2DResource*)TextureRenderTarget->GameThread_GetRenderTargetResource();
 	if (!RTResource)
 	{
 		return OutFormat;
@@ -59,28 +61,37 @@ EPixelFormat UTextureRenderTargetLibrary::ReadRenderTargetHelper(
 			OutFormat = PF_Unknown;
 		}
 		break;
-	default:
-		OutFormat = PF_Unknown;
-		break;
+	default: OutFormat = PF_Unknown; break;
 	}
 
 	return OutFormat;
 }
 
-FLinearColor UTextureRenderTargetLibrary::GetAverageColor(UObject* WorldContextObject, UTextureRenderTarget2D* TextureRenderTarget)
+FLinearColor UTextureRenderTargetLibrary::GetAverageColor(
+	UObject* WorldContextObject,
+	UTextureRenderTarget2D* TextureRenderTarget)
 {
 	TArray<FColor> Samples;
 	TArray<FLinearColor> LinearSamples;
 	FLinearColor Average = FLinearColor::Black;
 
 	float TotalPixelCount = TextureRenderTarget->SizeX * TextureRenderTarget->SizeY;
-	switch (ReadRenderTargetHelper(Samples, LinearSamples, WorldContextObject, TextureRenderTarget, 0, 0, TextureRenderTarget->SizeX, TextureRenderTarget->SizeY))
+	switch (ReadRenderTargetHelper(
+		Samples,
+		LinearSamples,
+		WorldContextObject,
+		TextureRenderTarget,
+		0,
+		0,
+		TextureRenderTarget->SizeX,
+		TextureRenderTarget->SizeY))
 	{
 	case PF_B8G8R8A8:
 		check(Samples.Num() == TotalPixelCount && LinearSamples.Num() == 0);
 		for (const FColor& Color : Samples)
 		{
-			// I don't know why they use this, instead of the constructor conversion (which remaps properly to linear space, instead of directly assigning)
+			// I don't know why they use this, instead of the constructor conversion (which remaps properly to linear
+			// space, instead of directly assigning)
 			Average += FLinearColor(float(Color.R), float(Color.G), float(Color.B), float(Color.A));
 		}
 		Average /= TotalPixelCount;
@@ -94,8 +105,7 @@ FLinearColor UTextureRenderTargetLibrary::GetAverageColor(UObject* WorldContextO
 		Average /= TotalPixelCount;
 		break;
 	case PF_Unknown:
-	default:
-		break;
+	default: break;
 	}
 
 	return Average;

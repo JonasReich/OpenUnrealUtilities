@@ -2,10 +2,10 @@
 
 #pragma once
 
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "Logging/MessageLogName.h"
 #include "Logging/MessageLogSeverity.h"
 #include "Logging/MessageLogToken.h"
-#include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "MessageLogBlueprintLibrary.generated.h"
 
@@ -32,7 +32,10 @@ public:
 	 * @param Severity: The severity level of the message
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Message Log")
-	static void AddTextMessageLogMessage(FName MessageLogName, FText MessageText, EMessageLogSeverity Severity = EMessageLogSeverity::Info);
+	static void AddTextMessageLogMessage(
+		FName MessageLogName,
+		FText MessageText,
+		EMessageLogSeverity Severity = EMessageLogSeverity::Info);
 
 	/**
 	 * Add a tokenized message to the message log.
@@ -42,15 +45,22 @@ public:
 	 * @param Severity: The severity level of the message
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Message Log")
-	static void AddTokenizedMessageLogMessage(FName MessageLogName, TArray<FMessageLogToken> MessageTokens, EMessageLogSeverity Severity = EMessageLogSeverity::Info);
+	static void AddTokenizedMessageLogMessage(
+		FName MessageLogName,
+		TArray<FMessageLogToken> MessageTokens,
+		EMessageLogSeverity Severity = EMessageLogSeverity::Info);
 
 	/**
 	 * Opens the message log window with the provided tab focused.
-	 * @param InMinSeverity: Minimum severity of the messages being displayed. (e.g. Info displays all messages, Warning only Warnings and Errors)
+	 * @param InMinSeverity: Minimum severity of the messages being displayed. (e.g. Info displays all messages, Warning
+	 * only Warnings and Errors)
 	 * @param bOpenEvenIfEmpty: Force to open the message log even if it does not contain any messages
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Message Log")
-	static void OpenMessageLog(FName MessageLogName, EMessageLogSeverity InMinSeverity = EMessageLogSeverity::Info, bool bOpenEvenIfEmpty = false);
+	static void OpenMessageLog(
+		FName MessageLogName,
+		EMessageLogSeverity InMinSeverity = EMessageLogSeverity::Info,
+		bool bOpenEvenIfEmpty = false);
 
 	// -------------
 	// FMessageLogToken constructor wrappers
@@ -59,7 +69,8 @@ public:
 	/**
 	 * Create a message log token that references an asset.
 	 * @param AssetName: Name/path of the asset to link to.
-	 * @param OptionalLabelOverride: If not empty, this text is displayed as clickable link instead of the asset name itself
+	 * @param OptionalLabelOverride: If not empty, this text is displayed as clickable link instead of the asset name
+	 * itself
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Message Log")
 	static FMessageLogToken CreateAssetNameMessageLogToken(FString AssetName, FText OptionalLabelOverride);
@@ -67,7 +78,8 @@ public:
 	/**
 	 * Creates a message log token that references any UObject. Can be clicked to navigate to actors in the scene.
 	 * @param Object: Object to link to.
-	 * @param OptionalLabelOverride: If not empty, this text is displayed as clickable link instead of the object name itself
+	 * @param OptionalLabelOverride: If not empty, this text is displayed as clickable link instead of the object name
+	 * itself
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Message Log")
 	static FMessageLogToken CreateObjectMessageLogToken(UObject* Object, FText OptionalLabelOverride);
@@ -77,7 +89,8 @@ public:
 	static FMessageLogToken CreateTextMessageLogToken(FText Text);
 
 	/**
-	 * Creates a message log token from a hyperlink URL. Can be clicked to open a browser to navigate to the linked webpage.
+	 * Creates a message log token from a hyperlink URL. Can be clicked to open a browser to navigate to the linked
+	 * webpage.
 	 * @param URL: URL to link to
 	 * @param OptionalLabelOverride: If not empty, this text is displayed as clickable link instead of the URL itself
 	 */

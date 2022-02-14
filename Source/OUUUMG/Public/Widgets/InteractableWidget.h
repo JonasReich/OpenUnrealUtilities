@@ -2,9 +2,10 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "CoreMinimal.h"
 #include "Widgets/UserFocusResetableWidget.h"
+
 #include "InteractableWidget.generated.h"
 
 class UUMGInputActionBindingStack;
@@ -14,7 +15,8 @@ class UUMGInputActionBindingStack;
  * to implement the IUserFocusResettableWidget interface using the template TUserFocusResetableWidget_Impl<T>.
  */
 UCLASS()
-class OUUUMG_API UOUUInteractableWidget : public UUserWidget,
+class OUUUMG_API UOUUInteractableWidget :
+	public UUserWidget,
 	public IUserFocusResetableWidget,
 	public TUserFocusResetableWidget_Impl<UOUUInteractableWidget>
 {

@@ -6,14 +6,16 @@
 
 #if WITH_AUTOMATION_WORKER
 
-#include "Traits/StringConversionTraits.h"
-#include "Templates/IsEnumClass.h"
-#include "Templates/UnrealTypeTraits.h"
-#include "LogOpenUnrealUtilities.h"
+	#include "LogOpenUnrealUtilities.h"
+	#include "Templates/IsEnumClass.h"
+	#include "Templates/UnrealTypeTraits.h"
+	#include "Traits/StringConversionTraits.h"
 
 namespace OUUTests_Internal
 {
-	template<typename T, typename EnableType = typename TEnableIf<TModels<CLexTryParseString_Parseable, T>::Value == true>::Type>
+	template <
+		typename T,
+		typename EnableType = typename TEnableIf<TModels<CLexTryParseString_Parseable, T>::Value == true>::Type>
 	T ParseValue(const FString& s)
 	{
 		T Result;
@@ -22,10 +24,13 @@ namespace OUUTests_Internal
 		return T();
 	}
 
-	template<typename T, typename EnableType = typename TEnableIf<TModels<CLexTryParseString_Parseable, T>::Value == false &&
-		TModels<CLexFromString_Parseable, T>::Value == true>::Type,
+	template <
+		typename T,
+		typename EnableType = typename TEnableIf<
+			TModels<CLexTryParseString_Parseable, T>::Value == false
+			&& TModels<CLexFromString_Parseable, T>::Value == true>::Type,
 		typename T2 = void>
-		T ParseValue(const FString& s)
+	T ParseValue(const FString& s)
 	{
 		T Result;
 		LexFromString(Result, *s);
@@ -33,27 +38,32 @@ namespace OUUTests_Internal
 	}
 
 	/** For enum classes: Parse from int if LexTryParseString and LexFromString are not overloaded */
-	template<typename T, typename EnableType = typename TEnableIf<TIsEnumClass<T>::Value == true &&
-		TModels<CLexTryParseString_Parseable, T>::Value == false && 
-		TModels<CLexFromString_Parseable, T>::Value == false
-		>::Type, typename T2 = void, typename T3 = void>
-		T ParseValue(const FString& s)
+	template <
+		typename T,
+		typename EnableType = typename TEnableIf<
+			TIsEnumClass<T>::Value == true && TModels<CLexTryParseString_Parseable, T>::Value == false
+			&& TModels<CLexFromString_Parseable, T>::Value == false>::Type,
+		typename T2 = void,
+		typename T3 = void>
+	T ParseValue(const FString& s)
 	{
-		static_assert(sizeof(int32) >= sizeof(T), "Cannot parse value because enum class T underlying type is bigger than int32");
+		static_assert(
+			sizeof(int32) >= sizeof(T),
+			"Cannot parse value because enum class T underlying type is bigger than int32");
 		int32 Result;
 		if (LexTryParseString(Result, *s))
 			return static_cast<T>(Result);
 		return T();
 	}
 
-	template<typename T, typename EnableType = typename TEnableIf<TIsSame<T, FVector>::Value>::Type>
+	template <typename T, typename EnableType = typename TEnableIf<TIsSame<T, FVector>::Value>::Type>
 	FVector ParseValue(const FString& s)
 	{
 		FVector Result;
 		Result.InitFromString(s);
 		return Result;
 	}
-}
+} // namespace OUUTests_Internal
 
 /**
  * Utility that allows easy parsing of test parameters for complex automation tests.
@@ -68,12 +78,11 @@ private:
 
 public:
 	FAutomationTestParameterParser(FString ParametersString, FString InParameterDelimiter, FString InArrayDelimiter) :
-		ParameterDelimiter(InParameterDelimiter),
-		ArrayDelimiter(InArrayDelimiter)
+		ParameterDelimiter(InParameterDelimiter), ArrayDelimiter(InArrayDelimiter)
 	{
 		NumParameters = ParametersString.ParseIntoArray(Parameters, *ParameterDelimiter);
 	}
-	
+
 	FAutomationTestParameterParser(FString ParametersString, FString InParameterDelimiter) :
 		FAutomationTestParameterParser(ParametersString, InParameterDelimiter, TEXT(";"))
 	{
@@ -84,30 +93,35 @@ public:
 	{
 	}
 
-	FORCEINLINE int32 GetNumParamters() const
-	{
-		return NumParameters;
-	}
+	FORCEINLINE int32 GetNumParamters() const { return NumParameters; }
 
-	template<typename T>
+	template <typename T>
 	T GetValue(int32 Index) const
 	{
 		if (!Parameters.IsValidIndex(Index))
 		{
-			UE_LOG(LogOpenUnrealUtilities, Error, TEXT("Failed to parse parameter with index %i: Index out of range!"), Index);
+			UE_LOG(
+				LogOpenUnrealUtilities,
+				Error,
+				TEXT("Failed to parse parameter with index %i: Index out of range!"),
+				Index);
 			return T();
 		}
 
 		return OUUTests_Internal::ParseValue<T>(Parameters[Index]);
 	}
 
-	template<typename T>
+	template <typename T>
 	TArray<T> GetArrayValue(int32 Index) const
 	{
 		TArray<T> Result;
 		if (!Parameters.IsValidIndex(Index))
 		{
-			UE_LOG(LogOpenUnrealUtilities, Error, TEXT("Failed to parse parameter with index %i: Index out of range!"), Index);
+			UE_LOG(
+				LogOpenUnrealUtilities,
+				Error,
+				TEXT("Failed to parse parameter with index %i: Index out of range!"),
+				Index);
 			return Result;
 		}
 

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Runtime/Templates/InterfaceUtilsTests_Interfaces.h"
+
 #include "InterfaceUtilsTests_Implementations.generated.h"
 
 // ------------------------
@@ -11,22 +12,15 @@
 // ------------------------
 
 UCLASS(meta = (Hidden, HideDropDown))
-class UInterfaceUtilsTests_CppInterface_Impl : public UObject,
-	public IInterfaceUtilsTests_CppInterface
+class UInterfaceUtilsTests_CppInterface_Impl : public UObject, public IInterfaceUtilsTests_CppInterface
 {
 	GENERATED_BODY()
 public:
 	float Number;
 
-	virtual void SetNumber(float f) override
-	{
-		Number = f;
-	}
+	virtual void SetNumber(float f) override { Number = f; }
 
-	virtual float GetNumber() const
-	{
-		return Number;
-	}
+	virtual float GetNumber() const { return Number; }
 };
 
 // -------------------------
@@ -35,20 +29,13 @@ public:
 
 // C++ implementation of IInterfaceUtilsTests_BpInterface
 UCLASS(meta = (Hidden, HideDropDown))
-class UInterfaceUtilsTests_BpInterface_CppImpl : public UObject,
-	public IInterfaceUtilsTests_BpInterface
+class UInterfaceUtilsTests_BpInterface_CppImpl : public UObject, public IInterfaceUtilsTests_BpInterface
 {
 	GENERATED_BODY()
 public:
 	float Number;
 
-	virtual void SetNumber_Implementation(float f) override
-	{
-		Number = f;
-	}
+	virtual void SetNumber_Implementation(float f) override { Number = f; }
 
-	virtual float GetNumber_Implementation() const
-	{
-		return Number;
-	}
+	virtual float GetNumber_Implementation() const { return Number; }
 };

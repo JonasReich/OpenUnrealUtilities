@@ -6,18 +6,21 @@
 
 #if WITH_AUTOMATION_WORKER
 
-#include "LogOpenUnrealUtilities.h"
-#include "Engine/EngineTypes.h"
-#include "Engine/GameInstance.h"
-#include "Engine/World.h"
-#include "GameFramework/GameModeBase.h"
-#include "GameFramework/PlayerState.h"
-#include "Traits/IteratorTraits.h"
-#include "UObject/CoreOnline.h"
+	#include "Engine/EngineTypes.h"
+	#include "Engine/GameInstance.h"
+	#include "Engine/World.h"
+	#include "GameFramework/GameModeBase.h"
+	#include "GameFramework/PlayerState.h"
+	#include "LogOpenUnrealUtilities.h"
+	#include "Traits/IteratorTraits.h"
+	#include "UObject/CoreOnline.h"
 
 FOUUAutomationTestWorld::~FOUUAutomationTestWorld()
 {
-	if (!ensureMsgf(!bHasWorld, TEXT("Undestroyed world found! You must always explicitly delete/cleanup automation test worlds that are not FScopedAutomationTestWorlds!!!")))
+	if (!ensureMsgf(
+			!bHasWorld,
+			TEXT("Undestroyed world found! You must always explicitly delete/cleanup automation test worlds that are "
+				 "not FScopedAutomationTestWorlds!!!")))
 	{
 		// Explicitly call FOUUAutomationTestWorld version of the virtual function
 		// -> happens anyways because it's called in destructor
@@ -51,11 +54,12 @@ void FOUUAutomationTestWorld::BeginPlay()
 	World->BeginPlay();
 }
 
-#define CHECK_INIT_GAME_CONDITION(Condition, ErrorString) \
-if (Condition) { \
-	UE_LOG(LogOpenUnrealUtilities, Error, TEXT("%s"), ToCStr(ErrorString)); \
-	return false; \
-}
+	#define CHECK_INIT_GAME_CONDITION(Condition, ErrorString)                                                          \
+		if (Condition)                                                                                                 \
+		{                                                                                                              \
+			UE_LOG(LogOpenUnrealUtilities, Error, TEXT("%s"), ToCStr(ErrorString));                                    \
+			return false;                                                                                              \
+		}
 
 bool FOUUAutomationTestWorld::InitializeGame()
 {
@@ -74,7 +78,7 @@ bool FOUUAutomationTestWorld::InitializeGame()
 	UWorld* GI_TempWorld = GameInstanceWorldContext->World();
 
 	// Must destroy the temp world to prevent memory leaks!
-	// We are supplying the new world that we are "travelling" to, in order to prevent GC of our test world. 
+	// We are supplying the new world that we are "travelling" to, in order to prevent GC of our test world.
 	GI_TempWorld->DestroyWorld(true, World);
 
 	// Tell the game instance and world about each other.
@@ -108,7 +112,7 @@ bool FOUUAutomationTestWorld::InitializeGame()
 
 	return true;
 }
-#undef CHECK_INIT_GAME_CONDITION
+	#undef CHECK_INIT_GAME_CONDITION
 
 void FOUUAutomationTestWorld::DestroyWorld()
 {
@@ -117,7 +121,10 @@ void FOUUAutomationTestWorld::DestroyWorld()
 
 void FOUUAutomationTestWorld::CreateWorldImplementation()
 {
-	if (!ensureMsgf(!bHasWorld, TEXT("Undestroyed world found! You must always explicitly delete/cleanup automation test worlds that are not FScopedAutomationTestWorlds!!!")))
+	if (!ensureMsgf(
+			!bHasWorld,
+			TEXT("Undestroyed world found! You must always explicitly delete/cleanup automation test worlds that are "
+				 "not FScopedAutomationTestWorlds!!!")))
 	{
 		DestroyWorldImplementation();
 	}
@@ -190,12 +197,18 @@ FOUUScopedAutomationTestWorld::~FOUUScopedAutomationTestWorld()
 
 void FOUUScopedAutomationTestWorld::CreateWorld()
 {
-	ensureMsgf(false, TEXT("CreateWorld must not be called on scoped automation worlds! Let RAII take care of world creation/destruction!"));
+	ensureMsgf(
+		false,
+		TEXT("CreateWorld must not be called on scoped automation worlds! Let RAII take care of world "
+			 "creation/destruction!"));
 }
 
 void FOUUScopedAutomationTestWorld::DestroyWorld()
 {
-	ensureMsgf(false, TEXT("DestroyWorld must not be called on scoped automation worlds! Let RAII take care of world creation/destruction!"));
+	ensureMsgf(
+		false,
+		TEXT("DestroyWorld must not be called on scoped automation worlds! Let RAII take care of world "
+			 "creation/destruction!"));
 }
 
 #endif

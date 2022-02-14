@@ -1,27 +1,47 @@
 // Copyright (c) 2021 Jonas Reich
 
 #include "SemVer/SemanticVersion.h"
-#include "SemVer/SemVerRegex.h"
-#include "Misc/RegexUtils.h"
-#include "LogOpenUnrealUtilities.h"
 
-FSemanticVersion::FSemanticVersion(int32 Major, int32 Minor, int32 Patch, FSemVerPreReleaseIdentifier PreRelease /*= {}*/, FSemVerBuildMetadata Metadata /*= {}*/) :
-	MajorVersion(Major), MinorVersion(Minor), PatchVersion(Patch), PreReleaseIdentifier(PreRelease), BuildMetadata(Metadata)
+#include "LogOpenUnrealUtilities.h"
+#include "Misc/RegexUtils.h"
+#include "SemVer/SemVerRegex.h"
+
+FSemanticVersion::FSemanticVersion(
+	int32 Major,
+	int32 Minor,
+	int32 Patch,
+	FSemVerPreReleaseIdentifier PreRelease /*= {}*/,
+	FSemVerBuildMetadata Metadata /*= {}*/) :
+	MajorVersion(Major),
+	MinorVersion(Minor),
+	PatchVersion(Patch),
+	PreReleaseIdentifier(PreRelease),
+	BuildMetadata(Metadata)
 {
 	if (MajorVersion < 0 || MinorVersion < 0 || PatchVersion < 0)
 	{
-		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("No negative numbers allowed in SemanticVersion (%i.%i.%i). Defaulting to 0.1.0"),
-			MajorVersion, MinorVersion, PatchVersion);
+		UE_LOG(
+			LogOpenUnrealUtilities,
+			Warning,
+			TEXT("No negative numbers allowed in SemanticVersion (%i.%i.%i). Defaulting to 0.1.0"),
+			MajorVersion,
+			MinorVersion,
+			PatchVersion);
 		(*this) = {};
 	}
 	else if (MajorVersion == 0 && MinorVersion == 0 && PatchVersion == 0)
 	{
-		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("SemanticVersion components (minor, major, patch) must not all be zero. Defaulting to 0.1.0"));
+		UE_LOG(
+			LogOpenUnrealUtilities,
+			Warning,
+			TEXT("SemanticVersion components (minor, major, patch) must not all be zero. Defaulting to 0.1.0"));
 		(*this) = {};
 	}
 }
 
-FSemanticVersion::FSemanticVersion(const FString& SourceString, ESemVerParsingStrictness Strictness /*= ESemVerParsingStrictness::Strict*/)
+FSemanticVersion::FSemanticVersion(
+	const FString& SourceString,
+	ESemVerParsingStrictness Strictness /*= ESemVerParsingStrictness::Strict*/)
 {
 	TryParseString(SourceString, Strictness);
 }
@@ -99,10 +119,8 @@ bool FSemanticVersion::TryIncrementPreReleaseVersion()
 
 bool FSemanticVersion::EqualsPrecedence(const FSemanticVersion& Other) const
 {
-	return MajorVersion == Other.MajorVersion
-		&& MinorVersion == Other.MinorVersion
-		&& PatchVersion == Other.PatchVersion
-		&& PreReleaseIdentifier == Other.PreReleaseIdentifier;
+	return MajorVersion == Other.MajorVersion && MinorVersion == Other.MinorVersion
+		&& PatchVersion == Other.PatchVersion && PreReleaseIdentifier == Other.PreReleaseIdentifier;
 	// exclude build metadata from precedence check
 }
 
@@ -139,11 +157,12 @@ bool FSemanticVersion::operator>=(const FSemanticVersion& Other) const
 bool FSemanticVersion::TryParseString_Internal(const FString& SourceString, ESemVerParsingStrictness Strictness)
 {
 	FString VersionNumbersString, PreReleaseAndBuildNr, PreReleaseString, BuildMetadataString;
-	
+
 	FRegexGroups Result;
 	if (Strictness == ESemVerParsingStrictness::Liberal)
 	{
-		TArray<FRegexGroups> Matches = FRegexUtils::GetRegexMatchesAndGroups(FSemVerRegex::String(Strictness), 5, SourceString);
+		TArray<FRegexGroups> Matches =
+			FRegexUtils::GetRegexMatchesAndGroups(FSemVerRegex::String(Strictness), 5, SourceString);
 		if (Matches.Num() > 0)
 		{
 			Result = Matches[0];
@@ -153,7 +172,7 @@ bool FSemanticVersion::TryParseString_Internal(const FString& SourceString, ESem
 	{
 		Result = FRegexUtils::GetRegexMatchAndGroupsExact(FSemVerRegex::String(Strictness), 5, SourceString);
 	}
-	
+
 	if (!Result.IsValid())
 		return false;
 
@@ -165,12 +184,27 @@ bool FSemanticVersion::TryParseString_Internal(const FString& SourceString, ESem
 	LexFromString(PatchVersion, *Result.CaptureGroups[3].MatchString);
 
 	// Check for max int
-	UE_CLOG(MajorVersion == TNumericLimits<int32>::Max(), LogOpenUnrealUtilities, Warning, TEXT("MajorVersion is equal to maximum integer value after parsing. Such high version numbers are not supported!"));
-	UE_CLOG(MinorVersion == TNumericLimits<int32>::Max(), LogOpenUnrealUtilities, Warning, TEXT("MinorVersion is equal to maximum integer value after parsing. Such high version numbers are not supported!"));
-	UE_CLOG(PatchVersion == TNumericLimits<int32>::Max(), LogOpenUnrealUtilities, Warning, TEXT("PatchVersion is equal to maximum integer value after parsing. Such high version numbers are not supported!"));
+	UE_CLOG(
+		MajorVersion == TNumericLimits<int32>::Max(),
+		LogOpenUnrealUtilities,
+		Warning,
+		TEXT("MajorVersion is equal to maximum integer value after parsing. Such high version numbers are not "
+			 "supported!"));
+	UE_CLOG(
+		MinorVersion == TNumericLimits<int32>::Max(),
+		LogOpenUnrealUtilities,
+		Warning,
+		TEXT("MinorVersion is equal to maximum integer value after parsing. Such high version numbers are not "
+			 "supported!"));
+	UE_CLOG(
+		PatchVersion == TNumericLimits<int32>::Max(),
+		LogOpenUnrealUtilities,
+		Warning,
+		TEXT("PatchVersion is equal to maximum integer value after parsing. Such high version numbers are not "
+			 "supported!"));
 
-	PreReleaseIdentifier = { Result.CaptureGroups[4].MatchString, Strictness };
-	BuildMetadata = { Result.CaptureGroups[5].MatchString, Strictness };
+	PreReleaseIdentifier = {Result.CaptureGroups[4].MatchString, Strictness};
+	BuildMetadata = {Result.CaptureGroups[5].MatchString, Strictness};
 
 	return true;
 }

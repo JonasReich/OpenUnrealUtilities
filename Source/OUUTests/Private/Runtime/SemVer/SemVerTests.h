@@ -40,8 +40,7 @@ const TArray<FString> ValidSemVers = {
 	// Theoretically valid, but exceed max int, so it's excluded here.
 	// Additional tests for numbers exceeding/close to max ranges are implemented separately.
 	// "99999999999999999999999.999999999999999999.99999999999999999",
-	"1.0.0-0A.is.legal"
-};
+	"1.0.0-0A.is.legal"};
 
 // Invalid SemVers taken from official sample at https://regex101.com/r/Ly7O1x/3/
 const TArray<FString> InvalidSemVers = {
@@ -83,7 +82,7 @@ const TArray<FString> InvalidSemVers = {
 	"+justmeta",
 	"9.8.7+meta+meta",
 	"9.8.7-whatever+meta+meta",
-	"99999999999999999999999.999999999999999999.99999999999999999----RC-SNAPSHOT.12.09.1--------------------------------..12"
-};
+	"99999999999999999999999.999999999999999999.99999999999999999----RC-SNAPSHOT.12.09.1-------------------------------"
+	"-..12"};
 
 #endif

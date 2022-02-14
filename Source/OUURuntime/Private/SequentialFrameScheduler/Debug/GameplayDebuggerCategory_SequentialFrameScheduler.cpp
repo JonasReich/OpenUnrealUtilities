@@ -1,24 +1,25 @@
 ﻿// Copyright (c) 2021 Jonas Reich
 
 #include "SequentialFrameScheduler/Debug/GameplayDebuggerCategory_SequentialFrameScheduler.h"
-#include "SequentialFrameScheduler/WorldBoundSFSchedulerRegistry.h"
+
 #include "GameFramework/PlayerController.h"
+#include "SequentialFrameScheduler/WorldBoundSFSchedulerRegistry.h"
 
 #if WITH_GAMEPLAY_DEBUGGER
 
 FString GetTickingGroupName(ETickingGroup Group)
 {
-	switch(Group)
+	switch (Group)
 	{
-		case TG_PrePhysics: return "PrePhysics";
-		case TG_StartPhysics: return "StartPhysics";
-		case TG_DuringPhysics: return "DuringPhysics";
-		case TG_EndPhysics: return "EndPhysics";
-		case TG_PostPhysics: return "PostPhysics";
-		case TG_PostUpdateWork: return "PostUpdateWork";
-		case TG_LastDemotable: return "LastDemotable";
-		case TG_NewlySpawned: return "NewlySpawned";
-		default: return "<invalid>";
+	case TG_PrePhysics: return "PrePhysics";
+	case TG_StartPhysics: return "StartPhysics";
+	case TG_DuringPhysics: return "DuringPhysics";
+	case TG_EndPhysics: return "EndPhysics";
+	case TG_PostPhysics: return "PostPhysics";
+	case TG_PostUpdateWork: return "PostUpdateWork";
+	case TG_LastDemotable: return "LastDemotable";
+	case TG_NewlySpawned: return "NewlySpawned";
+	default: return "<invalid>";
 	}
 }
 
@@ -30,7 +31,9 @@ FGameplayDebuggerCategory_SequentialFrameScheduler::FGameplayDebuggerCategory_Se
 	BindKeyPress(KeyConfig, this, &FGameplayDebuggerCategory_SequentialFrameScheduler::CycleDebugScheduler);
 }
 
-void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(APlayerController* OwnerPC, FGameplayDebuggerCanvasContext& CanvasContext)
+void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
+	APlayerController* OwnerPC,
+	FGameplayDebuggerCanvasContext& CanvasContext)
 {
 	CanvasContext.FontRenderInfo.bEnableShadow = true;
 
@@ -40,11 +43,12 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(APlayerControl
 		return;
 	}
 
-	AWorldBoundSFSchedulerRegistry& FrameSchedulerRegistry = *AWorldBoundSFSchedulerRegistry::GetWorldSingleton(OwnerPC);
+	AWorldBoundSFSchedulerRegistry& FrameSchedulerRegistry =
+		*AWorldBoundSFSchedulerRegistry::GetWorldSingleton(OwnerPC);
 	TArray<FSchedulerPtr> Schedulers;
 	FrameSchedulerRegistry.SchedulersByName.GenerateValueArray(Schedulers);
 
-	const int32 NumSchedulers = Schedulers.Num(); 
+	const int32 NumSchedulers = Schedulers.Num();
 	if (NumSchedulers == 0)
 	{
 		CanvasContext.Print(TEXT("{red}No schedulers registered"));
@@ -63,11 +67,16 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(APlayerControl
 	for (ETickingGroup TickingGroup : RegisteredTickingGroups)
 	{
 		CanvasContext.Printf(TEXT("{green}- %s:"), *GetTickingGroupName(TickingGroup));
-		TArray<FSchedulerPtr>& SchedulersInTickingGroup = FrameSchedulerRegistry.TickGroupToSchedulerPriorityList[TickingGroup];
+		TArray<FSchedulerPtr>& SchedulersInTickingGroup =
+			FrameSchedulerRegistry.TickGroupToSchedulerPriorityList[TickingGroup];
 		for (FSchedulerPtr Scheduler : SchedulersInTickingGroup)
 		{
 			const bool bIsDebugTarget = Scheduler == DebugScheduler;
-			CanvasContext.Printf(TEXT("{%s}\t- %s (%i)"), *FString(bIsDebugTarget ? "yellow" : "white"), *Scheduler->Name.ToString(), Scheduler->Priority);
+			CanvasContext.Printf(
+				TEXT("{%s}\t- %s (%i)"),
+				*FString(bIsDebugTarget ? "yellow" : "white"),
+				*Scheduler->Name.ToString(),
+				Scheduler->Priority);
 		}
 	}
 
@@ -99,7 +108,12 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(APlayerControl
 
 		FName TaskName = DebugScheduler->DebugData.TaskDebugNames[TaskHandle];
 		TSharedPtr<FSequentialFrameTask> TaskInfo = DebugScheduler->TaskHandlesToTaskInfos[TaskHandle];
-		HistoryString += FString::Printf(TEXT("\n- #%i tick time: %.2fms, period: %.2fms %s"), FrameNumber, TimeBetweenUpdates * 1000.f, TaskInfo->Period * 1000.f, *TaskName.ToString());
+		HistoryString += FString::Printf(
+			TEXT("\n- #%i tick time: %.2fms, period: %.2fms %s"),
+			FrameNumber,
+			TimeBetweenUpdates * 1000.f,
+			TaskInfo->Period * 1000.f,
+			*TaskName.ToString());
 	}
 	CanvasContext.Print(HistoryString);
 }

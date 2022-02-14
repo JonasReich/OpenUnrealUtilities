@@ -27,12 +27,14 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 
 #if WITH_GAMEPLAY_DEBUGGER
 		const float TaskOvertimeSeconds = Task->GetOvertimeSeconds();
-		const float TaskOvertimeSecondsClamped = bClampStats ? FMath::Clamp(TaskOvertimeSeconds, 0.f, MAX_FLT) : TaskOvertimeSeconds;
+		const float TaskOvertimeSecondsClamped =
+			bClampStats ? FMath::Clamp(TaskOvertimeSeconds, 0.f, MAX_FLT) : TaskOvertimeSeconds;
 		SumOvertimeSeconds += TaskOvertimeSecondsClamped;
 		MaxOvertimeSeconds = FMath::Max(MaxOvertimeSeconds, TaskOvertimeSecondsClamped);
 
 		const float TaskOvertimeFraction = Task->GetOvertimeFraction();
-		const float TaskOvertimeFractionClamped = bClampStats ? FMath::Clamp(TaskOvertimeFraction, 0.f, MAX_FLT) : TaskOvertimeFraction;
+		const float TaskOvertimeFractionClamped =
+			bClampStats ? FMath::Clamp(TaskOvertimeFraction, 0.f, MAX_FLT) : TaskOvertimeFraction;
 		SumOvertimeFraction += TaskOvertimeFractionClamped;
 		MaxOvertimeFraction = FMath::Max(MaxOvertimeFraction, TaskOvertimeFractionClamped);
 #endif
@@ -46,13 +48,13 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 	DebugData.AverageDelayFractionRingBuffer.Add(SumOvertimeFraction / NumTasksFloat);
 #endif
 
-	TaskQueue.Sort([&](const FTaskHandle& HandleA, const FTaskHandle& HandleB) -> bool
-	{
+	TaskQueue.Sort([&](const FTaskHandle& HandleA, const FTaskHandle& HandleB) -> bool {
 		const FSequentialFrameTask& TaskA = GetTask(HandleA);
 		const FSequentialFrameTask& TaskB = GetTask(HandleB);
 		float OvertimeA = TaskA.GetOvertimeFraction();
 		float OvertimeB = TaskB.GetOvertimeFraction();
-		for (int32 iFrame = 1; FMath::IsNearlyEqual(OvertimeA, OvertimeB) && iFrame <= NumFramesToLookAheadForSorting; iFrame++)
+		for (int32 iFrame = 1; FMath::IsNearlyEqual(OvertimeA, OvertimeB) && iFrame <= NumFramesToLookAheadForSorting;
+			 iFrame++)
 		{
 			OvertimeA = TaskA.GetPredictedOvertimeFraction(PredictedDeltaTimeNextFrames, iFrame);
 			OvertimeB = TaskB.GetPredictedOvertimeFraction(PredictedDeltaTimeNextFrames, iFrame);
@@ -61,7 +63,7 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 	});
 
 	const int32 MaxNumTasksToExecuteThisFrame = FMath::Min(MaxNumTasksToExecutePerFrame, TaskQueue.Num());
-	int32 ActualNumTasksExecutedThisFrame = 0; 
+	int32 ActualNumTasksExecutedThisFrame = 0;
 
 	for (int32 QueueIndex = 0; QueueIndex < TaskQueue.Num(); QueueIndex++)
 	{
@@ -74,7 +76,7 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 		// If it's not set as "tick as often as possible" we should not pick it prematurely
 		// no matter where it is in the queue.
 		// This means we would have to check here anyways even if we factored it in the sorting.
-		// As a result, we can just ignore the bTickAsOftenAsPossible while sorting. 
+		// As a result, we can just ignore the bTickAsOftenAsPossible while sorting.
 		if (!CurrentTask->bTickAsOftenAsPossible && (CurrentTask->GetOvertimeSeconds() < 0))
 		{
 			continue;
@@ -138,7 +140,10 @@ void FSequentialFrameScheduler::UnPauseTask(const FTaskHandle& Handle)
 	}
 }
 
-FSequentialFrameTask::FTaskHandle FSequentialFrameScheduler::InternalAddTask(FTaskUnifiedDelegate&& Delegate, float InPeriod, bool bTickAsOftenAsPossible)
+FSequentialFrameTask::FTaskHandle FSequentialFrameScheduler::InternalAddTask(
+	FTaskUnifiedDelegate&& Delegate,
+	float InPeriod,
+	bool bTickAsOftenAsPossible)
 {
 	const FTaskHandle NewHandle = TaskIdCounter;
 	TaskIdCounter++;
@@ -147,7 +152,7 @@ FSequentialFrameTask::FTaskHandle FSequentialFrameScheduler::InternalAddTask(FTa
 	TasksPendingForAdd.Add(NewHandle);
 	TasksPendingForRemoval.Remove(NewHandle);
 
-	TSharedRef<FSequentialFrameTask> Task = MakeShared<FSequentialFrameTask>(); 
+	TSharedRef<FSequentialFrameTask> Task = MakeShared<FSequentialFrameTask>();
 	Task->Delegate = MoveTemp(Delegate);
 	Task->Handle = NewHandle;
 	Task->Period = InPeriod;
@@ -163,8 +168,8 @@ void FSequentialFrameScheduler::AddPendingTasksToQueue()
 	{
 		TaskQueue.Add(TaskHandle);
 		// Pretend the task needs immediate invocation when initially adding it to the queue.
-		// This mainly ensures that tasks being added after minutes/hours of play don't get unproportionally large overtime
-		// and tasks added as bTickAsOftenAsPossible=false at least get the initial tick as soon as possible.
+		// This mainly ensures that tasks being added after minutes/hours of play don't get unproportionally large
+		// overtime and tasks added as bTickAsOftenAsPossible=false at least get the initial tick as soon as possible.
 		GetTask(TaskHandle).LastInvocationTime = -1.0f * GetTask(TaskHandle).Period;
 	}
 	TasksPendingForAdd.Empty();

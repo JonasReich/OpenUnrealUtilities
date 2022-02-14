@@ -1,9 +1,10 @@
 // Copyright (c) 2021 Jonas Reich
 
 #include "UMGInputBinding.h"
+
 #include "Blueprint/UserWidget.h"
-#include "LogOpenUnrealUtilities.h"
 #include "GameFramework/PlayerInput.h"
+#include "LogOpenUnrealUtilities.h"
 
 void UUMGInputActionBindingStack::SetOwningPlayerInput(UPlayerInput* InOwningPlayerInput)
 {
@@ -19,7 +20,10 @@ UUMGInputActionBindingStack* UUMGInputActionBindingStack::CreateUMGInputActionBi
 {
 	if (!IsValid(InOwningWidget))
 	{
-		UE_LOG(LogOpenUnrealUtilities, Error, TEXT("Could not create UMGInputActionBindingStack with invalid OwningWidget!"));
+		UE_LOG(
+			LogOpenUnrealUtilities,
+			Error,
+			TEXT("Could not create UMGInputActionBindingStack with invalid OwningWidget!"));
 		return nullptr;
 	}
 
@@ -34,19 +38,18 @@ UUMGInputActionBindingStack* UUMGInputActionBindingStack::CreateUMGInputActionBi
 
 void UUMGInputActionBindingStack::BindAction(FUMGInputAction Action, FUMGInputActionDelegate Delegate)
 {
-	BindingStack.Add({ Action, Delegate });
+	BindingStack.Add({Action, Delegate});
 }
 
 void UUMGInputActionBindingStack::RemoveSingleBinding(FUMGInputAction Action, FUMGInputActionDelegate Delegate)
 {
-	BindingStack.Remove({ Action, Delegate });
+	BindingStack.Remove({Action, Delegate});
 }
 
 void UUMGInputActionBindingStack::RemoveBindings(FUMGInputAction Action)
 {
-	BindingStack.RemoveAll([&Action](const FUMGInputActionBinding& Binding) -> bool {
-		return Binding.BindingSignature == Action;
-	});
+	BindingStack.RemoveAll(
+		[&Action](const FUMGInputActionBinding& Binding) -> bool { return Binding.BindingSignature == Action; });
 }
 
 void UUMGInputActionBindingStack::RemoveBindingsByObject(UObject* TargetObject)
@@ -91,11 +94,12 @@ int32 UUMGInputActionBindingStack::GetFirstBindingWithKey(FKey Key) const
 	for (int32 i = 0; i < BindingStack.Num(); i++)
 	{
 		const FUMGInputActionBinding& Binding = BindingStack[i];
-		const TArray<FInputActionKeyMapping>& Actions = OwningPlayerInput->GetKeysForAction(Binding.BindingSignature.ActionName);
-		bool bMatchesKey = Actions.ContainsByPredicate([&Key](const FInputActionKeyMapping& Action) {
-			return Action.Key == Key;
-		});
-		if (bMatchesKey) return i;
+		const TArray<FInputActionKeyMapping>& Actions =
+			OwningPlayerInput->GetKeysForAction(Binding.BindingSignature.ActionName);
+		bool bMatchesKey =
+			Actions.ContainsByPredicate([&Key](const FInputActionKeyMapping& Action) { return Action.Key == Key; });
+		if (bMatchesKey)
+			return i;
 	}
 	return INDEX_NONE;
 }
@@ -110,12 +114,12 @@ bool UUMGInputActionBindingStack::ProcessKeyEvent(FGeometry MyGeometry, FKeyEven
 	for (int32 Idx = 0; Idx < BindingStack.Num(); Idx++)
 	{
 		FUMGInputActionBinding& Binding = BindingStack[Idx];
-		const TArray<FInputActionKeyMapping>& Actions = OwningPlayerInput->GetKeysForAction(Binding.BindingSignature.ActionName);
-		bool bMatchesKey = Actions.ContainsByPredicate([&Key](const FInputActionKeyMapping& Action) {
-			return Action.Key == Key;
-		});
+		const TArray<FInputActionKeyMapping>& Actions =
+			OwningPlayerInput->GetKeysForAction(Binding.BindingSignature.ActionName);
+		bool bMatchesKey =
+			Actions.ContainsByPredicate([&Key](const FInputActionKeyMapping& Action) { return Action.Key == Key; });
 
-		if(!bMatchesKey)
+		if (!bMatchesKey)
 			continue;
 
 		switch (Binding.BindingSignature.ReactEvent)
@@ -167,8 +171,7 @@ bool UUMGInputActionBindingStack::ProcessKeyEvent(FGeometry MyGeometry, FKeyEven
 			if (ProcessBindingMatch(Idx, EUMGInputActionKeyEvent::Any))
 				return true;
 		}
-		default:
-			break;
+		default: break;
 		}
 	}
 
@@ -185,7 +188,8 @@ bool UUMGInputActionBindingStack::ProcessBindingMatch(int32 BindingIndex, EUMGIn
 	{
 		IndicesToRemoveThisFrame.Add(BindingIndex);
 	}
-	return ConsumeMode == EUMGInputActionKeyEventConsumeMode::Same || ConsumeMode == EUMGInputActionKeyEventConsumeMode::All;
+	return ConsumeMode == EUMGInputActionKeyEventConsumeMode::Same
+		|| ConsumeMode == EUMGInputActionKeyEventConsumeMode::All;
 }
 
 void UUMGInputActionBindingStack::CleanUpStack()

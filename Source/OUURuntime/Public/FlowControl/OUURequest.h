@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "OUURequest.generated.h"
 
 class UOUURequest;
@@ -32,16 +33,16 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRequestRaised, UOUURequest*, Requ
 
 /**
  * Request object that represents a request from one component to another.
- * One possible application for requests are blueprint callbacks where a C++ system makes a request and binds to the OnCompleted delegate
- * and a blueprint fulfills the request, which calls the previously bound callback. 
- * 
+ * One possible application for requests are blueprint callbacks where a C++ system makes a request and binds to the
+ * OnCompleted delegate and a blueprint fulfills the request, which calls the previously bound callback.
+ *
  * Requests can succeed, fail or be canceled and may be reset and reused after completion.
  * A request can be triggered multiple times from multiple sources, but will only propagate the first of these calls.
- * This is useful in many situations, e.g. save requests. If this is not sufficient and you need a request that will be acted on for each
- * individual call, consider using a UOUURequestQueue instead.
- * 
- * Request payload data should be added as class members of child classes and can be set up with bidirectional read/write access
- * (from caller to responder and vice versa).
+ * This is useful in many situations, e.g. save requests. If this is not sufficient and you need a request that will be
+ * acted on for each individual call, consider using a UOUURequestQueue instead.
+ *
+ * Request payload data should be added as class members of child classes and can be set up with bidirectional
+ * read/write access (from caller to responder and vice versa).
  */
 UCLASS(BlueprintType, Blueprintable)
 class OUURUNTIME_API UOUURequest : public UObject
@@ -77,7 +78,7 @@ public:
 	/** Raise the request and bind a callback delegate that will be called when the request is completed */
 	UFUNCTION(BlueprintCallable)
 	void RaiseAndWait(FOnRequestStatusChangedDelegate CompletedCallback);
-	
+
 	/**
 	 * Drop the request from the caller side. (i.e. "never mind, I don't need this anymore")
 	 * Doesn't do anything if the request is not in the pending state.
@@ -95,10 +96,10 @@ public:
 	/** Reset the request status after completion. Doesn't do anything while the request is still pending. */
 	UFUNCTION(BlueprintCallable)
 	void Reset();
-	
+
 	/**
-	 * Get the current state of the request. When multiple objects bind to the OnRaised event, it's useful to check if the request has
-	 * already been fulfilled by a third party.
+	 * Get the current state of the request. When multiple objects bind to the OnRaised event, it's useful to check if
+	 * the request has already been fulfilled by a third party.
 	 */
 	UFUNCTION(BlueprintPure)
 	EOUURequestState GetState() const;

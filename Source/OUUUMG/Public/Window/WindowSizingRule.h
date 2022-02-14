@@ -3,12 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "WindowSizingRule.generated.h"
 
 /**
-* Enum to describe how windows are sized
-* This is the same as ESizingRule, but blueprint exposed
-*/
+ * Enum to describe how windows are sized
+ * This is the same as ESizingRule, but blueprint exposed
+ */
 UENUM(BlueprintType)
 enum class EWindowSizingRule : uint8
 {

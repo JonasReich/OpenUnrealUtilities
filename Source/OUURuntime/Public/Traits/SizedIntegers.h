@@ -23,18 +23,22 @@ template <SIZE_T BitSize, bool bSigned>
 struct TBitSizedInteger
 {
 	using Type = void;
-	static_assert(bSigned || TAssertValuesEqual<SIZE_T, BitSize, -1>::Value,
-		"Size is not a valid unsigned integer size. See template specializations for TBitSizedInteger in IntegerSize.h");
-	static_assert(!bSigned || TAssertValuesEqual<SIZE_T, BitSize, -1>::Value,
+	static_assert(
+		bSigned || TAssertValuesEqual<SIZE_T, BitSize, -1>::Value,
+		"Size is not a valid unsigned integer size. See template specializations for TBitSizedInteger in "
+		"IntegerSize.h");
+	static_assert(
+		!bSigned || TAssertValuesEqual<SIZE_T, BitSize, -1>::Value,
 		"Size is not a valid signed integer size. See template specializations for TBitSizedInteger in IntegerSize.h");
 };
 
 // Define specializations for TBitSizedInteger
-#define T_SIZED_INTEGER_IMPL(Size, bSigned, IntType) \
-	template <> \
-	struct TBitSizedInteger<Size, bSigned> { \
-		using Type = IntType; \
-	}; \
+#define T_SIZED_INTEGER_IMPL(Size, bSigned, IntType)                                                                   \
+	template <>                                                                                                        \
+	struct TBitSizedInteger<Size, bSigned>                                                                             \
+	{                                                                                                                  \
+		using Type = IntType;                                                                                          \
+	};                                                                                                                 \
 	static_assert(TAssertBitSizeEquality<IntType, Size>::Value, "Sized integer implementation has wrong size!");
 
 T_SIZED_INTEGER_IMPL(1, false, bool);
@@ -59,18 +63,23 @@ struct TMinBitSizedInteger
 {
 	static constexpr SIZE_T NearestIntegerBitCount(SIZE_T InBitCount)
 	{
-		if (InBitCount <= 1) return 1;
-		if (InBitCount <= 8) return 8;
-		if (InBitCount <= 16) return 16;
-		if (InBitCount <= 32) return 32;
-		if (InBitCount <= 64) return 64;
+		if (InBitCount <= 1)
+			return 1;
+		if (InBitCount <= 8)
+			return 8;
+		if (InBitCount <= 16)
+			return 16;
+		if (InBitCount <= 32)
+			return 32;
+		if (InBitCount <= 64)
+			return 64;
 		return 0;
 	}
 
 	using Type = typename TBitSizedInteger<NearestIntegerBitCount(MinBitCount), bSigned>::Type;
 };
 
-/** Trait that returns the smallest integer type which has enough mutable bits for the target number */ 
+/** Trait that returns the smallest integer type which has enough mutable bits for the target number */
 template <int64 TargetNumber>
 struct TMinValueInteger
 {

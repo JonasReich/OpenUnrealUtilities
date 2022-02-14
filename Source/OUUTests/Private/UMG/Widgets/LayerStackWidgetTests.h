@@ -1,8 +1,9 @@
 // Copyright (c) 2021 Jonas Reich
 
+#include "Components/Overlay.h"
 #include "Widgets/LayerStackWidget.h"
 #include "Widgets/LayerWidget.h"
-#include "Components/Overlay.h"
+
 #include "LayerStackWidgetTests.generated.h"
 
 // Test layer stack that doesn't have any layers
@@ -20,14 +21,18 @@ protected:
 	}
 };
 
-// Test layer that tracks the last layer above that was passed via UpdateLayer() 
+// Test layer that tracks the last layer above that was passed via UpdateLayer()
 UCLASS(meta = (Hidden, HideDropDown))
 class UOUULayerStackTickTestLayer : public UOUULayerWidget
 {
 	GENERATED_BODY()
 public:
 	// params: self layer, last layer above
-	DECLARE_EVENT_TwoParams(UOUULayerStackTickTestLayer, FOnLayerUpdated, const UOUULayerWidget*, const UOUULayerWidget*);
+	DECLARE_EVENT_TwoParams(
+		UOUULayerStackTickTestLayer,
+		FOnLayerUpdated,
+		const UOUULayerWidget*,
+		const UOUULayerWidget*);
 	FOnLayerUpdated OnLayerUpdated;
 
 	virtual void UpdateLayer(const UOUULayerWidget* LayerAbove) override

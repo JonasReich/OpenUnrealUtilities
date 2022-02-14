@@ -4,11 +4,11 @@
 
 #if WITH_AUTOMATION_WORKER
 
-#include "Math/OUUMathLibrary.h"
-#include "Engine/EngineTypes.h"
+	#include "Engine/EngineTypes.h"
+	#include "Math/OUUMathLibrary.h"
 
-#define OUU_TEST_CATEGORY OpenUnrealUtilities.Runtime.Math
-#define OUU_TEST_TYPE MathLibrary
+	#define OUU_TEST_CATEGORY OpenUnrealUtilities.Runtime.Math
+	#define OUU_TEST_TYPE	  MathLibrary
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -22,11 +22,11 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("X=+1,Y=+0,Z=+0|X=+1,Y=+1,Z=+0|+45")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(AngleBetweenVectors)
 {
 	// Arrange
-	FAutomationTestParameterParser Parser{ Parameters };
+	FAutomationTestParameterParser Parser{Parameters};
 	const FVector A = Parser.GetValue<FVector>(0);
 	const FVector B = Parser.GetValue<FVector>(1);
 	const float ExpectedAngle = Parser.GetValue<float>(2);
-	
+
 	// Act
 	float ActualAngle = UOUUMathLibrary::AngleBetweenVectors(A, B);
 
@@ -55,17 +55,21 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("X=+0,Y=+0,Z=+1|X=+1,Y=+0,Z=+0|X=+0,Y=-1,Z=+0|+9
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(SignedAngleBetweenVectors)
 {
 	// Arrange
-	FAutomationTestParameterParser Parser{ Parameters };
+	FAutomationTestParameterParser Parser{Parameters};
 	const FVector A = Parser.GetValue<FVector>(0);
 	const FVector B = Parser.GetValue<FVector>(1);
 	const FVector Up = Parser.GetValue<FVector>(2);
 	const float ExpectedAngle = Parser.GetValue<float>(3);
-	
+
 	// Act
 	float ActualAngle = UOUUMathLibrary::SignedAngleBetweenVectors(A, B, Up);
 
 	// Assert
-	FString DisplayString = FString::Printf(TEXT("Signed angle between vectors %s and %s with up: %s"), *A.ToString(), *B.ToString(), *Up.ToString());
+	FString DisplayString = FString::Printf(
+		TEXT("Signed angle between vectors %s and %s with up: %s"),
+		*A.ToString(),
+		*B.ToString(),
+		*Up.ToString());
 	TestEqual(DisplayString, ActualAngle, ExpectedAngle);
 
 	return true;
@@ -80,13 +84,13 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("4|1|3|3")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(ClampToRange)
 {
 	// Arrange
-	FAutomationTestParameterParser Parser{ Parameters };
+	FAutomationTestParameterParser Parser{Parameters};
 	float InValue = Parser.GetValue<float>(0);
 	float Min = Parser.GetValue<float>(1);
 	float Max = Parser.GetValue<float>(2);
-	TRange<float> Range{ Min, Max };
+	TRange<float> Range{Min, Max};
 	float ExpectedResult = Parser.GetValue<float>(3);
-	
+
 	// Act
 	float ActualResult = UOUUMathLibrary::ClampToRange(InValue, Range);
 
@@ -99,7 +103,7 @@ OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(ClampToRange)
 
 //////////////////////////////////////////////////////////////////////////
 
-#undef OUU_TEST_CATEGORY
-#undef OUU_TEST_TYPE
+	#undef OUU_TEST_CATEGORY
+	#undef OUU_TEST_TYPE
 
 #endif

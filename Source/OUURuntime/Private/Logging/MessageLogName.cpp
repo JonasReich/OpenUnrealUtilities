@@ -4,7 +4,8 @@
 
 FName GetMessageLogName(EMessageLogName MesageLogName)
 {
-#define MESSAGELOG_ENUM_TO_FNAME_CASE(Entry) case EMessageLogName::Entry: return PREPROCESSOR_TO_STRING(Entry);
+#define MESSAGELOG_ENUM_TO_FNAME_CASE(Entry)                                                                           \
+	case EMessageLogName::Entry: return PREPROCESSOR_TO_STRING(Entry);
 	switch (MesageLogName)
 	{
 		MESSAGELOG_ENUM_TO_FNAME_CASE(PIE)
@@ -28,9 +29,8 @@ FName GetMessageLogName(EMessageLogName MesageLogName)
 		MESSAGELOG_ENUM_TO_FNAME_CASE(TranslationEditor)
 		MESSAGELOG_ENUM_TO_FNAME_CASE(UDNParser)
 		MESSAGELOG_ENUM_TO_FNAME_CASE(WidgetEvents)
-			// return Blueprint log by default because it matches most situations
-		default:
-			return "Blueprint";
+		// return Blueprint log by default because it matches most situations
+	default: return "Blueprint";
 	}
 #undef MESSAGELOG_ENUM_TO_FNAME_CASE
 }

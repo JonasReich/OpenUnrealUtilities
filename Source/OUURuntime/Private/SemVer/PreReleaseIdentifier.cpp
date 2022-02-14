@@ -1,9 +1,12 @@
 // Copyright (c) 2021 Jonas Reich
 
 #include "SemVer/PreReleaseIdentifier.h"
+
 #include "Misc/RegexUtils.h"
 
-FSemVerPreReleaseIdentifier::FSemVerPreReleaseIdentifier(const FString& SourceString, ESemVerParsingStrictness InStrictness /*= ESemVerParsingStrictness::Strict*/)
+FSemVerPreReleaseIdentifier::FSemVerPreReleaseIdentifier(
+	const FString& SourceString,
+	ESemVerParsingStrictness InStrictness /*= ESemVerParsingStrictness::Strict*/)
 {
 	TryParseString(SourceString, InStrictness);
 }
@@ -59,11 +62,8 @@ bool FSemVerPreReleaseIdentifier::TryParseString(const FString& SourceString, ES
 		}
 	}
 
-	Identifiers.RemoveAll([](auto& Identifier) -> bool
-	{
-		return Identifier.IsEmpty();
-	});
-	
+	Identifiers.RemoveAll([](auto& Identifier) -> bool { return Identifier.IsEmpty(); });
+
 	if (bIdentifiersOk)
 	{
 		return true;
@@ -225,7 +225,7 @@ bool FSemVerPreReleaseIdentifier::CompareStringIdentifiersBigger(const FString& 
 
 int32 FSemVerPreReleaseIdentifier::TryParseNumericIdentifier(const FString& Identifier)
 {
-	if(Identifier.IsNumeric())
+	if (Identifier.IsNumeric())
 	{
 		int32 Result = 0;
 		LexFromString(Result, *Identifier);

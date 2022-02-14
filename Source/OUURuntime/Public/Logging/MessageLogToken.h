@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Logging/TokenizedMessage.h"
+
 #include "MessageLogToken.generated.h"
 
 /**
@@ -36,30 +37,30 @@ enum class EMessageLogTokenType : uint8
 	DynamicText = EMessageToken::DynamicText
 };
 
-static_assert(EMessageLogTokenType::Action == static_cast<EMessageLogTokenType>(EMessageToken::Action),
+static_assert(
+	EMessageLogTokenType::Action == static_cast<EMessageLogTokenType>(EMessageToken::Action),
 	"Action entry must match");
 
 FString OUURUNTIME_API LexToString(EMessageLogTokenType Type);
 
 /**
  * Message log token payload that can be specified in BP.
- * Theoretically they can be created by just setting data, but it's recommended to use the static member functions (in C++)
- * or the CreateXMessageLogToken blueprint library functions.
+ * Theoretically they can be created by just setting data, but it's recommended to use the static member functions (in
+ * C++) or the CreateXMessageLogToken blueprint library functions.
  */
 USTRUCT(BlueprintType)
 struct OUURUNTIME_API FMessageLogToken
 {
 	GENERATED_BODY()
 public:
-	static FMessageLogToken CreateAssetNameMessageLogToken(const FString& AssetName, const FText& OptionalLabelOverride);
+	static FMessageLogToken CreateAssetNameMessageLogToken(
+		const FString& AssetName,
+		const FText& OptionalLabelOverride);
 	static FMessageLogToken CreateObjectMessageLogToken(const UObject* Object, const FText& OptionalLabelOverride);
 	static FMessageLogToken CreateTextMessageLogToken(const FText& Text);
 	static FMessageLogToken CreateURLMessageLogToken(const FString& URL, const FText& OptionalLabelOverride);
 
-	static FORCEINLINE FMessageLogToken Create(FText Text)
-	{
-		return CreateTextMessageLogToken(Text);
-	}
+	static FORCEINLINE FMessageLogToken Create(FText Text) { return CreateTextMessageLogToken(Text); }
 
 	static FORCEINLINE FMessageLogToken Create(FString Text)
 	{
@@ -71,21 +72,18 @@ public:
 		return CreateObjectMessageLogToken(Object, FText());
 	}
 
-	static FORCEINLINE FMessageLogToken Create(FMessageLogToken Token)
-	{
-		return Token;
-	}
+	static FORCEINLINE FMessageLogToken Create(FMessageLogToken Token) { return Token; }
 
-	template<typename FirstType>
+	template <typename FirstType>
 	static TArray<FMessageLogToken> CreateList(FirstType FirstArgument)
 	{
 		return TArray<FMessageLogToken>{Create(FirstArgument)};
 	}
 
-	template<typename FirstType, typename... RemainingTypes>
+	template <typename FirstType, typename... RemainingTypes>
 	static TArray<FMessageLogToken> CreateList(FirstType FirstArgument, RemainingTypes... RemainingArguments)
 	{
-		TArray<FMessageLogToken> ResultArray {Create(FirstArgument)};
+		TArray<FMessageLogToken> ResultArray{Create(FirstArgument)};
 		ResultArray.Append(CreateList(RemainingArguments...));
 		return ResultArray;
 	}

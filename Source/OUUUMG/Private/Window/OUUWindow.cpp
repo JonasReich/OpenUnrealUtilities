@@ -2,9 +2,8 @@
 
 #include "Window/OUUWindow.h"
 
-
-#include "LogOpenUnrealUtilities.h"
 #include "Components/Widget.h"
+#include "LogOpenUnrealUtilities.h"
 #include "Widgets/SWindow.h"
 
 UOUUWindow* UOUUWindow::OpenWindow(UWidget* InRootWidget, FOUUWindowParameters InWindowParameters, UObject* Outer)
@@ -16,7 +15,11 @@ UOUUWindow* UOUUWindow::OpenWindow(UWidget* InRootWidget, FOUUWindowParameters I
 
 bool UOUUWindow::IsOpened() const
 {
-	UE_CLOG(!bIsInitialized, LogOpenUnrealUtilities, Error, TEXT("IsOpened() was called on OUUWindow %s that was not initialized"),
+	UE_CLOG(
+		!bIsInitialized,
+		LogOpenUnrealUtilities,
+		Error,
+		TEXT("IsOpened() was called on OUUWindow %s that was not initialized"),
 		*GetName());
 
 	return SlateWindow.IsValid();
@@ -24,7 +27,11 @@ bool UOUUWindow::IsOpened() const
 
 void UOUUWindow::CloseWindow()
 {
-	UE_CLOG(!bIsInitialized, LogOpenUnrealUtilities, Error, TEXT("CloseWindow() was called on OUUWindow %s that was not initialized"),
+	UE_CLOG(
+		!bIsInitialized,
+		LogOpenUnrealUtilities,
+		Error,
+		TEXT("CloseWindow() was called on OUUWindow %s that was not initialized"),
 		*GetName());
 
 	if (IsOpened())
@@ -39,19 +46,29 @@ void UOUUWindow::CloseWindow()
 
 void UOUUWindow::Initialize(UWidget* InRootWidget, FOUUWindowParameters InWindowParameters)
 {
-	UE_CLOG(bIsInitialized, LogOpenUnrealUtilities, Error, TEXT("Initialize() was called on OUUWindow %s that was already initialized"),
+	UE_CLOG(
+		bIsInitialized,
+		LogOpenUnrealUtilities,
+		Error,
+		TEXT("Initialize() was called on OUUWindow %s that was already initialized"),
 		*GetName());
 
 	if (!ensure(IsValid(InRootWidget)))
 	{
-		UE_LOG(LogOpenUnrealUtilities, Error, TEXT("Could not inialize new OUUWindow %s with invalid Root Widget!"),
+		UE_LOG(
+			LogOpenUnrealUtilities,
+			Error,
+			TEXT("Could not inialize new OUUWindow %s with invalid Root Widget!"),
 			*GetName());
 		return;
 	}
 
 	if (!ensure(!SlateWindow.IsValid()))
 	{
-		UE_LOG(LogOpenUnrealUtilities, Error, TEXT("Initialize() was called on a UOUUWindow %s that already has a valid slate widget"),
+		UE_LOG(
+			LogOpenUnrealUtilities,
+			Error,
+			TEXT("Initialize() was called on a UOUUWindow %s that already has a valid slate widget"),
 			*GetName());
 		return;
 	}
@@ -60,6 +77,7 @@ void UOUUWindow::Initialize(UWidget* InRootWidget, FOUUWindowParameters InWindow
 	RootWidget = InRootWidget;
 	WindowParameters = InWindowParameters;
 
+	// clang-format off
 	SlateWindow = SNew(SWindow)
 		.AutoCenter(StaticCast<EAutoCenter>((WindowParameters.AutoCenterRule)))
 		.IsInitiallyMaximized(WindowParameters.bIsInitiallyMaximized)
@@ -73,6 +91,7 @@ void UOUUWindow::Initialize(UWidget* InRootWidget, FOUUWindowParameters InWindow
 		.ClientSize(WindowParameters.ClientSize)
 		.UseOSWindowBorder(WindowParameters.bUseOSWindowBorder)
 		.Title(WindowParameters.Title);
+	// clang-format on
 
 	SlateWindow->SetOnWindowClosed(FOnWindowClosed::CreateUObject(this, &UOUUWindow::HandleSlateWindowClosed));
 

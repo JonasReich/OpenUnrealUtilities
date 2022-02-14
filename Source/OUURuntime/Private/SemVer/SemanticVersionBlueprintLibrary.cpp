@@ -2,7 +2,10 @@
 
 #include "SemVer/SemanticVersionBlueprintLibrary.h"
 
-bool USemanticVersionBlueprintLibrary::TryParseSemVerString(const FString& SourceString, ESemVerParsingStrictness Strictness, FSemanticVersion& OutSemanticVersion)
+bool USemanticVersionBlueprintLibrary::TryParseSemVerString(
+	const FString& SourceString,
+	ESemVerParsingStrictness Strictness,
+	FSemanticVersion& OutSemanticVersion)
 {
 	return OutSemanticVersion.TryParseString(SourceString, Strictness);
 }
@@ -67,42 +70,58 @@ FString USemanticVersionBlueprintLibrary::Conv_SemVerString(const FSemanticVersi
 	return InSemanticVersion.ToString();
 }
 
-bool USemanticVersionBlueprintLibrary::TryParseSemVerPreReleaseIdentifierString(const FString& SourceString, ESemVerParsingStrictness Strictness, FSemVerPreReleaseIdentifier& OutReleaseIdentifier)
+bool USemanticVersionBlueprintLibrary::TryParseSemVerPreReleaseIdentifierString(
+	const FString& SourceString,
+	ESemVerParsingStrictness Strictness,
+	FSemVerPreReleaseIdentifier& OutReleaseIdentifier)
 {
 	return OutReleaseIdentifier.TryParseString(SourceString, Strictness);
 }
 
-bool USemanticVersionBlueprintLibrary::TryIncrementSemVerPreReleaseIdentifier(FSemVerPreReleaseIdentifier& PreReleaseIdentifier)
+bool USemanticVersionBlueprintLibrary::TryIncrementSemVerPreReleaseIdentifier(
+	FSemVerPreReleaseIdentifier& PreReleaseIdentifier)
 {
 	return PreReleaseIdentifier.TryIncrement();
 }
 
-bool USemanticVersionBlueprintLibrary::Equal_PreReleasePreRelease(const FSemVerPreReleaseIdentifier& A, const FSemVerPreReleaseIdentifier& B)
+bool USemanticVersionBlueprintLibrary::Equal_PreReleasePreRelease(
+	const FSemVerPreReleaseIdentifier& A,
+	const FSemVerPreReleaseIdentifier& B)
 {
 	return A == B;
 }
 
-bool USemanticVersionBlueprintLibrary::NotEqual_PreReleasePreRelease(const FSemVerPreReleaseIdentifier& A, const FSemVerPreReleaseIdentifier& B)
+bool USemanticVersionBlueprintLibrary::NotEqual_PreReleasePreRelease(
+	const FSemVerPreReleaseIdentifier& A,
+	const FSemVerPreReleaseIdentifier& B)
 {
 	return A != B;
 }
 
-bool USemanticVersionBlueprintLibrary::Less_PreReleasePreRelease(const FSemVerPreReleaseIdentifier& A, const FSemVerPreReleaseIdentifier& B)
+bool USemanticVersionBlueprintLibrary::Less_PreReleasePreRelease(
+	const FSemVerPreReleaseIdentifier& A,
+	const FSemVerPreReleaseIdentifier& B)
 {
 	return A < B;
 }
 
-bool USemanticVersionBlueprintLibrary::LessEqual_PreReleasePreRelease(const FSemVerPreReleaseIdentifier& A, const FSemVerPreReleaseIdentifier& B)
+bool USemanticVersionBlueprintLibrary::LessEqual_PreReleasePreRelease(
+	const FSemVerPreReleaseIdentifier& A,
+	const FSemVerPreReleaseIdentifier& B)
 {
 	return A <= B;
 }
 
-bool USemanticVersionBlueprintLibrary::Greater_PreReleasePreRelease(const FSemVerPreReleaseIdentifier& A, const FSemVerPreReleaseIdentifier& B)
+bool USemanticVersionBlueprintLibrary::Greater_PreReleasePreRelease(
+	const FSemVerPreReleaseIdentifier& A,
+	const FSemVerPreReleaseIdentifier& B)
 {
 	return A > B;
 }
 
-bool USemanticVersionBlueprintLibrary::GreaterEqual_PreReleasePreRelease(const FSemVerPreReleaseIdentifier& A, const FSemVerPreReleaseIdentifier& B)
+bool USemanticVersionBlueprintLibrary::GreaterEqual_PreReleasePreRelease(
+	const FSemVerPreReleaseIdentifier& A,
+	const FSemVerPreReleaseIdentifier& B)
 {
 	return A >= B;
 }
@@ -112,17 +131,24 @@ FString USemanticVersionBlueprintLibrary::Conv_PreReleaseString(const FSemVerPre
 	return InReleaseIdentifier.ToString();
 }
 
-bool USemanticVersionBlueprintLibrary::TryParseSemVerBuildMetadataString(const FString& SourceString, ESemVerParsingStrictness Strictness, FSemVerBuildMetadata& OutBuildMetadata)
+bool USemanticVersionBlueprintLibrary::TryParseSemVerBuildMetadataString(
+	const FString& SourceString,
+	ESemVerParsingStrictness Strictness,
+	FSemVerBuildMetadata& OutBuildMetadata)
 {
 	return OutBuildMetadata.TryParseString(SourceString, Strictness);
 }
 
-bool USemanticVersionBlueprintLibrary::Equal_BuildMetadataBuildMetadata(const FSemVerBuildMetadata& A, const FSemVerBuildMetadata& B)
+bool USemanticVersionBlueprintLibrary::Equal_BuildMetadataBuildMetadata(
+	const FSemVerBuildMetadata& A,
+	const FSemVerBuildMetadata& B)
 {
 	return A == B;
 }
 
-bool USemanticVersionBlueprintLibrary::NotEqual_BuildMetadataBuildMetadata(const FSemVerBuildMetadata& A, const FSemVerBuildMetadata& B)
+bool USemanticVersionBlueprintLibrary::NotEqual_BuildMetadataBuildMetadata(
+	const FSemVerBuildMetadata& A,
+	const FSemVerBuildMetadata& B)
 {
 	return A != B;
 }

@@ -8,8 +8,7 @@ public class OUURuntime : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[]
-		{
+		PublicDependencyModuleNames.AddRange(new string[] {
 			"CoreUObject",
 			"Engine",
 			"Core",
@@ -21,12 +20,7 @@ public class OUURuntime : ModuleRules
 			"GameplayTasks"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[]
-		{
-			"HeadMountedDisplay",
-			"Slate",
-			"AIModule"
-		});
+		PrivateDependencyModuleNames.AddRange(new string[] { "HeadMountedDisplay", "Slate", "AIModule" });
 
 		// - Editor only dependencies
 		if (Target.bBuildEditor)
@@ -34,13 +28,16 @@ public class OUURuntime : ModuleRules
 			PrivateDependencyModuleNames.Add("UnrealEd");
 		}
 		// --
-		
-		if (Target.bBuildDeveloperTools || (Target.Configuration != UnrealTargetConfiguration.Shipping && Target.Configuration != UnrealTargetConfiguration.Test))
+
+		if (Target.bBuildDeveloperTools
+			|| (Target.Configuration != UnrealTargetConfiguration.Shipping
+				&& Target.Configuration != UnrealTargetConfiguration.Test))
 		{
 			PublicDependencyModuleNames.Add("GameplayDebugger");
 			PublicDefinitions.Add("WITH_GAMEPLAY_DEBUGGER=1");
 		}
 		else
+
 		{
 			PublicDefinitions.Add("WITH_GAMEPLAY_DEBUGGER=0");
 		}

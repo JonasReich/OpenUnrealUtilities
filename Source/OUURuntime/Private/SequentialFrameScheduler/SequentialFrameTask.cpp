@@ -14,7 +14,7 @@ void FSequentialFrameTask::Tick(float DeltaTime)
 
 	Now += DeltaTime;
 	CachedOvertimeSeconds = Now - GetNextDesiredInvocationTimeSeconds();
-	CachedOvertimeFraction = CachedOvertimeSeconds / Period;;
+	CachedOvertimeFraction = CachedOvertimeSeconds / Period;
 }
 
 float FSequentialFrameTask::GetOvertimeSeconds() const
@@ -29,7 +29,7 @@ float FSequentialFrameTask::GetOvertimeFraction() const
 
 float FSequentialFrameTask::GetPredictedOvertimeFraction(float PredictedDeltaTime, int32 NumFrames) const
 {
-	return CachedOvertimeFraction + ((PredictedDeltaTime / Period) * NumFrames); 
+	return CachedOvertimeFraction + ((PredictedDeltaTime / Period) * NumFrames);
 }
 
 void FSequentialFrameTask::Execute()

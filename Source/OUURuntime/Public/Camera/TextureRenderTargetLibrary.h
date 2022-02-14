@@ -4,18 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+
 #include "TextureRenderTargetLibrary.generated.h"
 
 class UTextureRenderTarget2D;
 
 /**
- * 
+ *
  */
 UCLASS()
 class OUURUNTIME_API UTextureRenderTargetLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
-	
+
 public:
 	/**
 	 * Compute the average color of a TextureRenderTarget.
@@ -25,5 +26,13 @@ public:
 	static FLinearColor GetAverageColor(UObject* WorldContextObject, UTextureRenderTarget2D* TextureRenderTarget);
 
 private:
-	static EPixelFormat ReadRenderTargetHelper(TArray<FColor>& OutLDRValues, TArray<FLinearColor>& OutHDRValues, UObject* WorldContextObject, UTextureRenderTarget2D* TextureRenderTarget, int32 X, int32 Y, int32 Width, int32 Height);
+	static EPixelFormat ReadRenderTargetHelper(
+		TArray<FColor>& OutLDRValues,
+		TArray<FLinearColor>& OutHDRValues,
+		UObject* WorldContextObject,
+		UTextureRenderTarget2D* TextureRenderTarget,
+		int32 X,
+		int32 Y,
+		int32 Width,
+		int32 Height);
 };

@@ -2,9 +2,9 @@
 
 #include "Slate/SlateNotificationLibrary.h"
 
-#include "LogOpenUnrealUtilities.h"
 #include "Components/Widget.h"
 #include "Framework/Notifications/NotificationManager.h"
+#include "LogOpenUnrealUtilities.h"
 #include "Widgets/Notifications/SNotificationList.h"
 
 FNotificationInfo FSlateNotificationInfo::ToNativeNotificationInfo() const
@@ -19,7 +19,7 @@ FNotificationInfo FSlateNotificationInfo::ToNativeNotificationInfo() const
 	Result.bUseLargeFont = bUseLargeFont;
 	if (WidthOverride > 0.f)
 	{
-		Result.WidthOverride = WidthOverride; 
+		Result.WidthOverride = WidthOverride;
 	}
 	Result.bFireAndForget = bFireAndForget;
 	return Result;
@@ -52,7 +52,7 @@ uint32 GetTypeHash(const FSlateNotificationHandle& Handle)
 
 ESlateNotificationState SlateNotificationState_ConvertSlateToBlueprint(SNotificationItem::ECompletionState State)
 {
-	switch(State)
+	switch (State)
 	{
 	case SNotificationItem::CS_Pending: return ESlateNotificationState::Pending;
 	case SNotificationItem::CS_Success: return ESlateNotificationState::Success;
@@ -63,7 +63,7 @@ ESlateNotificationState SlateNotificationState_ConvertSlateToBlueprint(SNotifica
 
 SNotificationItem::ECompletionState SlateNotificationState_ConvertBlueprintToSlate(ESlateNotificationState State)
 {
-	switch(State)
+	switch (State)
 	{
 	case ESlateNotificationState::Pending: return SNotificationItem::CS_Pending;
 	case ESlateNotificationState::Success: return SNotificationItem::CS_Success;
@@ -75,14 +75,17 @@ SNotificationItem::ECompletionState SlateNotificationState_ConvertBlueprintToSla
 FSlateNotificationHandle USlateNotificationLibrary::AddSlateNotification(const FSlateNotificationInfo& Info)
 {
 	FSlateNotificationHandle Handle;
-	while(!Handle.IsValid() || GetNotificationMap().Contains(Handle))
+	while (!Handle.IsValid() || GetNotificationMap().Contains(Handle))
 	{
 		Handle.NewGuid();
 	}
-	if(!IsInGameThread())
+	if (!IsInGameThread())
 	{
-		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("Failed to create slate notification, "
-			"because AddSlateNotification was called from a thread that is not the game thread."));
+		UE_LOG(
+			LogOpenUnrealUtilities,
+			Warning,
+			TEXT("Failed to create slate notification, "
+				 "because AddSlateNotification was called from a thread that is not the game thread."));
 		return FSlateNotificationHandle::InvalidHandle();
 	}
 	const auto NewNotification = FSlateNotificationManager::Get().AddNotification(Info.ToNativeNotificationInfo());
@@ -98,19 +101,21 @@ void USlateNotificationLibrary::SetSlateNotificationText(const FSlateNotificatio
 	}
 }
 
-void USlateNotificationLibrary::SetSlateNotificationHyperlink(const FSlateNotificationHandle& NotificationHandle, FText HyperlinkText, FSlateNotificationSimpleSingleCastDelegate HyperlinkDelegate)
+void USlateNotificationLibrary::SetSlateNotificationHyperlink(
+	const FSlateNotificationHandle& NotificationHandle,
+	FText HyperlinkText,
+	FSlateNotificationSimpleSingleCastDelegate HyperlinkDelegate)
 {
 	if (auto* Notification = FindNotification(NotificationHandle))
 	{
-		const FSimpleDelegate Delegate = FSimpleDelegate::CreateLambda([=]()
-		{
-			HyperlinkDelegate.ExecuteIfBound();	
-		});
+		const FSimpleDelegate Delegate = FSimpleDelegate::CreateLambda([=]() { HyperlinkDelegate.ExecuteIfBound(); });
 		Notification->SetHyperlink(Delegate, HyperlinkText);
 	}
 }
 
-void USlateNotificationLibrary::SetSlateNotificationExpireDuration(const FSlateNotificationHandle& NotificationHandle, float ExpireDuration)
+void USlateNotificationLibrary::SetSlateNotificationExpireDuration(
+	const FSlateNotificationHandle& NotificationHandle,
+	float ExpireDuration)
 {
 	if (auto* Notification = FindNotification(NotificationHandle))
 	{
@@ -118,7 +123,9 @@ void USlateNotificationLibrary::SetSlateNotificationExpireDuration(const FSlateN
 	}
 }
 
-void USlateNotificationLibrary::SetSlateNotificationFadeInDuration(const FSlateNotificationHandle& NotificationHandle, float FadeInDuration)
+void USlateNotificationLibrary::SetSlateNotificationFadeInDuration(
+	const FSlateNotificationHandle& NotificationHandle,
+	float FadeInDuration)
 {
 	if (auto* Notification = FindNotification(NotificationHandle))
 	{
@@ -126,7 +133,9 @@ void USlateNotificationLibrary::SetSlateNotificationFadeInDuration(const FSlateN
 	}
 }
 
-void USlateNotificationLibrary::SetSlateNotificationFadeOutDuration(const FSlateNotificationHandle& NotificationHandle, float FadeOutDuration)
+void USlateNotificationLibrary::SetSlateNotificationFadeOutDuration(
+	const FSlateNotificationHandle& NotificationHandle,
+	float FadeOutDuration)
 {
 	if (auto* Notification = FindNotification(NotificationHandle))
 	{
@@ -134,7 +143,8 @@ void USlateNotificationLibrary::SetSlateNotificationFadeOutDuration(const FSlate
 	}
 }
 
-ESlateNotificationState USlateNotificationLibrary::GetSlateNotificationCompletionState(const FSlateNotificationHandle& NotificationHandle)
+ESlateNotificationState USlateNotificationLibrary::GetSlateNotificationCompletionState(
+	const FSlateNotificationHandle& NotificationHandle)
 {
 	if (auto* Notification = FindNotification(NotificationHandle))
 	{
@@ -143,7 +153,9 @@ ESlateNotificationState USlateNotificationLibrary::GetSlateNotificationCompletio
 	return ESlateNotificationState::None;
 }
 
-void USlateNotificationLibrary::SetSlateNotificationCompletionState(const FSlateNotificationHandle& NotificationHandle, ESlateNotificationState CompletionState)
+void USlateNotificationLibrary::SetSlateNotificationCompletionState(
+	const FSlateNotificationHandle& NotificationHandle,
+	ESlateNotificationState CompletionState)
 {
 	if (auto* Notification = FindNotification(NotificationHandle))
 	{
@@ -167,7 +179,9 @@ void USlateNotificationLibrary::FadeoutSlateNotification(const FSlateNotificatio
 	}
 }
 
-void USlateNotificationLibrary::PulseSlateNotification(const FSlateNotificationHandle& NotificationHandle, FLinearColor GlowColor)
+void USlateNotificationLibrary::PulseSlateNotification(
+	const FSlateNotificationHandle& NotificationHandle,
+	FLinearColor GlowColor)
 {
 	if (auto* Notification = FindNotification(NotificationHandle))
 	{

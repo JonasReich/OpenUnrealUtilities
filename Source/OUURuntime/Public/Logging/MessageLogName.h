@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "MessageLogName.generated.h"
 
 /**
@@ -17,7 +18,7 @@ enum class EMessageLogName : uint8
 	// ----
 	// GAME
 	// ----
-	// Miscellaneous logs to display during Play in Editor gameplay. Comparable to "LogTemp" 
+	// Miscellaneous logs to display during Play in Editor gameplay. Comparable to "LogTemp"
 	PIE,
 
 	// ----
@@ -31,7 +32,7 @@ enum class EMessageLogName : uint8
 	MapCheck,
 	// Asset check/validation
 	AssetCheck,
-	// Asset (re)import  
+	// Asset (re)import
 	AssetReimport,
 
 	// ----
@@ -57,7 +58,7 @@ enum class EMessageLogName : uint8
 	LoadErrors,
 	// Localization dashboard
 	LocalizationService,
-	// Project packaging after build 
+	// Project packaging after build
 	PackagingResults,
 	// Internal slate messages
 	SlateStyleLog,

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+
 #include "InterfaceUtilsTests_Interfaces.generated.h"
 
 // ------------------------
@@ -44,7 +45,7 @@ public:
 	void SetNumber(float f);
 	virtual void SetNumber_Implementation(float f) PURE_VIRTUAL(SetNumber_Implementation)
 
-	UFUNCTION(BlueprintNativeEvent)
+		UFUNCTION(BlueprintNativeEvent)
 	float GetNumber() const;
 	virtual float GetNumber_Implementation() const PURE_VIRTUAL(GetNumber_Implementation, return 0.f;)
 };

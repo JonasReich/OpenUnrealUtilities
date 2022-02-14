@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Components/SlateWrapperTypes.h"
+#include "CoreMinimal.h"
+
 #include "UMGInputBinding.generated.h"
 
 class UUserWidget;
@@ -39,7 +40,6 @@ enum class EUMGInputActionKeyEventConsumeMode : uint8
 	All
 };
 
-
 /**
  * Utility struct used to bind delegates to an input action.
  * Only works for Input ACTION mappings, not Axis mappings.
@@ -50,8 +50,12 @@ struct OUUUMG_API FUMGInputAction
 	GENERATED_BODY()
 public:
 	FUMGInputAction() = default;
-	FUMGInputAction(FName InActionName, EUMGInputActionKeyEvent InReactEvent, EUMGInputActionKeyEventConsumeMode InConsumeMode = EUMGInputActionKeyEventConsumeMode::Same,
-		bool bInIsOneshot = false, float InHoldTime = 0.f) :
+	FUMGInputAction(
+		FName InActionName,
+		EUMGInputActionKeyEvent InReactEvent,
+		EUMGInputActionKeyEventConsumeMode InConsumeMode = EUMGInputActionKeyEventConsumeMode::Same,
+		bool bInIsOneshot = false,
+		float InHoldTime = 0.f) :
 
 		ActionName(InActionName),
 		ReactEvent(InReactEvent),
@@ -64,7 +68,7 @@ public:
 	/** Name of the input action as registered in the InputSettings/PlayerInput. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName ActionName = NAME_None;
-	
+
 	/** Which key event(s) will provoke the callback delegate being broadcast. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EUMGInputActionKeyEvent ReactEvent = EUMGInputActionKeyEvent::KeyDown;
@@ -83,8 +87,8 @@ public:
 
 	FORCEINLINE bool operator==(const FUMGInputAction& Other) const
 	{
-		return ActionName == Other.ActionName && ReactEvent == Other.ReactEvent && 
-			ConsumeMode == Other.ConsumeMode && bIsOneshot == Other.bIsOneshot;
+		return ActionName == Other.ActionName && ReactEvent == Other.ReactEvent && ConsumeMode == Other.ConsumeMode
+			&& bIsOneshot == Other.bIsOneshot;
 	}
 };
 
@@ -105,15 +109,16 @@ class OUUUMG_API UUMGInputActionBindingStack : public UObject
 public:
 	//-------------
 	// Setup
-	//------------- 
+	//-------------
 
 	UFUNCTION(BlueprintCallable)
 	void SetOwningPlayerInput(UPlayerInput* InOwningPlayerInput);
-	
+
 	UFUNCTION(BlueprintPure)
 	UPlayerInput* GetOwningPlayerInput() const;
 
-	/** Create a UUMGInputActionBindingStack object and initialize it with the specified UUserWidget as outer and owner. */
+	/** Create a UUMGInputActionBindingStack object and initialize it with the specified UUserWidget as outer and owner.
+	 */
 	UFUNCTION(BlueprintCallable)
 	static UUMGInputActionBindingStack* CreateUMGInputActionBindingStack(UUserWidget* InOwningWidget);
 
@@ -128,19 +133,19 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable)
 	void BindAction(FUMGInputAction Action, FUMGInputActionDelegate Delegate);
-	
+
 	/** Remove a single input action binding */
 	UFUNCTION(BlueprintCallable)
 	void RemoveSingleBinding(FUMGInputAction Action, FUMGInputActionDelegate Delegate);
-	
+
 	/** Remove all bindings with the specified action*/
 	UFUNCTION(BlueprintCallable)
 	void RemoveBindings(FUMGInputAction Action);
-	
+
 	/** Remove all bindings that have delegates with the specified target object */
 	UFUNCTION(BlueprintCallable)
 	void RemoveBindingsByObject(UObject* TargetObject);
-	
+
 	/** Remove all bindings no matter the action or delegate */
 	UFUNCTION(BlueprintCallable)
 	void RemoveAllBindings();
@@ -159,11 +164,11 @@ public:
 	/** Link this in a widgets KeyDown event and pass the event reply on */
 	UFUNCTION(BlueprintCallable)
 	FEventReply ProcessOnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent);
-	
+
 	/** Link this in a widgets KeyUp event and pass the event reply on */
 	UFUNCTION(BlueprintCallable)
 	FEventReply ProcessOnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent);
-	
+
 private:
 	UPROPERTY()
 	TSoftObjectPtr<UPlayerInput> OwningPlayerInput;
@@ -173,7 +178,9 @@ private:
 	struct FUMGInputActionBinding
 	{
 		FUMGInputActionBinding(FUMGInputAction InSignature, FUMGInputActionDelegate InDelegate) :
-			BindingSignature(InSignature), Delegate(InDelegate) {}
+			BindingSignature(InSignature), Delegate(InDelegate)
+		{
+		}
 
 		FUMGInputAction BindingSignature;
 

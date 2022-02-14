@@ -65,9 +65,8 @@ void UOUURequest::ChangeState(EOUURequestState NewState)
 		return;
 	State = NewState;
 	OnStatusChanged.Broadcast(this, NewState);
-	if (NewState == EOUURequestState::Successful ||
-		NewState == EOUURequestState::Failed ||
-		NewState == EOUURequestState::Canceled)
+	if (NewState == EOUURequestState::Successful || NewState == EOUURequestState::Failed
+		|| NewState == EOUURequestState::Canceled)
 	{
 		OnCompleted.Broadcast(this, NewState);
 		if (bResetAfterCompletion)

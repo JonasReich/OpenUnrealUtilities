@@ -1,12 +1,13 @@
 // Copyright (c) 2021 Jonas Reich
 
 #include "Widgets/LayerWidget.h"
-#include "Widgets/SWidget.h"
-#include "Widgets/SViewport.h"
+
 #include "Framework/Application/SlateApplication.h"
 #include "LogOpenUnrealUtilities.h"
 #include "UMG/UMGUtils.h"
 #include "UMGInputBinding.h"
+#include "Widgets/SViewport.h"
+#include "Widgets/SWidget.h"
 
 void UOUULayerWidget::UpdateLayer(const UOUULayerWidget* LayerAbove)
 {
@@ -34,7 +35,7 @@ ESlateVisibility UOUULayerWidget::GetDesiredVisibility() const
 	{
 		return IsLayerInputVisible() ? ESlateVisibility::Visible : ESlateVisibility::HitTestInvisible;
 	}
-	
+
 	return ESlateVisibility::Collapsed;
 }
 
@@ -42,7 +43,10 @@ UUMGInputActionBindingStack* UOUULayerWidget::GetInputActionBindingStack()
 {
 	if (!bAllowInput)
 	{
-		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("GetInputActionBindingStack was called on Layer Widget '%s' that is not marked as bAllowInput!"));
+		UE_LOG(
+			LogOpenUnrealUtilities,
+			Warning,
+			TEXT("GetInputActionBindingStack was called on Layer Widget '%s' that is not marked as bAllowInput!"));
 		return nullptr;
 	}
 	if (!IsValid(InputActionBindingStack))
@@ -52,7 +56,10 @@ UUMGInputActionBindingStack* UOUULayerWidget::GetInputActionBindingStack()
 	return InputActionBindingStack;
 }
 
-void UOUULayerWidget::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocusPath, const FWidgetPath& NewWidgetPath, const FFocusEvent& InFocusEvent)
+void UOUULayerWidget::NativeOnFocusChanging(
+	const FWeakWidgetPath& PreviousFocusPath,
+	const FWidgetPath& NewWidgetPath,
+	const FFocusEvent& InFocusEvent)
 {
 	Super::NativeOnFocusChanging(PreviousFocusPath, NewWidgetPath, InFocusEvent);
 	auto SafeWidget = TakeWidget();
@@ -62,8 +69,8 @@ void UOUULayerWidget::NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocus
 	if (!NewWidgetPath.ContainsWidget(SafeWidget))
 	{
 		// probable loss of focus on the layer
-		// we want to check if the new focus path is outside of the game viewport, because that is a common scenario in PIE
-		// during which we do NOT want the focus to be constantly reset
+		// we want to check if the new focus path is outside of the game viewport, because that is a common scenario in
+		// PIE during which we do NOT want the focus to be constantly reset
 		if (DoesPathContainGameViewport(NewWidgetPath))
 		{
 			OnRequestResetFocusFromTopLayer.Broadcast();
@@ -92,7 +99,11 @@ void UOUULayerWidget::CheckLayerVisibility()
 {
 	if (bIsFocusable)
 	{
-		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("Layer widgets themselves must not be focusable! Made layer '%s' not focusable..."), *GetName());
+		UE_LOG(
+			LogOpenUnrealUtilities,
+			Warning,
+			TEXT("Layer widgets themselves must not be focusable! Made layer '%s' not focusable..."),
+			*GetName());
 		bIsFocusable = false;
 	}
 
@@ -101,11 +112,10 @@ void UOUULayerWidget::CheckLayerVisibility()
 		bIsLayerVisible = false;
 		bIsLayerInputVisible = false;
 
-		UMGUtils::ForEachWidgetAndDescendants<const UWidget>(this, false, [&](const UWidget* W) -> bool
-		{
+		UMGUtils::ForEachWidgetAndDescendants<const UWidget>(this, false, [&](const UWidget* W) -> bool {
 			bIsLayerVisible |= W->IsVisible();
 			bIsLayerInputVisible = bAllowInput && UMGUtils::IsInputVisible(W);
-			
+
 			// break when we have all the info we need
 			return bIsLayerInputVisible || (!bAllowInput && bIsLayerVisible);
 		});
@@ -127,16 +137,17 @@ bool UOUULayerWidget::ResetUserFocus_Implementation()
 	if (LastValidFocusPath.IsValid())
 	{
 		FWidgetPath WidgetPath = LastValidFocusPath.ToWidgetPath();
-		int32 FocusableWidgetIdx = WidgetPath.Widgets.FindLastByPredicate([](const FArrangedWidget& WidgetPathElement) -> bool
-		{
-			return WidgetPathElement.Widget->SupportsKeyboardFocus();
-		});
+		int32 FocusableWidgetIdx =
+			WidgetPath.Widgets.FindLastByPredicate([](const FArrangedWidget& WidgetPathElement) -> bool {
+				return WidgetPathElement.Widget->SupportsKeyboardFocus();
+			});
 		if (FocusableWidgetIdx != INDEX_NONE)
 		{
 			TSharedPtr<SWidget> SafeWidget = WidgetPath.Widgets[FocusableWidgetIdx].Widget;
 			if (ULocalPlayer* LocalPlayer = GetOwningLocalPlayer())
 			{
-				TOptional<int32> UserIndex = FSlateApplication::Get().GetUserIndexForController(LocalPlayer->GetControllerId());
+				TOptional<int32> UserIndex =
+					FSlateApplication::Get().GetUserIndexForController(LocalPlayer->GetControllerId());
 				if (UserIndex.IsSet())
 				{
 					FReply& DelayedSlateOperations = LocalPlayer->GetSlateOperations();

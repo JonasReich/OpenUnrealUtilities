@@ -4,7 +4,7 @@
 
 bool UOUUDataTableLibrary::AddRowToDataTable(UDataTable* DataTable, FName RowName, FTableRowBase RowStruct)
 {
-	// We must never hit this! The real implementation is in Generic_AddRowToDataTable 
+	// We must never hit this! The real implementation is in Generic_AddRowToDataTable
 	check(false);
 	return false;
 }
@@ -40,17 +40,16 @@ DEFINE_FUNCTION(UOUUDataTableLibrary::execAddRowToDataTable)
 	{
 		FBlueprintExceptionInfo ExceptionInfo(
 			EBlueprintExceptionType::AccessViolation,
-			INVTEXT("Failed to resolve the table input. Be sure the DataTable is valid.")
-		);
+			INVTEXT("Failed to resolve the table input. Be sure the DataTable is valid."));
 		FBlueprintCoreDelegates::ThrowScriptException(P_THIS, Stack, ExceptionInfo);
 	}
 	else if (StructProp && RowPtr)
 	{
 		UScriptStruct* OutputType = StructProp->Struct;
-		const UScriptStruct* TableType  = DataTable->GetRowStruct();
+		const UScriptStruct* TableType = DataTable->GetRowStruct();
 
-		const bool bCompatible = (OutputType == TableType) || 
-			(OutputType->IsChildOf(TableType) && FStructUtils::TheSameLayout(OutputType, TableType));
+		const bool bCompatible = (OutputType == TableType)
+			|| (OutputType->IsChildOf(TableType) && FStructUtils::TheSameLayout(OutputType, TableType));
 		if (bCompatible)
 		{
 			P_NATIVE_BEGIN;
@@ -61,8 +60,7 @@ DEFINE_FUNCTION(UOUUDataTableLibrary::execAddRowToDataTable)
 		{
 			FBlueprintExceptionInfo ExceptionInfo(
 				EBlueprintExceptionType::AccessViolation,
-				INVTEXT("Incompatible input parameter; the data table's type is not the same as the type to add.")
-				);
+				INVTEXT("Incompatible input parameter; the data table's type is not the same as the type to add."));
 			FBlueprintCoreDelegates::ThrowScriptException(P_THIS, Stack, ExceptionInfo);
 		}
 	}
@@ -70,22 +68,25 @@ DEFINE_FUNCTION(UOUUDataTableLibrary::execAddRowToDataTable)
 	{
 		FBlueprintExceptionInfo ExceptionInfo(
 			EBlueprintExceptionType::AccessViolation,
-			INVTEXT("Failed to resolve the input parameter for AddRowToDataTable.")
-		);
+			INVTEXT("Failed to resolve the input parameter for AddRowToDataTable."));
 		FBlueprintCoreDelegates::ThrowScriptException(P_THIS, Stack, ExceptionInfo);
 	}
 
 	*(bool*)RESULT_PARAM = bSuccess;
 }
 
-bool UOUUDataTableLibrary::Generic_AddRowToDataTable(UDataTable* DataTable, FName RowName, FStructProperty* StructProp, void* RowPtr)
+bool UOUUDataTableLibrary::Generic_AddRowToDataTable(
+	UDataTable* DataTable,
+	FName RowName,
+	FStructProperty* StructProp,
+	void* RowPtr)
 {
 	if (!IsValid(DataTable) || !RowPtr || !StructProp)
 		return false;
 
 	if (DataTable->GetRowMap().Contains(RowName))
 		return false;
-	
+
 	const UScriptStruct* StructType = DataTable->GetRowStruct();
 	if (StructType == nullptr)
 		return false;

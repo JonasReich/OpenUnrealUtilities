@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
 #include "Engine/DataTable.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+
 #include "OUUDataTableLibrary.generated.h"
 
 /**
  * Extensions to UDataTableFunctionLibrary, i.e. functions to manipulate data tables
- * from Blueprint that are otherwise available from code. 
+ * from Blueprint that are otherwise available from code.
  */
 UCLASS()
 class UOUUDataTableLibrary : public UBlueprintFunctionLibrary
@@ -24,7 +24,11 @@ public:
 	 * @param RowStruct: Custom structure to use as values for the new table row
 	 * @returns if the row was successfully added to the data table
 	 */
-	UFUNCTION(BlueprintCallable, CustomThunk, meta = (CustomStructureParam = "RowStruct"), Category = "Open Unreal Utilities|DataTable")
+	UFUNCTION(
+		BlueprintCallable,
+		CustomThunk,
+		meta = (CustomStructureParam = "RowStruct"),
+		Category = "Open Unreal Utilities|DataTable")
 	static bool AddRowToDataTable(UDataTable* DataTable, FName RowName, FTableRowBase RowStruct);
 
 	/**
@@ -39,5 +43,9 @@ public:
 private:
 	DECLARE_FUNCTION(execAddRowToDataTable);
 
-	static bool Generic_AddRowToDataTable(UDataTable* DataTable, FName RowName, FStructProperty* StructProp, void* RowPtr);
+	static bool Generic_AddRowToDataTable(
+		UDataTable* DataTable,
+		FName RowName,
+		FStructProperty* StructProp,
+		void* RowPtr);
 };

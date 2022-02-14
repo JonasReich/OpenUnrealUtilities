@@ -3,13 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SemVer/PreReleaseIdentifier.h"
 #include "SemVer/BuildMetadata.h"
+#include "SemVer/PreReleaseIdentifier.h"
 #include "SemVer/SemVerParsingStrictness.h"
+
 #include "SemanticVersion.generated.h"
 
 //////////////////////////////////////////////////////////////////////////
-// The types defined in this file and all other in this directory implement 
+// The types defined in this file and all other in this directory implement
 // Semantic Versioning 2.0.0 as specified at https://semver.org/spec/v2.0.0.html
 //////////////////////////////////////////////////////////////////////////
 
@@ -39,7 +40,10 @@ public:
 	FSemanticVersion() = default;
 
 	/** Construct a SemVer from its components */
-	FSemanticVersion(int32 Major, int32 Minor, int32 Patch,
+	FSemanticVersion(
+		int32 Major,
+		int32 Minor,
+		int32 Patch,
 		FSemVerPreReleaseIdentifier PreRelease = {},
 		FSemVerBuildMetadata Metadata = {});
 
@@ -48,8 +52,10 @@ public:
 	 * If the string cannot be parsed to a valid semantic version,
 	 * it's set to a default-constrcuted version.
 	 */
-	FSemanticVersion(const FString& SourceString, ESemVerParsingStrictness Strictness = ESemVerParsingStrictness::Strict);
-	
+	FSemanticVersion(
+		const FString& SourceString,
+		ESemVerParsingStrictness Strictness = ESemVerParsingStrictness::Strict);
+
 	UPROPERTY(BlueprintReadWrite)
 	int32 MajorVersion = 0;
 
@@ -85,14 +91,14 @@ public:
 	 * Strips pre-release identifier and build metadata.
 	 */
 	void IncrementMajorVersion();
-	
+
 	/**
 	 * Increments the minor version.
 	 * Resets patch version to 0.
 	 * Strips pre-release identifier and build metadata.
 	 */
 	void IncrementMinorVersion();
-	
+
 	/**
 	 * Increments the minor version.
 	 * Strips pre-release identifier and build metadata.
@@ -113,16 +119,16 @@ public:
 	 * This means it cannot be used to check precedence!
 	 * If you want to check if two semantic versions have the same precedence,
 	 * call EqualsPrecedence() instead.
-	 */ 
+	 */
 	bool operator==(const FSemanticVersion& Other) const;
 	bool operator!=(const FSemanticVersion& Other) const;
 
 	/** Does this version have lower precedence than the other SemVer? */
 	bool operator<(const FSemanticVersion& Other) const;
-	
+
 	/** Does this version have lower or equal precedence as the other SemVer? */
 	bool operator<=(const FSemanticVersion& Other) const;
-	
+
 	/** Does this version have higher precedence than the other SemVer? */
 	bool operator>(const FSemanticVersion& Other) const;
 
@@ -130,6 +136,6 @@ public:
 	bool operator>=(const FSemanticVersion& Other) const;
 
 private:
-	bool TryParseString_Internal(const FString & SourceString, ESemVerParsingStrictness Strictness);
+	bool TryParseString_Internal(const FString& SourceString, ESemVerParsingStrictness Strictness);
 	bool ComparePrecedence_Internal(const FSemanticVersion& Other, bool bSmallerThan) const;
 };

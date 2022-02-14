@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-
 #include "AutomationTestWorld.h"
-#include "OUUTestObject.h"
-#include "FlowControl/SharedLock.h"
+#include "CoreMinimal.h"
 #include "FlowControl/ExclusiveLock.h"
+#include "FlowControl/SharedLock.h"
+#include "OUUTestObject.h"
+
 #include "LockTestHelpers.generated.h"
 
 UCLASS(meta = (Hidden, HideDropDown))
@@ -23,7 +23,7 @@ public:
 	UFUNCTION()
 	void HandleExclusiveLockStateChanged(UExclusiveLock* InLock, bool bInIsLocked)
 	{
-		HandleLockStateChanged_SharedImplementation(InLock, bInIsLocked);		
+		HandleLockStateChanged_SharedImplementation(InLock, bInIsLocked);
 	}
 
 	UFUNCTION()
@@ -49,7 +49,7 @@ public:
 	}
 };
 
-template<class LockType>
+template <class LockType>
 struct FOUULockTestEnvironment
 {
 	LockType* Lock = nullptr;
@@ -57,7 +57,7 @@ struct FOUULockTestEnvironment
 	UObject* Key0 = nullptr;
 	UObject* Key1 = nullptr;
 
-	FOUUScopedAutomationTestWorld TestWorld {"FOUULockTestEnvironment"};
+	FOUUScopedAutomationTestWorld TestWorld{"FOUULockTestEnvironment"};
 
 	FOUULockTestEnvironment()
 	{

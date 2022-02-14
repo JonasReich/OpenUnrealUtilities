@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Kismet/BlueprintFunctionLibrary.h"
+
 #include "GeneralProjectSettingsLibrary.generated.h"
 
 /** Expose project info config values from UGeneralProjectSettings to Blueprint */

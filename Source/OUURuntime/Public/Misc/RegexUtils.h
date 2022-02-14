@@ -4,6 +4,7 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Templates/StringUtils.h"
+
 #include "RegexUtils.generated.h"
 
 class FRegexMatcher;
@@ -17,9 +18,7 @@ public:
 	FRegexMatch() = default;
 
 	FRegexMatch(int32 Beginning, int32 Ending, FString InMatchString) :
-		MatchBeginning(Beginning),
-		MatchEnding(Ending),
-		MatchString(InMatchString)
+		MatchBeginning(Beginning), MatchEnding(Ending), MatchString(InMatchString)
 	{
 	}
 
@@ -39,15 +38,11 @@ public:
 
 	FORCEINLINE bool operator==(const FRegexMatch& Other) const
 	{
-		return MatchBeginning == Other.MatchBeginning
-				&& MatchEnding == Other.MatchEnding
-				&& MatchString == Other.MatchString;
+		return MatchBeginning == Other.MatchBeginning && MatchEnding == Other.MatchEnding
+			&& MatchString == Other.MatchString;
 	}
 
-	FORCEINLINE bool operator!=(const FRegexMatch& Other) const
-	{
-		return !(*this == Other);
-	}
+	FORCEINLINE bool operator!=(const FRegexMatch& Other) const { return !(*this == Other); }
 };
 
 /** A complex regex result including the match and all of the capture groups */
@@ -58,43 +53,22 @@ struct OUURUNTIME_API FRegexGroups
 public:
 	FRegexGroups() = default;
 
-	FRegexGroups(TArray<FRegexMatch> InCaptureGroups) :
-		CaptureGroups(InCaptureGroups)
-	{
-	}
+	FRegexGroups(TArray<FRegexMatch> InCaptureGroups) : CaptureGroups(InCaptureGroups) {}
 
-	FRegexGroups(FRegexMatch InMatch) :
-		CaptureGroups({InMatch})
-	{
-	}
+	FRegexGroups(FRegexMatch InMatch) : CaptureGroups({InMatch}) {}
 
-	static FRegexGroups Invalid()
-	{
-		return FRegexGroups();
-	}
+	static FRegexGroups Invalid() { return FRegexGroups(); }
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<FRegexMatch> CaptureGroups;
 
-	FORCEINLINE FString ToString() const
-	{
-		return ArrayToString(CaptureGroups);
-	}
+	FORCEINLINE FString ToString() const { return ArrayToString(CaptureGroups); }
 
-	FORCEINLINE bool operator==(const FRegexGroups& Other) const
-	{
-		return CaptureGroups == Other.CaptureGroups;
-	}
+	FORCEINLINE bool operator==(const FRegexGroups& Other) const { return CaptureGroups == Other.CaptureGroups; }
 
-	FORCEINLINE bool operator!=(const FRegexGroups& Other) const
-	{
-		return !(*this == Other);
-	}
+	FORCEINLINE bool operator!=(const FRegexGroups& Other) const { return !(*this == Other); }
 
-	bool IsValid() const
-	{
-		return CaptureGroups.Num() > 0;
-	}
+	bool IsValid() const { return CaptureGroups.Num() > 0; }
 };
 
 /** Simplified and blueprint exposed functions for regex matching. */
@@ -121,16 +95,25 @@ public:
 
 	/** @returns all of the matches of the pattern in the test string together with all of the capture groups */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Regex")
-	static TArray<FRegexGroups> GetRegexMatchesAndGroups(const FString& RegexPattern, int32 GroupCount, const FString& TestString);
+	static TArray<FRegexGroups> GetRegexMatchesAndGroups(
+		const FString& RegexPattern,
+		int32 GroupCount,
+		const FString& TestString);
 
 	/** @returns first of the matches of the pattern in the test string together with all of the capture groups */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Regex")
-	static FRegexGroups GetFirstRegexMatchAndGroups(const FString& RegexPattern, int32 GroupCount, const FString& TestString);
+	static FRegexGroups GetFirstRegexMatchAndGroups(
+		const FString& RegexPattern,
+		int32 GroupCount,
+		const FString& TestString);
 
 	/** @returns the single regex match of the pattern in the test string together with all of the capture groups,
 	 * IF the match ranges from the beginning to the end of the test string (all characters included). */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Regex")
-	static FRegexGroups GetRegexMatchAndGroupsExact(const FString& RegexPattern, int32 GroupCount, const FString& TestString);
+	static FRegexGroups GetRegexMatchAndGroupsExact(
+		const FString& RegexPattern,
+		int32 GroupCount,
+		const FString& TestString);
 };
 
 using FRegexUtils = URegexFunctionLibrary;

@@ -17,7 +17,7 @@ namespace QueryParser
 		FString Any = "ANY(";
 		FString All = "ALL(";
 		FString None = "NONE(";
-	}
+	} // namespace OpStrings
 
 	// ----------------
 
@@ -54,9 +54,8 @@ namespace QueryParser
 	/** Checks if the string starts with any of the OpStrings. Does not modify the string pointer */
 	bool StartsWithArbitraryOp(const TCHAR* Str)
 	{
-		return SkipIfStartsWith(Str, *OpStrings::Any) ||
-		       SkipIfStartsWith(Str, *OpStrings::All) ||
-		       SkipIfStartsWith(Str, *OpStrings::None);
+		return SkipIfStartsWith(Str, *OpStrings::Any) || SkipIfStartsWith(Str, *OpStrings::All)
+			|| SkipIfStartsWith(Str, *OpStrings::None);
 	}
 
 	// ----------------
@@ -64,22 +63,21 @@ namespace QueryParser
 	/**
 	 * For brevity this type is just called FQueryExprHelper, but a more verbose name would be
 	 * FGameplayTagQueryExpressionConstructionHelper.
-	 * It's a utility class that maps to the query expressions of gameplay tag queries and helps building a tree of these expressions.
-	 * Expressions can target tags or a nested set of other expressions.
+	 * It's a utility class that maps to the query expressions of gameplay tag queries and helps building a tree of
+	 * these expressions. Expressions can target tags or a nested set of other expressions.
 	 *
 	 * This structure simplifies this approach by using the same type for both kinds of operations.
 	 * The matching native expression is resolved dynamically based on the nature of the nested contents.
 	 * e.g.
-	 *     - "ALL(OR(), ALL())" has nested expressions and must be resolved to FGameplayTagQueryExpression::AllExprMatch()
+	 *     - "ALL(OR(), ALL())" has nested expressions and must be resolved to
+	 * FGameplayTagQueryExpression::AllExprMatch()
 	 *     - "ALL(Foo.Bar, Alpha)" has nested tags and must be resolved to FGameplayTagQueryExpression::AllTagsMatch()
-	 * 
+	 *
 	 * This dynamic resolution is realized via child classes for each of the individual operators (all, any, none).
 	 */
 	struct FQueryExprHelper
 	{
-		virtual ~FQueryExprHelper()
-		{
-		}
+		virtual ~FQueryExprHelper() {}
 
 	private:
 		/**
@@ -116,27 +114,19 @@ namespace QueryParser
 		/** Convert this query expression and its subtree into a valid/parseable query string. */
 		FString ToString() const
 		{
-			const FString InnerExpressionsString = FString::JoinBy(InnerExpressions, TEXT(", "), [](auto& Element)
-			{
+			const FString InnerExpressionsString = FString::JoinBy(InnerExpressions, TEXT(", "), [](auto& Element) {
 				return FString::Printf(TEXT("%s"), *FString(Element ? Element->ToString() : ""));
 			});
-			const FString TagsString = FString::JoinBy(Tags, TEXT(", "), [](auto& Element)
-			{
+			const FString TagsString = FString::JoinBy(Tags, TEXT(", "), [](auto& Element) {
 				return FString::Printf(TEXT("%s"), *LexToString(Element));
 			});
 
 			return FString::Printf(TEXT("%s%s%s)"), *GetOpString(), *InnerExpressionsString, *TagsString);
 		}
 
-		void AddInnerExpression(TSharedPtr<FQueryExprHelper> InExpression)
-		{
-			InnerExpressions.Add(InExpression);
-		}
+		void AddInnerExpression(TSharedPtr<FQueryExprHelper> InExpression) { InnerExpressions.Add(InExpression); }
 
-		void AddTag(FGameplayTag&& Tag)
-		{
-			Tags.Add(Tag);
-		}
+		void AddTag(FGameplayTag&& Tag) { Tags.Add(Tag); }
 
 		/** Convert helper structs into a tree of FGameplayTagQueryExpressions */
 		FGameplayTagQueryExpression& MakeNativeExpr()
@@ -175,10 +165,7 @@ namespace QueryParser
 			InNativeExpr->AnyExprMatch();
 		}
 
-		virtual FString GetOpString() const override
-		{
-			return OpStrings::Any;
-		}
+		virtual FString GetOpString() const override { return OpStrings::Any; }
 	};
 
 	/** FQueryExprHelper subclass for ALL() operations */
@@ -194,10 +181,7 @@ namespace QueryParser
 			InNativeExpr->AllExprMatch();
 		}
 
-		virtual FString GetOpString() const override
-		{
-			return OpStrings::All;
-		}
+		virtual FString GetOpString() const override { return OpStrings::All; }
 	};
 
 	/** FQueryExprHelper subclass for NONE() operations */
@@ -213,10 +197,7 @@ namespace QueryParser
 			InNativeExpr->NoExprMatch();
 		}
 
-		virtual FString GetOpString() const override
-		{
-			return OpStrings::None;
-		}
+		virtual FString GetOpString() const override { return OpStrings::None; }
 	};
 
 	/**
@@ -242,7 +223,7 @@ namespace QueryParser
 
 	/**
 	 * Parse a string into a tree of helper structs.
-	 * This function does the bulk of the actual parsing work (separating operators, iterating tags, etc).  
+	 * This function does the bulk of the actual parsing work (separating operators, iterating tags, etc).
 	 */
 	TSharedPtr<FQueryExprHelper> ParseIntoHelperTree(const TCHAR*& Str)
 	{
@@ -275,7 +256,8 @@ namespace QueryParser
 		// Skip the first check of the loop -> already done in the surrounding if-block
 		do
 		{
-			// Continue parsing expressions and their nested trees until no other expression is found at the start of the string
+			// Continue parsing expressions and their nested trees until no other expression is found at the start of
+			// the string
 			HelperRoot->AddInnerExpression(ParseIntoHelperTree(Str));
 			// Skip commas between operations
 			SkipCommasAndWhitespace(Str);
@@ -329,7 +311,7 @@ namespace QueryParser
 			Str = TagEnd;
 		}
 	}
-}
+} // namespace QueryParser
 
 FGameplayTagQuery FGameplayTagQueryParser::ParseQuery(const FString& SourceString)
 {

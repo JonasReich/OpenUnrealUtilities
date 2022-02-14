@@ -1,28 +1,27 @@
 // Copyright (c) 2021 Jonas Reich
 
-#include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
-
-#include "EngineUtils.h"
-#include "GameplayTagContainer.h"
-#include "LogOpenUnrealUtilities.h"
 #include "Brushes/SlateColorBrush.h"
 #include "Components/SceneCaptureComponent2D.h"
+#include "CoreMinimal.h"
 #include "Engine/SceneCapture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "EngineUtils.h"
 #include "GameFramework/PlayerController.h"
+#include "GameplayTagContainer.h"
 #include "GameplayTags/GameplayTagQueryParser.h"
+#include "LogOpenUnrealUtilities.h"
 #include "Misc/RegexUtils.h"
-#include "Widgets/SWindow.h"
 #include "Widgets/Input/SCheckBox.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Input/SVectorInputBox.h"
 #include "Widgets/Layout/SScaleBox.h"
 #include "Widgets/Layout/SSpacer.h"
+#include "Widgets/SWindow.h"
 
 #if WITH_EDITOR
-#include "LevelEditorViewport.h"
+	#include "LevelEditorViewport.h"
 #endif
 
 /**
@@ -37,14 +36,8 @@ FSlateColorBrush White(FColor::White);
  * Default colors for actor overlays.
  * The list contains the most extreme saturated colors only to make the stand out as much as possible.
  */
-TArray<FColor> DefaultColors = {
-	FColorList::Red,
-	FColorList::Green,
-	FColorList::Blue,
-	FColorList::Magenta,
-	FColorList::Cyan,
-	FColorList::Yellow
-};
+TArray<FColor> DefaultColors =
+	{FColorList::Red, FColorList::Green, FColorList::Blue, FColorList::Magenta, FColorList::Cyan, FColorList::Yellow};
 
 /**
  * Utility class that allows querying actors matching certain filter conditions.
@@ -77,7 +70,7 @@ public:
 	/**
 	 * If this is valid, actors are expected to have a gameplay ability system component
 	 * of which the owned gameplay tags are compared with this query.
-	 */  
+	 */
 	FGameplayTagQuery ActorTagQuery;
 
 	/**
@@ -118,7 +111,8 @@ public:
 		if (!ActorTagQuery.IsEmpty())
 		{
 			bAtLeastOneFilterActive = true;
-			if (UAbilitySystemComponent* AbilitySystemComponent = Actor->FindComponentByClass<UAbilitySystemComponent>())
+			if (UAbilitySystemComponent* AbilitySystemComponent =
+					Actor->FindComponentByClass<UAbilitySystemComponent>())
 			{
 				FGameplayTagContainer OwnedTags;
 				AbilitySystemComponent->GetOwnedGameplayTags(OUT OwnedTags);
@@ -183,30 +177,29 @@ struct FColumnSizeData
 	TAttribute<float> RightColumnWidth;
 	SSplitter::FOnSlotResized OnWidthChanged;
 
-	void SetColumnWidth(float InWidth) const
-	{
-		OnWidthChanged.ExecuteIfBound(InWidth);
-	}
+	void SetColumnWidth(float InWidth) const { OnWidthChanged.ExecuteIfBound(InWidth); }
 
 	TSharedRef<SWidget> DetailsSplitter(const FText& Label, const FText& Tooltip, TSharedRef<SWidget> RightWidget) const
 	{
+		// clang-format off
 		return SNew(SSplitter)
 			+ SSplitter::Slot()
-			  .SizeRule(SSplitter::ESizeRule::FractionOfParent)
-			  .Value(LeftColumnWidth)
-			  .OnSlotResized(OnWidthChanged)
+				.SizeRule(SSplitter::ESizeRule::FractionOfParent)
+				.Value(LeftColumnWidth)
+				.OnSlotResized(OnWidthChanged)
 			[
 				SNew(STextBlock)
 				.Text(Label)
 				.ToolTipText(Tooltip)
 			]
 			+ SSplitter::Slot()
-			  .SizeRule(SSplitter::ESizeRule::FractionOfParent)
-			  .Value(RightColumnWidth)
-			  .OnSlotResized(OnWidthChanged)
+				.SizeRule(SSplitter::ESizeRule::FractionOfParent)
+				.Value(RightColumnWidth)
+				.OnSlotResized(OnWidthChanged)
 			[
 				RightWidget
 			];
+		// clang-format on
 	}
 };
 
@@ -218,7 +211,7 @@ class SActorLocationOverlay : public SLeafWidget
 {
 	using Super = SLeafWidget;
 
-SLATE_BEGIN_ARGS(SActorLocationOverlay)
+	SLATE_BEGIN_ARGS(SActorLocationOverlay)
 		{
 		}
 
@@ -244,7 +237,14 @@ SLATE_BEGIN_ARGS(SActorLocationOverlay)
 		return FVector2D::ZeroVector;
 	}
 
-	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override
+	virtual int32 OnPaint(
+		const FPaintArgs& Args,
+		const FGeometry& AllottedGeometry,
+		const FSlateRect& MyCullingRect,
+		FSlateWindowElementList& OutDrawElements,
+		int32 LayerId,
+		const FWidgetStyle& InWidgetStyle,
+		bool bParentEnabled) const override
 	{
 		if (ActorQueries.Get() == nullptr)
 			return LayerId;
@@ -286,30 +286,35 @@ SLATE_BEGIN_ARGS(SActorLocationOverlay)
 				const FVector RelativeLocation3D = WorldLocation - TopLeftCorner;
 				const FVector2D RelativeLocation2D{RelativeLocation3D.X, RelativeLocation3D.Y};
 				const FVector2D RelativeLocation2D_Normalized = RelativeLocation2D / MapSizeActual;
-				// Need to remap coordinates from world space when looking down (x is up, y is right) to UI space (x is right, y is down)
-				const FVector2D WidgetSpaceLocationNormalized {RelativeLocation2D_Normalized.Y, 1.f-RelativeLocation2D_Normalized.X};
+				// Need to remap coordinates from world space when looking down (x is up, y is right) to UI space (x is
+				// right, y is down)
+				const FVector2D WidgetSpaceLocationNormalized{
+					RelativeLocation2D_Normalized.Y,
+					1.f - RelativeLocation2D_Normalized.X};
 				const FVector2D WidgetSpaceLocation = Position + WidgetSpaceLocationNormalized * Size;
 
 				const float MarkerSize = 6.f;
 				FSlateDrawElement::MakeBox(
 					OutDrawElements,
 					RetLayerId++,
-					AllottedGeometry.ToPaintGeometry(WidgetSpaceLocation - (MarkerSize / 2.f), FVector2D(MarkerSize, MarkerSize)),
+					AllottedGeometry
+						.ToPaintGeometry(WidgetSpaceLocation - (MarkerSize / 2.f), FVector2D(MarkerSize, MarkerSize)),
 					&White,
 					DrawEffects,
-					Query->QueryColor
-				);
+					Query->QueryColor);
 
-				auto& Style = FCoreStyle::Get().GetWidgetStyle< FTextBlockStyle >("SmallText");
+				auto& Style = FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>("SmallText");
 				const FSlateFontInfo FontInfo = Style.Font;
 				FSlateDrawElement::MakeText(
-				OutDrawElements,
-                RetLayerId++,
-                AllottedGeometry.ToPaintGeometry(WidgetSpaceLocation - (MarkerSize / 2.f) + FVector2D(0, MarkerSize), FVector2D(MarkerSize, MarkerSize)),
-                FText::FromString(Actor->GetName()),
-                FontInfo,
-                DrawEffects,
-                Query->QueryColor);
+					OutDrawElements,
+					RetLayerId++,
+					AllottedGeometry.ToPaintGeometry(
+						WidgetSpaceLocation - (MarkerSize / 2.f) + FVector2D(0, MarkerSize),
+						FVector2D(MarkerSize, MarkerSize)),
+					FText::FromString(Actor->GetName()),
+					FontInfo,
+					DrawEffects,
+					Query->QueryColor);
 			}
 		}
 
@@ -317,24 +322,28 @@ SLATE_BEGIN_ARGS(SActorLocationOverlay)
 	}
 };
 
-/** Slate widget for entries of a list of actor queries. */  
+/** Slate widget for entries of a list of actor queries. */
 class SActorQueryRow : public STableRow<TSharedPtr<FActorQuery>>
 {
 public:
-SLATE_BEGIN_ARGS(SActorQueryRow)
+	SLATE_BEGIN_ARGS(SActorQueryRow)
 		{
 		}
 
 		SLATE_ARGUMENT(FColumnSizeData*, ColumnSizeData)
 	SLATE_END_ARGS()
 
-	void Construct(const FArguments& InArgs, TSharedRef<STableViewBase> InOwnerTableView, TSharedPtr<FActorQuery>& InActorQuery)
+	void Construct(
+		const FArguments& InArgs,
+		TSharedRef<STableViewBase> InOwnerTableView,
+		TSharedPtr<FActorQuery>& InActorQuery)
 	{
 		ActorQuery = InActorQuery;
 		ensure(ActorQuery.IsValid());
 
 		ColumnSizeData = InArgs._ColumnSizeData;
 
+		// clang-format off
 		STableRow<TSharedPtr<FActorQuery>>::Construct(
 			STableRow<TSharedPtr<FActorQuery>>::FArguments()
 			.Content()
@@ -349,7 +358,8 @@ SLATE_BEGIN_ARGS(SActorQueryRow)
 				[
 					ColumnSizeData->DetailsSplitter(
 						INVTEXT("Name Filter"),
-						INVTEXT("Name string that must be contained within the actor names, for the actor to be included in the query."),
+						INVTEXT("Name string that must be contained within the actor names, for the actor to be "
+							"included in the query."),
 						SNew(SEditableTextBox)
 						.Text(this, &SActorQueryRow::GetNameFilter_Text)
 						.HintText(INVTEXT("<empty>"))
@@ -360,7 +370,8 @@ SLATE_BEGIN_ARGS(SActorQueryRow)
 				[
 					ColumnSizeData->DetailsSplitter(
 						INVTEXT("Name Regex Pattern"),
-						INVTEXT("Regular expression pattern that must match to actor names, for the actor to be included in the query."),
+						INVTEXT("Regular expression pattern that must match to actor names, for the actor to be "
+							"included in the query."),
 						SNew(SEditableTextBox)
 						.Text(this, &SActorQueryRow::GetNameRegexPattern_Text)
 						.HintText(INVTEXT("<empty>"))
@@ -371,7 +382,8 @@ SLATE_BEGIN_ARGS(SActorQueryRow)
 				[
 					ColumnSizeData->DetailsSplitter(
 						INVTEXT("Class Filter"),
-						INVTEXT("Name string that must be contained within the actors class name or any of its super classes, for the actor to be included in the query."),
+						INVTEXT("Name string that must be contained within the actors class name or any of its "
+							"super classes, for the actor to be included in the query."),
 						SNew(SEditableTextBox)
 						.Text(this, &SActorQueryRow::GetActorClassSearchString_Text)
 						.HintText(INVTEXT("<empty>"))
@@ -390,6 +402,7 @@ SLATE_BEGIN_ARGS(SActorQueryRow)
 					)
 				]
 			], InOwnerTableView);
+		// clang-format on
 	}
 
 private:
@@ -397,13 +410,43 @@ private:
 	FColumnSizeData* ColumnSizeData = nullptr;
 	FString GameplayTagQueryString;
 
-	FText GetNameFilter_Text() const { return ActorQuery.IsValid() ? FText::FromString(ActorQuery->NameFilter) : INVTEXT("<invalid>"); }
-	void SetNameFilter_Text(const FText& Text, ETextCommit::Type) const { if (ActorQuery.IsValid()) { ActorQuery->NameFilter = Text.ToString(); } }
-	FText GetNameRegexPattern_Text() const { return ActorQuery.IsValid() ? FText::FromString(ActorQuery->NameRegexPattern) : INVTEXT("<invalid>"); }
-	void SetNameRegexPattern_Text(const FText& Text, ETextCommit::Type) const { if (ActorQuery.IsValid()) { ActorQuery->NameRegexPattern = Text.ToString(); } }
-	FText GetActorClassSearchString_Text() const { return ActorQuery.IsValid() ? FText::FromString(ActorQuery->ActorClassName) : INVTEXT("<invalid>"); }
-	void SetActorClassSearchString_Text(const FText& Text, ETextCommit::Type) const { if (ActorQuery.IsValid()) { ActorQuery->ActorClassName = Text.ToString(); } }
-	FText GetGameplayTagQueryString_Text() const { return ActorQuery.IsValid() ? FText::FromString(GameplayTagQueryString) : INVTEXT("<invalid>"); }
+	FText GetNameFilter_Text() const
+	{
+		return ActorQuery.IsValid() ? FText::FromString(ActorQuery->NameFilter) : INVTEXT("<invalid>");
+	}
+	void SetNameFilter_Text(const FText& Text, ETextCommit::Type) const
+	{
+		if (ActorQuery.IsValid())
+		{
+			ActorQuery->NameFilter = Text.ToString();
+		}
+	}
+	FText GetNameRegexPattern_Text() const
+	{
+		return ActorQuery.IsValid() ? FText::FromString(ActorQuery->NameRegexPattern) : INVTEXT("<invalid>");
+	}
+	void SetNameRegexPattern_Text(const FText& Text, ETextCommit::Type) const
+	{
+		if (ActorQuery.IsValid())
+		{
+			ActorQuery->NameRegexPattern = Text.ToString();
+		}
+	}
+	FText GetActorClassSearchString_Text() const
+	{
+		return ActorQuery.IsValid() ? FText::FromString(ActorQuery->ActorClassName) : INVTEXT("<invalid>");
+	}
+	void SetActorClassSearchString_Text(const FText& Text, ETextCommit::Type) const
+	{
+		if (ActorQuery.IsValid())
+		{
+			ActorQuery->ActorClassName = Text.ToString();
+		}
+	}
+	FText GetGameplayTagQueryString_Text() const
+	{
+		return ActorQuery.IsValid() ? FText::FromString(GameplayTagQueryString) : INVTEXT("<invalid>");
+	}
 	void SetGameplayTagQueryString_Text(const FText& Text, ETextCommit::Type)
 	{
 		FString TextAsString = Text.ToString();
@@ -440,10 +483,7 @@ public:
 	virtual bool IsTickableInEditor() const override { return true; }
 	virtual bool IsTickableWhenPaused() const override { return true; }
 
-	virtual TStatId GetStatId() const override
-	{
-		RETURN_QUICK_DECLARE_CYCLE_STAT(FActorMap, STATGROUP_Tickables);
-	}
+	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(FActorMap, STATGROUP_Tickables); }
 
 	virtual void Tick(float DeltaTime) override
 	{
@@ -527,7 +567,10 @@ public:
 		CaptureComponent->CaptureSource = ESceneCaptureSource::SCS_BaseColor;
 		CaptureComponent->bEnableClipPlane = false;
 
-		const FName TargetName = MakeUniqueObjectName(SceneCaptureActor.Get(), UTextureRenderTarget2D::StaticClass(), TEXT("SceneCaptureTextureTarget"));
+		const FName TargetName = MakeUniqueObjectName(
+			SceneCaptureActor.Get(),
+			UTextureRenderTarget2D::StaticClass(),
+			TEXT("SceneCaptureTextureTarget"));
 		CaptureComponent->TextureTarget = NewObject<UTextureRenderTarget2D>(SceneCaptureActor.Get(), TargetName);
 		CaptureComponent->TextureTarget->InitCustomFormat(CaptureSize, CaptureSize, PF_FloatRGB, false);
 		CaptureComponent->TextureTarget->ClearColor = FLinearColor::Black;
@@ -549,18 +592,12 @@ public:
 		DetailsColumns.OnWidthChanged = SSplitter::FOnSlotResized::CreateSP(this, &FActorMap::OnSetDetailsColumnWidth);
 	}
 
-	UWorld* GetTargetWorld() const
-	{
-		return TargetWorld.Get();
-	}
+	UWorld* GetTargetWorld() const { return TargetWorld.Get(); }
 
 	TSharedRef<SWidget> TakeWidget()
 	{
-		return SNew(SBorder)
-		.BorderImage(&DarkGrey)
-		.Content()
-		[
-			SNew(SSplitter)
+		// clang-format off
+		return SNew(SBorder).BorderImage(&DarkGrey).Content()[SNew(SSplitter)
 			+ SSplitter::Slot()
 			  .SizeRule(SSplitter::ESizeRule::FractionOfParent)
 			  .Value(MainColumns.LeftColumnWidth)
@@ -598,12 +635,15 @@ public:
 				]
 			]
 		];
+		// clang-format on
 	}
 
 	FText GetTitleText() const
 	{
-		return FText::FromString(FString::Printf(TEXT("OUU Actor Map (%s) [%s]"),
-		                                         *TargetWorld->GetName(), GetWorldTypeString(TargetWorld->WorldType)));
+		return FText::FromString(FString::Printf(
+			TEXT("OUU Actor Map (%s) [%s]"),
+			*TargetWorld->GetName(),
+			GetWorldTypeString(TargetWorld->WorldType)));
 	}
 
 protected:
@@ -645,7 +685,6 @@ protected:
 			SceneCaptureActor->GetCaptureComponent2D()->OrthoWidth = OrthoWidth;
 		}
 	}
-
 
 	FColumnSizeData MainColumns;
 	float MapColumnWidthFactor = 0.75f;
@@ -721,6 +760,7 @@ protected:
 	//------------------------
 	TSharedRef<SWidget> DetailsWidget()
 	{
+		// clang-format off
 		return SNew(SBox)
 		.MinDesiredWidth(200.f)
 		.Content()
@@ -807,16 +847,19 @@ protected:
 				.OnGenerateRow(this, &FActorMap::OnGenerateActorQueryRow)
 			]
 		];
+		// clang-format on
 	}
 
-	TSharedRef<ITableRow> OnGenerateActorQueryRow(TSharedPtr<FActorQuery> InItem, const TSharedRef<STableViewBase>& OwnerTable)
+	TSharedRef<ITableRow> OnGenerateActorQueryRow(
+		TSharedPtr<FActorQuery> InItem,
+		const TSharedRef<STableViewBase>& OwnerTable)
 	{
-		return SNew(SActorQueryRow, OwnerTable, InItem)
-			.ColumnSizeData(&DetailsColumns);
+		return SNew(SActorQueryRow, OwnerTable, InItem).ColumnSizeData(&DetailsColumns);
 	}
 
 	TSharedRef<SWidget> MapWidget()
 	{
+		// clang-format off
 		return
 			SNew(SOverlay)
 			+ SOverlay::Slot()
@@ -838,6 +881,7 @@ protected:
 				.MapSize(this, &FActorMap::GetOrthoWidth)
 				.ReferencePosition(this, &FActorMap::GetReferencePosition)
 			];
+		// clang-format on
 	}
 };
 
@@ -898,22 +942,23 @@ public:
 		GEngine->OnWorldDestroyed().AddRaw(this, &FActorMapWindowBootstrapper::HandleWorldDestroyed);
 
 		SlateWindow = SNew(SWindow)
-			.AutoCenter(EAutoCenter::None)
-			.IsInitiallyMaximized(true)
-			.ScreenPosition({20.f, 20.f})
-			.CreateTitleBar(true)
-			.SizingRule(ESizingRule::UserSized)
-			.SupportsMaximize(true)
-			.SupportsMinimize(true)
-			.HasCloseButton(true)
-			.Style(&FCoreStyle::Get().GetWidgetStyle<FWindowStyle>("Window"))
-			.ClientSize({500.f, 300.f})
-			.UseOSWindowBorder(false)
-			.Title(ActorMap->GetTitleText());
+						  .AutoCenter(EAutoCenter::None)
+						  .IsInitiallyMaximized(true)
+						  .ScreenPosition({20.f, 20.f})
+						  .CreateTitleBar(true)
+						  .SizingRule(ESizingRule::UserSized)
+						  .SupportsMaximize(true)
+						  .SupportsMinimize(true)
+						  .HasCloseButton(true)
+						  .Style(&FCoreStyle::Get().GetWidgetStyle<FWindowStyle>("Window"))
+						  .ClientSize({500.f, 300.f})
+						  .UseOSWindowBorder(false)
+						  .Title(ActorMap->GetTitleText());
 
 		SlateWindow->SetContent(ActorMap->TakeWidget());
 
-		SlateWindow->SetOnWindowClosed(FOnWindowClosed::CreateRaw(this, &FActorMapWindowBootstrapper::HandleSlateWindowClosed));
+		SlateWindow->SetOnWindowClosed(
+			FOnWindowClosed::CreateRaw(this, &FActorMapWindowBootstrapper::HandleSlateWindowClosed));
 
 		FSlateApplication::Get().AddWindow(SlateWindow.ToSharedRef());
 		FSlateApplication::Get().GetRenderer()->CreateViewport(SlateWindow.ToSharedRef());
@@ -947,20 +992,20 @@ void OpenActorMapWindowForCurrentWorld()
 {
 	if (ActorMapWindowBootstrapper.IsValid())
 	{
-		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("OpenActorMapWindowForCurrentWorld() was called, but a different window is already opened. Closing the previous instance..."))
+		UE_LOG(
+			LogOpenUnrealUtilities,
+			Warning,
+			TEXT("OpenActorMapWindowForCurrentWorld() was called, but a different window is already opened. Closing "
+				 "the previous instance..."))
 		ActorMapWindowBootstrapper->CloseWindow();
 	}
 	ActorMapWindowBootstrapper = MakeUnique<FActorMapWindowBootstrapper>();
 	// Automatically clean up unique pointer once the window is closed.
-	ActorMapWindowBootstrapper->OnWindowClosed.AddLambda([]()
-	{
-		ActorMapWindowBootstrapper.Reset();
-	});
+	ActorMapWindowBootstrapper->OnWindowClosed.AddLambda([]() { ActorMapWindowBootstrapper.Reset(); });
 	ActorMapWindowBootstrapper->OpenWindowForCurrentWorld();
 }
 
 static FAutoConsoleCommand OpenActorMapCommand(
 	TEXT("ouu.Debug.OpenActorMap"),
 	TEXT("Open an actor map for the current world (game or editor)"),
-	FConsoleCommandDelegate::CreateStatic(OpenActorMapWindowForCurrentWorld)
-);
+	FConsoleCommandDelegate::CreateStatic(OpenActorMapWindowForCurrentWorld));

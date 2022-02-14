@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Kismet/BlueprintFunctionLibrary.h"
+
 #include "OUUMathLibrary.generated.h"
 
 /**
@@ -13,7 +14,6 @@ class OUURUNTIME_API UOUUMathLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
-
 	/** Get the absolute angle between two vectors A and B. */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Math")
 	static float AngleBetweenVectors(FVector A, FVector B);
@@ -23,19 +23,21 @@ public:
 	static float SignedAngleBetweenVectors(FVector A, FVector B, FVector Up);
 
 	/** Clamp a value into a range, using the fallback values if the range is not bound at the respective end. */
-	template<typename T>
+	template <typename T>
 	static T ClampToRange(T Value, TRange<T>& Range, T FalbackMin, T FallbackMax)
 	{
-		return  FMath::Clamp(Value,
+		return FMath::Clamp(
+			Value,
 			Range.HasLowerBound() ? Range.GetLowerBoundValue() : FalbackMin,
 			Range.HasUpperBound() ? Range.GetUpperBoundValue() : FallbackMax);
 	}
 
 	/**	Clamp a value into a range, using numeric type limits if the range is not bound. */
-	template<typename T>
+	template <typename T>
 	static T ClampToRange(T Value, TRange<T>& Range)
 	{
-		return  FMath::Clamp(Value,
+		return FMath::Clamp(
+			Value,
 			Range.HasLowerBound() ? Range.GetLowerBoundValue() : TNumericLimits<T>::Min(),
 			Range.HasUpperBound() ? Range.GetUpperBoundValue() : TNumericLimits<T>::Max());
 	}

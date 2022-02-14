@@ -43,10 +43,8 @@ UOUURequest* UOUURequestQueue::GetOldestRequest() const
 
 UOUURequest* UOUURequestQueue::GetOldestRequestWithState(EOUURequestState State) const
 {
-	if (UOUURequest*const* ResultPtr = RequestQueue.FindByPredicate([State](const UOUURequest* R) -> bool
-	{
-		return IsValid(R) && R->GetState() == State;
-	}))
+	if (UOUURequest* const* ResultPtr = RequestQueue.FindByPredicate(
+			[State](const UOUURequest* R) -> bool { return IsValid(R) && R->GetState() == State; }))
 	{
 		return *ResultPtr;
 	}

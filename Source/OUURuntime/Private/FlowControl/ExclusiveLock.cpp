@@ -1,6 +1,7 @@
 // Copyright (c) 2021 Jonas Reich
 
 #include "FlowControl/ExclusiveLock.h"
+
 #include "LogOpenUnrealUtilities.h"
 
 bool UExclusiveLock::TryLock(UObject* Key)
@@ -27,12 +28,19 @@ bool UExclusiveLock::TryLockForDuration(UObject* Key, float Duration)
 	UWorld* World = GetWorld();
 	if (!IsValid(World))
 	{
-		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("TryLockForDuration cannot be used if the lock does not have a valid world context"));
+		UE_LOG(
+			LogOpenUnrealUtilities,
+			Warning,
+			TEXT("TryLockForDuration cannot be used if the lock does not have a valid world context"));
 		return false;
 	}
 
 	FTimerHandle Handle;
-	World->GetTimerManager().SetTimer(Handle, [this, Key]() { TryUnlock(Key); }, Duration, false);
+	World->GetTimerManager().SetTimer(
+		Handle,
+		[this, Key]() { TryUnlock(Key); },
+		Duration,
+		false);
 	return TryLock(Key);
 }
 

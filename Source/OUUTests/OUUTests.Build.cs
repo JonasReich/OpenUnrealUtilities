@@ -8,30 +8,26 @@ public class OUUTests : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[]
-		{
-			// Engine
-			"Core",
-			"CoreUObject",
-			"Engine",
-			"UMG",
+		PublicDependencyModuleNames.AddRange(new string[] {// Engine
+														   "Core",
+														   "CoreUObject",
+														   "Engine",
+														   "UMG",
 
-			// Plugin
-			"OUURuntime",
-			"GameplayTags"
+														   // Plugin
+														   "OUURuntime",
+														   "GameplayTags"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[]
-		{
-			// Engine
-			"InputCore",
-			"SlateCore",
-			"EditorScriptingUtilities",
+		PrivateDependencyModuleNames.AddRange(new string[] {// Engine
+															"InputCore",
+															"SlateCore",
+															"EditorScriptingUtilities",
 
-			// Plugin
-			"OUUBlueprintRuntime",
-			"OUUUMG",
-			"OUUTestUtilities"
+															// Plugin
+															"OUUBlueprintRuntime",
+															"OUUUMG",
+															"OUUTestUtilities"
 		});
 	}
 }

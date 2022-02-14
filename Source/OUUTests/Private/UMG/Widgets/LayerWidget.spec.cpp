@@ -4,12 +4,12 @@
 
 #if WITH_AUTOMATION_WORKER
 
-#include "Widgets/LayerWidget.h"
-#include "Components/HorizontalBox.h"
-#include "Components/Button.h"
-#include "Blueprint/UserWidget.h"
-#include "Blueprint/WidgetTree.h"
-#include "UMG/UMGUtils.h"
+	#include "Blueprint/UserWidget.h"
+	#include "Blueprint/WidgetTree.h"
+	#include "Components/Button.h"
+	#include "Components/HorizontalBox.h"
+	#include "UMG/UMGUtils.h"
+	#include "Widgets/LayerWidget.h"
 
 UOUULayerWidget* CreateLayer(FOUUAutomationTestWorld& TestWorld)
 {
@@ -37,14 +37,13 @@ void SetVisiblityOfAllChildren(UWidget* Widget, ESlateVisibility Visibility)
 }
 
 BEGIN_DEFINE_SPEC(FLayerWidgetSpec, "OpenUnrealUtilities.UMG.Widgets.LayerWidget", DEFAULT_OUU_TEST_FLAGS)
-TSharedPtr<FOUUScopedAutomationTestWorld> TestWorld;
-UOUULayerWidget* FirstLayerWidget;
-UOUULayerWidget* SecondLayerWidget;
+	TSharedPtr<FOUUScopedAutomationTestWorld> TestWorld;
+	UOUULayerWidget* FirstLayerWidget;
+	UOUULayerWidget* SecondLayerWidget;
 END_DEFINE_SPEC(FLayerWidgetSpec)
 void FLayerWidgetSpec::Define()
 {
-	BeforeEach([this]()
-	{
+	BeforeEach([this]() {
 		TestWorld = MakeShared<FOUUScopedAutomationTestWorld>("FLayerWidgetSpec");
 		TestWorld->InitializeGame();
 
@@ -52,32 +51,24 @@ void FLayerWidgetSpec::Define()
 		SecondLayerWidget = CreateLayer(*TestWorld);
 	});
 
-	Describe("UpdateLayer updates input visibility of the widget, so calling IsLayerInputVisible", [this]()
-	{
-		It("should throw an error if the layer itself is focusable", [this]()
-		{
+	Describe("UpdateLayer updates input visibility of the widget, so calling IsLayerInputVisible", [this]() {
+		It("should throw an error if the layer itself is focusable", [this]() {
 			AddExpectedError("Layer widgets themselves must not be focusable!");
 			FirstLayerWidget->bIsFocusable = true;
 			auto SlateWidget = FirstLayerWidget->TakeWidget();
 			FirstLayerWidget->UpdateLayer(nullptr);
 		});
 
-		Describe("if bAllowInput is true", [this]()
-		{
-			BeforeEach([this]()
-			{
-				FirstLayerWidget->bAllowInput = true;
-			});
+		Describe("if bAllowInput is true", [this]() {
+			BeforeEach([this]() { FirstLayerWidget->bAllowInput = true; });
 
-			It("should return false if there are no input visible children", [this]()
-			{
+			It("should return false if there are no input visible children", [this]() {
 				auto SlateWidget = FirstLayerWidget->TakeWidget();
 				FirstLayerWidget->UpdateLayer(nullptr);
 				SPEC_TEST_FALSE(FirstLayerWidget->IsLayerInputVisible());
 			});
 
-			It("should return true if there are input visible children", [this]()
-			{
+			It("should return true if there are input visible children", [this]() {
 				AddButtonToLayer(FirstLayerWidget);
 				auto SlateWidget = FirstLayerWidget->TakeWidget();
 				FirstLayerWidget->UpdateLayer(nullptr);
@@ -85,23 +76,17 @@ void FLayerWidgetSpec::Define()
 			});
 		});
 
-		Describe("if bAllowInput is false", [this]()
-		{
-			BeforeEach([this]()
-			{
-				FirstLayerWidget->bAllowInput = false;
-			});
+		Describe("if bAllowInput is false", [this]() {
+			BeforeEach([this]() { FirstLayerWidget->bAllowInput = false; });
 
-			It("should return false even if there are input visible children", [this]()
-			{
+			It("should return false even if there are input visible children", [this]() {
 				AddButtonToLayer(FirstLayerWidget);
 				auto SlateWidget = FirstLayerWidget->TakeWidget();
 				FirstLayerWidget->UpdateLayer(nullptr);
 				SPEC_TEST_FALSE(FirstLayerWidget->IsLayerInputVisible());
 			});
 
-			It("should return false if there are no input visible children", [this]()
-			{
+			It("should return false if there are no input visible children", [this]() {
 				auto SlateWidget = FirstLayerWidget->TakeWidget();
 				FirstLayerWidget->UpdateLayer(nullptr);
 				SPEC_TEST_FALSE(FirstLayerWidget->IsLayerInputVisible());
@@ -109,133 +94,109 @@ void FLayerWidgetSpec::Define()
 		});
 	});
 
-	Describe("UpdateLayer updates actively concealing state, so calling IsActivelyConcealing", [this]()
-	{
-		Describe("if bConcealLayersBelow is true", [this]()
-		{
-			BeforeEach([this]()
-			{
-				FirstLayerWidget->bConcealLayersBelow = true;
-			});
+	Describe("UpdateLayer updates actively concealing state, so calling IsActivelyConcealing", [this]() {
+		Describe("if bConcealLayersBelow is true", [this]() {
+			BeforeEach([this]() { FirstLayerWidget->bConcealLayersBelow = true; });
 
-			It("should return true if it doesn't have a layer above and it has visible children", [this]()
-			{
+			It("should return true if it doesn't have a layer above and it has visible children", [this]() {
 				SetVisiblityOfAllChildren(FirstLayerWidget, ESlateVisibility::HitTestInvisible);
 				auto SlateWidget = FirstLayerWidget->TakeWidget();
 				FirstLayerWidget->UpdateLayer(nullptr);
 				SPEC_TEST_TRUE(FirstLayerWidget->IsActivelyConcealing());
 			});
 
-			It("should return false if it doesn't have a layer above and it has no visible children", [this]()
-			{
+			It("should return false if it doesn't have a layer above and it has no visible children", [this]() {
 				SetVisiblityOfAllChildren(FirstLayerWidget, ESlateVisibility::Collapsed);
 				auto SlateWidget = FirstLayerWidget->TakeWidget();
 				FirstLayerWidget->UpdateLayer(nullptr);
 				SPEC_TEST_FALSE(FirstLayerWidget->IsActivelyConcealing());
 			});
 
-			Describe("and there is an actively concealing layer above", [this]()
-			{
-				BeforeEach([this]()
-				{
-					SecondLayerWidget->bConcealLayersBelow = true;
-				});
+			Describe("and there is an actively concealing layer above", [this]() {
+				BeforeEach([this]() { SecondLayerWidget->bConcealLayersBelow = true; });
 
-				It("should return true if it has an actively concealing layer above, but it cannot be concealed", [this]()
-				{
-					FirstLayerWidget->bMayBeConcealedFromAbove = false;
+				It("should return true if it has an actively concealing layer above, but it cannot be concealed",
+				   [this]() {
+					   FirstLayerWidget->bMayBeConcealedFromAbove = false;
 
-					auto SlateWidget = FirstLayerWidget->TakeWidget();
-					auto SlateWidget2 = SecondLayerWidget->TakeWidget();
-					SecondLayerWidget->UpdateLayer(nullptr);
-					FirstLayerWidget->UpdateLayer(SecondLayerWidget);
+					   auto SlateWidget = FirstLayerWidget->TakeWidget();
+					   auto SlateWidget2 = SecondLayerWidget->TakeWidget();
+					   SecondLayerWidget->UpdateLayer(nullptr);
+					   FirstLayerWidget->UpdateLayer(SecondLayerWidget);
 
-					SPEC_TEST_TRUE(FirstLayerWidget->IsActivelyConcealing());
-				});
+					   SPEC_TEST_TRUE(FirstLayerWidget->IsActivelyConcealing());
+				   });
 
-				It("should return false if it has an actively concealing layer above, and it can be concealed", [this]()
-				{
-					FirstLayerWidget->bMayBeConcealedFromAbove = true;
+				It("should return false if it has an actively concealing layer above, and it can be concealed",
+				   [this]() {
+					   FirstLayerWidget->bMayBeConcealedFromAbove = true;
 
-					auto SlateWidget = FirstLayerWidget->TakeWidget();
-					auto SlateWidget2 = SecondLayerWidget->TakeWidget();
-					SecondLayerWidget->UpdateLayer(nullptr);
-					FirstLayerWidget->UpdateLayer(SecondLayerWidget);
+					   auto SlateWidget = FirstLayerWidget->TakeWidget();
+					   auto SlateWidget2 = SecondLayerWidget->TakeWidget();
+					   SecondLayerWidget->UpdateLayer(nullptr);
+					   FirstLayerWidget->UpdateLayer(SecondLayerWidget);
 
-					SPEC_TEST_FALSE(FirstLayerWidget->IsActivelyConcealing());
-				});
+					   SPEC_TEST_FALSE(FirstLayerWidget->IsActivelyConcealing());
+				   });
 			});
 		});
 
-		Describe("if bConcealLayersBelow is false", [this]()
-		{
-			BeforeEach([this]()
-			{
-				FirstLayerWidget->bConcealLayersBelow = false;
-			});
+		Describe("if bConcealLayersBelow is false", [this]() {
+			BeforeEach([this]() { FirstLayerWidget->bConcealLayersBelow = false; });
 
-			It("should return false even if it doesn't have a layer above and it has visible children", [this]()
-			{
+			It("should return false even if it doesn't have a layer above and it has visible children", [this]() {
 				SetVisiblityOfAllChildren(FirstLayerWidget, ESlateVisibility::SelfHitTestInvisible);
 				auto SlateWidget = FirstLayerWidget->TakeWidget();
 				FirstLayerWidget->UpdateLayer(nullptr);
 				SPEC_TEST_FALSE(FirstLayerWidget->IsActivelyConcealing());
 			});
 
-			It("should return false if it doesn't have a layer above and it has no visible children", [this]()
-			{
+			It("should return false if it doesn't have a layer above and it has no visible children", [this]() {
 				SetVisiblityOfAllChildren(FirstLayerWidget, ESlateVisibility::Collapsed);
 				auto SlateWidget = FirstLayerWidget->TakeWidget();
 				FirstLayerWidget->UpdateLayer(nullptr);
 				SPEC_TEST_FALSE(FirstLayerWidget->IsActivelyConcealing());
 			});
 
-			Describe("and there is an actively concealing layer above", [this]()
-			{
-				BeforeEach([this]()
-				{
-					SecondLayerWidget->bConcealLayersBelow = true;
-				});
+			Describe("and there is an actively concealing layer above", [this]() {
+				BeforeEach([this]() { SecondLayerWidget->bConcealLayersBelow = true; });
 
-				It("should return false if it has an actively concealing layer above, but it cannot be concealed", [this]()
-				{
-					FirstLayerWidget->bMayBeConcealedFromAbove = false;
+				It("should return false if it has an actively concealing layer above, but it cannot be concealed",
+				   [this]() {
+					   FirstLayerWidget->bMayBeConcealedFromAbove = false;
 
-					auto SlateWidget = FirstLayerWidget->TakeWidget();
-					auto SlateWidget2 = SecondLayerWidget->TakeWidget();
-					SecondLayerWidget->UpdateLayer(nullptr);
-					FirstLayerWidget->UpdateLayer(SecondLayerWidget);
+					   auto SlateWidget = FirstLayerWidget->TakeWidget();
+					   auto SlateWidget2 = SecondLayerWidget->TakeWidget();
+					   SecondLayerWidget->UpdateLayer(nullptr);
+					   FirstLayerWidget->UpdateLayer(SecondLayerWidget);
 
-					SPEC_TEST_FALSE(FirstLayerWidget->IsActivelyConcealing());
-				});
+					   SPEC_TEST_FALSE(FirstLayerWidget->IsActivelyConcealing());
+				   });
 
-				It("should return false if it has an actively concealing layer above, and it can be concealed", [this]()
-				{
-					FirstLayerWidget->bMayBeConcealedFromAbove = true;
+				It("should return false if it has an actively concealing layer above, and it can be concealed",
+				   [this]() {
+					   FirstLayerWidget->bMayBeConcealedFromAbove = true;
 
-					auto SlateWidget = FirstLayerWidget->TakeWidget();
-					auto SlateWidget2 = SecondLayerWidget->TakeWidget();
-					SecondLayerWidget->UpdateLayer(nullptr);
-					FirstLayerWidget->UpdateLayer(SecondLayerWidget);
+					   auto SlateWidget = FirstLayerWidget->TakeWidget();
+					   auto SlateWidget2 = SecondLayerWidget->TakeWidget();
+					   SecondLayerWidget->UpdateLayer(nullptr);
+					   FirstLayerWidget->UpdateLayer(SecondLayerWidget);
 
-					SPEC_TEST_FALSE(FirstLayerWidget->IsActivelyConcealing());
-				});
+					   SPEC_TEST_FALSE(FirstLayerWidget->IsActivelyConcealing());
+				   });
 			});
 		});
 	});
 
-	Describe("UpdateLayer updates the visibility of widgets, so calling GetVisibility", [this]()
-	{
-		It("should return Collapsed if there are no visible child widgets", [this]() 
-		{
+	Describe("UpdateLayer updates the visibility of widgets, so calling GetVisibility", [this]() {
+		It("should return Collapsed if there are no visible child widgets", [this]() {
 			SetVisiblityOfAllChildren(FirstLayerWidget, ESlateVisibility::Collapsed);
 			auto SlateWidget = FirstLayerWidget->TakeWidget();
 			FirstLayerWidget->UpdateLayer(nullptr);
 			SPEC_TEST_EQUAL(FirstLayerWidget->GetVisibility(), ESlateVisibility::Collapsed);
 		});
 
-		It("should return Collapsed if the layer has visible children but is concealed from a layer above", [this]() 
-		{
+		It("should return Collapsed if the layer has visible children but is concealed from a layer above", [this]() {
 			SetVisiblityOfAllChildren(FirstLayerWidget, ESlateVisibility::Visible);
 			auto SlateWidget1 = FirstLayerWidget->TakeWidget();
 			auto SlateWidget2 = SecondLayerWidget->TakeWidget();
@@ -248,17 +209,16 @@ void FLayerWidgetSpec::Define()
 			SPEC_TEST_EQUAL(FirstLayerWidget->GetVisibility(), ESlateVisibility::Collapsed);
 		});
 
-		It("should return HitTestInvisible if the layer has visible children but is set not to allow any input", [this]() 
-		{
-			SetVisiblityOfAllChildren(FirstLayerWidget, ESlateVisibility::Visible);
-			FirstLayerWidget->bAllowInput = false;
-			auto SlateWidget = FirstLayerWidget->TakeWidget();
-			FirstLayerWidget->UpdateLayer(nullptr);
-			SPEC_TEST_EQUAL(FirstLayerWidget->GetVisibility(), ESlateVisibility::HitTestInvisible);
-		});
+		It("should return HitTestInvisible if the layer has visible children but is set not to allow any input",
+		   [this]() {
+			   SetVisiblityOfAllChildren(FirstLayerWidget, ESlateVisibility::Visible);
+			   FirstLayerWidget->bAllowInput = false;
+			   auto SlateWidget = FirstLayerWidget->TakeWidget();
+			   FirstLayerWidget->UpdateLayer(nullptr);
+			   SPEC_TEST_EQUAL(FirstLayerWidget->GetVisibility(), ESlateVisibility::HitTestInvisible);
+		   });
 
-		It("should return Visible if the layer has any visible children and is set to allow input", [this]() 
-		{
+		It("should return Visible if the layer has any visible children and is set to allow input", [this]() {
 			SetVisiblityOfAllChildren(FirstLayerWidget, ESlateVisibility::Visible);
 			FirstLayerWidget->bAllowInput = true;
 			auto SlateWidget = FirstLayerWidget->TakeWidget();
@@ -267,17 +227,14 @@ void FLayerWidgetSpec::Define()
 		});
 	});
 
-	Describe("IsConcealed", [this]()
-	{
-		It("returns false if the layer is not concealed", [this]()
-		{
+	Describe("IsConcealed", [this]() {
+		It("returns false if the layer is not concealed", [this]() {
 			auto SlateWidget = FirstLayerWidget->TakeWidget();
 			FirstLayerWidget->UpdateLayer(nullptr);
 			SPEC_TEST_FALSE(FirstLayerWidget->IsConcealed());
 		});
 
-		It("returns true if the layer has a concealing layer above and it's concealable from above", [this]()
-		{
+		It("returns true if the layer has a concealing layer above and it's concealable from above", [this]() {
 			FirstLayerWidget->bMayBeConcealedFromAbove = true;
 			SecondLayerWidget->bConcealLayersBelow = true;
 			auto SlateWidget1 = FirstLayerWidget->TakeWidget();
@@ -287,8 +244,7 @@ void FLayerWidgetSpec::Define()
 			SPEC_TEST_TRUE(FirstLayerWidget->IsConcealed());
 		});
 
-		It("returns false if the layer has a concealing layer above and it's NOT concealable from above", [this]()
-		{
+		It("returns false if the layer has a concealing layer above and it's NOT concealable from above", [this]() {
 			FirstLayerWidget->bMayBeConcealedFromAbove = false;
 			SecondLayerWidget->bConcealLayersBelow = true;
 			auto SlateWidget1 = FirstLayerWidget->TakeWidget();
@@ -298,32 +254,30 @@ void FLayerWidgetSpec::Define()
 			SPEC_TEST_FALSE(FirstLayerWidget->IsConcealed());
 		});
 
-		It("returns true if the layer has a concealing layer above and it's concealable from above even if the layer immediately above is not concealable itself", [this]()
-		{
-			UOUULayerWidget* ThirdLayerWidget = CreateLayer(*TestWorld);
+		It("returns true if the layer has a concealing layer above and it's concealable from above even if the layer "
+		   "immediately above is not concealable itself",
+		   [this]() {
+			   UOUULayerWidget* ThirdLayerWidget = CreateLayer(*TestWorld);
 
-			ThirdLayerWidget->bConcealLayersBelow = true;
-			SecondLayerWidget->bMayBeConcealedFromAbove = false;
-			FirstLayerWidget->bMayBeConcealedFromAbove = true;
+			   ThirdLayerWidget->bConcealLayersBelow = true;
+			   SecondLayerWidget->bMayBeConcealedFromAbove = false;
+			   FirstLayerWidget->bMayBeConcealedFromAbove = true;
 
-			auto SlateWidget1 = FirstLayerWidget->TakeWidget();
-			auto SlateWidget2 = SecondLayerWidget->TakeWidget();
-			auto SlateWidget3 = ThirdLayerWidget->TakeWidget();
+			   auto SlateWidget1 = FirstLayerWidget->TakeWidget();
+			   auto SlateWidget2 = SecondLayerWidget->TakeWidget();
+			   auto SlateWidget3 = ThirdLayerWidget->TakeWidget();
 
-			ThirdLayerWidget->UpdateLayer(nullptr);
-			SecondLayerWidget->UpdateLayer(ThirdLayerWidget);
-			FirstLayerWidget->UpdateLayer(SecondLayerWidget);
+			   ThirdLayerWidget->UpdateLayer(nullptr);
+			   SecondLayerWidget->UpdateLayer(ThirdLayerWidget);
+			   FirstLayerWidget->UpdateLayer(SecondLayerWidget);
 
-			SPEC_TEST_TRUE(ThirdLayerWidget->IsActivelyConcealing());
-			SPEC_TEST_FALSE(SecondLayerWidget->IsConcealed());
-			SPEC_TEST_TRUE(FirstLayerWidget->IsConcealed());
-		});
+			   SPEC_TEST_TRUE(ThirdLayerWidget->IsActivelyConcealing());
+			   SPEC_TEST_FALSE(SecondLayerWidget->IsConcealed());
+			   SPEC_TEST_TRUE(FirstLayerWidget->IsConcealed());
+		   });
 	});
 
-	AfterEach([this]()
-	{
-		TestWorld.Reset();
-	});
+	AfterEach([this]() { TestWorld.Reset(); });
 }
 
 #endif

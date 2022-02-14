@@ -2,15 +2,15 @@
 
 #pragma once
 
+#include "EngineUtils.h"
 #include "Templates/IsPointer.h"
 #include "Templates/Models.h"
-#include "EngineUtils.h"
 
-template<typename IteratorType, bool bIsPointerType = TIsPointer<IteratorType>::Value>
+template <typename IteratorType, bool bIsPointerType = TIsPointer<IteratorType>::Value>
 struct TIteratorTraits;
 
 // specialization for non-pointer containers (e.g. TArray, TMap, etc.)
-template<typename IteratorType>
+template <typename IteratorType>
 struct TIteratorTraits<IteratorType, false>
 {
 	using ReferenceType = decltype(DeclVal<IteratorType>().operator*());
@@ -19,7 +19,7 @@ struct TIteratorTraits<IteratorType, false>
 };
 
 // specialization for pointers and c-arrays
-template<typename IteratorType>
+template <typename IteratorType>
 struct TIteratorTraits<IteratorType, true>
 {
 	using ElementType = typename TRemovePointer<IteratorType>::Type;
@@ -31,14 +31,16 @@ struct TIteratorTraits<IteratorType, true>
 // See "Models.h"
 struct CBidirectionalIterator
 {
-	template<typename IteratorType>
+	template <typename IteratorType>
 	auto Requires(IteratorType It) -> decltype(
 		--It,
 		++It,
 		*It
-		//TIteratorTraits<IteratorType>::ElementType(*It) #TODO-j.reich move to ByValue iterator?
-		);
+		// TIteratorTraits<IteratorType>::ElementType(*It) #TODO-j.reich move to ByValue iterator?
+	);
 };
 
 // To check if the CBidirectionalIterator concept works as expected, we test TActorIterator, which cannot be decremented
-static_assert(TModels<CBidirectionalIterator, TActorIterator<AActor>>::Value == false, "Actor iterator is not bidirectional!");
+static_assert(
+	TModels<CBidirectionalIterator, TActorIterator<AActor>>::Value == false,
+	"Actor iterator is not bidirectional!");

@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "CoreMinimal.h"
+
 #include "OUUTestObject.generated.h"
 
 /** Used in place of plain UObject for tests, because UObject itself is abstract */

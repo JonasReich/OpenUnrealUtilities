@@ -2,9 +2,10 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "CoreMinimal.h"
 #include "UMGInputBinding.h"
+
 #include "UMGInputBindingTests.generated.h"
 
 class UUMGInputActionBindingStack;
@@ -31,7 +32,7 @@ public:
 
 	UFUNCTION()
 	void HandleInputActionEventTwo(EUMGInputActionKeyEvent SourceEvent);
-	
+
 	// This one does nothing
 	UFUNCTION()
 	void HandleInputActionEventThree(EUMGInputActionKeyEvent SourceEvent);

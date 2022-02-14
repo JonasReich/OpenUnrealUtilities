@@ -2,11 +2,11 @@
 
 #pragma once
 
+#include "Templates/AddressOf.h"
 #include "Templates/EnableIf.h"
 #include "Templates/RemoveReference.h"
 #include "Templates/UnrealTemplate.h"
 #include "Templates/UnrealTypeTraits.h"
-#include "Templates/AddressOf.h"
 
 /**
  * Wrap a reference in a copyable, assignable object.
@@ -22,10 +22,12 @@ public:
 	// Type declaration so the type can be used in external type traits.
 	using Type = T;
 
-	/** Implicitly construct reference wrappers from anything that allows implicit conversion to T& that is not a reference wrapper */
-	template <typename U, typename = typename TEnableIf<!TIsSame<TReferenceWrapper, typename TRemoveReference<U>::Type>::Value>::Type>
-	constexpr TReferenceWrapper(U&& Argument)
-		: Pointer(AddressOf(Forward<U>(Argument)))
+	/** Implicitly construct reference wrappers from anything that allows implicit conversion to T& that is not a
+	 * reference wrapper */
+	template <
+		typename U,
+		typename = typename TEnableIf<!TIsSame<TReferenceWrapper, typename TRemoveReference<U>::Type>::Value>::Type>
+	constexpr TReferenceWrapper(U&& Argument) : Pointer(AddressOf(Forward<U>(Argument)))
 	{
 	}
 
@@ -37,10 +39,7 @@ public:
 	TReferenceWrapper& operator=(const TReferenceWrapper&) noexcept = default;
 
 	/** Implicit access by conversion to T& */
-	operator T&() const noexcept
-	{
-		return *Pointer;
-	}
+	operator T&() const noexcept { return *Pointer; }
 
 	/** Explicit access  */
 	T& Get() const noexcept

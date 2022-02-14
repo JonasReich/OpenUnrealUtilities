@@ -1,12 +1,13 @@
 // Copyright (c) 2021 Jonas Reich
 
 #include "UMG/UMGUtils.h"
-#include "Widgets/SWidget.h"
+
 #include "LogOpenUnrealUtilities.h"
+#include "Widgets/SWidget.h"
 
 namespace UMGUtils
 {
-	template<class WidgetClass>
+	template <class WidgetClass>
 	bool ForEachWidget(WidgetClass* RootWidget, TFunctionRef<bool(WidgetClass*)> Predicate)
 	{
 		if (RootWidget)
@@ -32,7 +33,11 @@ namespace UMGUtils
 		return false;
 	}
 
-	template<class WidgetClass> bool ForEachWidgetAndDescendants(WidgetClass* RootWidget, bool bIncludeRootWidget, TFunctionRef<bool(WidgetClass*)> Predicate)
+	template <class WidgetClass>
+	bool ForEachWidgetAndDescendants(
+		WidgetClass* RootWidget,
+		bool bIncludeRootWidget,
+		TFunctionRef<bool(WidgetClass*)> Predicate)
 	{
 		if (!RootWidget)
 			return false;
@@ -47,7 +52,10 @@ namespace UMGUtils
 		{
 			if (UserWidgetChild->WidgetTree)
 			{
-				if (UMGUtils::ForEachWidgetAndDescendants<WidgetClass>(UserWidgetChild->WidgetTree->RootWidget, true, Predicate))
+				if (UMGUtils::ForEachWidgetAndDescendants<WidgetClass>(
+						UserWidgetChild->WidgetTree->RootWidget,
+						true,
+						Predicate))
 					return true;
 			}
 		}
@@ -84,7 +92,7 @@ namespace UMGUtils
 		return false;
 	}
 
-	template<class WidgetClass>
+	template <class WidgetClass>
 	bool ForChildWidgets(WidgetClass* Widget, TFunctionRef<bool(WidgetClass*)> Predicate)
 	{
 		// Search for any named slot with content that we need to dive into.
@@ -130,8 +138,12 @@ namespace UMGUtils
 		TSharedPtr<SWidget> SlateWidget = Widget->GetCachedWidget();
 		if (!SlateWidget.IsValid())
 		{
-			UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("UMGUtils::IsFocusable() could not determine focusability of widget %s "
-				"because the cached slate widget was invalid"), *Widget->GetName());
+			UE_LOG(
+				LogOpenUnrealUtilities,
+				Warning,
+				TEXT("UMGUtils::IsFocusable() could not determine focusability of widget %s "
+					 "because the cached slate widget was invalid"),
+				*Widget->GetName());
 			return false;
 		}
 
@@ -161,16 +173,14 @@ namespace UMGUtils
 
 	bool HasInputVisibleDescendantsIncludingSelf(const UWidget* Widget)
 	{
-		return UMGUtils::ForEachWidgetAndDescendants<const UWidget>(Widget, true, [&](const UWidget* W) -> bool
-		{
+		return UMGUtils::ForEachWidgetAndDescendants<const UWidget>(Widget, true, [&](const UWidget* W) -> bool {
 			return UMGUtils::IsInputVisible(W);
 		});
 	}
 
 	bool HasInputVisibleDescendantsExcludingSelf(const UWidget* Widget)
 	{
-		return UMGUtils::ForEachWidgetAndDescendants<const UWidget>(Widget, false, [&](const UWidget* W) -> bool
-		{
+		return UMGUtils::ForEachWidgetAndDescendants<const UWidget>(Widget, false, [&](const UWidget* W) -> bool {
 			return UMGUtils::IsInputVisible(W);
 		});
 	}
@@ -178,8 +188,7 @@ namespace UMGUtils
 	UWidget* GetFirstFocusableDescendantIncludingSelf(UWidget* Widget)
 	{
 		UWidget* Result = nullptr;
-		UMGUtils::ForEachWidgetAndDescendants<UWidget>(Widget, true, [&](UWidget* W) -> bool
-		{
+		UMGUtils::ForEachWidgetAndDescendants<UWidget>(Widget, true, [&](UWidget* W) -> bool {
 			if (UMGUtils::IsFocusable(W))
 			{
 				Result = W;
@@ -194,10 +203,18 @@ namespace UMGUtils
 
 	// Explicit instantiations of the widget tree iteration templates above
 	template bool OUURUNTIME_API ForEachWidget<UWidget>(UWidget* RootWidget, TFunctionRef<bool(UWidget*)> Predicate);
-	template bool OUURUNTIME_API ForEachWidget<const UWidget>(const UWidget* RootWidget, TFunctionRef<bool(const UWidget*)> Predicate);
-	template bool OUURUNTIME_API ForEachWidgetAndDescendants<UWidget>(UWidget* RootWidget, bool bIncludeRootWidget, TFunctionRef<bool(UWidget*)> Predicate);
-	template bool OUURUNTIME_API ForEachWidgetAndDescendants<const UWidget>(const UWidget* RootWidget, bool bIncludeRootWidget, TFunctionRef<bool(const UWidget*)> Predicate);
+	template bool OUURUNTIME_API
+		ForEachWidget<const UWidget>(const UWidget* RootWidget, TFunctionRef<bool(const UWidget*)> Predicate);
+	template bool OUURUNTIME_API ForEachWidgetAndDescendants<UWidget>(
+		UWidget* RootWidget,
+		bool bIncludeRootWidget,
+		TFunctionRef<bool(UWidget*)> Predicate);
+	template bool OUURUNTIME_API ForEachWidgetAndDescendants<const UWidget>(
+		const UWidget* RootWidget,
+		bool bIncludeRootWidget,
+		TFunctionRef<bool(const UWidget*)> Predicate);
 	template bool OUURUNTIME_API ForChildWidgets<UWidget>(UWidget* Widget, TFunctionRef<bool(UWidget*)> Predicate);
-	template bool OUURUNTIME_API ForChildWidgets<const UWidget>(const UWidget* Widget, TFunctionRef<bool(const UWidget*)> Predicate);
+	template bool OUURUNTIME_API
+		ForChildWidgets<const UWidget>(const UWidget* Widget, TFunctionRef<bool(const UWidget*)> Predicate);
 
-}
+} // namespace UMGUtils

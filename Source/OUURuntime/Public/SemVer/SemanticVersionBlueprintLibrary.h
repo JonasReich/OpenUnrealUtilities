@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "SemVer/SemanticVersion.h"
+
 #include "SemanticVersionBlueprintLibrary.generated.h"
 
 /**
  * This blueprint library exposes member functions of SemVer struct types to Blueprint.
- * Any additional functionality that is not present in existing C++ member functions should be placed in other blueprint libraries.
+ * Any additional functionality that is not present in existing C++ member functions should be placed in other blueprint
+ * libraries.
  */
 UCLASS()
 class OUURUNTIME_API USemanticVersionBlueprintLibrary : public UBlueprintFunctionLibrary
@@ -29,7 +31,10 @@ public:
 	 * @returns if parsing was successful
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
-	static bool TryParseSemVerString(const FString& SourceString, ESemVerParsingStrictness Strictness, FSemanticVersion& OutSemanticVersion);
+	static bool TryParseSemVerString(
+		const FString& SourceString,
+		ESemVerParsingStrictness Strictness,
+		FSemanticVersion& OutSemanticVersion);
 
 	/** Increment the major version of a semantic version object */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
@@ -64,7 +69,15 @@ public:
 	 * If you want to check if two semantic versions have the same precedence,
 	 * call SemVerEqualPrecedence() instead.
 	 */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Equal (SemVer)", CompactNodeTitle = "==", ScriptMethod = "Equals", ScriptOperator = "==", Keywords = "== equal"), Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
+	UFUNCTION(
+		BlueprintPure,
+		meta =
+			(DisplayName = "Equal (SemVer)",
+			 CompactNodeTitle = "==",
+			 ScriptMethod = "Equals",
+			 ScriptOperator = "==",
+			 Keywords = "== equal"),
+		Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
 	static bool Equal_SemVerSemVer(const FSemanticVersion& A, const FSemanticVersion& B);
 
 	/**
@@ -73,27 +86,51 @@ public:
 	 * If you want to check if two semantic versions have the same or different precedence,
 	 * call SemanticVersionsEqualPrecedence() instead.
 	 */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Not Equal (SemVer)", CompactNodeTitle = "!=", ScriptMethod = "NotEqual", ScriptOperator = "==", Keywords = "== not equal"), Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
+	UFUNCTION(
+		BlueprintPure,
+		meta =
+			(DisplayName = "Not Equal (SemVer)",
+			 CompactNodeTitle = "!=",
+			 ScriptMethod = "NotEqual",
+			 ScriptOperator = "==",
+			 Keywords = "== not equal"),
+		Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
 	static bool NotEqual_SemVerSemVer(const FSemanticVersion& A, const FSemanticVersion& B);
 
 	/** Does one version have lower precedence than the other SemVer? */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "SemVer < SemVer", CompactNodeTitle="<", Keywords="< less"), Category="Open Unreal Utilities|Semantic Versioning|Semantic Version")
+	UFUNCTION(
+		BlueprintPure,
+		meta = (DisplayName = "SemVer < SemVer", CompactNodeTitle = "<", Keywords = "< less"),
+		Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
 	static bool Less_SemVerSemVer(const FSemanticVersion& A, const FSemanticVersion& B);
 
 	/** Does one version have lower or equal precedence as the other SemVer? */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "SemVer <= SemVer", CompactNodeTitle = "<=", Keywords = "<= less"), Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
+	UFUNCTION(
+		BlueprintPure,
+		meta = (DisplayName = "SemVer <= SemVer", CompactNodeTitle = "<=", Keywords = "<= less"),
+		Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
 	static bool LessEqual_SemVerSemVer(const FSemanticVersion& A, const FSemanticVersion& B);
 
 	/** Does one version have higher precedence than the other SemVer? */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "SemVer > SemVer", CompactNodeTitle = ">", Keywords = "> greater"), Category="Open Unreal Utilities|Semantic Versioning|Semantic Version")
+	UFUNCTION(
+		BlueprintPure,
+		meta = (DisplayName = "SemVer > SemVer", CompactNodeTitle = ">", Keywords = "> greater"),
+		Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
 	static bool Greater_SemVerSemVer(const FSemanticVersion& A, const FSemanticVersion& B);
 
 	/** Does one version have higher or equal precedence as the other SemVer? */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "SemVer >= SemVer", CompactNodeTitle = ">=", Keywords = ">= greater"), Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
+	UFUNCTION(
+		BlueprintPure,
+		meta = (DisplayName = "SemVer >= SemVer", CompactNodeTitle = ">=", Keywords = ">= greater"),
+		Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
 	static bool GreaterEqual_SemVerSemVer(const FSemanticVersion& A, const FSemanticVersion& B);
 
 	/** Convert a semantic version into its string representation */
-	UFUNCTION(BlueprintPure, meta=(DisplayName = "ToString (SemVer)", CompactNodeTitle = "->", Keywords="cast convert", BlueprintAutocast), Category="Open Unreal Utilities|Semantic Versioning|Semantic Version")
+	UFUNCTION(
+		BlueprintPure,
+		meta =
+			(DisplayName = "ToString (SemVer)", CompactNodeTitle = "->", Keywords = "cast convert", BlueprintAutocast),
+		Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
 	static FString Conv_SemVerString(const FSemanticVersion& InSemanticVersion);
 
 	//----------------------
@@ -101,16 +138,19 @@ public:
 	//----------------------
 
 	/**
-	* Try to create a pre-release identifier from a string.
-	* If the string cannot be parsed to a valid pre-release identifier,
-	* the identifier remains empty.
-	* @param SourceString The string from which the semver will be constructed
-	* @param Strictness How strict the string parsing functions should be adhering to the standard
-	* @param OutReleaseIdentifier The resulting pre-release identifier
-	* @returns if parsing was successful
-	*/
+	 * Try to create a pre-release identifier from a string.
+	 * If the string cannot be parsed to a valid pre-release identifier,
+	 * the identifier remains empty.
+	 * @param SourceString The string from which the semver will be constructed
+	 * @param Strictness How strict the string parsing functions should be adhering to the standard
+	 * @param OutReleaseIdentifier The resulting pre-release identifier
+	 * @returns if parsing was successful
+	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Semantic Versioning|Pre-Release Identifier")
-	static bool TryParseSemVerPreReleaseIdentifierString(const FString& SourceString, ESemVerParsingStrictness Strictness, FSemVerPreReleaseIdentifier& OutReleaseIdentifier);
+	static bool TryParseSemVerPreReleaseIdentifierString(
+		const FString& SourceString,
+		ESemVerParsingStrictness Strictness,
+		FSemVerPreReleaseIdentifier& OutReleaseIdentifier);
 
 	/**
 	 * Try to increment a pre-release identifier. Only works if the last identifier has only digits or is empty.
@@ -120,31 +160,75 @@ public:
 	bool TryIncrementSemVerPreReleaseIdentifier(UPARAM(ref) FSemVerPreReleaseIdentifier& PreReleaseIdentifier);
 
 	/** Does one pre-release identifier have the same value and precedence as the other one? */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Equal (SemVer PreRelease)", CompactNodeTitle = "==", ScriptMethod = "Equals", ScriptOperator = "==", Keywords = "== equal"), Category = "Open Unreal Utilities|Semantic Versioning|Pre-Release Identifier")
+	UFUNCTION(
+		BlueprintPure,
+		meta =
+			(DisplayName = "Equal (SemVer PreRelease)",
+			 CompactNodeTitle = "==",
+			 ScriptMethod = "Equals",
+			 ScriptOperator = "==",
+			 Keywords = "== equal"),
+		Category = "Open Unreal Utilities|Semantic Versioning|Pre-Release Identifier")
 	static bool Equal_PreReleasePreRelease(const FSemVerPreReleaseIdentifier& A, const FSemVerPreReleaseIdentifier& B);
 
 	/** Does one pre-release identifier have differing value or precedence as the other one? */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Not Equal (SemVer PreRelease)", CompactNodeTitle = "!=", ScriptMethod = "NotEqual", ScriptOperator = "==", Keywords = "== not equal"), Category = "Open Unreal Utilities|Semantic Versioning|Pre-Release Identifier")
-	static bool NotEqual_PreReleasePreRelease(const FSemVerPreReleaseIdentifier& A, const FSemVerPreReleaseIdentifier& B);
+	UFUNCTION(
+		BlueprintPure,
+		meta =
+			(DisplayName = "Not Equal (SemVer PreRelease)",
+			 CompactNodeTitle = "!=",
+			 ScriptMethod = "NotEqual",
+			 ScriptOperator = "==",
+			 Keywords = "== not equal"),
+		Category = "Open Unreal Utilities|Semantic Versioning|Pre-Release Identifier")
+	static bool NotEqual_PreReleasePreRelease(
+		const FSemVerPreReleaseIdentifier& A,
+		const FSemVerPreReleaseIdentifier& B);
 
 	/** Does one pre-release identifier have lower precedence than the other one? */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "SemVer PreRelease < SemVer PreRelease", CompactNodeTitle="<", Keywords="< less"), Category="Open Unreal Utilities|Semantic Versioning|Pre-Release Identifier")
+	UFUNCTION(
+		BlueprintPure,
+		meta = (DisplayName = "SemVer PreRelease < SemVer PreRelease", CompactNodeTitle = "<", Keywords = "< less"),
+		Category = "Open Unreal Utilities|Semantic Versioning|Pre-Release Identifier")
 	static bool Less_PreReleasePreRelease(const FSemVerPreReleaseIdentifier& A, const FSemVerPreReleaseIdentifier& B);
 
 	/** Does one pre-release identifier have lower or equal precedence as the other one? */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "SemVer PreRelease <= SemVer PreRelease", CompactNodeTitle = "<=", Keywords = "<= less"), Category = "Open Unreal Utilities|Semantic Versioning|Pre-Release Identifier")
-	static bool LessEqual_PreReleasePreRelease(const FSemVerPreReleaseIdentifier& A, const FSemVerPreReleaseIdentifier& B);
+	UFUNCTION(
+		BlueprintPure,
+		meta = (DisplayName = "SemVer PreRelease <= SemVer PreRelease", CompactNodeTitle = "<=", Keywords = "<= less"),
+		Category = "Open Unreal Utilities|Semantic Versioning|Pre-Release Identifier")
+	static bool LessEqual_PreReleasePreRelease(
+		const FSemVerPreReleaseIdentifier& A,
+		const FSemVerPreReleaseIdentifier& B);
 
 	/** Does one pre-release identifier have higher precedence than the other one? */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "SemVer PreRelease > SemVer PreRelease", CompactNodeTitle = ">", Keywords = "> greater"), Category="Open Unreal Utilities|Semantic Versioning|Pre-Release Identifier")
-	static bool Greater_PreReleasePreRelease(const FSemVerPreReleaseIdentifier& A, const FSemVerPreReleaseIdentifier& B);
+	UFUNCTION(
+		BlueprintPure,
+		meta = (DisplayName = "SemVer PreRelease > SemVer PreRelease", CompactNodeTitle = ">", Keywords = "> greater"),
+		Category = "Open Unreal Utilities|Semantic Versioning|Pre-Release Identifier")
+	static bool Greater_PreReleasePreRelease(
+		const FSemVerPreReleaseIdentifier& A,
+		const FSemVerPreReleaseIdentifier& B);
 
 	/** Does one pre-release identifier have higher or equal precedence as the other one? */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "SemVer PreRelease >= SemVer PreRelease", CompactNodeTitle = ">=", Keywords = ">= greater"), Category = "Open Unreal Utilities|Semantic Versioning|Pre-Release Identifier")
-	static bool GreaterEqual_PreReleasePreRelease(const FSemVerPreReleaseIdentifier& A, const FSemVerPreReleaseIdentifier& B);
+	UFUNCTION(
+		BlueprintPure,
+		meta =
+			(DisplayName = "SemVer PreRelease >= SemVer PreRelease", CompactNodeTitle = ">=", Keywords = ">= greater"),
+		Category = "Open Unreal Utilities|Semantic Versioning|Pre-Release Identifier")
+	static bool GreaterEqual_PreReleasePreRelease(
+		const FSemVerPreReleaseIdentifier& A,
+		const FSemVerPreReleaseIdentifier& B);
 
 	/** Convert a pre-release identifier to its string representation */
-	UFUNCTION(BlueprintPure, meta=(DisplayName = "ToString (SemVer PreRelease)", CompactNodeTitle = "->", Keywords="cast convert", BlueprintAutocast), Category="Open Unreal Utilities|Semantic Versioning|Pre-Release Identifier")
+	UFUNCTION(
+		BlueprintPure,
+		meta =
+			(DisplayName = "ToString (SemVer PreRelease)",
+			 CompactNodeTitle = "->",
+			 Keywords = "cast convert",
+			 BlueprintAutocast),
+		Category = "Open Unreal Utilities|Semantic Versioning|Pre-Release Identifier")
 	static FString Conv_PreReleaseString(const FSemVerPreReleaseIdentifier& InReleaseIdentifier);
 
 	//----------------------
@@ -161,17 +245,43 @@ public:
 	 * @returns if parsing was successful
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Semantic Versioning|Build Metadata")
-	static bool TryParseSemVerBuildMetadataString(const FString& SourceString, ESemVerParsingStrictness Strictness, FSemVerBuildMetadata& OutBuildMetadata);
+	static bool TryParseSemVerBuildMetadataString(
+		const FString& SourceString,
+		ESemVerParsingStrictness Strictness,
+		FSemVerBuildMetadata& OutBuildMetadata);
 
 	/** If one build metadata equals another build metadata */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Equal (SemVer BuildMetadata)", CompactNodeTitle = "==", ScriptMethod = "Equals", ScriptOperator = "==", Keywords = "== equal"), Category = "Open Unreal Utilities|Semantic Versioning|Build Metadata")
+	UFUNCTION(
+		BlueprintPure,
+		meta =
+			(DisplayName = "Equal (SemVer BuildMetadata)",
+			 CompactNodeTitle = "==",
+			 ScriptMethod = "Equals",
+			 ScriptOperator = "==",
+			 Keywords = "== equal"),
+		Category = "Open Unreal Utilities|Semantic Versioning|Build Metadata")
 	static bool Equal_BuildMetadataBuildMetadata(const FSemVerBuildMetadata& A, const FSemVerBuildMetadata& B);
 
 	/** If one build metadata does not equal another build metadata */
-	UFUNCTION(BlueprintPure, meta = (DisplayName = "Not Equal (SemVer BuildMetadata)", CompactNodeTitle = "!=", ScriptMethod = "NotEqual", ScriptOperator = "==", Keywords = "== not equal"), Category = "Open Unreal Utilities|Semantic Versioning|Build Metadata")
+	UFUNCTION(
+		BlueprintPure,
+		meta =
+			(DisplayName = "Not Equal (SemVer BuildMetadata)",
+			 CompactNodeTitle = "!=",
+			 ScriptMethod = "NotEqual",
+			 ScriptOperator = "==",
+			 Keywords = "== not equal"),
+		Category = "Open Unreal Utilities|Semantic Versioning|Build Metadata")
 	static bool NotEqual_BuildMetadataBuildMetadata(const FSemVerBuildMetadata& A, const FSemVerBuildMetadata& B);
 
 	/** Convert a build metadata object to its string representation */
-	UFUNCTION(BlueprintPure, meta=(DisplayName = "ToString (SemVer BuildMetadata)", CompactNodeTitle = "->", Keywords="cast convert", BlueprintAutocast), Category="Open Unreal Utilities|Semantic Versioning|Build Metadata")
+	UFUNCTION(
+		BlueprintPure,
+		meta =
+			(DisplayName = "ToString (SemVer BuildMetadata)",
+			 CompactNodeTitle = "->",
+			 Keywords = "cast convert",
+			 BlueprintAutocast),
+		Category = "Open Unreal Utilities|Semantic Versioning|Build Metadata")
 	static FString Conv_BuildMetadataString(const FSemVerBuildMetadata& InBuildMetadata);
 };

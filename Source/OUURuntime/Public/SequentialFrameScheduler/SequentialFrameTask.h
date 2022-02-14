@@ -13,16 +13,11 @@ public:
 	{
 		FTaskHandle() = default;
 
-		FTaskHandle(int32 InIndex) : Index(InIndex)
-		{
-		}
+		FTaskHandle(int32 InIndex) : Index(InIndex) {}
 
 		int32 Index = INDEX_NONE;
 
-		bool operator==(const FTaskHandle& Other) const
-		{
-			return Index == Other.Index;
-		}
+		bool operator==(const FTaskHandle& Other) const { return Index == Other.Index; }
 	};
 
 	/**

@@ -136,7 +136,10 @@ public:
 	 * Copies the elements from a given array range to a new array.
 	 */
 	template <typename ElementType, typename AllocatorType>
-	static TArray<ElementType, AllocatorType> CopyRange(TArray<ElementType, AllocatorType>& SourceArray, int32 StartIndex, int32 EndIndex)
+	static TArray<ElementType, AllocatorType> CopyRange(
+		TArray<ElementType, AllocatorType>& SourceArray,
+		int32 StartIndex,
+		int32 EndIndex)
 	{
 		check(SourceArray.IsValidIndex(StartIndex));
 		check(SourceArray.IsValidIndex(EndIndex));
@@ -147,14 +150,13 @@ public:
 	 * Gives access to a single array element using slice index (negative numbers accesses elements from the end).
 	 */
 	template <typename ElementType, typename AllocatorType>
-    static ElementType& Slice(TArray<ElementType, AllocatorType>& Array, int32 Index)
+	static ElementType& Slice(TArray<ElementType, AllocatorType>& Array, int32 Index)
 	{
 		Index = SliceIndex(Array, Index);
 		check(Array.IsValidIndex(Index));
 		return Array[Index];
 	}
 
-	
 	/**
 	 * Gives access to a single array element using slice index (negative numbers accesses elements from the end).
 	 */
@@ -169,14 +171,20 @@ public:
 	 * Negative indices can be used to convey positions from the end of the array.
 	 */
 	template <typename ElementType, typename AllocatorType>
-	static TArray<ElementType, AllocatorType> Slice(const TArray<ElementType, AllocatorType>& SourceArray, int32 StartIndex, int32 EndIndex)
+	static TArray<ElementType, AllocatorType> Slice(
+		const TArray<ElementType, AllocatorType>& SourceArray,
+		int32 StartIndex,
+		int32 EndIndex)
 	{
 		StartIndex = SliceIndex(SourceArray, StartIndex);
 		EndIndex = SliceIndex(SourceArray, EndIndex);
 		check(SourceArray.IsValidIndex(StartIndex));
 		check(SourceArray.IsValidIndex(EndIndex));
-		checkf(StartIndex < EndIndex, TEXT("Resolved StartIndex is expected to be smaller than resolved EndIndex. "
-			"Dynamic reversal of ranges is not support at the moment! Please use ReverseRange() for those cases."));
+		checkf(
+			StartIndex < EndIndex,
+			TEXT(
+				"Resolved StartIndex is expected to be smaller than resolved EndIndex. "
+				"Dynamic reversal of ranges is not support at the moment! Please use ReverseRange() for those cases."));
 
 		return TArray<ElementType, AllocatorType>(&SourceArray[StartIndex], EndIndex - StartIndex + 1);
 	}

@@ -4,10 +4,10 @@
 
 #if WITH_AUTOMATION_WORKER
 
-#include "Templates/BitmaskUtils.h"
+	#include "Templates/BitmaskUtils.h"
 
-#define OUU_TEST_CATEGORY OpenUnrealUtilities.Runtime.Templates
-#define OUU_TEST_TYPE BitmaskUtils
+	#define OUU_TEST_CATEGORY OpenUnrealUtilities.Runtime.Templates
+	#define OUU_TEST_TYPE	  BitmaskUtils
 
 //////////////////////////////////////////////////////////////////////////
 // Utility types for testing
@@ -65,14 +65,14 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("false|16|16")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(EnumValueAsBitmask)
 {
 	// Arrange
-	FAutomationTestParameterParser Parser{ Parameters };
+	FAutomationTestParameterParser Parser{Parameters};
 	const bool bNaturalEnum = Parser.GetValue<bool>(0);
 	const int32 ExpectedBitmask = Parser.GetValue<int32>(2);
 
 	// Act
-	const int32 Bitmask = bNaturalEnum ? BitmaskUtils::EnumValueAsBitmask(Parser.GetValue<ENaturalTestEnum>(1)) :
-		BitmaskUtils::EnumValueAsBitmask(Parser.GetValue<EPow2TestEnum>(1));
-	
+	const int32 Bitmask = bNaturalEnum ? BitmaskUtils::EnumValueAsBitmask(Parser.GetValue<ENaturalTestEnum>(1))
+									   : BitmaskUtils::EnumValueAsBitmask(Parser.GetValue<EPow2TestEnum>(1));
+
 	// Assert
 	TestEqual("Bitmask", Bitmask, ExpectedBitmask);
 	return true;
@@ -88,8 +88,8 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(EnumValuesAsBitmask, DEFAULT_OUU_TEST_FLAGS
 	const int32 ExpectedBitmask = 3;
 
 	// Act
-	const int32 NaturalBitmask = BitmaskUtils::EnumValuesAsBitmask({ ENaturalTestEnum::Zero, ENaturalTestEnum::One });
-	const int32 Pow2Bitmask = BitmaskUtils::EnumValuesAsBitmask({ EPow2TestEnum::FirstBit, EPow2TestEnum::SecondBit });
+	const int32 NaturalBitmask = BitmaskUtils::EnumValuesAsBitmask({ENaturalTestEnum::Zero, ENaturalTestEnum::One});
+	const int32 Pow2Bitmask = BitmaskUtils::EnumValuesAsBitmask({EPow2TestEnum::FirstBit, EPow2TestEnum::SecondBit});
 
 	// Assert
 	TestEqual("Bitmask (Natural)", NaturalBitmask, ExpectedBitmask);
@@ -122,13 +122,13 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("false|4|1|5")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(SetBit)
 {
 	// Arrange
-	FAutomationTestParameterParser Parser{ Parameters };
+	FAutomationTestParameterParser Parser{Parameters};
 	const bool bNaturalEnum = Parser.GetValue<bool>(0);
 	int32 Bitmask = Parser.GetValue<int32>(1);
 	const int32 ExpectedResult = Parser.GetValue<int32>(3);
 
 	// Act
-	if(bNaturalEnum)
+	if (bNaturalEnum)
 	{
 		BitmaskUtils::SetBit(Bitmask, Parser.GetValue<ENaturalTestEnum>(2));
 	}
@@ -136,7 +136,7 @@ OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(SetBit)
 	{
 		BitmaskUtils::SetBit(Bitmask, Parser.GetValue<EPow2TestEnum>(2));
 	}
-	
+
 	// Assert
 	TestEqual("Bitmask", Bitmask, ExpectedResult);
 	return true;
@@ -150,8 +150,8 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(SetBits, DEFAULT_OUU_TEST_FLAGS)
 	int32 Pow2Bitmask = 4;
 
 	// Act
-	BitmaskUtils::SetBits(NaturalBitmask, { ENaturalTestEnum::Zero, ENaturalTestEnum::One });
-	BitmaskUtils::SetBits(Pow2Bitmask, { EPow2TestEnum::FirstBit, EPow2TestEnum::SecondBit });
+	BitmaskUtils::SetBits(NaturalBitmask, {ENaturalTestEnum::Zero, ENaturalTestEnum::One});
+	BitmaskUtils::SetBits(Pow2Bitmask, {EPow2TestEnum::FirstBit, EPow2TestEnum::SecondBit});
 
 	// Assert
 	TestEqual("Bitmask (Natural)", NaturalBitmask, ExpectedBitmask);
@@ -183,7 +183,7 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("false|3|2|1")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(ClearBit)
 {
 	// Arrange
-	FAutomationTestParameterParser Parser{ Parameters };
+	FAutomationTestParameterParser Parser{Parameters};
 	const bool bNaturalEnum = Parser.GetValue<bool>(0);
 	int32 Bitmask = Parser.GetValue<int32>(1);
 	const int32 ExpectedResult = Parser.GetValue<int32>(3);
@@ -211,8 +211,8 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(ClearBits, DEFAULT_OUU_TEST_FLAGS)
 	int32 Pow2Bitmask = 7;
 
 	// Act
-	BitmaskUtils::ClearBits(NaturalBitmask, { ENaturalTestEnum::Zero, ENaturalTestEnum::One });
-	BitmaskUtils::ClearBits(Pow2Bitmask, { EPow2TestEnum::FirstBit, EPow2TestEnum::SecondBit });
+	BitmaskUtils::ClearBits(NaturalBitmask, {ENaturalTestEnum::Zero, ENaturalTestEnum::One});
+	BitmaskUtils::ClearBits(Pow2Bitmask, {EPow2TestEnum::FirstBit, EPow2TestEnum::SecondBit});
 
 	// Assert
 	TestEqual("Bitmask (Natural)", NaturalBitmask, ExpectedBitmask);
@@ -249,15 +249,14 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("false|3|4|false")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(TestBit)
 {
 	// Arrange
-	FAutomationTestParameterParser Parser{ Parameters };
+	FAutomationTestParameterParser Parser{Parameters};
 	const bool bNaturalEnum = Parser.GetValue<bool>(0);
 	int32 Bitmask = Parser.GetValue<int32>(1);
 	const bool ExpectedResult = Parser.GetValue<bool>(3);
-	
+
 	// Act
-	bool ActualResult = bNaturalEnum ? 
-		BitmaskUtils::TestBit(Bitmask, Parser.GetValue<ENaturalTestEnum>(2)) :
-		BitmaskUtils::TestBit(Bitmask, Parser.GetValue<EPow2TestEnum>(2));
+	bool ActualResult = bNaturalEnum ? BitmaskUtils::TestBit(Bitmask, Parser.GetValue<ENaturalTestEnum>(2))
+									 : BitmaskUtils::TestBit(Bitmask, Parser.GetValue<EPow2TestEnum>(2));
 
 	// Assert
 	TestEqual("TestBit result", ActualResult, ExpectedResult);
@@ -270,37 +269,53 @@ OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(TestBit)
 
 OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestAllBits_Complete, DEFAULT_OUU_TEST_FLAGS)
 {
-	TestTrue("TestAllBits for matching set of flags (Natural)",
-		BitmaskUtils::TestAllBits(TestMultipleNaturalBits_Bitmask, { ENaturalTestEnum::Zero, ENaturalTestEnum::One, ENaturalTestEnum::Two }));
-	TestTrue("TestAllBits for matching set of flags (Pow2)", 
-		BitmaskUtils::TestAllBits(TestMultiplePow2Bits_Bitmask, { EPow2TestEnum::FirstBit, EPow2TestEnum::SecondBit, EPow2TestEnum::ThirdBit }));
+	TestTrue(
+		"TestAllBits for matching set of flags (Natural)",
+		BitmaskUtils::TestAllBits(
+			TestMultipleNaturalBits_Bitmask,
+			{ENaturalTestEnum::Zero, ENaturalTestEnum::One, ENaturalTestEnum::Two}));
+	TestTrue(
+		"TestAllBits for matching set of flags (Pow2)",
+		BitmaskUtils::TestAllBits(
+			TestMultiplePow2Bits_Bitmask,
+			{EPow2TestEnum::FirstBit, EPow2TestEnum::SecondBit, EPow2TestEnum::ThirdBit}));
 	return true;
 }
 
 OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestAllBits_Incomplete, DEFAULT_OUU_TEST_FLAGS)
 {
-	TestTrue("TestAllBits for incomplete set of flags (Natural)",
-		BitmaskUtils::TestAllBits(TestMultipleNaturalBits_Bitmask, { ENaturalTestEnum::Zero, ENaturalTestEnum::Two }));
-	TestTrue("TestAllBits for incomplete set of flags (Pow2)",
-		BitmaskUtils::TestAllBits(TestMultiplePow2Bits_Bitmask, { EPow2TestEnum::FirstBit, EPow2TestEnum::ThirdBit }));
+	TestTrue(
+		"TestAllBits for incomplete set of flags (Natural)",
+		BitmaskUtils::TestAllBits(TestMultipleNaturalBits_Bitmask, {ENaturalTestEnum::Zero, ENaturalTestEnum::Two}));
+	TestTrue(
+		"TestAllBits for incomplete set of flags (Pow2)",
+		BitmaskUtils::TestAllBits(TestMultiplePow2Bits_Bitmask, {EPow2TestEnum::FirstBit, EPow2TestEnum::ThirdBit}));
 	return true;
 }
 
 OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestAllBits_TooMany, DEFAULT_OUU_TEST_FLAGS)
 {
-	TestFalse("TestAllBits for too many flags (Natural)",
-		BitmaskUtils::TestAllBits(TestMultipleNaturalBits_Bitmask, { ENaturalTestEnum::Zero, ENaturalTestEnum::One, ENaturalTestEnum::Two, ENaturalTestEnum::Three }));
-	TestFalse("TestAllBits for too many flags (Pow2)",
-		BitmaskUtils::TestAllBits(TestMultiplePow2Bits_Bitmask, { EPow2TestEnum::FirstBit, EPow2TestEnum::SecondBit, EPow2TestEnum::ThirdBit, EPow2TestEnum::FourthBit }));
+	TestFalse(
+		"TestAllBits for too many flags (Natural)",
+		BitmaskUtils::TestAllBits(
+			TestMultipleNaturalBits_Bitmask,
+			{ENaturalTestEnum::Zero, ENaturalTestEnum::One, ENaturalTestEnum::Two, ENaturalTestEnum::Three}));
+	TestFalse(
+		"TestAllBits for too many flags (Pow2)",
+		BitmaskUtils::TestAllBits(
+			TestMultiplePow2Bits_Bitmask,
+			{EPow2TestEnum::FirstBit, EPow2TestEnum::SecondBit, EPow2TestEnum::ThirdBit, EPow2TestEnum::FourthBit}));
 	return true;
 }
 
 OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestAllBits_AllWrong, DEFAULT_OUU_TEST_FLAGS)
 {
-	TestFalse("TestAllBits for completely wrong flags (Natural)", 
-		BitmaskUtils::TestAllBits(TestMultipleNaturalBits_Bitmask, { ENaturalTestEnum::Three }));
-	TestFalse("TestAllBits for completely wrong flags (Pow2)",
-		BitmaskUtils::TestAllBits(TestMultiplePow2Bits_Bitmask, { EPow2TestEnum::FourthBit }));
+	TestFalse(
+		"TestAllBits for completely wrong flags (Natural)",
+		BitmaskUtils::TestAllBits(TestMultipleNaturalBits_Bitmask, {ENaturalTestEnum::Three}));
+	TestFalse(
+		"TestAllBits for completely wrong flags (Pow2)",
+		BitmaskUtils::TestAllBits(TestMultiplePow2Bits_Bitmask, {EPow2TestEnum::FourthBit}));
 
 	return true;
 }
@@ -311,44 +326,59 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(TestAllBits_AllWrong, DEFAULT_OUU_TEST_FLAG
 
 OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(Natural_TestAnyBits_Complete, DEFAULT_OUU_TEST_FLAGS)
 {
-	TestTrue("TestAnyBits for matching set of flags (Natural)",
-		BitmaskUtils::TestAnyBits(TestMultipleNaturalBits_Bitmask, { ENaturalTestEnum::Zero, ENaturalTestEnum::One, ENaturalTestEnum::Two }));
-	TestTrue("TestAnyBits for matching set of flags must be true (Pow2)",
-		BitmaskUtils::TestAnyBits(TestMultiplePow2Bits_Bitmask, { EPow2TestEnum::FirstBit, EPow2TestEnum::SecondBit, EPow2TestEnum::ThirdBit }));
+	TestTrue(
+		"TestAnyBits for matching set of flags (Natural)",
+		BitmaskUtils::TestAnyBits(
+			TestMultipleNaturalBits_Bitmask,
+			{ENaturalTestEnum::Zero, ENaturalTestEnum::One, ENaturalTestEnum::Two}));
+	TestTrue(
+		"TestAnyBits for matching set of flags must be true (Pow2)",
+		BitmaskUtils::TestAnyBits(
+			TestMultiplePow2Bits_Bitmask,
+			{EPow2TestEnum::FirstBit, EPow2TestEnum::SecondBit, EPow2TestEnum::ThirdBit}));
 	return true;
 }
 
 OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(Natural_TestAnyBits_Incomplete, DEFAULT_OUU_TEST_FLAGS)
 {
-	TestTrue("TestAnyBits for incomplete set of flags (Natural)", 
-		BitmaskUtils::TestAnyBits(TestMultipleNaturalBits_Bitmask, { ENaturalTestEnum::Zero, ENaturalTestEnum::Two }));
-	TestTrue("TestAnyBits for incomplete set of flags (Pow2)",
-		BitmaskUtils::TestAnyBits(TestMultiplePow2Bits_Bitmask, { EPow2TestEnum::FirstBit, EPow2TestEnum::ThirdBit }));
+	TestTrue(
+		"TestAnyBits for incomplete set of flags (Natural)",
+		BitmaskUtils::TestAnyBits(TestMultipleNaturalBits_Bitmask, {ENaturalTestEnum::Zero, ENaturalTestEnum::Two}));
+	TestTrue(
+		"TestAnyBits for incomplete set of flags (Pow2)",
+		BitmaskUtils::TestAnyBits(TestMultiplePow2Bits_Bitmask, {EPow2TestEnum::FirstBit, EPow2TestEnum::ThirdBit}));
 	return true;
 }
 
 OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(Natural_TestAnyBits_TooMany, DEFAULT_OUU_TEST_FLAGS)
 {
-	TestTrue("TestAnyBits for too many flags (Natural)",
-		BitmaskUtils::TestAnyBits(TestMultipleNaturalBits_Bitmask, { ENaturalTestEnum::Zero, ENaturalTestEnum::One, ENaturalTestEnum::Two, ENaturalTestEnum::Three }));
-	TestTrue("TestAnyBits for too many flags (Pow2)",
-		BitmaskUtils::TestAnyBits(TestMultiplePow2Bits_Bitmask, { EPow2TestEnum::FirstBit, EPow2TestEnum::SecondBit, EPow2TestEnum::ThirdBit, EPow2TestEnum::FourthBit }));
+	TestTrue(
+		"TestAnyBits for too many flags (Natural)",
+		BitmaskUtils::TestAnyBits(
+			TestMultipleNaturalBits_Bitmask,
+			{ENaturalTestEnum::Zero, ENaturalTestEnum::One, ENaturalTestEnum::Two, ENaturalTestEnum::Three}));
+	TestTrue(
+		"TestAnyBits for too many flags (Pow2)",
+		BitmaskUtils::TestAnyBits(
+			TestMultiplePow2Bits_Bitmask,
+			{EPow2TestEnum::FirstBit, EPow2TestEnum::SecondBit, EPow2TestEnum::ThirdBit, EPow2TestEnum::FourthBit}));
 	return true;
 }
 
 OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(Natural_TestAnyBits_AllWrong, DEFAULT_OUU_TEST_FLAGS)
 {
-	TestFalse("TestAnyBits for completely wrong flags",
-		BitmaskUtils::TestAnyBits(TestMultipleNaturalBits_Bitmask, { ENaturalTestEnum::Three }));
-	TestFalse("TestAnyBits for completely wrong flags (Pow2)",
-		BitmaskUtils::TestAnyBits(TestMultiplePow2Bits_Bitmask, { EPow2TestEnum::FourthBit }));
+	TestFalse(
+		"TestAnyBits for completely wrong flags",
+		BitmaskUtils::TestAnyBits(TestMultipleNaturalBits_Bitmask, {ENaturalTestEnum::Three}));
+	TestFalse(
+		"TestAnyBits for completely wrong flags (Pow2)",
+		BitmaskUtils::TestAnyBits(TestMultiplePow2Bits_Bitmask, {EPow2TestEnum::FourthBit}));
 	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-#undef OUU_TEST_CATEGORY
-#undef OUU_TEST_TYPE
+	#undef OUU_TEST_CATEGORY
+	#undef OUU_TEST_TYPE
 
 #endif
-

@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include "Kismet/BlueprintFunctionLibrary.h"
 #include "Engine/World.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
+
 #include "WorldBlueprintLibrary.generated.h"
 
 /** Copy of EWorldType that is Blueprint exposed */
@@ -38,15 +39,14 @@ enum class EBlueprintWorldType : uint8
 static_assert(EWorldType::None == 0, "None types must match");
 
 /**
-* Engine globals defined in CoreGlobals.h and Build.h that are not blueprint exposed via engine libraries.
-* Does not expand upon existing C++ functionality but merely makes it available for blueprint use. 
-*/
+ * Engine globals defined in CoreGlobals.h and Build.h that are not blueprint exposed via engine libraries.
+ * Does not expand upon existing C++ functionality but merely makes it available for blueprint use.
+ */
 UCLASS()
 class UWorldBlueprintLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
-
 	/** Get the world type of a world */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|World")
 	static EBlueprintWorldType GetWorldType(UWorld* World);

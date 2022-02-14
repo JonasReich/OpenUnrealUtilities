@@ -1,11 +1,12 @@
 // Copyright (c) 2021 Jonas Reich
 
 #include "Math/StaticIntegerMath.h"
+
 #include "Traits/AssertValueEquality.h"
 
 // Static tests for IntPow()
 
-template<SIZE_T Base, SIZE_T Power, SIZE_T ExpectedResult>
+template <SIZE_T Base, SIZE_T Power, SIZE_T ExpectedResult>
 struct TAssertIntPowEquals
 {
 	static const SIZE_T TestResult = IntPow<SIZE_T>(Base, Power);
@@ -33,10 +34,18 @@ static_assert(TAssertValuesEqual<int64, ConvertDecimalToFakeBinary<int8>(-1), 11
 static_assert(TAssertValuesEqual<int64, ConvertDecimalToFakeBinary<int8>(-2), 11111110>::Value, "-2 as binary");
 static_assert(TAssertValuesEqual<int64, ConvertDecimalToFakeBinary<int8>(-3), 11111101>::Value, "-3 as binary");
 
-static_assert(TAssertValuesEqual<int64, ConvertDecimalToFakeBinary<int32>(1024), 10000000000>::Value, "1024 as fake-binary");
-static_assert(TAssertValuesEqual<int64, ConvertDecimalToFakeBinary<int32>(0b10000000000), 10000000000>::Value, "1024 as fake-binary");
-static_assert(TAssertValuesEqual<int64, ConvertDecimalToFakeBinary<int32>(1025), 10000000001>::Value, "1025 as fake-binary");
-static_assert(TAssertValuesEqual<int64, ConvertDecimalToFakeBinary<int32>(0b10000000001), 10000000001>::Value, "1025 as fake-binary");
+static_assert(
+	TAssertValuesEqual<int64, ConvertDecimalToFakeBinary<int32>(1024), 10000000000>::Value,
+	"1024 as fake-binary");
+static_assert(
+	TAssertValuesEqual<int64, ConvertDecimalToFakeBinary<int32>(0b10000000000), 10000000000>::Value,
+	"1024 as fake-binary");
+static_assert(
+	TAssertValuesEqual<int64, ConvertDecimalToFakeBinary<int32>(1025), 10000000001>::Value,
+	"1025 as fake-binary");
+static_assert(
+	TAssertValuesEqual<int64, ConvertDecimalToFakeBinary<int32>(0b10000000001), 10000000001>::Value,
+	"1025 as fake-binary");
 
 // Static tests for NumDigits
 
@@ -68,9 +77,21 @@ static_assert(TAssertValuesEqual<SIZE_T, NumDigits<int32>(1024, 2), 11>::Value, 
 
 // Static tests for GetMinBitSize
 
-static_assert(TAssertValuesEqual<int32, GetMinBitSize(-3), 3>::Value, "GetMinSize<-3>() returns wrong value! (should be 3)");
-static_assert(TAssertValuesEqual<int32, GetMinBitSize(+5), 3>::Value, "GetMinSize<+5>() returns wrong value! (should be 3)");
-static_assert(TAssertValuesEqual<int32, GetMinBitSize(+0), 1>::Value, "GetMinSize<+0>() returns wrong value! (should be 1)");
-static_assert(TAssertValuesEqual<int32, GetMinBitSize(-1), 2>::Value, "GetMinSize<-1>() returns wrong value! (should be 2)");
-static_assert(TAssertValuesEqual<int32, GetMinBitSize(-5), 4>::Value, "GetMinSize<-5>() returns wrong value! (should be 4)");
-static_assert(TAssertValuesEqual<int32, GetMinBitSize(+5), 3>::Value, "GetMinSize<+5>() returns wrong value! (should be 3)");
+static_assert(
+	TAssertValuesEqual<int32, GetMinBitSize(-3), 3>::Value,
+	"GetMinSize<-3>() returns wrong value! (should be 3)");
+static_assert(
+	TAssertValuesEqual<int32, GetMinBitSize(+5), 3>::Value,
+	"GetMinSize<+5>() returns wrong value! (should be 3)");
+static_assert(
+	TAssertValuesEqual<int32, GetMinBitSize(+0), 1>::Value,
+	"GetMinSize<+0>() returns wrong value! (should be 1)");
+static_assert(
+	TAssertValuesEqual<int32, GetMinBitSize(-1), 2>::Value,
+	"GetMinSize<-1>() returns wrong value! (should be 2)");
+static_assert(
+	TAssertValuesEqual<int32, GetMinBitSize(-5), 4>::Value,
+	"GetMinSize<-5>() returns wrong value! (should be 4)");
+static_assert(
+	TAssertValuesEqual<int32, GetMinBitSize(+5), 3>::Value,
+	"GetMinSize<+5>() returns wrong value! (should be 3)");

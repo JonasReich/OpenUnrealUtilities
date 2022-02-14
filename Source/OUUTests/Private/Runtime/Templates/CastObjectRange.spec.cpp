@@ -4,16 +4,21 @@
 
 #if WITH_AUTOMATION_WORKER
 
-#include "Templates/CastObjectRange.h"
-#include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+	#include "CoreMinimal.h"
+	#include "GameFramework/Actor.h"
+	#include "Templates/CastObjectRange.h"
 
 namespace CastObjectRangeTests
 {
-	template<bool bSourceConst, bool bTargetConst, bool bCopySourceArray, bool bForwardConstArray,
+	template <
+		bool bSourceConst,
+		bool bTargetConst,
+		bool bCopySourceArray,
+		bool bForwardConstArray,
 		typename SourceType = typename TConditionalType<bSourceConst, const UObject*, UObject*>::Type,
 		typename TargetType = typename TConditionalType<bTargetConst, const AActor*, AActor*>::Type,
-		typename ForwardArrayType = typename TConditionalType<bForwardConstArray, const TArray<SourceType>&, TArray<SourceType>&>::Type>
+		typename ForwardArrayType =
+			typename TConditionalType<bForwardConstArray, const TArray<SourceType>&, TArray<SourceType>&>::Type>
 	void TestObjectRange(FAutomationTestBase& AutomationTest, FString TestString)
 	{
 		// Arrange
@@ -47,7 +52,7 @@ namespace CastObjectRangeTests
 		// Assert
 		TestArraysEqual(AutomationTest, "CastObjectRange (" + TestString + ")", ResultActorArray, ExpectedActorArray);
 	}
-}
+} // namespace CastObjectRangeTests
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -55,35 +60,28 @@ BEGIN_DEFINE_SPEC(FCastObjectRangeSpec, "OpenUnrealUtilities.Runtime.Templates.C
 END_DEFINE_SPEC(FCastObjectRangeSpec)
 void FCastObjectRangeSpec::Define()
 {
-	Describe("when the collection is passed by non-const reference", [this]()
-	{
-		It("should cast elements of TArray<const UObject*>& to const AActor*", [this]()
-		{
+	Describe("when the collection is passed by non-const reference", [this]() {
+		It("should cast elements of TArray<const UObject*>& to const AActor*", [this]() {
 			CastObjectRangeTests::TestObjectRange<true, true, false, false>(*this, "const to const by ref");
 		});
 
-		It("should cast elements of TArray<UObject*>& to const AActor*", [this]()
-		{
+		It("should cast elements of TArray<UObject*>& to const AActor*", [this]() {
 			CastObjectRangeTests::TestObjectRange<false, true, false, false>(*this, "non-const to const by ref");
 		});
 
-		It("should cast elements of TArray<UObject*>& to AActor*", [this]()
-		{
+		It("should cast elements of TArray<UObject*>& to AActor*", [this]() {
 			CastObjectRangeTests::TestObjectRange<false, false, false, false>(*this, "non-const to non-const by ref");
 		});
 
 		// No 4th case: cannot convert from 'const AActor *' to 'TargetType' with [ TargetType=AActor * ]
 	});
-	
-	Describe("when the collection is passed by const reference", [this]()
-	{
-		It("should cast elements of const TArray<const UObject*>& to const AActor*", [this]()
-		{
+
+	Describe("when the collection is passed by const reference", [this]() {
+		It("should cast elements of const TArray<const UObject*>& to const AActor*", [this]() {
 			CastObjectRangeTests::TestObjectRange<true, true, false, true>(*this, "const to const by ref");
 		});
 
-		It("should cast elements of const TArray<UObject*>& to const AActor*", [this]()
-		{
+		It("should cast elements of const TArray<UObject*>& to const AActor*", [this]() {
 			CastObjectRangeTests::TestObjectRange<false, true, false, true>(*this, "non-const to const by ref");
 		});
 
@@ -91,20 +89,16 @@ void FCastObjectRangeSpec::Define()
 		// No 4th case: cannot convert from 'const AActor *' to 'TargetType' with [ TargetType=AActor * ]
 	});
 
-	Describe("when the collection is passed by value", [this]()
-	{
-		It("should cast elements of TArray<const UObject*> to const AActor*", [this]()
-		{
+	Describe("when the collection is passed by value", [this]() {
+		It("should cast elements of TArray<const UObject*> to const AActor*", [this]() {
 			CastObjectRangeTests::TestObjectRange<true, true, true, false>(*this, "const to const by value");
 		});
 
-		It("should cast elements of TArray<UObject*> to const AActor*", [this]()
-		{
+		It("should cast elements of TArray<UObject*> to const AActor*", [this]() {
 			CastObjectRangeTests::TestObjectRange<false, true, true, false>(*this, "non-const to const by value");
 		});
 
-		It("should cast elements of TArray<UObject*> to AActor*", [this]()
-		{
+		It("should cast elements of TArray<UObject*> to AActor*", [this]() {
 			CastObjectRangeTests::TestObjectRange<false, false, true, false>(*this, "non-const to non-const by value");
 		});
 

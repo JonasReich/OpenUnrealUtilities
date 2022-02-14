@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Logging/TokenizedMessage.h"
+
 #include "MessageLogSeverity.generated.h"
 
 /**
@@ -19,5 +20,6 @@ enum class EMessageLogSeverity : uint8
 	Info = EMessageSeverity::Info
 };
 
-static_assert(EMessageLogSeverity::CriticalError == static_cast<EMessageLogSeverity>(EMessageSeverity::CriticalError),
+static_assert(
+	EMessageLogSeverity::CriticalError == static_cast<EMessageLogSeverity>(EMessageSeverity::CriticalError),
 	"CriticalError value must match in both enums");

@@ -15,11 +15,13 @@ namespace OUU_ScopedMultiRWLock_Private
 	class FScopedMultiRWLockRef_Base
 	{
 	public:
-		template<typename...>
+		template <typename...>
 		friend class TScopedMultiRWLock;
 
 		FScopedMultiRWLockRef_Base(FRWLockedVariable_Base& InRWLockVariable_Base_Ref, bool bInIsWriteLock) :
-		RWLockVariable_Base_Ref(InRWLockVariable_Base_Ref), bIsWriteLock(bInIsWriteLock) {}
+			RWLockVariable_Base_Ref(InRWLockVariable_Base_Ref), bIsWriteLock(bInIsWriteLock)
+		{
+		}
 
 	private:
 		FRWLockedVariable_Base& RWLockVariable_Base_Ref;
@@ -34,7 +36,7 @@ namespace OUU_ScopedMultiRWLock_Private
 
 	/**
 	 * Templated reference to a TRWLockedVariable used inside the multi-lock.
-	 * This version extends upon FScopedMultiRWLockRef_Base by adding a reference 
+	 * This version extends upon FScopedMultiRWLockRef_Base by adding a reference
 	 * to the actual TRWLockedVariable which holds the data member.
 	 */
 	template <typename InVariableType, bool bInIsWriteLock>
@@ -51,11 +53,13 @@ namespace OUU_ScopedMultiRWLock_Private
 		 * Static type info that denotes whether the lock is a write lock.
 		 * This should always have the same value as FScopedMultiRWLockRef_Base::bIsWriteLock.
 		 */
-		enum { IsWriteLock = bInIsWriteLock };
+		enum
+		{
+			IsWriteLock = bInIsWriteLock
+		};
 
 		TScopedMultiRWLockRef(RWLockedVariableType& InRWLockedVariable) :
-			FScopedMultiRWLockRef_Base(InRWLockedVariable, bInIsWriteLock),
-			RWLockedVariable_Ref(InRWLockedVariable)
+			FScopedMultiRWLockRef_Base(InRWLockedVariable, bInIsWriteLock), RWLockedVariable_Ref(InRWLockedVariable)
 		{
 		}
 
@@ -66,19 +70,19 @@ namespace OUU_ScopedMultiRWLock_Private
 		 */
 		RWLockedVariableType& RWLockedVariable_Ref;
 	};
-};
+}; // namespace OUU_ScopedMultiRWLock_Private
 
 /**
  * TScopedMultiRWLock allows locking multiple TRWLockedVariable's at the same time and ensure at runtime time that
  * they will be locked in the same order when locking and unlocking from multiple places.
- * 
+ *
  * LockRefTypes is a variadic template type list consisting of TScopedMultiRWLockRef<> instantiations.
  *
  * Please use the template functions MakeScopedMultiRWLock(), ScopedMultiRWLock_Write() and ScopedMultiRWLock_Read()
  * to avoid having to explicitly specify the template parameter types.
  *
  * Example:
- * 
+ *
  *    // Declare TRWLockedVariables
  *    TRWLockedVariable<int32> RWLockedInt;
  *    TRWLockedVariable<TArray<int32>> RWLockedArray;
@@ -112,26 +116,19 @@ public:
 	// Number of variables / locks controlled by this multi lock
 	static const uint32 NumLocks = sizeof...(LockRefTypes);
 
-	TScopedMultiRWLock(const LockRefTypes&... InLockReferences) :
-		LockReferences(InLockReferences...)
+	TScopedMultiRWLock(const LockRefTypes&... InLockReferences) : LockReferences(InLockReferences...)
 	{
 		// Add pointers to the locks to the array
-		VisitTupleElements([&](FScopedMultiRWLockRef_Base& LockRef)
-		{
-			LockPointers.Add(&LockRef);
-		}, LockReferences);
+		VisitTupleElements([&](FScopedMultiRWLockRef_Base& LockRef) { LockPointers.Add(&LockRef); }, LockReferences);
 
 		// Sort locks by memory address
-		LockPointers.Sort([](
-			const FScopedMultiRWLockRef_Base& Left,
-			const FScopedMultiRWLockRef_Base& Right) -> bool
-		{
+		LockPointers.Sort([](const FScopedMultiRWLockRef_Base& Left, const FScopedMultiRWLockRef_Base& Right) -> bool {
 			const FScopedMultiRWLockRef_Base* LeftPtr = &Left;
 			const FScopedMultiRWLockRef_Base* RightPtr = &Right;
 			return LeftPtr < RightPtr;
 		});
 
-		// Go through all sorted locks and acquire the appropriate lock 
+		// Go through all sorted locks and acquire the appropriate lock
 		for (const FScopedMultiRWLockRef_Base* LockRef : LockPointers)
 		{
 			if (LockRef->bIsWriteLock)
@@ -147,7 +144,7 @@ public:
 
 	~TScopedMultiRWLock()
 	{
-		// Go through all sorted locks and release the appropriate lock 
+		// Go through all sorted locks and release the appropriate lock
 		for (const FScopedMultiRWLockRef_Base* LockRef : LockPointers)
 		{
 			if (LockRef->bIsWriteLock)
@@ -165,15 +162,15 @@ public:
 	 * Get a reference to the underlying data variables referenced by this multi lock by index.
 	 * Index order is determined by the order you used in the constructor for creating the scoped multi-lock.
 	 */
-	template<
+	template <
 		int32 Idx,
 		typename LockRefType = typename TTupleElement<Idx, TTuple<LockRefTypes...>>::Type,
 		typename VariableType = typename LockRefType::VariableType,
 		// return const reference if the type is only read-locked
-		typename ResultType = typename TConditionalType<LockRefType::IsWriteLock, VariableType, const VariableType>::Type
-	>
+		typename ResultType =
+			typename TConditionalType<LockRefType::IsWriteLock, VariableType, const VariableType>::Type>
 	ResultType& GetByIdx() const
-	{ 
+	{
 		return LockReferences.template Get<Idx>().RWLockedVariable_Ref.GetRefWithoutLocking_USE_WITH_CAUTION();
 	}
 
@@ -198,22 +195,20 @@ public:
 
 	/**
 	 * Get a tuple of pointers to the underlying data variables referenced by this multi lock.
-	 * Can be used in conjunction with Tie() to assign pointers in your function (see usage example in class docs above).
-	 * The order of elements is determined by the order you used in the constructor for creating the scoped multi-lock.
+	 * Can be used in conjunction with Tie() to assign pointers in your function (see usage example in class docs
+	 * above). The order of elements is determined by the order you used in the constructor for creating the scoped
+	 * multi-lock.
 	 *
 	 * Please note that pointers obtained for items with read-only access are const!
 	 * -> The compile errors when assigning this to a wrong pointer tuple using Tie() are very sparse and hard to read.
 	 */
-	auto GetPointers() const
-	{
-		return TTransformTuple_Impl<TMakeIntegerSequence<uint32, NumLocks>>::Do(*this);
-	}
+	auto GetPointers() const { return TTransformTuple_Impl<TMakeIntegerSequence<uint32, NumLocks>>::Do(*this); }
 
 private:
 	// Pointers to base types sorted by memory address
 	TArray<FScopedMultiRWLockRef_Base*, TFixedAllocator<NumLocks>> LockPointers;
 
-	// References to template instances sorted by same order as passed into constructor 
+	// References to template instances sorted by same order as passed into constructor
 	TTuple<LockRefTypes...> LockReferences;
 };
 
@@ -221,7 +216,7 @@ private:
  * Create a TScopedMultiRWLock (see above) from a list of TScopedMultiRWLockRef.
  * Those references are created with the Write() and Get() functions below.
  */
-template<typename... LockRefTypes>
+template <typename... LockRefTypes>
 auto MakeScopedMultiRWLock(LockRefTypes... LockRefs)
 {
 	return TScopedMultiRWLock<LockRefTypes...>(LockRefs...);
@@ -230,7 +225,7 @@ auto MakeScopedMultiRWLock(LockRefTypes... LockRefs)
 /**
  * Mark a TRWLockedVariable for WRITE access when passing to MakeScopedMultiRWLock()
  */
-template<typename VariableType>
+template <typename VariableType>
 auto Write(TRWLockedVariable<VariableType>& RWLockedVariable)
 {
 	return OUU_ScopedMultiRWLock_Private::TScopedMultiRWLockRef<VariableType, true>(RWLockedVariable);
@@ -239,7 +234,7 @@ auto Write(TRWLockedVariable<VariableType>& RWLockedVariable)
 /**
  * Mark a TRWLockedVariable for READ access when passing to MakeScopedMultiRWLock()
  */
-template<typename VariableType>
+template <typename VariableType>
 auto Read(TRWLockedVariable<VariableType>& RWLockedVariable)
 {
 	return OUU_ScopedMultiRWLock_Private::TScopedMultiRWLockRef<VariableType, false>(RWLockedVariable);

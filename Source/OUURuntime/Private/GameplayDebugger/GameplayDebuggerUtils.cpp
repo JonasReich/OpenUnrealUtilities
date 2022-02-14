@@ -4,9 +4,12 @@
 
 #if WITH_GAMEPLAY_DEBUGGER
 
-#include "GameplayDebuggerTypes.h"
+	#include "GameplayDebuggerTypes.h"
 
-FString GameplayDebuggerUtils::WrapStringToWidth(const FString& InString, FGameplayDebuggerCanvasContext& CanvasContext, float TargetWidth)
+FString GameplayDebuggerUtils::WrapStringToWidth(
+	const FString& InString,
+	FGameplayDebuggerCanvasContext& CanvasContext,
+	float TargetWidth)
 {
 	FString OutString;
 	if (TryWrapStringToWidth(InString, OutString, CanvasContext, TargetWidth))
@@ -16,7 +19,11 @@ FString GameplayDebuggerUtils::WrapStringToWidth(const FString& InString, FGamep
 	return InString;
 }
 
-bool GameplayDebuggerUtils::TryWrapStringToWidth(const FString& InString, FString& OutString, FGameplayDebuggerCanvasContext& CanvasContext, float TargetWidth)
+bool GameplayDebuggerUtils::TryWrapStringToWidth(
+	const FString& InString,
+	FString& OutString,
+	FGameplayDebuggerCanvasContext& CanvasContext,
+	float TargetWidth)
 {
 	if (!InString.IsEmpty())
 	{
@@ -42,7 +49,7 @@ bool GameplayDebuggerUtils::TryWrapStringToWidth(const FString& InString, FStrin
 			return true;
 		}
 	}
-	// No need to wrap the text 
+	// No need to wrap the text
 	return false;
 }
 

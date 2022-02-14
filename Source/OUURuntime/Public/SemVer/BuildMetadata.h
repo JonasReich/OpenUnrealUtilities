@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "SemVer/SemVerParsingStrictness.h"
+
 #include "BuildMetadata.generated.h"
 
 //////////////////////////////////////////////////////////////////////////
-// The types defined in this file and all other in this directory implement 
+// The types defined in this file and all other in this directory implement
 // Semantic Versioning 2.0.0 as specified at https://semver.org/spec/v2.0.0.html
 //////////////////////////////////////////////////////////////////////////
 
@@ -26,7 +27,9 @@ public:
 	 * If the string cannot be parsed to a valid metadata object,
 	 * the object remains empty.
 	 */
-	FSemVerBuildMetadata(const FString& SourceString, ESemVerParsingStrictness InStrictness = ESemVerParsingStrictness::Strict);
+	FSemVerBuildMetadata(
+		const FString& SourceString,
+		ESemVerParsingStrictness InStrictness = ESemVerParsingStrictness::Strict);
 
 	FString ToString() const;
 

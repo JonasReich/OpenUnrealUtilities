@@ -1,16 +1,20 @@
 // Copyright (c) 2021 Jonas Reich
 
 #include "Camera/SceneProjectionLibrary.h"
-#include "GameFramework/PlayerController.h"
-#include "Engine/LocalPlayer.h"
+
 #include "Camera/CameraComponent.h"
 #include "Engine/Engine.h"
-#include "IXRTrackingSystem.h"
-#include "IXRCamera.h"
-#include "SceneViewExtension.h"
+#include "Engine/LocalPlayer.h"
+#include "GameFramework/PlayerController.h"
 #include "GameFramework/WorldSettings.h"
+#include "IXRCamera.h"
+#include "IXRTrackingSystem.h"
+#include "SceneViewExtension.h"
 
-bool UOUUSceneProjectionLibrary::GetViewProjectionData(UCameraComponent* TargetCamera, APlayerController const* Player, FSceneViewProjectionData& OutProjectionData)
+bool UOUUSceneProjectionLibrary::GetViewProjectionData(
+	UCameraComponent* TargetCamera,
+	APlayerController const* Player,
+	FSceneViewProjectionData& OutProjectionData)
 {
 	ULocalPlayer* const LocalPlayer = Player ? Player->GetLocalPlayer() : nullptr;
 	if (!LocalPlayer || !LocalPlayer->ViewportClient)
@@ -53,7 +57,9 @@ bool UOUUSceneProjectionLibrary::GetViewProjectionData(UCameraComponent* TargetC
 	}
 
 	// scale distances for cull distance purposes by the ratio of our current FOV to the default FOV
-	//LocalPlayer->PlayerController->LocalPlayerCachedLODDistanceFactor = ViewInfo.FOV / FMath::Max<float>(0.01f, (LocalPlayer->PlayerController->PlayerCameraManager != NULL) ? LocalPlayer->PlayerController->PlayerCameraManager->DefaultFOV : 90.f);
+	// LocalPlayer->PlayerController->LocalPlayerCachedLODDistanceFactor = ViewInfo.FOV / FMath::Max<float>(0.01f,
+	// (LocalPlayer->PlayerController->PlayerCameraManager != NULL) ?
+	// LocalPlayer->PlayerController->PlayerCameraManager->DefaultFOV : 90.f);
 
 	FVector StereoViewLocation = ViewInfo.Location;
 	if (bNeedStereo || bIsHeadTrackingAllowed)
@@ -68,24 +74,28 @@ bool UOUUSceneProjectionLibrary::GetViewProjectionData(UCameraComponent* TargetC
 
 		if (GEngine->StereoRenderingDevice.IsValid())
 		{
-			GEngine->StereoRenderingDevice->CalculateStereoViewOffset(StereoPass, ViewInfo.Rotation, LocalPlayer->GetWorld()->GetWorldSettings()->WorldToMeters, StereoViewLocation);
+			GEngine->StereoRenderingDevice->CalculateStereoViewOffset(
+				StereoPass,
+				ViewInfo.Rotation,
+				LocalPlayer->GetWorld()->GetWorldSettings()->WorldToMeters,
+				StereoViewLocation);
 		}
 	}
 
-	
 	// Create the view matrix
 	OutProjectionData.ViewOrigin = StereoViewLocation;
-	OutProjectionData.ViewRotationMatrix = FInverseRotationMatrix(ViewInfo.Rotation) * FMatrix(
-		FPlane(0, 0, 1, 0),
-		FPlane(1, 0, 0, 0),
-		FPlane(0, 1, 0, 0),
-		FPlane(0, 0, 0, 1));
+	OutProjectionData.ViewRotationMatrix = FInverseRotationMatrix(ViewInfo.Rotation)
+		* FMatrix(FPlane(0, 0, 1, 0), FPlane(1, 0, 0, 0), FPlane(0, 1, 0, 0), FPlane(0, 0, 0, 1));
 
 	// @todo viewext this use case needs to be revisited
 	if (!bNeedStereo)
 	{
 		// Create the projection matrix (and possibly constrain the view rectangle)
-		FMinimalViewInfo::CalculateProjectionMatrixGivenView(ViewInfo, LocalPlayer->AspectRatioAxisConstraint, Viewport, IN OUT OutProjectionData);
+		FMinimalViewInfo::CalculateProjectionMatrixGivenView(
+			ViewInfo,
+			LocalPlayer->AspectRatioAxisConstraint,
+			Viewport,
+			IN OUT OutProjectionData);
 
 		FSceneViewExtensionContext ViewExtensionContext(Viewport);
 		for (auto& ViewExt : GEngine->ViewExtensions->GatherActiveExtensions(ViewExtensionContext))
@@ -105,13 +115,22 @@ bool UOUUSceneProjectionLibrary::GetViewProjectionData(UCameraComponent* TargetC
 	return true;
 }
 
-bool UOUUSceneProjectionLibrary::ProjectWorldToScreen(UCameraComponent* TargetCamera, APlayerController const* Player, const FVector& WorldPosition, FVector2D& OutScreenPosition, bool bPlayerViewportRelative /*= true*/)
+bool UOUUSceneProjectionLibrary::ProjectWorldToScreen(
+	UCameraComponent* TargetCamera,
+	APlayerController const* Player,
+	const FVector& WorldPosition,
+	FVector2D& OutScreenPosition,
+	bool bPlayerViewportRelative /*= true*/)
 {
 	FSceneViewProjectionData ProjectionData;
 	if (GetViewProjectionData(TargetCamera, Player, ProjectionData))
 	{
 		FMatrix const ViewProjectionMatrix = ProjectionData.ComputeViewProjectionMatrix();
-		bool bResult = FSceneView::ProjectWorldToScreen(WorldPosition, ProjectionData.GetConstrainedViewRect(), ViewProjectionMatrix, OutScreenPosition);
+		bool bResult = FSceneView::ProjectWorldToScreen(
+			WorldPosition,
+			ProjectionData.GetConstrainedViewRect(),
+			ViewProjectionMatrix,
+			OutScreenPosition);
 
 		if (bPlayerViewportRelative)
 		{
@@ -124,13 +143,23 @@ bool UOUUSceneProjectionLibrary::ProjectWorldToScreen(UCameraComponent* TargetCa
 	return false;
 }
 
-bool UOUUSceneProjectionLibrary::DeprojectScreenToWorld(UCameraComponent* TargetCamera, APlayerController const* Player, const FVector2D& ScreenPosition, FVector& OutWorldPosition, FVector& OutWorldDirection)
+bool UOUUSceneProjectionLibrary::DeprojectScreenToWorld(
+	UCameraComponent* TargetCamera,
+	APlayerController const* Player,
+	const FVector2D& ScreenPosition,
+	FVector& OutWorldPosition,
+	FVector& OutWorldDirection)
 {
 	FSceneViewProjectionData ProjectionData;
 	if (GetViewProjectionData(TargetCamera, Player, ProjectionData))
 	{
 		FMatrix const InvViewProjMatrix = ProjectionData.ComputeViewProjectionMatrix().InverseFast();
-		FSceneView::DeprojectScreenToWorld(ScreenPosition, ProjectionData.GetConstrainedViewRect(), InvViewProjMatrix, /*out*/ OutWorldPosition, /*out*/ OutWorldDirection);
+		FSceneView::DeprojectScreenToWorld(
+			ScreenPosition,
+			ProjectionData.GetConstrainedViewRect(),
+			InvViewProjMatrix,
+			/*out*/ OutWorldPosition,
+			/*out*/ OutWorldDirection);
 		return true;
 	}
 

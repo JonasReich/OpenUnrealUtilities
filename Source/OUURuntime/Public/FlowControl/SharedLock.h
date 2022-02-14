@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "SharedLock.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnSharedLockStateChanged, USharedLock*, Lock, bool, bIsLocked);
@@ -20,7 +21,7 @@ public:
 	/** Called whenever the lock state changes (from unlocked to locked or vice versa) */
 	UPROPERTY(BlueprintAssignable)
 	FOnSharedLockStateChanged OnLockStateChanged;
-	
+
 	/**
 	 * Add a key to the lock. May be called successively with multiple different key objects.
 	 * All of these key objects need to be removed via TryRelease() in order to release the entire lock.

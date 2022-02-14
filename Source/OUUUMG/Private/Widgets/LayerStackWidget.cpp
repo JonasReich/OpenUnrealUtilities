@@ -1,10 +1,11 @@
 // Copyright (c) 2021 Jonas Reich
 
 #include "Widgets/LayerStackWidget.h"
-#include "Templates/CastObjectRange.h"
-#include "Widgets/LayerWidget.h"
+
 #include "Components/Overlay.h"
 #include "LogOpenUnrealUtilities.h"
+#include "Templates/CastObjectRange.h"
+#include "Widgets/LayerWidget.h"
 
 UOUULayerStackWidget::UOUULayerStackWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -59,11 +60,15 @@ bool UOUULayerStackWidget::IsLinkedStackHead() const
 {
 	if (!bAddedCorrectly)
 	{
-		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("LayerStackWidget was not initialized correctly and is not part of a linked stack! "
-			"You must call StartNewLinkedStack() to create a new linked stack or one of the insert functions to add a LayerStackWidget to "
-			"an existing linked stack before calling any of the other member functions!"));
+		UE_LOG(
+			LogOpenUnrealUtilities,
+			Warning,
+			TEXT("LayerStackWidget was not initialized correctly and is not part of a linked stack! "
+				 "You must call StartNewLinkedStack() to create a new linked stack or one of the insert functions to "
+				 "add a LayerStackWidget to "
+				 "an existing linked stack before calling any of the other member functions!"));
 	}
-	
+
 	return LinkedStackAbove.IsValid() == false;
 }
 
@@ -71,9 +76,13 @@ bool UOUULayerStackWidget::IsLinkedStackRoot() const
 {
 	if (!bAddedCorrectly)
 	{
-		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("LayerStackWidget was not initialized correctly and is not part of a linked stack! "
-			"You must call StartNewLinkedStack() to create a new linked stack or one of the insert functions to add a LayerStackWidget to "
-			"an existing linked stack before calling any of the other member functions!"));
+		UE_LOG(
+			LogOpenUnrealUtilities,
+			Warning,
+			TEXT("LayerStackWidget was not initialized correctly and is not part of a linked stack! "
+				 "You must call StartNewLinkedStack() to create a new linked stack or one of the insert functions to "
+				 "add a LayerStackWidget to "
+				 "an existing linked stack before calling any of the other member functions!"));
 	}
 
 	return LinkedStackBelow.IsValid() == false;
@@ -108,8 +117,11 @@ void UOUULayerStackWidget::NativeOnInitialized()
 	Super::NativeOnInitialized();
 	if (!IsValid(WidgetStack))
 	{
-		UE_LOG(LogOpenUnrealUtilities, Error, TEXT("WidgetStack overlay widget is not bound in NativeOnInitialized. "
-			"This will prevents all of the stack functionality from functioning correctly!"));
+		UE_LOG(
+			LogOpenUnrealUtilities,
+			Error,
+			TEXT("WidgetStack overlay widget is not bound in NativeOnInitialized. "
+				 "This will prevents all of the stack functionality from functioning correctly!"));
 		return;
 	}
 
@@ -117,10 +129,15 @@ void UOUULayerStackWidget::NativeOnInitialized()
 	for (UOUULayerWidget* Layer : CastObjectRange<UOUULayerWidget>(WidgetStack->GetAllChildren()))
 	{
 		NumLayersFound++;
-		Layer->OnRequestResetFocusFromTopLayer.AddDynamic(this, &UOUULayerStackWidget::HandleRequestResetFocusFromTopLayer);
+		Layer->OnRequestResetFocusFromTopLayer
+			.AddDynamic(this, &UOUULayerStackWidget::HandleRequestResetFocusFromTopLayer);
 	}
 
-	UE_CLOG(NumLayersFound == 0, LogOpenUnrealUtilities, Warning, TEXT("WidgetStack overlay widget does not contain any UOUULayerWidget children"));
+	UE_CLOG(
+		NumLayersFound == 0,
+		LogOpenUnrealUtilities,
+		Warning,
+		TEXT("WidgetStack overlay widget does not contain any UOUULayerWidget children"));
 }
 
 void UOUULayerStackWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -138,7 +155,8 @@ void UOUULayerStackWidget::NativeDestruct()
 	{
 		for (UOUULayerWidget* Layer : CastObjectRange<UOUULayerWidget>(WidgetStack->GetAllChildren()))
 		{
-			Layer->OnRequestResetFocusFromTopLayer.RemoveDynamic(this, &UOUULayerStackWidget::HandleRequestResetFocusFromTopLayer);
+			Layer->OnRequestResetFocusFromTopLayer
+				.RemoveDynamic(this, &UOUULayerStackWidget::HandleRequestResetFocusFromTopLayer);
 		}
 	}
 	Super::NativeDestruct();
@@ -183,7 +201,8 @@ void UOUULayerStackWidget::UpdateLayers(UOUULayerWidget* BottomLayerFromStackAbo
 void UOUULayerStackWidget::HandleRequestResetFocusFromTopLayer()
 {
 	// forward to linked stack head.
-	// we do not bind this delegate to linked stack head directly to make it a bit easier to link in new stack widgets after the fact
+	// we do not bind this delegate to linked stack head directly to make it a bit easier to link in new stack widgets
+	// after the fact
 	GetLinkedStackHead()->ResetUserFocusRecursively();
 }
 

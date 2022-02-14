@@ -4,11 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "FlowControl/OUURequest.h"
+
 #include "OUURequestQueue.generated.h"
 
 /**
- * Container for raising multiple requests of the same type consecutively that should be fulfilled independently of one another.
- * Request objects are dropped after completion and may be garbage collected.
+ * Container for raising multiple requests of the same type consecutively that should be fulfilled independently of one
+ * another. Request objects are dropped after completion and may be garbage collected.
  */
 UCLASS(BlueprintType, Blueprintable)
 class OUURUNTIME_API UOUURequestQueue : public UObject

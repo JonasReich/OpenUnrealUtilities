@@ -1,0 +1,91 @@
+﻿---
+AccessModifierOffset: '-4'
+AlignAfterOpenBracket: AlwaysBreak
+AlignConsecutiveAssignments: 'false'
+AlignConsecutiveDeclarations: 'false'
+AlignConsecutiveBitFields: 'true'
+AlignConsecutiveMacros: 'true'
+AlignEscapedNewlines: 'Right'
+AlignOperands: 'false'
+AlignTrailingComments: 'true'
+AllowShortBlocksOnASingleLine: 'false'
+AllowShortCaseLabelsOnASingleLine: 'true'
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: 'false'
+AllowShortLoopsOnASingleLine: 'false'
+AllowShortLambdasOnASingleLine: 'All'
+AllowShortEnumsOnASingleLine: 'true'
+AlwaysBreakAfterDefinitionReturnType: None
+AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: 'false'
+AlwaysBreakTemplateDeclarations: 'Yes'
+BinPackArguments: 'false'
+BinPackParameters: 'false'
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBraces: Allman
+BreakBeforeTernaryOperators: 'true'
+BreakStringLiterals: 'true'
+ColumnLimit: '120'
+ConstructorInitializerAllOnOneLineOrOnePerLine: 'true'
+AllowAllConstructorInitializersOnNextLine: 'true'
+Cpp11BracedListStyle: 'true'
+DerivePointerAlignment: 'false'
+ExperimentalAutoDetectBinPacking: 'false'
+IndentCaseLabels: 'false'
+IndentWidth: '4'
+ContinuationIndentWidth: 4
+IndentWrappedFunctionNames: 'true'
+KeepEmptyLinesAtTheStartOfBlocks: 'false'
+MaxEmptyLinesToKeep: '1'
+NamespaceIndentation: 'All'
+PointerAlignment: Left
+ReflowComments: 'true'
+SortIncludes: 'true'
+SpaceAfterCStyleCast: 'false'
+SpaceBeforeAssignmentOperators: 'true'
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: 'false'
+SpacesInAngles: 'false'
+SpacesInCStyleCastParentheses: 'false'
+SpacesInContainerLiterals: 'false'
+SpacesInParentheses: 'false'
+SpacesInSquareBrackets: 'false'
+SpaceInEmptyBlock: 'false'
+SpaceAfterTemplateKeyword: 'true'
+SpaceAfterLogicalNot: 'false'
+SpaceBeforeCpp11BracedList: 'false'
+SpaceBeforeCtorInitializerColon: 'true'
+SpaceBeforeInheritanceColon: 'true'
+SpaceBeforeRangeBasedForLoopColon: 'true'
+Standard: 'c++17'
+TabWidth: '4'
+UseTab: Always
+PenaltyReturnTypeOnItsOwnLine: '1000'
+PenaltyBreakBeforeFirstCallParameter: '100'
+AllowAllParametersOfDeclarationOnNextLine: 'false'
+AllowAllArgumentsOnNextLine: 'false'
+BreakConstructorInitializers: 'AfterColon'
+BreakInheritanceList: 'AfterColon'
+BitFieldColonSpacing: 'After'
+FixNamespaceComments: 'true'
+IndentPPDirectives: 'BeforeHash'
+StatementMacros:
+  - UFUNCTION
+  - UPROPERTY
+  - GENERATED_BODY
+  - GENERATED_UCLASS_BODY
+MacroBlockBegin: "^SLATE_BEGIN_ARGS(.*)|BEGIN_DEFINE_SPEC|DECLARE_OUU_GAMEPLAY_TAGS(.*)|OUU_GTAG_GROUP_START(.*)$"
+MacroBlockEnd: "^SLATE_END_ARGS(.*)|END_DEFINE_SPEC|OUU_GTAG_GROUP_END(.*)$"
+IncludeBlocks:  Regroup
+IncludeCategories:
+  - Regex:           '^".+\.generated\.h"$'
+    Priority:        4
+  - Regex:           '<.+>$'
+    Priority:        3
+  - Regex:           '^".+"$'
+    Priority:        2
+---
+Language: Cpp
+---
+Language: CSharp
+...

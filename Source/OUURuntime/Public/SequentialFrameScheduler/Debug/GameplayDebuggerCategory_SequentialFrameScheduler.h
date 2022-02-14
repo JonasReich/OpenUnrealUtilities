@@ -4,8 +4,8 @@
 
 #if WITH_GAMEPLAY_DEBUGGER
 
-#include "GameplayDebuggerCategory.h"
-#include "SequentialFrameScheduler/WorldBoundSFSchedulerRegistry.h"
+	#include "GameplayDebuggerCategory.h"
+	#include "SequentialFrameScheduler/WorldBoundSFSchedulerRegistry.h"
 
 class OUURUNTIME_API FGameplayDebuggerCategory_SequentialFrameScheduler : public FGameplayDebuggerCategory
 {

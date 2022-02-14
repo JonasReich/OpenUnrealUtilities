@@ -1,6 +1,7 @@
 // Copyright (c) 2021 Jonas Reich
 
 #include "Widgets/InteractableWidget.h"
+
 #include "UMGInputBinding.h"
 
 UUMGInputActionBindingStack* UOUUInteractableWidget::GetInputActionBindingStack()
@@ -20,6 +21,7 @@ FReply UOUUInteractableWidget::NativeOnKeyDown(const FGeometry& InGeometry, cons
 		if (Result.NativeReply.IsEventHandled())
 			return Result.NativeReply;
 	}
+
 	// If the event was not handled by the stack,
 	// the blueprint should still get the opportunity to do so
 	return Super::NativeOnKeyDown(InGeometry, InKeyEvent);

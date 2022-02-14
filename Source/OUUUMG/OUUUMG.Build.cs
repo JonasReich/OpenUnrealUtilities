@@ -8,18 +8,10 @@ public class OUUUMG : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[]
-		{
-			"CoreUObject",
-			"Engine",
-			"Core",
-			"InputCore",
-			"UMG",
-			"SlateCore"
-		});
+		PublicDependencyModuleNames.AddRange(
+			new string[] { "CoreUObject", "Engine", "Core", "InputCore", "UMG", "SlateCore" });
 
-		PrivateDependencyModuleNames.AddRange(new string[]
-		{
+		PrivateDependencyModuleNames.AddRange(new string[] {
 			"Slate",
 
 			"OUURuntime"

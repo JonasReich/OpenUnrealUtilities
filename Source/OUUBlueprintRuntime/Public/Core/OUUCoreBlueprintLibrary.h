@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+
 #include "OUUCoreBlueprintLibrary.generated.h"
 
 /**
- * Core engine/UObject functionality that is for some reason not blueprint exposed via Kismet functions, e.g GetDefaultObject(), etc.
- * Does not expand upon existing C++ functionality but merely makes it available for blueprint use. 
+ * Core engine/UObject functionality that is for some reason not blueprint exposed via Kismet functions, e.g
+ * GetDefaultObject(), etc. Does not expand upon existing C++ functionality but merely makes it available for blueprint
+ * use.
  */
 UCLASS()
 class UOUUCoreBlueprintLibrary : public UBlueprintFunctionLibrary
@@ -32,24 +34,27 @@ public:
 
 	/**
 	 * Attempts to get the world from the current blueprint context.
-	 * Functionally the same as TryGetWorldFromObject(), but this version auto-populates the WorldContextObject parameter in Blueprints.
-	 * Returns nullptr if not world was found.
+	 * Functionally the same as TryGetWorldFromObject(), but this version auto-populates the WorldContextObject
+	 * parameter in Blueprints. Returns nullptr if not world was found.
 	 */
-	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|World", meta = (DisplayName = "Try Get World", WorldContext = "WorldContextObject"))
+	UFUNCTION(
+		BlueprintPure,
+		Category = "Open Unreal Utilities|World",
+		meta = (DisplayName = "Try Get World", WorldContext = "WorldContextObject"))
 	static UWorld* TryGetWorldFromObject_K2(UObject* WorldContextObject);
 
 	/**
-	* Mark an object as modified.
-	* If we are currently recording into the transaction buffer (undo/redo),
-	* save a copy of this object into the buffer and mark the package as needing to be saved.
-	*/
+	 * Mark an object as modified.
+	 * If we are currently recording into the transaction buffer (undo/redo),
+	 * save a copy of this object into the buffer and mark the package as needing to be saved.
+	 */
 	UFUNCTION(BlueprintCallable)
 	static void ModifyObject(UObject* Object);
 
-	/** 
-	* Reruns the construction scripts of an actor
-	* Be careful when calling this
-	*/
+	/**
+	 * Reruns the construction scripts of an actor
+	 * Be careful when calling this
+	 */
 	UFUNCTION(BlueprintCallable)
 	static void RerunConstructionScripts(AActor* Actor);
 };

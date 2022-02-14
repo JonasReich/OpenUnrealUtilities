@@ -8,17 +8,15 @@ public class OUUTestUtilities : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[]
-		{
-			// Engine
-			"Core",
-			"CoreUObject",
-			"Engine",
-			"UMG",
-			"SignificanceManager",
+		PublicDependencyModuleNames.AddRange(new string[] {// Engine
+														   "Core",
+														   "CoreUObject",
+														   "Engine",
+														   "UMG",
+														   "SignificanceManager",
 
-			// Plugin
-			"OUURuntime"
+														   // Plugin
+														   "OUURuntime"
 		});
 	}
 }

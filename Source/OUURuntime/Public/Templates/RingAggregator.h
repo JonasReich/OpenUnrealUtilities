@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "CircularArrayAdaptor.h"
 #include "Algo/MaxElement.h"
 #include "Algo/MinElement.h"
+#include "CircularArrayAdaptor.h"
 #include "Containers/Array.h"
 #include "Traits/IsInteger.h"
 
@@ -20,16 +20,9 @@ public:
 	using Super = TCircularArrayAdaptor_Base<ChildClass, InElementType, AllocatorType>;
 	using ArrayType = TArray<ElementType, AllocatorType>;
 
-	TRingAggregator_Base() :
-		Super(Storage, 32),
-		Storage({})
-	{
-		Super::StorageReference = Storage;
-	}
+	TRingAggregator_Base() : Super(Storage, 32), Storage({}) { Super::StorageReference = Storage; }
 
-	TRingAggregator_Base(int32 MaxNum) :
-		Super(Storage, MaxNum),
-		Storage({})
+	TRingAggregator_Base(int32 MaxNum) : Super(Storage, MaxNum), Storage({})
 	{
 		Super::StorageReference = Storage;
 		Storage.Reserve(MaxNum);
@@ -37,14 +30,8 @@ public:
 		check(Storage == GetStorage());
 	}
 
-	TRingAggregator_Base(const TRingAggregator_Base& Other) : TRingAggregator_Base()
-	{
-		*this = Other;
-	}
-	TRingAggregator_Base(TRingAggregator_Base&& Other) noexcept : TRingAggregator_Base()
-	{
-		*this = MoveTemp(Other);
-	}
+	TRingAggregator_Base(const TRingAggregator_Base& Other) : TRingAggregator_Base() { *this = Other; }
+	TRingAggregator_Base(TRingAggregator_Base&& Other) noexcept : TRingAggregator_Base() { *this = MoveTemp(Other); }
 	TRingAggregator_Base& operator=(const TRingAggregator_Base& Other)
 	{
 		*(static_cast<Super*>(this)) = Other;
@@ -70,40 +57,32 @@ public:
 		return ResultSum;
 	}
 
-	ElementType Average() const
-	{
-		return Super::HasData() ? (Sum() / Super::Num()) : 0;
-	}
+	ElementType Average() const { return Super::HasData() ? (Sum() / Super::Num()) : 0; }
 
-	ElementType Max() const
-	{
-		return Super::HasData() ? (*Algo::MaxElement(Storage)) : 0;
-	}
+	ElementType Max() const { return Super::HasData() ? (*Algo::MaxElement(Storage)) : 0; }
 
-	ElementType Min() const
-	{
-		return Super::HasData() ? (*Algo::MinElement(Storage)) : 0;
-	}
+	ElementType Min() const { return Super::HasData() ? (*Algo::MinElement(Storage)) : 0; }
 
-	const TArray<ElementType, AllocatorType>& GetStorage() const
-	{
-		return Storage;
-	}
+	const TArray<ElementType, AllocatorType>& GetStorage() const { return Storage; }
 
 protected:
 	TArray<ElementType, AllocatorType> Storage = {};
 
 	/** Overload for builds with ensure macros that checks for integer overflow */
-	template <typename T, typename = typename TEnableIf<TIsInteger<T>::Value && static_cast<bool>(DO_CHECK)>::Type>
+	template <typename T, typename = typename TEnableIf<TIsInteger<T>::Value&& static_cast<bool>(DO_CHECK)>::Type>
 	static void AddNumbersEnsured(T& A, T B)
 	{
 		ElementType SignBefore = FMath::Sign(A);
 		A += B;
 		ElementType SignAfter = FMath::Sign(A);
-		ensureMsgf(SignBefore == SignAfter || ((SignBefore + SignAfter) != 0 || SignBefore != FMath::Sign(B)), TEXT("integer overflow detected"));
+		ensureMsgf(
+			SignBefore == SignAfter || ((SignBefore + SignAfter) != 0 || SignBefore != FMath::Sign(B)),
+			TEXT("integer overflow detected"));
 	}
 
-	template <typename T, typename = typename TEnableIf<TIsInteger<T>::Value == false || static_cast<bool>(DO_CHECK) == false>::Type>
+	template <
+		typename T,
+		typename = typename TEnableIf<TIsInteger<T>::Value == false || static_cast<bool>(DO_CHECK) == false>::Type>
 	static void AddNumbersEnsured(T& A, T B, int32 = 0)
 	{
 		A += B;
@@ -122,10 +101,17 @@ public:
 
 /** Ring aggregator that has a compile time fixed size of elements */
 template <typename ElementType, uint32 ElementNum>
-class TFixedSizeRingAggregator : public TRingAggregator_Base<TFixedSizeRingAggregator<ElementType, ElementNum>, ElementType, TFixedAllocator<ElementNum>>
+class TFixedSizeRingAggregator :
+	public TRingAggregator_Base<
+		TFixedSizeRingAggregator<ElementType, ElementNum>,
+		ElementType,
+		TFixedAllocator<ElementNum>>
 {
 public:
-	using Super = TRingAggregator_Base<TFixedSizeRingAggregator<ElementType, ElementNum>, ElementType, TFixedAllocator<ElementNum>>;
+	using Super = TRingAggregator_Base<
+		TFixedSizeRingAggregator<ElementType, ElementNum>,
+		ElementType,
+		TFixedAllocator<ElementNum>>;
 	TFixedSizeRingAggregator() : Super(ElementNum) {}
 	// no constructor with MaxNum parameter, because it's a compile time constant ("ElementNum")
 };

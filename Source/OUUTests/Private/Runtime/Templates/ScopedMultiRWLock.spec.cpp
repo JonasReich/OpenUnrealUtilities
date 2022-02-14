@@ -1,29 +1,30 @@
 ﻿// Copyright (c) 2021 Jonas Reich
 
-#include "OUUTestUtilities.h"
 #include "Templates/ScopedMultiRWLock.h"
+
+#include "OUUTestUtilities.h"
 
 #if WITH_AUTOMATION_WORKER
 
-#include "Templates/RWLockedVariable.h"
+	#include "Templates/RWLockedVariable.h"
 
-BEGIN_DEFINE_SPEC(FScopedMultiRWLockSpec, "OpenUnrealUtilities.Runtime.Templates.ScopedMultiRWLock", DEFAULT_OUU_TEST_FLAGS)
-TRWLockedVariable<int32> RWLockedInt;
-TRWLockedVariable<TArray<int32>> RWLockedArray;
+BEGIN_DEFINE_SPEC(
+	FScopedMultiRWLockSpec,
+	"OpenUnrealUtilities.Runtime.Templates.ScopedMultiRWLock",
+	DEFAULT_OUU_TEST_FLAGS)
+	TRWLockedVariable<int32> RWLockedInt;
+	TRWLockedVariable<TArray<int32>> RWLockedArray;
 END_DEFINE_SPEC(FScopedMultiRWLockSpec)
 
 void FScopedMultiRWLockSpec::Define()
 {
-	BeforeEach([this]()
-	{
+	BeforeEach([this]() {
 		auto IntRef = RWLockedInt.Write();
 		IntRef = 5;
 	});
 
-	Describe("GetPointers", [this]()
-	{
-		It ("should be tied to pointers that allow accessing all values", [this]()
-		{
+	Describe("GetPointers", [this]() {
+		It("should be tied to pointers that allow accessing all values", [this]() {
 			int32& RealInt = RWLockedInt.GetRefWithoutLocking_USE_WITH_CAUTION();
 			RealInt = 42;
 			SPEC_TEST_EQUAL(RealInt, 42);
@@ -43,10 +44,8 @@ void FScopedMultiRWLockSpec::Define()
 		});
 	});
 
-	Describe("GetByIdx", [this]()
-	{
-		It ("should give access to a single value via reference", [this]()
-		{
+	Describe("GetByIdx", [this]() {
+		It("should give access to a single value via reference", [this]() {
 			int32& RealInt = RWLockedInt.GetRefWithoutLocking_USE_WITH_CAUTION();
 			RealInt = 42;
 			SPEC_TEST_EQUAL(RealInt, 42);

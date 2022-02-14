@@ -1,6 +1,7 @@
 // Copyright (c) 2021 Jonas Reich
 
 #include "Misc/GeneralProjectSettingsLibrary.h"
+
 #include "GeneralProjectSettings.h"
 
 FString UGeneralProjectSettingsLibrary::GetProjectCompanyName()

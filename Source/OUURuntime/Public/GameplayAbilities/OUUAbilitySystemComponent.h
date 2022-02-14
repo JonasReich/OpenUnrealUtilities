@@ -51,7 +51,7 @@ public:
 /**
  * Custom ability system component that provides friend access to FGameplayDebuggerCategory_OUUAbilities
  * (required to access some of the protected members of the parent class)
- * and record additional debugging data, e.g. history of gameplay events. 
+ * and record additional debugging data, e.g. history of gameplay events.
  */
 UCLASS()
 class OUURUNTIME_API UOUUAbilitySystemComponent : public UAbilitySystemComponent
@@ -77,6 +77,5 @@ protected:
 	 * Circular buffer adapter for the gameplay event history.
 	 * Use this to access the history elements!
 	 */
-	TCircularArrayAdaptor<FOUUGameplayEventData> CircularGameplayEventHistory {GameplayEventHistory, 10};
+	TCircularArrayAdaptor<FOUUGameplayEventData> CircularGameplayEventHistory{GameplayEventHistory, 10};
 };
-

@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
 #include "SequentialFrameScheduler/SequentialFrameTask.h"
 #include "Templates/RingAggregator.h"
 
@@ -45,7 +44,7 @@ public:
 	bool TaskExists(const FTaskHandle& Handle) const;
 
 	template <typename... ArgumentTypes>
-	FORCEINLINE FTaskHandle AddNamedTask(const FName TaskName, ArgumentTypes ... Args)
+	FORCEINLINE FTaskHandle AddNamedTask(const FName TaskName, ArgumentTypes... Args)
 	{
 		const FTaskHandle TaskHandle = AddTask(Args...);
 		AddTaskDebugName(TaskHandle, TaskName);
@@ -59,15 +58,29 @@ public:
 	 * All overloads return a task handle that can be used to remove the task again.
 	 */
 	template <class UserClass>
-	FORCEINLINE FTaskHandle AddTask(UserClass* InObj, typename FTaskDelegate::TUObjectMethodDelegate<UserClass>::FMethodPtr InTaskMethod, float InPeriod, bool bTickAsOftenAsPossible = true)
+	FORCEINLINE FTaskHandle AddTask(
+		UserClass* InObj,
+		typename FTaskDelegate::TUObjectMethodDelegate<UserClass>::FMethodPtr InTaskMethod,
+		float InPeriod,
+		bool bTickAsOftenAsPossible = true)
 	{
-		return InternalAddTask(FTaskUnifiedDelegate(FTaskDelegate::CreateUObject(InObj, InTaskMethod)), InPeriod, bTickAsOftenAsPossible);
+		return InternalAddTask(
+			FTaskUnifiedDelegate(FTaskDelegate::CreateUObject(InObj, InTaskMethod)),
+			InPeriod,
+			bTickAsOftenAsPossible);
 	}
 
 	template <class UserClass>
-	FORCEINLINE FTaskHandle AddTask(UserClass* InObj, typename FTaskDelegate::TUObjectMethodDelegate_Const<UserClass>::FMethodPtr InTaskMethod, float InPeriod, bool bTickAsOftenAsPossible = true)
+	FORCEINLINE FTaskHandle AddTask(
+		UserClass* InObj,
+		typename FTaskDelegate::TUObjectMethodDelegate_Const<UserClass>::FMethodPtr InTaskMethod,
+		float InPeriod,
+		bool bTickAsOftenAsPossible = true)
 	{
-		return InternalAddTask(FTaskUnifiedDelegate(FTaskDelegate::CreateUObject(InObj, InTaskMethod)), InPeriod, bTickAsOftenAsPossible);
+		return InternalAddTask(
+			FTaskUnifiedDelegate(FTaskDelegate::CreateUObject(InObj, InTaskMethod)),
+			InPeriod,
+			bTickAsOftenAsPossible);
 	}
 
 	/** Version that takes any generic delegate. */
@@ -77,13 +90,15 @@ public:
 	}
 
 	/** Version that takes a dynamic delegate (e.g. for UFunctions). */
-	FORCEINLINE FTaskHandle AddTask(FTaskDynamicDelegate const& InDynDelegate, float InPeriod, bool bTickAsOftenAsPossible = true)
+	FORCEINLINE FTaskHandle
+		AddTask(FTaskDynamicDelegate const& InDynDelegate, float InPeriod, bool bTickAsOftenAsPossible = true)
 	{
 		return InternalAddTask(FTaskUnifiedDelegate(InDynDelegate), InPeriod, bTickAsOftenAsPossible);
 	}
 
 	/** Version that takes a TFunction */
-	FORCEINLINE FTaskHandle AddTask(TFunction<void(void)>&& Callback, float InPeriod, bool bTickAsOftenAsPossible = true)
+	FORCEINLINE FTaskHandle
+		AddTask(TFunction<void(void)>&& Callback, float InPeriod, bool bTickAsOftenAsPossible = true)
 	{
 		return InternalAddTask(FTaskUnifiedDelegate(MoveTemp(Callback)), InPeriod, bTickAsOftenAsPossible);
 	}

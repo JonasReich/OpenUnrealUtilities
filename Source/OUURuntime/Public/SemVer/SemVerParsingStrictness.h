@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "SemVerParsingStrictness.generated.h"
 
 /**
@@ -17,14 +18,14 @@ enum class ESemVerParsingStrictness : uint8
 	// Only allow SemVer strings that 100% spec compliant.
 	// Fail parsing for all suffixes, prefixes or invalid characters/digits.
 	Strict,
-	
+
 	// Allow leading zeroes (e.g. "1.01.0" instead of "1.1.0").
 	// Ignore any special characters except for whitespace for build metadata
 	// (e.g. allow "1.0.0-alpha.30+nightly.346@94149" even though it has invalid '@' character).
 	// SemVers parsed with this strictness might change in the digits (removing leading zeroes),
 	// but everything else stays the same.
 	Regular,
-	
+
 	// Always try to succeed.
 	// Ignore invalid prefixes and suffixes to the version string.
 	// Minimum requirement for success: digit.digit (e.g. "1.0b" and "Version 1.0@c" would pass).
@@ -36,4 +37,8 @@ enum class ESemVerParsingStrictness : uint8
 
 FString OUURUNTIME_API LexToString(ESemVerParsingStrictness Strictness);
 
-ENUM_RANGE_BY_VALUES(ESemVerParsingStrictness, ESemVerParsingStrictness::Strict, ESemVerParsingStrictness::Regular, ESemVerParsingStrictness::Liberal);
+ENUM_RANGE_BY_VALUES(
+	ESemVerParsingStrictness,
+	ESemVerParsingStrictness::Strict,
+	ESemVerParsingStrictness::Regular,
+	ESemVerParsingStrictness::Liberal);

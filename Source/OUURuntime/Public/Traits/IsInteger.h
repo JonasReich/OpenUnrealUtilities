@@ -10,9 +10,13 @@
 template <typename T>
 struct TIsInteger
 {
-	enum { Value = false };
+	enum
+	{
+		Value = false
+	};
 };
 
+// clang-format off
 template <> struct TIsInteger<uint8> { enum { Value = true }; };
 template <> struct TIsInteger<uint16> { enum { Value = true }; };
 template <> struct TIsInteger<uint32> { enum { Value = true }; };
@@ -25,3 +29,4 @@ template <> struct TIsInteger<int64> { enum { Value = true }; };
 template <typename T> struct TIsInteger<const          T> { enum { Value = TIsInteger<T>::Value }; };
 template <typename T> struct TIsInteger<      volatile T> { enum { Value = TIsInteger<T>::Value }; };
 template <typename T> struct TIsInteger<const volatile T> { enum { Value = TIsInteger<T>::Value }; };
+// clang-format on

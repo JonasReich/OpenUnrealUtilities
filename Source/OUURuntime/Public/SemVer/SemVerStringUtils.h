@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Kismet/BlueprintFunctionLibrary.h"
+
 #include "SemVerStringUtils.generated.h"
 
 enum class ESemVerParsingStrictness : uint8;

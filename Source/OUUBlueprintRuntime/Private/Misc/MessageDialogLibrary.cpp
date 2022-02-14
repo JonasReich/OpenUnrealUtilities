@@ -9,18 +9,22 @@ void UMessageDialogLibrary::ShowMessageDialogueNotification(FText OptionalTitle,
 	FMessageDialog::Debugf(Message, GetOptionalTitlePtr(OptionalTitle));
 }
 
-EBlueprintAppReturnType UMessageDialogLibrary::OpenMessageDialog(EBlueprintAppMsgType MessageType, FText OptionalTitle, FText Message)
+EBlueprintAppReturnType UMessageDialogLibrary::OpenMessageDialog(
+	EBlueprintAppMsgType MessageType,
+	FText OptionalTitle,
+	FText Message)
 {
-	return StaticCast<EBlueprintAppReturnType>(FMessageDialog::Open(
-		StaticCast<EAppMsgType::Type>(MessageType),
-		Message,
-		GetOptionalTitlePtr(OptionalTitle)));
+	return StaticCast<EBlueprintAppReturnType>(
+		FMessageDialog::Open(StaticCast<EAppMsgType::Type>(MessageType), Message, GetOptionalTitlePtr(OptionalTitle)));
 }
 
-EBlueprintAppReturnType UMessageDialogLibrary::OpenMessageDialogWithDefaultValue(EBlueprintAppMsgType MessageType,
-	EBlueprintAppReturnType DefaultValue, FText OptionalTitle, FText Message)
+EBlueprintAppReturnType UMessageDialogLibrary::OpenMessageDialogWithDefaultValue(
+	EBlueprintAppMsgType MessageType,
+	EBlueprintAppReturnType DefaultValue,
+	FText OptionalTitle,
+	FText Message)
 {
-	return StaticCast<EBlueprintAppReturnType>( FMessageDialog::Open(
+	return StaticCast<EBlueprintAppReturnType>(FMessageDialog::Open(
 		StaticCast<EAppMsgType::Type>(MessageType),
 		StaticCast<EAppReturnType::Type>(DefaultValue),
 		Message,
@@ -30,5 +34,5 @@ EBlueprintAppReturnType UMessageDialogLibrary::OpenMessageDialogWithDefaultValue
 const FText* UMessageDialogLibrary::GetOptionalTitlePtr(FText& Text)
 {
 	const int32 TitleLength = Text.ToString().Len();
-	return (TitleLength > 0) ? &Text : nullptr; 
+	return (TitleLength > 0) ? &Text : nullptr;
 }

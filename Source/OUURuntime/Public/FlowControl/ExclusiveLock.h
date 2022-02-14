@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "ExclusiveLock.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnExclusiveLockStateChanged, UExclusiveLock*, Lock, bool, bIsLocked);

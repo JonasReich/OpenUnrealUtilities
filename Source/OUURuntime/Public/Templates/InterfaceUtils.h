@@ -12,12 +12,9 @@
  * @param Function: The function member of the Interface you want to invoke
  * @param InterfaceObject: An object pointer, interface pointer or script interface of the matching interface
  */
-#define CALL_INTERFACE(InterfaceType, Function, InterfaceObject, ...) \
-( \
-(OUU_Interface_Private::Ignore(&InterfaceType::Function)), \
-(InterfaceType::Execute_ ## Function(GetInterfaceObject(InterfaceObject), ##  __VA_ARGS__)) \
-)
-
+#define CALL_INTERFACE(InterfaceType, Function, InterfaceObject, ...)                                                  \
+	((OUU_Interface_Private::Ignore(&InterfaceType::Function)),                                                        \
+	 (InterfaceType::Execute_##Function(GetInterfaceObject(InterfaceObject), ##__VA_ARGS__)))
 
 template <typename T>
 using TIsIInterface_T = typename TEnableIf<TIsIInterface<T>::Value>::Type;
@@ -94,17 +91,22 @@ FORCEINLINE bool IsValidInterface(TScriptInterface<T>& InterfaceObject)
 template <typename T, typename = TIsIInterface_T<T>>
 FORCEINLINE bool IsValidInterface(const TScriptInterface<T>& InterfaceObject)
 {
-	static_assert(sizeof(T) == -1, "You should not use const TScriptInterface<T>! Three reasons why:\n"
+	static_assert(
+		sizeof(T) == -1,
+		"You should not use const TScriptInterface<T>! Three reasons why:\n"
 		"\t- No memory benefit over passing by value\n"
 		"\t- const TScriptInterface<T> cannot be invalidated when it turns stale or corrected by IsValid() check\n"
-		"\t- No const safeness for pointer target, because const TScriptInterface<T> still allows calling non-const functions");
+		"\t- No const safeness for pointer target, because const TScriptInterface<T> still allows calling non-const "
+		"functions");
 	return false;
 }
 
 namespace OUU_Interface_Private
 {
 	/* Use this to let the compiler ignore what you have passed in */
-	template<typename... Ts>
-	void Ignore(Ts...) {} 
-	
-}
+	template <typename... Ts>
+	void Ignore(Ts...)
+	{
+	}
+
+} // namespace OUU_Interface_Private

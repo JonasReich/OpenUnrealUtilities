@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/UserFocusResetableWidget.h"
+
 #include "LayerWidget.generated.h"
 
 class UUMGInputActionBindingStack;
@@ -20,13 +21,13 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRequestResetFocusToHighestLayer);
  *		from the visibility of contained widgets (see UpdateLayer() and CheckIsInputVisible()).
  */
 UCLASS()
-class OUUUMG_API UOUULayerWidget : public UUserWidget,
+class OUUUMG_API UOUULayerWidget :
+	public UUserWidget,
 	public IUserFocusResetableWidget,
 	public TUserFocusResetableWidget_Impl<UOUULayerWidget>
 {
 	GENERATED_BODY()
 public:
-
 	/**
 	 * May this widget ever support player input?
 	 * If this is deactivated, all input related functions will be deactivated and throw warnings/fail when used.
@@ -73,12 +74,15 @@ public:
 	UFUNCTION(BlueprintPure, meta = (DisplayName = "Is Input Visible (Cached)"))
 	bool IsLayerInputVisible() const;
 
-protected:	
+protected:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Input")
 	UUMGInputActionBindingStack* GetInputActionBindingStack();
 
 	// - UUserWidget
-	virtual void NativeOnFocusChanging(const FWeakWidgetPath& PreviousFocusPath, const FWidgetPath& NewWidgetPath, const FFocusEvent& InFocusEvent) override;
+	virtual void NativeOnFocusChanging(
+		const FWeakWidgetPath& PreviousFocusPath,
+		const FWidgetPath& NewWidgetPath,
+		const FFocusEvent& InFocusEvent) override;
 	// - IUserFocusResetableWidget
 	virtual bool ResetUserFocus_Implementation() override;
 	// --
@@ -91,7 +95,7 @@ private:
 	/** Input action binding stack. To be lazily created by GetInputActionBindingStack() function. */
 	UPROPERTY(Transient)
 	UUMGInputActionBindingStack* InputActionBindingStack = nullptr;
-	
+
 	/**
 	 * Is there a concealing layer above? This info is still required even if the layer itself cannot be concealed,
 	 * because the value is passed down the widget stack to layers below.

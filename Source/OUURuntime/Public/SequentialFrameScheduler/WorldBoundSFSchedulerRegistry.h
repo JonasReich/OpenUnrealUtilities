@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Info.h"
 #include "SequentialFrameScheduler.h"
+
 #include "WorldBoundSFSchedulerRegistry.generated.h"
 
 /**
@@ -45,7 +46,10 @@ public:
 	 * @param SchedulerName: Name of the scheduler for debugging purposes
 	 * @param TickingGroup: Tick group that this scheduler will tick in
 	 */
-	static FSchedulerPtr GetNamedScheduler(const UObject* WorldContextObject, FName SchedulerName, ETickingGroup TickingGroup);
+	static FSchedulerPtr GetNamedScheduler(
+		const UObject* WorldContextObject,
+		FName SchedulerName,
+		ETickingGroup TickingGroup);
 
 	// - AActor
 	virtual void RegisterActorTickFunctions(bool bRegister) override;

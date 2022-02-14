@@ -2,9 +2,10 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "CoreMinimal.h"
 #include "UserFocusResetableWidget.h"
+
 #include "ActivatableWidget.generated.h"
 
 class UUMGInputActionBindingStack;
@@ -15,7 +16,8 @@ class UUMGInputActionBindingStack;
  * creation of user widgets that handle input and focus events for gamepad interactable widgets.
  */
 UCLASS()
-class OUUUMG_API UOUUActivatableWidget : public UUserWidget,
+class OUUUMG_API UOUUActivatableWidget :
+	public UUserWidget,
 	public IUserFocusResetableWidget,
 	public TUserFocusResetableWidget_Impl<UOUUActivatableWidget>
 {
@@ -35,7 +37,7 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	ESlateVisibility ActivatedVisibility = ESlateVisibility::SelfHitTestInvisible;
 
-	/** 
+	/**
 	 * The visibility the widget should have when deactivated.
 	 * This property may not be used if GetDesiredVisibility() is overridden.
 	 */
@@ -77,12 +79,12 @@ public:
 protected:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Input")
 	UUMGInputActionBindingStack* GetInputActionBindingStack();
-	
+
 	/** Get the desired visibility based on the current widget state */
 	virtual ESlateVisibility NativeGetDesiredVisibility() const;
 
 	/**
-	 * Determine desired widget visibility in Blueprint. 
+	 * Determine desired widget visibility in Blueprint.
 	 * @returns event reply whether the blueprint function returned a value that should be used.
 	 */
 	UFUNCTION(BlueprintImplementableEvent)

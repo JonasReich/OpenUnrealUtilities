@@ -4,34 +4,33 @@
 
 #if WITH_AUTOMATION_WORKER
 
-#include "Misc/GeneralProjectSettingsLibrary.h"
+	#include "Misc/GeneralProjectSettingsLibrary.h"
 
-BEGIN_DEFINE_SPEC(FGeneralProjectSettingsLibrarySpec, "OpenUnrealUtilities.BlueprintRuntime.Misc.GeneralProjectSettingsLibrary", DEFAULT_OUU_TEST_FLAGS)
+BEGIN_DEFINE_SPEC(
+	FGeneralProjectSettingsLibrarySpec,
+	"OpenUnrealUtilities.BlueprintRuntime.Misc.GeneralProjectSettingsLibrary",
+	DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FGeneralProjectSettingsLibrarySpec)
 void FGeneralProjectSettingsLibrarySpec::Define()
 {
-	It("should return a valid GUID as project ID", [this]()
-	{
+	It("should return a valid GUID as project ID", [this]() {
 		FGuid ProjectId = UGeneralProjectSettingsLibrary::GetProjectID();
 		SPEC_TEST_TRUE(ProjectId.IsValid());
 	});
 
-	It("should return a non-empty string as project version", [this]()
-	{
+	It("should return a non-empty string as project version", [this]() {
 		FString ProjectVersion = UGeneralProjectSettingsLibrary::GetProjectVersion();
 		SPEC_TEST_TRUE(ProjectVersion.Len() > 0);
 	});
 
-	It("should return the same project version that is set in the ini", [this]()
-	{
+	It("should return the same project version that is set in the ini", [this]() {
 		FString ProjectVersionFromLibrary = UGeneralProjectSettingsLibrary::GetProjectVersion();
 		FString ProjectVersionFromIni;
 		bool bValueWasFoundInIni = GConfig->GetString(
 			TEXT("/Script/EngineSettings.GeneralProjectSettings"),
 			TEXT("ProjectVersion"),
 			ProjectVersionFromIni,
-			GGameIni
-		);
+			GGameIni);
 
 		SPEC_TEST_TRUE(bValueWasFoundInIni);
 		SPEC_TEST_EQUAL(ProjectVersionFromLibrary, ProjectVersionFromIni);

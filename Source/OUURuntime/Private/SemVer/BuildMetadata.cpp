@@ -1,9 +1,12 @@
 // Copyright (c) 2021 Jonas Reich
 
 #include "SemVer/BuildMetadata.h"
+
 #include "Misc/RegexUtils.h"
 
-FSemVerBuildMetadata::FSemVerBuildMetadata(const FString& SourceString, ESemVerParsingStrictness InStrictness /*= ESemVerParsingStrictness::Strict*/)
+FSemVerBuildMetadata::FSemVerBuildMetadata(
+	const FString& SourceString,
+	ESemVerParsingStrictness InStrictness /*= ESemVerParsingStrictness::Strict*/)
 {
 	TryParseString(SourceString, InStrictness);
 }
@@ -31,11 +34,11 @@ bool FSemVerBuildMetadata::TryParseString(const FString& SourceString, ESemVerPa
 			return true;
 		}
 	}
-	else if(Strictness == ESemVerParsingStrictness::Regular)
+	else if (Strictness == ESemVerParsingStrictness::Regular)
 	{
 		FString StringCopy = SourceString.TrimStartAndEnd();
 		int32 WhitespaceIdx = StringCopy.FindLastCharByPredicate(FChar::IsWhitespace);
-		if (WhitespaceIdx == INDEX_NONE) 
+		if (WhitespaceIdx == INDEX_NONE)
 		{
 			Metadata = MoveTemp(StringCopy);
 			return true;

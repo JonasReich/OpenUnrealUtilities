@@ -5,17 +5,17 @@
 #include "Traits/IsInteger.h"
 
 /**
-* Returns the exponentiation of an integer.
-*
-* Warning: Use with caution!
-*
-* This function does not have any overflow checks when used with runtime values,
-* because they would prohibit marking the function as contexpr.
-* 
-* At compile time we cannot add any checks either, because they depend on the
-* intermediate steps of the calculation, which means they are not qualified for
-* static asserts.
-*/
+ * Returns the exponentiation of an integer.
+ *
+ * Warning: Use with caution!
+ *
+ * This function does not have any overflow checks when used with runtime values,
+ * because they would prohibit marking the function as contexpr.
+ *
+ * At compile time we cannot add any checks either, because they depend on the
+ * intermediate steps of the calculation, which means they are not qualified for
+ * static asserts.
+ */
 template <typename T>
 constexpr T IntPow(T Base, T Power)
 {
@@ -35,15 +35,15 @@ constexpr T IntPow(T Base, T Power)
 }
 
 /**
-* Convert the decimal number to a pseudo binary number.
-* The digits of the input in base 2 match with the digits of the output in base 10.
-* 
-* Example:
-* |        | Base 10     | Base 2                               |
-* |--------|-------------|--------------------------------------|
-* | Input  | 1024        | 0b10000000000                        |
-* | Output | 10000000000 | 0b1001010100000010111110010000000000 | 
-*/
+ * Convert the decimal number to a pseudo binary number.
+ * The digits of the input in base 2 match with the digits of the output in base 10.
+ *
+ * Example:
+ * |        | Base 10     | Base 2                               |
+ * |--------|-------------|--------------------------------------|
+ * | Input  | 1024        | 0b10000000000                        |
+ * | Output | 10000000000 | 0b1001010100000010111110010000000000 |
+ */
 template <typename T>
 constexpr int64 ConvertDecimalToFakeBinary(T Decimal)
 {
@@ -65,10 +65,10 @@ constexpr int64 ConvertDecimalToFakeBinary(T Decimal)
 }
 
 /**
-* Count the digit of an integer in any base.
-* Default: Base 10 = decimal.
-* @returns the number of digits, e.g. 4 for input value 1024 in base 10
-*/
+ * Count the digit of an integer in any base.
+ * Default: Base 10 = decimal.
+ * @returns the number of digits, e.g. 4 for input value 1024 in base 10
+ */
 template <typename T>
 constexpr T NumDigits(typename TIdentity<T>::Type Value, T Base = 10)
 {
@@ -87,9 +87,9 @@ constexpr T NumDigits(typename TIdentity<T>::Type Value, T Base = 10)
 }
 
 /**
-* Helper function for traits to get if a value is negative without raising compiler warnings.
-* Only signed integer types are checked against 0.
-*/
+ * Helper function for traits to get if a value is negative without raising compiler warnings.
+ * Only signed integer types are checked against 0.
+ */
 template <typename T>
 constexpr auto IsNegativeInteger(T Number) -> typename TEnableIf<TIsSigned<T>::Value, bool>::Type
 {
@@ -98,9 +98,9 @@ constexpr auto IsNegativeInteger(T Number) -> typename TEnableIf<TIsSigned<T>::V
 }
 
 /**
-* Helper function for traits to get if a value is negative without raising compiler warnings.
-* Only signed integer types are checked against 0.
-*/
+ * Helper function for traits to get if a value is negative without raising compiler warnings.
+ * Only signed integer types are checked against 0.
+ */
 template <typename T>
 constexpr auto IsNegativeInteger(T Number) -> typename TEnableIf<TIsSigned<T>::Value == false, bool>::Type
 {

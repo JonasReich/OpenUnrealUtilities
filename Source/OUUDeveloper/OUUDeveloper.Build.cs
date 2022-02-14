@@ -8,8 +8,7 @@ public class OUUDeveloper : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[]
-		{
+		PublicDependencyModuleNames.AddRange(new string[] {
 			"CoreUObject",
 			"Engine",
 			"Core",
@@ -21,13 +20,8 @@ public class OUUDeveloper : ModuleRules
 			"OUUUMG"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[]
-		{
-			"Slate",
-			"AIModule",
-			"GameplayTags",
-			"GameplayAbilities"
-		});
+		PrivateDependencyModuleNames.AddRange(
+			new string[] { "Slate", "AIModule", "GameplayTags", "GameplayAbilities" });
 
 		// - Editor only dependencies
 		if (Target.bBuildEditor)
@@ -37,7 +31,9 @@ public class OUUDeveloper : ModuleRules
 		// --
 
 		// #TODO-j.reich Figure out if it makes sense to move the gameplay debugger stuff into this module as well!
-		if (Target.bBuildDeveloperTools || (Target.Configuration != UnrealTargetConfiguration.Shipping && Target.Configuration != UnrealTargetConfiguration.Test))
+		if (Target.bBuildDeveloperTools
+			|| (Target.Configuration != UnrealTargetConfiguration.Shipping
+				&& Target.Configuration != UnrealTargetConfiguration.Test))
 		{
 			PublicDependencyModuleNames.Add("GameplayDebugger");
 			PublicDefinitions.Add("WITH_GAMEPLAY_DEBUGGER=1");

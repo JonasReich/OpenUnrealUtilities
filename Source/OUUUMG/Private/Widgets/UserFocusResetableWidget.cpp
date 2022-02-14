@@ -1,6 +1,7 @@
 // Copyright (c) 2021 Jonas Reich
 
 #include "Widgets/UserFocusResetableWidget.h"
+
 #include "Templates/InterfaceUtils.h"
 
 bool IUserFocusResetableWidget::ResetUserFocus_Implementation()

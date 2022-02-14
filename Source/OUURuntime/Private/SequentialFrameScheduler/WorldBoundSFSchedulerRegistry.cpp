@@ -24,12 +24,16 @@ bool AWorldBoundSFSchedulerRegistry::FPrioritizedScheduler::operator<(const FPri
 	return Priority < Other.Priority;
 }
 
-AWorldBoundSFSchedulerRegistry::FSchedulerPtr AWorldBoundSFSchedulerRegistry::GetDefaultScheduler(const UObject* WorldContextObject)
+AWorldBoundSFSchedulerRegistry::FSchedulerPtr AWorldBoundSFSchedulerRegistry::GetDefaultScheduler(
+	const UObject* WorldContextObject)
 {
 	return GetNamedScheduler(WorldContextObject, TEXT("Default"), TG_PrePhysics);
 }
 
-AWorldBoundSFSchedulerRegistry::FSchedulerPtr AWorldBoundSFSchedulerRegistry::GetNamedScheduler(const UObject* WorldContextObject, FName SchedulerName, ETickingGroup TickingGroup)
+AWorldBoundSFSchedulerRegistry::FSchedulerPtr AWorldBoundSFSchedulerRegistry::GetNamedScheduler(
+	const UObject* WorldContextObject,
+	FName SchedulerName,
+	ETickingGroup TickingGroup)
 {
 	AWorldBoundSFSchedulerRegistry* TypedThis = GetWorldSingleton(WorldContextObject);
 	if (!IsValid(TypedThis))
@@ -56,14 +60,16 @@ void AWorldBoundSFSchedulerRegistry::RegisterActorTickFunctions(bool bRegister)
 		if (DuringPhysicsTickFunction.bCanEverTick)
 		{
 			DuringPhysicsTickFunction.Target = this;
-			DuringPhysicsTickFunction.SetTickFunctionEnable(DuringPhysicsTickFunction.bStartWithTickEnabled || DuringPhysicsTickFunction.IsTickFunctionEnabled());
+			DuringPhysicsTickFunction.SetTickFunctionEnable(
+				DuringPhysicsTickFunction.bStartWithTickEnabled || DuringPhysicsTickFunction.IsTickFunctionEnabled());
 			DuringPhysicsTickFunction.RegisterTickFunction(GetLevel());
 		}
 
 		if (DuringPhysicsTickFunction.bCanEverTick)
 		{
 			PostPhysicsTickFunction.Target = this;
-			PostPhysicsTickFunction.SetTickFunctionEnable(PostPhysicsTickFunction.bStartWithTickEnabled || PostPhysicsTickFunction.IsTickFunctionEnabled());
+			PostPhysicsTickFunction.SetTickFunctionEnable(
+				PostPhysicsTickFunction.bStartWithTickEnabled || PostPhysicsTickFunction.IsTickFunctionEnabled());
 			PostPhysicsTickFunction.RegisterTickFunction(GetLevel());
 		}
 	}
@@ -81,21 +87,18 @@ void AWorldBoundSFSchedulerRegistry::RegisterActorTickFunctions(bool bRegister)
 	}
 }
 
-void AWorldBoundSFSchedulerRegistry::TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction)
+void AWorldBoundSFSchedulerRegistry::TickActor(
+	float DeltaTime,
+	ELevelTick TickType,
+	FActorTickFunction& ThisTickFunction)
 {
 	Super::TickActor(DeltaTime, TickType, ThisTickFunction);
 
 	if (auto* QueuePtr = TickGroupToSchedulerPriorityList.Find(ThisTickFunction.TickGroup))
 	{
 		TArray<FSchedulerPtr>& Queue = *QueuePtr;
-		Queue.RemoveAll([](const FSchedulerPtr Scheduler) -> bool
-		{
-			return !Scheduler.IsValid();
-		});
-		Queue.Sort([](const FSchedulerPtr A, const FSchedulerPtr B) -> bool
-		{
-			return A.Get() < B.Get();
-		});
+		Queue.RemoveAll([](const FSchedulerPtr Scheduler) -> bool { return !Scheduler.IsValid(); });
+		Queue.Sort([](const FSchedulerPtr A, const FSchedulerPtr B) -> bool { return A.Get() < B.Get(); });
 
 		for (FSchedulerPtr Scheduler : Queue)
 		{

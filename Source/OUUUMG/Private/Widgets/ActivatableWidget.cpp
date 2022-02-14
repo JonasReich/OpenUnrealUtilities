@@ -3,15 +3,20 @@
 #pragma once
 
 #include "Widgets/ActivatableWidget.h"
+
 #include "LogOpenUnrealUtilities.h"
-#include "UMGInputBinding.h"
 #include "UMG/UMGUtils.h"
+#include "UMGInputBinding.h"
 
 UUMGInputActionBindingStack* UOUUActivatableWidget::GetInputActionBindingStack()
 {
 	if (!bAllowInput)
 	{
-		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("GetInputActionBindingStack was called on Activatable Widget '%s' that is not marked as bAllowInput!"));
+		UE_LOG(
+			LogOpenUnrealUtilities,
+			Warning,
+			TEXT("GetInputActionBindingStack was called on Activatable Widget '%s' "
+				 "that is not marked as bAllowInput!"));
 		return nullptr;
 	}
 	if (!IsValid(InputActionBindingStack))
@@ -75,7 +80,7 @@ ESlateVisibility UOUUActivatableWidget::GetDesiredVisibility() const
 	FEventReply EventReply = BlueprintGetDesiredVisibility(OutVisibility);
 	if (EventReply.NativeReply.IsEventHandled())
 		return OutVisibility;
-	
+
 	return NativeGetDesiredVisibility();
 }
 
@@ -110,4 +115,3 @@ void UOUUActivatableWidget::ForceUpdateVisibility()
 		NativeUpdateVisibility();
 	}
 }
-

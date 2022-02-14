@@ -20,7 +20,8 @@ enum class EBlueprintAppReturnType : uint8
 	Continue = EAppReturnType::Continue,
 };
 
-static_assert(EBlueprintAppReturnType::No == static_cast<EBlueprintAppReturnType>(EAppReturnType::No),
+static_assert(
+	EBlueprintAppReturnType::No == static_cast<EBlueprintAppReturnType>(EAppReturnType::No),
 	"EBlueprintAppReturnType::No must be equal to EAppReturnType::No");
 
 /** Blueprint exposed copy of EAppMsgType */
@@ -30,19 +31,20 @@ enum class EBlueprintAppMsgType : uint8
 	Ok = 0,
 	YesNo = EAppMsgType::YesNo,
 	OkCancel = EAppMsgType::OkCancel,
-	YesNoCancel  = EAppMsgType::YesNoCancel,
+	YesNoCancel = EAppMsgType::YesNoCancel,
 	CancelRetryContinue = EAppMsgType::CancelRetryContinue,
 	YesNoYesAllNoAll = EAppMsgType::YesNoYesAllNoAll,
 	YesNoYesAllNoAllCancel = EAppMsgType::YesNoYesAllNoAllCancel,
 	YesNoYesAll = EAppMsgType::YesNoYesAll
 };
 
-static_assert(EBlueprintAppMsgType::Ok == static_cast<EBlueprintAppMsgType>(EAppMsgType::Ok),
+static_assert(
+	EBlueprintAppMsgType::Ok == static_cast<EBlueprintAppMsgType>(EAppMsgType::Ok),
 	"EBlueprintAppMsgType::Ok must be equal to EAppMsgType::Ok");
 
 /**
-* Library to open blocking message dialog popups from blueprint (editor utilities).
-*/
+ * Library to open blocking message dialog popups from blueprint (editor utilities).
+ */
 UCLASS()
 class OUUBLUEPRINTRUNTIME_API UMessageDialogLibrary : public UBlueprintFunctionLibrary
 {
@@ -63,7 +65,10 @@ public:
 	 * @param Message Text of message to show
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Messsage Dialog")
-	static EBlueprintAppReturnType OpenMessageDialog(EBlueprintAppMsgType MessageType, FText OptionalTitle, FText Message);
+	static EBlueprintAppReturnType OpenMessageDialog(
+		EBlueprintAppMsgType MessageType,
+		FText OptionalTitle,
+		FText Message);
 
 	/**
 	 * Open a modal message box dialog
@@ -73,7 +78,11 @@ public:
 	 * @param Message Text of message to show
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Messsage Dialog")
-	static EBlueprintAppReturnType OpenMessageDialogWithDefaultValue(EBlueprintAppMsgType MessageType, EBlueprintAppReturnType DefaultValue, FText OptionalTitle, FText Message);
+	static EBlueprintAppReturnType OpenMessageDialogWithDefaultValue(
+		EBlueprintAppMsgType MessageType,
+		EBlueprintAppReturnType DefaultValue,
+		FText OptionalTitle,
+		FText Message);
 
 private:
 	static const FText* GetOptionalTitlePtr(FText& Text);

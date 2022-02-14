@@ -10,13 +10,18 @@ FName UMessageLogBlueprintLibrary::GetMessageLogName(EMessageLogName MessageLogN
 	return ::GetMessageLogName(MessageLogName);
 }
 
-void UMessageLogBlueprintLibrary::AddTextMessageLogMessage(FName MessageLogName, FText MessageText, EMessageLogSeverity Severity)
+void UMessageLogBlueprintLibrary::AddTextMessageLogMessage(
+	FName MessageLogName,
+	FText MessageText,
+	EMessageLogSeverity Severity)
 {
 	FMessageLog(MessageLogName).Message(StaticCast<EMessageSeverity::Type>(Severity), MessageText);
 }
 
-void UMessageLogBlueprintLibrary::AddTokenizedMessageLogMessage(FName MessageLogName, TArray<FMessageLogToken> MessageTokens,
-                                                                EMessageLogSeverity Severity)
+void UMessageLogBlueprintLibrary::AddTokenizedMessageLogMessage(
+	FName MessageLogName,
+	TArray<FMessageLogToken> MessageTokens,
+	EMessageLogSeverity Severity)
 {
 	if (MessageTokens.Num() == 0)
 	{
@@ -31,20 +36,22 @@ void UMessageLogBlueprintLibrary::AddTokenizedMessageLogMessage(FName MessageLog
 	FMessageLog(MessageLogName).AddMessage(Message);
 }
 
-void UMessageLogBlueprintLibrary::OpenMessageLog(FName MessageLogName, EMessageLogSeverity InMinSeverity,
-                                                 bool bOpenEvenIfEmpty)
+void UMessageLogBlueprintLibrary::OpenMessageLog(
+	FName MessageLogName,
+	EMessageLogSeverity InMinSeverity,
+	bool bOpenEvenIfEmpty)
 {
 	FMessageLog(MessageLogName).Open(StaticCast<EMessageSeverity::Type>(InMinSeverity), bOpenEvenIfEmpty);
 }
 
-FMessageLogToken UMessageLogBlueprintLibrary::CreateAssetNameMessageLogToken(FString AssetName,
-                                                                             FText OptionalLabelOverride)
+FMessageLogToken UMessageLogBlueprintLibrary::CreateAssetNameMessageLogToken(
+	FString AssetName,
+	FText OptionalLabelOverride)
 {
 	return FMessageLogToken::CreateAssetNameMessageLogToken(AssetName, OptionalLabelOverride);
 }
 
-FMessageLogToken UMessageLogBlueprintLibrary::CreateObjectMessageLogToken(
-	UObject* Object, FText OptionalLabelOverride)
+FMessageLogToken UMessageLogBlueprintLibrary::CreateObjectMessageLogToken(UObject* Object, FText OptionalLabelOverride)
 {
 	return FMessageLogToken::CreateObjectMessageLogToken(Object, OptionalLabelOverride);
 }
@@ -54,8 +61,7 @@ FMessageLogToken UMessageLogBlueprintLibrary::CreateTextMessageLogToken(FText Te
 	return FMessageLogToken::CreateTextMessageLogToken(Text);
 }
 
-FMessageLogToken UMessageLogBlueprintLibrary::CreateURLMessageLogToken(FString URL,
-                                                                       FText OptionalLabelOverride)
+FMessageLogToken UMessageLogBlueprintLibrary::CreateURLMessageLogToken(FString URL, FText OptionalLabelOverride)
 {
 	return FMessageLogToken::CreateURLMessageLogToken(URL, OptionalLabelOverride);
 }

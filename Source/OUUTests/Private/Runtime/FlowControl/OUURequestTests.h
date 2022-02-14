@@ -1,8 +1,8 @@
 // Copyright (c) 2021 Jonas Reich
 
 #include "CoreMinimal.h"
-
 #include "FlowControl/OUURequest.h"
+
 #include "OUURequestTests.generated.h"
 
 UCLASS(meta = (Hidden, HideDropDown))
@@ -13,10 +13,7 @@ public:
 	bool bCompleteRequestSuccesfully = false;
 
 	UFUNCTION()
-	void HandleRequestRaised(UOUURequest* Request)
-	{
-		Request->Complete(bCompleteRequestSuccesfully);
-	}
+	void HandleRequestRaised(UOUURequest* Request) { Request->Complete(bCompleteRequestSuccesfully); }
 };
 
 UCLASS(meta = (Hidden, HideDropDown))
@@ -36,10 +33,7 @@ public:
 
 	TArray<EOUURequestState> StateHistory;
 	UFUNCTION()
-	void HandleStateChanged(UOUURequest* Request, EOUURequestState State)
-	{
-		StateHistory.Add(State);
-	}
+	void HandleStateChanged(UOUURequest* Request, EOUURequestState State) { StateHistory.Add(State); }
 };
 
 UCLASS(meta = (Hidden, HideDropDown))
@@ -47,5 +41,4 @@ class UOUURequestQueue_TestRequest : public UOUURequest
 {
 	GENERATED_BODY()
 public:
-
 };

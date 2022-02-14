@@ -7,14 +7,14 @@
 /** Concept for a class that supports string conversion via LexToString() */
 struct CLexToStringConvertible
 {
-	template<typename ElementType>
+	template <typename ElementType>
 	auto Requires(ElementType It) -> decltype(LexToString(DeclVal<ElementType>()));
 };
 
 /** Concept for a class that supports string conversion via ToString() member */
 struct CMemberToStringConvertable
 {
-	template<typename ElementType>
+	template <typename ElementType>
 	auto Requires(ElementType It) -> decltype(DeclVal<ElementType>().ToString());
 };
 

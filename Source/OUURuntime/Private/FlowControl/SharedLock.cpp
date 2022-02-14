@@ -1,6 +1,7 @@
 // Copyright (c) 2021 Jonas Reich
 
 #include "FlowControl/SharedLock.h"
+
 #include "LogOpenUnrealUtilities.h"
 
 void USharedLock::Lock(UObject* Key)
@@ -21,12 +22,19 @@ void USharedLock::LockForDuration(UObject* Key, float Duration)
 	UWorld* World = GetWorld();
 	if (!IsValid(World))
 	{
-		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("LockForDuration cannot be used if the lock does not have a valid world context"));
+		UE_LOG(
+			LogOpenUnrealUtilities,
+			Warning,
+			TEXT("LockForDuration cannot be used if the lock does not have a valid world context"));
 		return;
 	}
 
 	FTimerHandle Handle;
-	World->GetTimerManager().SetTimer(Handle, [this, Key]() { TryUnlock(Key); }, Duration, false);
+	World->GetTimerManager().SetTimer(
+		Handle,
+		[this, Key]() { TryUnlock(Key); },
+		Duration,
+		false);
 
 	Lock(Key);
 }
@@ -50,9 +58,7 @@ bool USharedLock::IsLocked() const
 
 bool USharedLock::CheckIsLocked()
 {
-	ActiveKeys.RemoveAllSwap([](auto Key) {
-		return !Key.IsValid() && Key.IsStale();
-	});
+	ActiveKeys.RemoveAllSwap([](auto Key) { return !Key.IsValid() && Key.IsStale(); });
 	return IsLocked();
 }
 

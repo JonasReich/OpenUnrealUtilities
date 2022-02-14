@@ -3,9 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
-#include "Window/WindowSizingRule.h"
 #include "Window/WindowAutoCenterRule.h"
+#include "Window/WindowSizingRule.h"
 
 #include "OUUWindowParameters.generated.h"
 
@@ -48,4 +47,3 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText Title = INVTEXT("");
 };
-

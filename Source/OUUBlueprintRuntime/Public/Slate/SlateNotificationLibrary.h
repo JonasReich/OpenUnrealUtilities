@@ -37,11 +37,11 @@ public:
 	/** When true an image is displayed next to the text */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slate Notification")
 	bool bShowImage = false;
-	
+
 	/** The icon image to display next to the text */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slate Notification")
 	FSlateBrush Image;
-	
+
 	/** Controls whether or not to add the animated throbber */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Slate Notification|Styling")
 	bool bUseThrobber = false;
@@ -81,7 +81,7 @@ public:
 
 private:
 	/** integer handle that is use to identify registered notifications */
-	FGuid NotificationId = FGuid();	
+	FGuid NotificationId = FGuid();
 };
 
 OUUBLUEPRINTRUNTIME_API uint32 GetTypeHash(const FSlateNotificationHandle& Handle);
@@ -95,8 +95,10 @@ enum class ESlateNotificationState : uint8
 	Fail
 };
 
-OUUBLUEPRINTRUNTIME_API ESlateNotificationState SlateNotificationState_ConvertSlateToBlueprint(SNotificationItem::ECompletionState State);
-OUUBLUEPRINTRUNTIME_API SNotificationItem::ECompletionState SlateNotificationState_ConvertBlueprintToSlate(ESlateNotificationState State);
+OUUBLUEPRINTRUNTIME_API ESlateNotificationState
+	SlateNotificationState_ConvertSlateToBlueprint(SNotificationItem::ECompletionState State);
+OUUBLUEPRINTRUNTIME_API SNotificationItem::ECompletionState SlateNotificationState_ConvertBlueprintToSlate(
+	ESlateNotificationState State);
 
 UCLASS()
 class OUUBLUEPRINTRUNTIME_API USlateNotificationLibrary : public UBlueprintFunctionLibrary
@@ -108,24 +110,43 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Slate Notification")
 	static void SetSlateNotificationText(const FSlateNotificationHandle& NotificationHandle, FText Text);
+
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Slate Notification")
-	static void SetSlateNotificationHyperlink(const FSlateNotificationHandle& NotificationHandle, FText HyperlinkText, FSlateNotificationSimpleSingleCastDelegate HyperlinkDelegate);
+	static void SetSlateNotificationHyperlink(
+		const FSlateNotificationHandle& NotificationHandle,
+		FText HyperlinkText,
+		FSlateNotificationSimpleSingleCastDelegate HyperlinkDelegate);
+
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Slate Notification")
-	static void SetSlateNotificationExpireDuration(const FSlateNotificationHandle& NotificationHandle, float ExpireDuration);
+	static void SetSlateNotificationExpireDuration(
+		const FSlateNotificationHandle& NotificationHandle,
+		float ExpireDuration);
+
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Slate Notification")
-	static void SetSlateNotificationFadeInDuration(const FSlateNotificationHandle& NotificationHandle, float FadeInDuration);
+	static void SetSlateNotificationFadeInDuration(
+		const FSlateNotificationHandle& NotificationHandle,
+		float FadeInDuration);
+
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Slate Notification")
-	static void SetSlateNotificationFadeOutDuration(const FSlateNotificationHandle& NotificationHandle, float FadeOutDuration);
+	static void SetSlateNotificationFadeOutDuration(
+		const FSlateNotificationHandle& NotificationHandle,
+		float FadeOutDuration);
 
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Slate Notification")
-	static ESlateNotificationState GetSlateNotificationCompletionState(const FSlateNotificationHandle& NotificationHandle);
+	static ESlateNotificationState GetSlateNotificationCompletionState(
+		const FSlateNotificationHandle& NotificationHandle);
+
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Slate Notification")
-	static void SetSlateNotificationCompletionState(const FSlateNotificationHandle& NotificationHandle, ESlateNotificationState CompletionState);
+	static void SetSlateNotificationCompletionState(
+		const FSlateNotificationHandle& NotificationHandle,
+		ESlateNotificationState CompletionState);
 
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Slate Notification")
 	static void ExpireSlateNotificationAndFadeout(const FSlateNotificationHandle& NotificationHandle);
+
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Slate Notification")
 	static void FadeoutSlateNotification(const FSlateNotificationHandle& NotificationHandle);
+
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Slate Notification")
 	static void PulseSlateNotification(const FSlateNotificationHandle& NotificationHandle, FLinearColor GlowColor);
 

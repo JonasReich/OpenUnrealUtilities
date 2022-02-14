@@ -1,15 +1,17 @@
 ﻿// Copyright (c) 2021 Jonas Reich
 
 #if WITH_EDITOR
-#include "Editor.h"
+	#include "Editor.h"
 #endif
-#include "LogOpenUnrealUtilities.h"
 #include "BehaviorTree/BTNode.h"
 #include "Components/Widget.h"
+#include "LogOpenUnrealUtilities.h"
 
-static TAutoConsoleVariable<bool> bCVarAccumulateGCCounts(TEXT("ouu.Debug.GC.AccumulateDumps"),
+static TAutoConsoleVariable<bool> bCVarAccumulateGCCounts(
+	TEXT("ouu.Debug.GC.AccumulateDumps"),
 	true,
-	TEXT("If true GC reports are only logged at the moment dumping is shut off. Otherwise every GC call triggers a log dump"),
+	TEXT("If true GC reports are only logged at the moment dumping is shut off. Otherwise every GC call triggers a log "
+		 "dump"),
 	ECVF_Cheat);
 
 // Right now we only track the count, but it would be great to extend this
@@ -22,7 +24,8 @@ struct FGarbageCollectionStats
 using FClassToGCStats = TTuple<TSoftClassPtr<UObject>, FGarbageCollectionStats>;
 
 /**
- * Delete listener that tracks deleted UObjects over time to gather metrics about object deletion and garbage collection.
+ * Delete listener that tracks deleted UObjects over time to gather metrics about object deletion and garbage
+ * collection.
  */
 class FGarbageCollectionListener : public FUObjectArray::FUObjectDeleteListener
 {
@@ -103,15 +106,13 @@ private:
 
 		// Sorted from specific to generic.
 		// Otherwise all objects would be put into a generic category like UObject.
-		TArray<UClass*> GroupingSuperClasses =
-		{
+		TArray<UClass*> GroupingSuperClasses = {
 			UEdGraphNode::StaticClass(),
 			UWidget::StaticClass(),
 			UBTNode::StaticClass(),
 			UActorComponent::StaticClass(),
 			AActor::StaticClass(),
-			UObject::StaticClass()
-		};
+			UObject::StaticClass()};
 
 		TMap<UClass*, TArray<FClassToGCStats>> SortedClassDeletionMaps;
 		TMap<UClass*, FClassToGCStats> AccumulatedDeletionMaps;
@@ -124,10 +125,8 @@ private:
 			UClass* SuperClass = UObject::StaticClass();
 			if (Pair.Key.IsValid())
 			{
-				if (auto** SuperClassPtr = GroupingSuperClasses.FindByPredicate([&](UClass* C) -> bool
-				{
-					return Pair.Key->IsChildOf(C);
-				}))
+				if (auto** SuperClassPtr =
+						GroupingSuperClasses.FindByPredicate([&](UClass* C) -> bool { return Pair.Key->IsChildOf(C); }))
 				{
 					SuperClass = *SuperClassPtr;
 				}
@@ -137,8 +136,7 @@ private:
 			AccumulatedDeletionMaps.FindOrAdd(SuperClass).Value.Count += Pair.Value.Count;
 		}
 
-		GroupingSuperClasses.Sort([&](const UClass& A, const UClass& B) -> bool
-		{
+		GroupingSuperClasses.Sort([&](const UClass& A, const UClass& B) -> bool {
 			FClassToGCStats* AccumulatedStatsA = AccumulatedDeletionMaps.Find(&A);
 			FClassToGCStats* AccumulatedStatsB = AccumulatedDeletionMaps.Find(&B);
 
@@ -150,8 +148,13 @@ private:
 
 		UE_LOG(LogOpenUnrealUtilities, Log, TEXT("--- Garbage Collection Summary ---"));
 		const double TimePassed = EndTime - StartTime;
-		UE_LOG(LogOpenUnrealUtilities, Log, TEXT("Deleted %i UObjects in %f seconds (%i frames). See breakdown per class below:"),
-			TotalDeletionCount, TimePassed, FrameCounter);
+		UE_LOG(
+			LogOpenUnrealUtilities,
+			Log,
+			TEXT("Deleted %i UObjects in %f seconds (%i frames). See breakdown per class below:"),
+			TotalDeletionCount,
+			TimePassed,
+			FrameCounter);
 
 		TSoftClassPtr<UObject> Class = nullptr;
 		FGarbageCollectionStats Stats;
@@ -161,17 +164,26 @@ private:
 			if (SortedClassDeletionMap == nullptr)
 				continue;
 
-			SortedClassDeletionMap->Sort([](const FClassToGCStats& A, const FClassToGCStats& B) -> bool
-			{
+			SortedClassDeletionMap->Sort([](const FClassToGCStats& A, const FClassToGCStats& B) -> bool {
 				// sort descending values
 				return A.Value.Count > B.Value.Count;
 			});
 
-			UE_LOG(LogOpenUnrealUtilities, Log, TEXT("- %i with super class %s"), AccumulatedDeletionMaps[SuperClass].Value.Count, *SuperClass->GetName());
+			UE_LOG(
+				LogOpenUnrealUtilities,
+				Log,
+				TEXT("- %i with super class %s"),
+				AccumulatedDeletionMaps[SuperClass].Value.Count,
+				*SuperClass->GetName());
 			for (auto& Pair : (*SortedClassDeletionMap))
 			{
 				Tie(Class, Stats) = Pair;
-				UE_LOG(LogOpenUnrealUtilities, Log, TEXT("\t- %i %s"), Stats.Count, *(Class.IsValid() ? Class->GetName() : FString("invalid class")));
+				UE_LOG(
+					LogOpenUnrealUtilities,
+					Log,
+					TEXT("\t- %i %s"),
+					Stats.Count,
+					*(Class.IsValid() ? Class->GetName() : FString("invalid class")));
 			}
 		}
 	}
@@ -202,15 +214,9 @@ public:
 		return *GGarbageCollectionListener;
 	}
 
-	static FGarbageCollectionListener* Find()
-	{
-		return GGarbageCollectionListener.Get();
-	}
+	static FGarbageCollectionListener* Find() { return GGarbageCollectionListener.Get(); }
 
-	static void Deactivate()
-	{
-		GGarbageCollectionListener.Reset();
-	}
+	static void Deactivate() { GGarbageCollectionListener.Reset(); }
 
 	// - FUObjectArray::FUObjectDeleteListener
 	virtual void NotifyUObjectDeleted(const UObjectBase* ObjectBase, int32 Index) override
@@ -235,32 +241,22 @@ TUniquePtr<FGarbageCollectionListener> FGarbageCollectionListener::GGarbageColle
 static FAutoConsoleCommand DumpGarbageCollection(
 	TEXT("ouu.Debug.GC.DumpNext"),
 	TEXT("Dump a summary of the next garbage collection that is triggered into the output log"),
-	FConsoleCommandDelegate::CreateStatic(
-		[]()
-		{
-			FGarbageCollectionListener::FindOrCreate().bAutoDeactivate = true;
-		})
-	);
+	FConsoleCommandDelegate::CreateStatic([]() { FGarbageCollectionListener::FindOrCreate().bAutoDeactivate = true; }));
 
 static FAutoConsoleCommand StartGarbageCollectionDumping(
 	TEXT("ouu.Debug.GC.StartDump"),
-	TEXT("Start dumping summaries of all following garbage collections into the output log until this process is stopped with ouu.GC.StopDump"),
-	FConsoleCommandDelegate::CreateStatic(
-		[]()
-		{
-			FGarbageCollectionListener::FindOrCreate().bAutoDeactivate = false;
-		})
-	);
+	TEXT("Start dumping summaries of all following garbage collections into the output log until this process is "
+		 "stopped with ouu.GC.StopDump"),
+	FConsoleCommandDelegate::CreateStatic([]() {
+		FGarbageCollectionListener::FindOrCreate().bAutoDeactivate = false;
+	}));
 
 static FAutoConsoleCommand StopGarbageCollectionDumping(
 	TEXT("ouu.Debug.GC.StopDump"),
 	TEXT("Stop dumping garbage collection summaries into the output log"),
-	FConsoleCommandDelegate::CreateStatic(
-		[]()
+	FConsoleCommandDelegate::CreateStatic([]() {
+		if (auto* Listener = FGarbageCollectionListener::Find())
 		{
-			if (auto* Listener = FGarbageCollectionListener::Find())
-			{
-				Listener->Deactivate();
-			}
-		})
-	);
+			Listener->Deactivate();
+		}
+	}));

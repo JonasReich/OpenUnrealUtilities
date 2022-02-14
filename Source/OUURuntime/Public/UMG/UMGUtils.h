@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetTree.h"
+#include "CoreMinimal.h"
 
 class UWidget;
 
@@ -13,10 +13,11 @@ namespace UMGUtils
 	/**
 	 * Execute a predicate on the widget and all widgets nested as Slot or Named Slot children.
 	 * Does not jump from one UserWidget into another.
-	 * Modeled after UWidgetTree::ForEachWidget, but the predicate returns a boolean break condition to stop the iteration.
+	 * Modeled after UWidgetTree::ForEachWidget, but the predicate returns a boolean break condition to stop the
+	 * iteration.
 	 * @returns if the exit condition was set / iteration was canceled
 	 */
-	template<class WidgetClass>
+	template <class WidgetClass>
 	bool ForEachWidget(WidgetClass* RootWidget, TFunctionRef<bool(WidgetClass*)> Predicate);
 
 	/**
@@ -28,7 +29,11 @@ namespace UMGUtils
 	 * @param Predicate: The predicate to execute for the widgets
 	 * @returns if the exit condition was set / iteration was canceled
 	 */
-	template<class WidgetClass> bool ForEachWidgetAndDescendants(WidgetClass* RootWidget, bool bIncludeRootWidget, TFunctionRef<bool(WidgetClass*)> Predicate);
+	template <class WidgetClass>
+	bool ForEachWidgetAndDescendants(
+		WidgetClass* RootWidget,
+		bool bIncludeRootWidget,
+		TFunctionRef<bool(WidgetClass*)> Predicate);
 
 	/**
 	 * Execute a predicate on all widgets nested as Slot or Named Slot children under the RootWidget.
@@ -37,7 +42,7 @@ namespace UMGUtils
 	 * but the predicate returns a boolean break condition
 	 * @returns if the exit condition was set / iteration was canceled
 	 */
-	template<class WidgetClass>
+	template <class WidgetClass>
 	bool ForChildWidgets(WidgetClass* Widget, TFunctionRef<bool(WidgetClass*)> Predicate);
 
 	/** Check if a widget is focusable. Works both for UUserWidgets and native UWidgets. */
@@ -67,9 +72,19 @@ namespace UMGUtils
 
 	// Explicit instantiations of the widget tree iteration templates above
 	extern template bool ForEachWidget<UWidget>(UWidget* RootWidget, TFunctionRef<bool(UWidget*)> Predicate);
-	extern template bool ForEachWidget<const UWidget>(const UWidget* RootWidget, TFunctionRef<bool(const UWidget*)> Predicate);
-	extern template bool ForEachWidgetAndDescendants<UWidget>(UWidget* RootWidget, bool bIncludeRootWidget, TFunctionRef<bool(UWidget*)> Predicate);
-	extern template bool ForEachWidgetAndDescendants<const UWidget>(const UWidget* RootWidget, bool bIncludeRootWidget, TFunctionRef<bool(const UWidget*)> Predicate);
+	extern template bool ForEachWidget<const UWidget>(
+		const UWidget* RootWidget,
+		TFunctionRef<bool(const UWidget*)> Predicate);
+	extern template bool ForEachWidgetAndDescendants<UWidget>(
+		UWidget* RootWidget,
+		bool bIncludeRootWidget,
+		TFunctionRef<bool(UWidget*)> Predicate);
+	extern template bool ForEachWidgetAndDescendants<const UWidget>(
+		const UWidget* RootWidget,
+		bool bIncludeRootWidget,
+		TFunctionRef<bool(const UWidget*)> Predicate);
 	extern template bool ForChildWidgets<UWidget>(UWidget* Widget, TFunctionRef<bool(UWidget*)> Predicate);
-	extern template bool ForChildWidgets<const UWidget>(const UWidget* Widget, TFunctionRef<bool(const UWidget*)> Predicate);
-}
+	extern template bool ForChildWidgets<const UWidget>(
+		const UWidget* Widget,
+		TFunctionRef<bool(const UWidget*)> Predicate);
+} // namespace UMGUtils
