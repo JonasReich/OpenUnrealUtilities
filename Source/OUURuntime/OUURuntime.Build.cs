@@ -9,6 +9,8 @@ public class OUURuntime : ModuleRules
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		PublicDependencyModuleNames.AddRange(new string[] {
+
+			// Engine
 			"CoreUObject",
 			"Engine",
 			"Core",
@@ -20,7 +22,13 @@ public class OUURuntime : ModuleRules
 			"GameplayTasks"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { "HeadMountedDisplay", "Slate", "AIModule" });
+		PrivateDependencyModuleNames.AddRange(new string[] {
+
+			// Engine
+			"HeadMountedDisplay",
+			"Slate",
+			"AIModule"
+		});
 
 		// - Editor only dependencies
 		if (Target.bBuildEditor)

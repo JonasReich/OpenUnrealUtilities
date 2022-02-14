@@ -8,9 +8,17 @@ public class OUUBlueprintRuntime : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "InputCore", "UMG" });
+		PublicDependencyModuleNames.AddRange(new string[] {
+
+			// Engine
+			"Core",
+			"InputCore",
+			"UMG"
+		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {
+
+			// Engine
 			"CoreUObject",
 			"Engine",
 			"Slate",

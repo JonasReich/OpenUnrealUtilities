@@ -8,19 +8,23 @@ public class OUUEditor : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] {// Engine
-														   "Core",
-														   "InputCore",
-														   "UMG",
+		PublicDependencyModuleNames.AddRange(new string[] {
 
-														   // Plugin
-														   "OUURuntime"
+			// Engine
+			"Core",
+			"InputCore",
+			"UMG",
+
+			// Plugin
+			"OUURuntime"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] {// Engine
-															"CoreUObject",
-															"Engine",
-															"Slate"
+		PrivateDependencyModuleNames.AddRange(new string[] {
+
+			// Engine
+			"CoreUObject",
+			"Engine",
+			"Slate"
 		});
 	}
 }

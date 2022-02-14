@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022 Jonas Reich
+// Copyright (c) 2022 Jonas Reich
 
 #include "GameplayTags/SampleGameplayTags.h"
 #include "OUUTestUtilities.h"

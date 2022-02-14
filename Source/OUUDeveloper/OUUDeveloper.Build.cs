@@ -9,6 +9,8 @@ public class OUUDeveloper : ModuleRules
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		PublicDependencyModuleNames.AddRange(new string[] {
+
+			// Engine
 			"CoreUObject",
 			"Engine",
 			"Core",
@@ -16,17 +18,28 @@ public class OUUDeveloper : ModuleRules
 			"UMG",
 			"SlateCore",
 
+			// Plugin
 			"OUURuntime",
 			"OUUUMG"
 		});
 
-		PrivateDependencyModuleNames.AddRange(
-			new string[] { "Slate", "AIModule", "GameplayTags", "GameplayAbilities" });
+		PrivateDependencyModuleNames.AddRange(new string[] {
+
+			// Engine
+			"Slate",
+			"AIModule",
+			"GameplayTags",
+			"GameplayAbilities"
+		});
 
 		// - Editor only dependencies
 		if (Target.bBuildEditor)
 		{
-			PrivateDependencyModuleNames.Add("UnrealEd");
+			PrivateDependencyModuleNames.AddRange(new string[] {
+
+				// Engine
+				"UnrealEd"
+			});
 		}
 		// --
 

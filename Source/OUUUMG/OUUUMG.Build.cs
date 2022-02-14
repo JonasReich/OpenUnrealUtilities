@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022 Jonas Reich
+// Copyright (c) 2022 Jonas Reich
 
 using UnrealBuildTool;
 
@@ -8,12 +8,23 @@ public class OUUUMG : ModuleRules
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(
-			new string[] { "CoreUObject", "Engine", "Core", "InputCore", "UMG", "SlateCore" });
+		PublicDependencyModuleNames.AddRange(new string[] {
+
+			// Engine
+			"CoreUObject",
+			"Engine",
+			"Core",
+			"InputCore",
+			"UMG",
+			"SlateCore"
+		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {
+
+			// Engine
 			"Slate",
 
+			// Plugin
 			"OUURuntime"
 		});
 	}
