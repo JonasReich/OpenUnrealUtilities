@@ -1,5 +1,5 @@
 ﻿
-// Copyright (c) 2021 Jonas Reich
+// Copyright (c) 2022 Jonas Reich
 
 #pragma once
 
