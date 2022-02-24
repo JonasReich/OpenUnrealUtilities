@@ -41,4 +41,10 @@ public:
 			Range.HasLowerBound() ? Range.GetLowerBoundValue() : TNumericLimits<T>::Min(),
 			Range.HasUpperBound() ? Range.GetUpperBoundValue() : TNumericLimits<T>::Max());
 	}
+
+	static float LinearValueToNormalizedLogScale(float Value, float ValueRangeMin, float ValueRangeMax)
+	{
+		float offset = FMath::Loge(ValueRangeMin);
+		return (FMath::Loge(Value) - offset) / (FMath::Loge(ValueRangeMax) - offset);
+	}
 };
