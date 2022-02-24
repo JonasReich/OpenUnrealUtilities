@@ -136,7 +136,7 @@ protected:
 
 	// Store the delta times of last 60 frames to better predict delta time for next frame
 	static const int32 NumFramesBufferSize = 60;
-	TFixedSizeRingAggregator<float, NumFramesBufferSize> DeltaTimeRingBuffer;
+	TFixedSizeCircularAggregator<float, NumFramesBufferSize> DeltaTimeRingBuffer;
 
 #if WITH_GAMEPLAY_DEBUGGER
 	struct FDebugData
@@ -152,15 +152,17 @@ protected:
 		// to show if the configuration of the debugger is balanced appropriately.
 		// No gameplay debugger is provided at this time because the integration into various other systems will impact
 		// how exactly the scheduler will be integrated / where it will be located.
-		TFixedSizeRingAggregator<float, NumFramesBufferSize> MaxDelaySecondsRingBuffer;
-		TFixedSizeRingAggregator<float, NumFramesBufferSize> AverageDelaySecondsRingBuffer;
-		TFixedSizeRingAggregator<float, NumFramesBufferSize> MaxDelayFractionRingBuffer;
-		TFixedSizeRingAggregator<float, NumFramesBufferSize> AverageDelayFractionRingBuffer;
-		TFixedSizeRingAggregator<int32, NumFramesBufferSize> NumTasksExecutedRingBuffer;
+		TFixedSizeCircularAggregator<float, NumFramesBufferSize> MaxDelaySecondsRingBuffer;
+		TFixedSizeCircularAggregator<float, NumFramesBufferSize> AverageDelaySecondsRingBuffer;
+		TFixedSizeCircularAggregator<float, NumFramesBufferSize> MaxDelayFractionRingBuffer;
+		TFixedSizeCircularAggregator<float, NumFramesBufferSize> AverageDelayFractionRingBuffer;
+		TFixedSizeCircularAggregator<int32, NumFramesBufferSize> NumTasksExecutedRingBuffer;
 
 		// Which tasks were actually executed in the last frames.
-		// TTuple: [TickCounter, TaskId, TimeBetweenUpdates]
-		TFixedSizeRingAggregator<TTuple<uint32, FTaskHandle, float>, NumFramesBufferSize> TaskHistory;
+		// TTuple: [TickCounter, TaskId, TimeBetweenUpdates, TaskDuration]
+		using TaskHistoryElementType = TTuple<uint32, FTaskHandle, float, float>;
+		using TaskHistoryType = TFixedSizeCircularAggregator<TaskHistoryElementType, NumFramesBufferSize>;
+		TaskHistoryType TaskHistory;
 	} DebugData;
 #endif
 
