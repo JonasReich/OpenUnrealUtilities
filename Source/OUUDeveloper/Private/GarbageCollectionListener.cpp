@@ -5,14 +5,15 @@
 #endif
 #include "BehaviorTree/BTNode.h"
 #include "Components/Widget.h"
+#include "Engine/Engine.h"
 #include "LogOpenUnrealUtilities.h"
+#include "TimerManager.h"
 
 static TAutoConsoleVariable<bool> bCVarAccumulateGCCounts(
 	TEXT("ouu.Debug.GC.AccumulateDumps"),
 	true,
 	TEXT("If true GC reports are only logged at the moment dumping is shut off. Otherwise every GC call triggers a log "
-		 "dump"),
-	ECVF_Cheat);
+		 "dump"));
 
 // Right now we only track the count, but it would be great to extend this
 // with some other metrics that we can still get during GC.
@@ -53,7 +54,7 @@ private:
 				DumpCurrentClassDeletions();
 
 				// This is only required for the case of dumping every frame,
-				// so we don't do it here instead of inside DumpCurrentClassDeletions()
+				// so we do it here instead of inside DumpCurrentClassDeletions()
 				ClassToStatsMap.Reset();
 				FrameCounter = 0;
 				StartTime = FPlatformTime::Seconds();
@@ -67,7 +68,7 @@ private:
 		if (TimerHandle.IsValid())
 			return;
 
-		if (auto* TimerManager = GetTimerManager())
+		if (auto TimerManager = GetTimerManager())
 		{
 			const FTimerDelegate Delegate = FTimerDelegate::CreateRaw(this, &FGarbageCollectionListener::Tick);
 			TimerHandle = TimerManager->SetTimerForNextTick(Delegate);
