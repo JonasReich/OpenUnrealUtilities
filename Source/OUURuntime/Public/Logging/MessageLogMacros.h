@@ -29,3 +29,13 @@
 		GetMessageLogName(EMessageLogName::Category),                                                                  \
 		FMessageLogToken::CreateList(ContextObject, FText::FromString(FString::Printf(__VA_ARGS__))),                  \
 		EMessageLogSeverity::Severity))
+
+/**
+ * Force a notification message with a link to the corresponding message log category
+ */
+#define UE_MESSAGELOG_NOTIFY(Category, Severity, Message)                                                              \
+	(UMessageLogBlueprintLibrary::NotifyMessageLog(                                                                    \
+		GetMessageLogName(EMessageLogName::Category),                                                                  \
+		INVTEXT(Message),                                                                                              \
+		EMessageLogSeverity::Severity,                                                                                 \
+		true))

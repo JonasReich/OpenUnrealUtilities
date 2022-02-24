@@ -44,6 +44,20 @@ void UMessageLogBlueprintLibrary::OpenMessageLog(
 	FMessageLog(MessageLogName).Open(StaticCast<EMessageSeverity::Type>(InMinSeverity), bOpenEvenIfEmpty);
 }
 
+void UMessageLogBlueprintLibrary::NotifyMessageLog(
+	FName MessageLogName,
+	const FText& InMessage,
+	EMessageLogSeverity InMinSeverity,
+	bool bForce)
+{
+	FMessageLog(MessageLogName).Notify(InMessage, StaticCast<EMessageSeverity::Type>(InMinSeverity), bForce);
+}
+
+void UMessageLogBlueprintLibrary::NewMessageLogPage(FName MessageLogName, const FText& InLabel)
+{
+	FMessageLog(MessageLogName).NewPage(InLabel);
+}
+
 FMessageLogToken UMessageLogBlueprintLibrary::CreateAssetNameMessageLogToken(
 	FString AssetName,
 	FText OptionalLabelOverride)

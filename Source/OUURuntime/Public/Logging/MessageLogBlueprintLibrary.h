@@ -62,6 +62,29 @@ public:
 		EMessageLogSeverity InMinSeverity = EMessageLogSeverity::Info,
 		bool bOpenEvenIfEmpty = false);
 
+	/**
+	 * Notify the user with a message if there are messages present.
+	 * This call will cause a flush so that the logs state is properly reflected.
+	 * @param	InMessage			The notification message.
+	 * @param	InMinSeverity		Only messages of higher severity than this filter will be considered when checking.
+	 * @param	bForce				Notify anyway, even if the filters gives us no messages.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Message Log")
+	static void NotifyMessageLog(
+		FName MessageLogName,
+		const FText& InMessage = FText(),
+		EMessageLogSeverity InMinSeverity = EMessageLogSeverity::Info,
+		bool bForce = false);
+
+	/**
+	 * Add a new page to the log.
+	 * Pages will not be created until messages are added to them, so we dont generate lots of empty pages.
+	 * This call will cause a flush so that the logs state is properly reflected.
+	 * @param	InLabel		The label for the page.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Message Log")
+	static void NewMessageLogPage(FName MessageLogName, const FText& InLabel);
+
 	// -------------
 	// FMessageLogToken constructor wrappers
 	// -------------
