@@ -62,9 +62,22 @@ FString LexToString(TSharedPtr<T> Object)
 	return Object.IsValid() ? LexToString(Object.Get()) : TEXT("nullptr");
 }
 
+template <typename T>
+FString LexToString_QuotedIfString(const T& Value)
+{
+	if (TIsStringType<T>::Value)
+	{
+		return FString::Printf(TEXT("\"%s\""), *LexToString(Value));
+	}
+	else
+	{
+		return LexToString(Value);
+	}
+}
+
 /**
  * Interprets all elements of an array as LexToString-convertible objects and joins them
- * in a comma separated list enclosed by square brackets.
+ * in a comma separated list enclosed by square brackets (similar to json arrays).
  * Any string types will be quoted.
  */
 template <typename ElementType, typename AllocatorType>
@@ -74,13 +87,29 @@ FString ArrayToString(const TArray<ElementType, AllocatorType>& Array, const TCH
 		TModels<CLexToStringConvertible, ElementType>::Value,
 		"ElementType must be string convertible with LexToString()!");
 	return FString::Printf(TEXT("[%s]"), *FString::JoinBy(Array, Separator, [](auto& Element) {
-							   if (TIsStringType<ElementType>::Value)
-							   {
-								   return FString::Printf(TEXT("\"%s\""), *LexToString(Element));
-							   }
-							   else
-							   {
-								   return LexToString(Element);
-							   }
+							   return LexToString_QuotedIfString<ElementType>(Element);
+						   }));
+}
+
+/**
+ * Interprets all elements of a map as LexToString-convertible objects and joins them
+ * in a comma separated list enclosed by curly brackets (similar to json maps).
+ * Any string types will be quoted.
+ */
+template <typename KeyType, typename ValueType, typename AllocatorType>
+FString MapToString(const TMap<KeyType, ValueType, AllocatorType>& Map, const TCHAR* Separator = TEXT(", "))
+{
+	static_assert(
+		TModels<CLexToStringConvertible, KeyType>::Value,
+		"KeyType must be string convertible with LexToString()!");
+	static_assert(
+		TModels<CLexToStringConvertible, ValueType>::Value,
+		"ValueType must be string convertible with LexToString()!");
+
+	return FString::Printf(TEXT("{%s}"), *FString::JoinBy(Map, Separator, [](auto& Element) {
+							   return FString::Printf(
+								   TEXT("%s : %s"),
+								   *LexToString_QuotedIfString<KeyType>(Element.Key),
+								   *LexToString_QuotedIfString<ValueType>(Element.Value));
 						   }));
 }
