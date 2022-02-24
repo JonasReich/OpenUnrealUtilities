@@ -22,8 +22,17 @@ public:
 
 private:
 	int32 ActiveDebugSchedulerTargetIndex = 0;
+	bool bToggleDummyTask = false;
+	bool bDummyTaskWasSpawned = false;
+
+	FSequentialFrameTask::FTaskHandle DummyTaskHandle_1;
+	FSequentialFrameTask::FTaskHandle DummyTaskHandle_2;
+	FSequentialFrameTask::FTaskHandle DummyTaskHandle_3;
 
 	void CycleDebugScheduler();
+	void ToggleDummyTask();
+
+	void ExecuteDummyTask(int32 TaskId);
 };
 
 #endif

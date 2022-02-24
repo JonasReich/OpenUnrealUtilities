@@ -82,6 +82,10 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 			continue;
 		}
 
+#if WITH_GAMEPLAY_DEBUGGER
+		const double TimeBeforeTask = FPlatformTime::Seconds();
+#endif
+
 		const float LastInvocationTimeBefore = CurrentTask->LastInvocationTime;
 		CurrentTask->Execute();
 		const float TaskWaitTime = CurrentTask->Now - LastInvocationTimeBefore;
@@ -89,7 +93,12 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 		ActualNumTasksExecutedThisFrame++;
 
 #if WITH_GAMEPLAY_DEBUGGER
-		DebugData.TaskHistory.Add(TTuple<uint32, FTaskHandle, float>{TickCounter, CurrentTask->Handle, TaskWaitTime});
+		const double TimeAfterTask = FPlatformTime::Seconds();
+		DebugData.TaskHistory.Add(TTuple<uint32, FTaskHandle, float, float>{
+			TickCounter,
+			CurrentTask->Handle,
+			TaskWaitTime,
+			TimeAfterTask - TimeBeforeTask});
 #endif
 	}
 #if WITH_GAMEPLAY_DEBUGGER

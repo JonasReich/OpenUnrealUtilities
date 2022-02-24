@@ -2,7 +2,10 @@
 
 #include "SequentialFrameScheduler/Debug/GameplayDebuggerCategory_SequentialFrameScheduler.h"
 
+#include "Engine/Canvas.h"
 #include "GameFramework/PlayerController.h"
+#include "GameplayAbilities/Debug/GameplayDebuggerCategory_OUUAbilities.h"
+#include "Misc/CanvasGraphPlottingUtils.h"
 #include "SequentialFrameScheduler/WorldBoundSFSchedulerRegistry.h"
 
 #if WITH_GAMEPLAY_DEBUGGER
@@ -27,8 +30,13 @@ FGameplayDebuggerCategory_SequentialFrameScheduler::FGameplayDebuggerCategory_Se
 {
 	bShowOnlyWithDebugActor = false;
 
-	const FGameplayDebuggerInputHandlerConfig KeyConfig(TEXT("Cycle Debug Scheduler"), EKeys::PageDown.GetFName());
-	BindKeyPress(KeyConfig, this, &FGameplayDebuggerCategory_SequentialFrameScheduler::CycleDebugScheduler);
+	const FGameplayDebuggerInputHandlerConfig CycleKeyConfig(TEXT("Cycle Debug Scheduler"), EKeys::PageDown.GetFName());
+	BindKeyPress(CycleKeyConfig, this, &FGameplayDebuggerCategory_SequentialFrameScheduler::CycleDebugScheduler);
+
+	const FGameplayDebuggerInputHandlerConfig ToggleDummyTaskKeyConfig(
+		TEXT("Add/Remove Dummy Task"),
+		EKeys::Home.GetFName());
+	BindKeyPress(ToggleDummyTaskKeyConfig, this, &FGameplayDebuggerCategory_SequentialFrameScheduler::ToggleDummyTask);
 }
 
 void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
@@ -37,10 +45,40 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
 {
 	CanvasContext.FontRenderInfo.bEnableShadow = true;
 
+	CanvasContext.Printf(TEXT("[{yellow}%s{white}]: Cycle Debug Scheduler"), *GetInputHandlerDescription(0));
+	CanvasContext.Printf(TEXT("[{yellow}%s{white}]: Enable/Disable dummy tasks"), *GetInputHandlerDescription(1));
+	CanvasContext.MoveToNewLine();
+
 	if (!IsValid(OwnerPC))
 	{
 		CanvasContext.Print(TEXT("{red}No valid player controller"));
 		return;
+	}
+
+	if (bToggleDummyTask)
+	{
+		auto DefaultScheduler = AWorldBoundSFSchedulerRegistry::GetDefaultScheduler(OwnerPC);
+		if (bDummyTaskWasSpawned)
+		{
+			DefaultScheduler->RemoveTask(DummyTaskHandle_1);
+			DefaultScheduler->RemoveTask(DummyTaskHandle_2);
+			DefaultScheduler->RemoveTask(DummyTaskHandle_3);
+		}
+		else
+		{
+			auto MakeTaskDelegate = [](auto* TypedThis, int32 TaskId) {
+				return FSequentialFrameTask::FTaskDelegate::CreateRaw(
+					TypedThis,
+					&FGameplayDebuggerCategory_SequentialFrameScheduler::ExecuteDummyTask,
+					TaskId);
+			};
+
+			DummyTaskHandle_1 = DefaultScheduler->AddNamedTask("Dummy Task 1", MakeTaskDelegate(this, 1), 1.f);
+			DummyTaskHandle_2 = DefaultScheduler->AddNamedTask("Dummy Task 2", MakeTaskDelegate(this, 2), 2.f);
+			DummyTaskHandle_3 = DefaultScheduler->AddNamedTask("Dummy Task 3", MakeTaskDelegate(this, 3), 3.f);
+		}
+		bDummyTaskWasSpawned = !bDummyTaskWasSpawned;
+		bToggleDummyTask = false;
 	}
 
 	AWorldBoundSFSchedulerRegistry& FrameSchedulerRegistry =
@@ -104,23 +142,166 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
 		int32 FrameNumber;
 		FSequentialFrameTask::FTaskHandle TaskHandle;
 		float TimeBetweenUpdates;
-		Tie(FrameNumber, TaskHandle, TimeBetweenUpdates) = TaskHistory[i];
+		float TaskDuration;
+		Tie(FrameNumber, TaskHandle, TimeBetweenUpdates, TaskDuration) = TaskHistory[i];
 
 		FName TaskName = DebugScheduler->DebugData.TaskDebugNames[TaskHandle];
-		TSharedPtr<FSequentialFrameTask> TaskInfo = DebugScheduler->TaskHandlesToTaskInfos[TaskHandle];
-		HistoryString += FString::Printf(
-			TEXT("\n- #%i tick time: %.2fms, period: %.2fms %s"),
-			FrameNumber,
-			TimeBetweenUpdates * 1000.f,
-			TaskInfo->Period * 1000.f,
-			*TaskName.ToString());
+		if (TSharedPtr<FSequentialFrameTask>* TaskInfo = DebugScheduler->TaskHandlesToTaskInfos.Find(TaskHandle))
+		{
+			HistoryString += FString::Printf(
+				TEXT("\n- #%i tick time: %.2fms, period: %.2fms %s; duration: %.4fms"),
+				FrameNumber,
+				TimeBetweenUpdates * 1000.f,
+				TaskInfo->Get()->Period * 1000.f,
+				*TaskName.ToString(),
+				TaskDuration * 1000.f);
+		}
+		else
+		{
+			HistoryString += "\n- invalid history entry";
+		}
 	}
 	CanvasContext.Print(HistoryString);
+
+	if (UCanvas* Canvas = CanvasContext.Canvas.Get())
+	{
+		const float GraphBottomYPos = Canvas->Canvas->GetRenderTarget()->GetSizeXY().Y / Canvas->GetDPIScale() - 50.0f;
+
+		// tasks to execute
+		{
+			TArray<CanvasGraphPlottingUtils::FGraphStatData> FrameTimesStats;
+			using TaskHistoryType = FSequentialFrameScheduler::FDebugData::TaskHistoryType;
+			CanvasGraphPlottingUtils::FGraphStatData::FValueRangeRef MaxRef{
+				&DebugScheduler->DebugData.TaskHistory,
+				[&](const void*, int32) -> float { return DebugScheduler->MaxNumTasksToExecutePerFrame; },
+				[&](const void*) -> int32 { return DebugScheduler->DebugData.NumTasksExecutedRingBuffer.Num(); }};
+			FrameTimesStats.Add({MaxRef, FLinearColor::Red, "max"});
+
+			CanvasGraphPlottingUtils::FGraphStatData::FValueRangeRef ActualRef{
+				&DebugScheduler->DebugData.TaskHistory,
+				[&](const void*, int32 Idx) -> float {
+					return static_cast<float>(DebugScheduler->DebugData.NumTasksExecutedRingBuffer[Idx]);
+				},
+				[&](const void*) -> int32 { return DebugScheduler->DebugData.NumTasksExecutedRingBuffer.Num(); }};
+			FrameTimesStats.Add({ActualRef, FLinearColor::Green, "actual"});
+
+			CanvasGraphPlottingUtils::DrawCanvasGraph(
+				Canvas->Canvas,
+				80.0f,
+				GraphBottomYPos - 250.f,
+				FrameTimesStats,
+				"# tasks per frame",
+				DebugScheduler->MaxNumTasksToExecutePerFrame + 1);
+		}
+
+		// delays
+		{
+			TArray<CanvasGraphPlottingUtils::FGraphStatData> DelayStats;
+			DelayStats.Add({DebugScheduler->DebugData.MaxDelaySecondsRingBuffer, FLinearColor::Red, "max"});
+			DelayStats.Add({DebugScheduler->DebugData.AverageDelaySecondsRingBuffer, FLinearColor::Yellow, "avg"});
+
+			CanvasGraphPlottingUtils::DrawCanvasGraph(
+				Canvas->Canvas,
+				80.f + 300.f,
+				GraphBottomYPos - 250.f,
+				DelayStats,
+				"delays",
+				0.1f);
+		}
+
+		// task times
+		{
+			TArray<CanvasGraphPlottingUtils::FGraphStatData> DelayTimeStats;
+			int32 i = 0;
+			for (auto& Entry : DebugScheduler->TaskHandlesToTaskInfos)
+			{
+				i++;
+				float iAsAlpha =
+					static_cast<float>(i) / static_cast<float>(DebugScheduler->TaskHandlesToTaskInfos.Num());
+
+				auto& TaskHandle = Entry.Key;
+				FString TaskName = DebugScheduler->DebugData.TaskDebugNames[TaskHandle].ToString();
+
+				TArray<CanvasGraphPlottingUtils::FGraphStatData> FrameTimesStats;
+				using TaskHistoryType = FSequentialFrameScheduler::FDebugData::TaskHistoryType;
+
+				CanvasGraphPlottingUtils::FGraphStatData::FValueRangeRef TaskDelayRef{
+					&DebugScheduler->DebugData.TaskHistory,
+					[&](const void* ContainerPtr, int32 Idx) -> float {
+						auto HistoryEntry = static_cast<const TaskHistoryType*>(ContainerPtr)->operator[](Idx);
+						auto EntryTaskHandle = HistoryEntry.Get<FSequentialFrameTask::FTaskHandle>();
+						static float LastCachedValue = -1.f;
+						if (Idx == 0)
+						{
+							LastCachedValue = -1.f;
+						}
+						if (EntryTaskHandle == TaskHandle)
+						{
+							LastCachedValue = HistoryEntry.Get<2>();
+						}
+						return LastCachedValue;
+					},
+					[](const void* ContainerPtr) -> int32 {
+						return static_cast<const TaskHistoryType*>(ContainerPtr)->Num();
+					}};
+
+				auto UniqueDelayColor = FMath::Lerp(FLinearColor::Green, FLinearColor::Red, iAsAlpha);
+				DelayTimeStats.Add({TaskDelayRef, UniqueDelayColor, TaskName});
+
+				CanvasGraphPlottingUtils::FGraphStatData::FValueRangeRef TaskTimeRef{
+					&DebugScheduler->DebugData.TaskHistory,
+					[&](const void* ContainerPtr, int32 Idx) -> float {
+						auto HistoryEntry = static_cast<const TaskHistoryType*>(ContainerPtr)->operator[](Idx);
+						auto EntryTaskHandle = HistoryEntry.Get<FSequentialFrameTask::FTaskHandle>();
+						static float LastCachedValue = -1.f;
+						if (Idx == 0)
+						{
+							LastCachedValue = -1.f;
+						}
+						if (EntryTaskHandle == TaskHandle)
+						{
+							LastCachedValue = HistoryEntry.Get<3>();
+						}
+						return LastCachedValue;
+					},
+					[](const void* ContainerPtr) -> int32 {
+						return static_cast<const TaskHistoryType*>(ContainerPtr)->Num();
+					}};
+				FrameTimesStats.Add({TaskTimeRef, FLinearColor::Green, "task time"});
+
+				CanvasGraphPlottingUtils::DrawCanvasGraph(
+					Canvas->Canvas,
+					80.0f + 300.f * i,
+					GraphBottomYPos,
+					FrameTimesStats,
+					TaskName,
+					0.1f);
+			}
+			CanvasGraphPlottingUtils::DrawCanvasGraph(
+				Canvas->Canvas,
+				80.0f,
+				GraphBottomYPos,
+				DelayTimeStats,
+				"delays",
+				1.f);
+		}
+	}
 }
 
 void FGameplayDebuggerCategory_SequentialFrameScheduler::CycleDebugScheduler()
 {
 	ActiveDebugSchedulerTargetIndex++;
+}
+
+void FGameplayDebuggerCategory_SequentialFrameScheduler::ToggleDummyTask()
+{
+	bToggleDummyTask = true;
+}
+
+void FGameplayDebuggerCategory_SequentialFrameScheduler::ExecuteDummyTask(int32 TaskId)
+{
+	FPlatformProcess::Sleep(
+		FMath::FRandRange(0.01f * static_cast<float>(TaskId - 1), 0.01f * static_cast<float>(TaskId)));
 }
 
 #endif
