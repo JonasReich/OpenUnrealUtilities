@@ -4,7 +4,11 @@
 
 #if WITH_GAMEPLAY_DEBUGGER
 
+	#include "GameplayDebuggerCategory.h"
+	#include "GameplayDebuggerCategoryReplicator.h"
+	#include "LogOpenUnrealUtilities.h"
 	#include "GameplayDebuggerTypes.h"
+	#include "Templates/StringUtils.h"
 
 FString GameplayDebuggerUtils::WrapStringToWidth(
 	const FString& InString,
@@ -58,6 +62,36 @@ FString GameplayDebuggerUtils::CleanupName(FString Name)
 	Name.RemoveFromStart(DEFAULT_OBJECT_PREFIX);
 	Name.RemoveFromEnd(TEXT("_C"));
 	return Name;
+}
+
+void GameplayDebuggerUtils::SetCategoryEnabled(
+	AGameplayDebuggerCategoryReplicator& InCategoryReplicator,
+	FGameplayDebuggerCategory& InCategoryToClose,
+	bool bEnabled)
+{
+	const int32 NumCategories = InCategoryReplicator.GetNumCategories();
+	int32 LocalCategoryId = INDEX_NONE;
+	for (int32 i = 0; i < NumCategories; i++)
+	{
+		auto Category = InCategoryReplicator.GetCategory(i);
+		if (&*Category == &InCategoryToClose)
+			LocalCategoryId = i;
+	}
+	if (LocalCategoryId != INDEX_NONE)
+	{
+		InCategoryReplicator.SetCategoryEnabled(LocalCategoryId, bEnabled);
+	}
+	else
+	{
+		UE_LOG(
+			LogOpenUnrealUtilities,
+			Warning,
+			TEXT("Could not set category %s enabled state (%s), because it was not found in the provided category "
+				 "replicator %s"),
+			*InCategoryToClose.GetCategoryName().ToString(),
+			*LexToString(bEnabled),
+			*LexToString(&InCategoryReplicator))
+	}
 }
 
 #endif

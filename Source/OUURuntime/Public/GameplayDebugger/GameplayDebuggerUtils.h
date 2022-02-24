@@ -6,6 +6,8 @@
 
 #if WITH_GAMEPLAY_DEBUGGER
 
+class AGameplayDebuggerCategoryReplicator;
+class FGameplayDebuggerCategory;
 class FGameplayDebuggerCanvasContext;
 
 /**
@@ -36,6 +38,16 @@ namespace GameplayDebuggerUtils
 	 * use with care!
 	 */
 	FString OUURUNTIME_API CleanupName(FString Name);
+
+	/**
+	 * Utility for opening / closing categories, which is normally only possible by index, which is private
+	 *
+	 */
+	void OUURUNTIME_API SetCategoryEnabled(
+		AGameplayDebuggerCategoryReplicator& InCategoryReplicator,
+		FGameplayDebuggerCategory& InCategoryToClose,
+		bool bEnabled);
+
 } // namespace GameplayDebuggerUtils
 
 #endif
