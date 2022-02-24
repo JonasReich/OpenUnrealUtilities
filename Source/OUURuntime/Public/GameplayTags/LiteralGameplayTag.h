@@ -163,14 +163,16 @@ struct TConditionalNativeTag<OwningType, true>
 #else
 
 template <typename OwningType>
-struct TConditionalNativeTag<OwningType, true>
+struct TConditionalNativeTag<OwningType, true> : public FGameplayTagNativeAdder
 {
 	FGameplayTag NativeInstance;
 
-	TConditionalNativeTag()
+	virtual ~TConditionalNativeTag() {}
+
+	virtual void AddTags() override
 	{
-		NativeInstance =
-			UGameplayTagsManager::Get().AddNativeGameplayTag(*OwningType::GetName(), OwningType::GetDescription());
+		auto& GameplayTagsManager = UGameplayTagsManager::Get();
+		NativeInstance = GameplayTagsManager.AddNativeGameplayTag(*OwningType::GetName(), OwningType::GetDescription());
 	}
 
 	static FGameplayTag Get(bool bErrorIfNotFound = true) { return OwningType::GetInstance().NativeInstance; }
