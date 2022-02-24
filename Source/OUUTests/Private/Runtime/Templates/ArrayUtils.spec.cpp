@@ -15,18 +15,18 @@ void FArrayUtilsSpec::Define()
 	BeforeEach([this]() { WorkingArray = {1, 2, 3, 4, 5, 6}; });
 
 	It("SetAllTo should set all elements in an array to the same value", [this]() {
-		FArrayUtils::SetAllTo(WorkingArray, 8);
+		ArrayUtils::SetAllTo(WorkingArray, 8);
 		SPEC_TEST_ARRAYS_EQUAL(WorkingArray, (TArray<int32>{8, 8, 8, 8, 8, 8}));
 	});
 
 	Describe("SetNumTo", [this]() {
 		It("should decrease the number of elements when called with a value smaller than current count", [this]() {
-			FArrayUtils::SetNumTo(WorkingArray, 3, 8);
+			ArrayUtils::SetNumTo(WorkingArray, 3, 8);
 			SPEC_TEST_ARRAYS_EQUAL(WorkingArray, (TArray<int32>{8, 8, 8}));
 		});
 
 		It("should increase the number of elements when called with a value bigger than current count", [this]() {
-			FArrayUtils::SetNumTo(WorkingArray, 10, 8);
+			ArrayUtils::SetNumTo(WorkingArray, 10, 8);
 			SPEC_TEST_ARRAYS_EQUAL(WorkingArray, (TArray<int32>{8, 8, 8, 8, 8, 8, 8, 8, 8, 8}));
 		});
 	});
@@ -34,14 +34,14 @@ void FArrayUtilsSpec::Define()
 	Describe("TakeAt", [this]() {
 		It("should remove the correct element from the array", [this]() {
 			TArray<int32> SourceArray = {1, 2, 3, 4, 5};
-			const int32 Element = FArrayUtils::TakeAt(SourceArray, 2);
+			const int32 Element = ArrayUtils::TakeAt(SourceArray, 2);
 			SPEC_TEST_EQUAL(Element, 3);
 			SPEC_TEST_TRUE(SourceArray.Num() == 4);
 		});
 
 		It("should retain the correct order of remaining elements", [this]() {
 			TArray<int32> SourceArray = {1, 2, 3, 4, 5};
-			FArrayUtils::TakeAt(SourceArray, 2);
+			ArrayUtils::TakeAt(SourceArray, 2);
 			SPEC_TEST_ARRAYS_EQUAL(SourceArray, (TArray<int32>{1, 2, 4, 5}));
 		});
 	});
@@ -49,14 +49,14 @@ void FArrayUtilsSpec::Define()
 	Describe("TakeAtSwap", [this]() {
 		It("should remove the correct element from the array", [this]() {
 			TArray<int32> SourceArray = {1, 2, 3, 4, 5};
-			const int32 Element = FArrayUtils::TakeAtSwap(SourceArray, 2);
+			const int32 Element = ArrayUtils::TakeAtSwap(SourceArray, 2);
 			SPEC_TEST_EQUAL(Element, 3);
 			SPEC_TEST_TRUE(SourceArray.Num() == 4);
 		});
 
 		It("should leave the correct elements in unspecified order", [this]() {
 			TArray<int32> SourceArray = {1, 2, 3, 4, 5};
-			FArrayUtils::TakeAtSwap(SourceArray, 2);
+			ArrayUtils::TakeAtSwap(SourceArray, 2);
 			SPEC_TEST_ARRAYS_MATCH_UNORDERED(SourceArray, (TArray<int32>{1, 2, 4, 5}));
 		});
 	});
@@ -66,7 +66,7 @@ void FArrayUtilsSpec::Define()
 			const TArray<int32> SourceArray = {1, 2, 3, 4, 5};
 			for (int32 i = 0; i < 100; i++)
 			{
-				FArrayUtils::GetRandomElement(SourceArray);
+				ArrayUtils::GetRandomElement(SourceArray);
 			}
 		});
 
@@ -78,7 +78,7 @@ void FArrayUtilsSpec::Define()
 				for (int32 j = 0; j < 5; j++)
 				{
 					FRandomStream Stream = i;
-					const int32 CurrentResult = FArrayUtils::GetRandomElement(SourceArray, Stream);
+					const int32 CurrentResult = ArrayUtils::GetRandomElement(SourceArray, Stream);
 					if (LastIterationResult == INDEX_NONE)
 					{
 						LastIterationResult = CurrentResult;
@@ -95,7 +95,7 @@ void FArrayUtilsSpec::Define()
 	Describe("TakeRandomElement", [this]() {
 		It("should remove the returned element from the array", [this]() {
 			TArray<int32> SourceArray = {1, 2, 3, 4, 5};
-			const int32 Element = FArrayUtils::TakeRandomElement(SourceArray);
+			const int32 Element = ArrayUtils::TakeRandomElement(SourceArray);
 			SPEC_TEST_FALSE(SourceArray.Contains(Element));
 			SPEC_TEST_TRUE(SourceArray.Num() == 4);
 		});
@@ -104,7 +104,7 @@ void FArrayUtilsSpec::Define()
 			TArray<int32> SourceArray = {1, 2, 3, 4, 5};
 			for (int32 i = 0; i < 5; i++)
 			{
-				FArrayUtils::TakeRandomElement(SourceArray);
+				ArrayUtils::TakeRandomElement(SourceArray);
 			}
 			SPEC_TEST_EQUAL(SourceArray.Num(), 0);
 		});
@@ -118,7 +118,7 @@ void FArrayUtilsSpec::Define()
 				{
 					TArray<int32> SourceArrayCopy = SourceArray;
 					FRandomStream Stream = i;
-					const int32 CurrentResult = FArrayUtils::TakeRandomElement(SourceArrayCopy, Stream);
+					const int32 CurrentResult = ArrayUtils::TakeRandomElement(SourceArrayCopy, Stream);
 					if (LastIterationResult == INDEX_NONE)
 					{
 						LastIterationResult = CurrentResult;
@@ -135,7 +135,7 @@ void FArrayUtilsSpec::Define()
 			const TArray<int32> SourceArray = {1, 2, 3, 4, 5};
 			TArray<int32> SourceArrayCopy = SourceArray;
 			TArray<int32> SourceArrayReferenceCopy = SourceArray;
-			const int32 Element = FArrayUtils::TakeRandomElement(SourceArrayCopy);
+			const int32 Element = ArrayUtils::TakeRandomElement(SourceArrayCopy);
 			const int32 ElementIndex = SourceArray.Find(Element);
 			SourceArrayReferenceCopy.RemoveAt(ElementIndex);
 			SPEC_TEST_ARRAYS_EQUAL(SourceArrayReferenceCopy, SourceArrayCopy);
@@ -148,7 +148,7 @@ void FArrayUtilsSpec::Define()
 				for (int32 i = 0; i < WorkingArray.Num(); i++)
 				{
 					int32& RegularIndexedElement = WorkingArray[i];
-					int32& SliceIndexedElement = FArrayUtils::Slice(WorkingArray, i);
+					int32& SliceIndexedElement = ArrayUtils::Slice(WorkingArray, i);
 					SPEC_TEST_EQUAL(&RegularIndexedElement, &SliceIndexedElement);
 				}
 			});
@@ -160,34 +160,34 @@ void FArrayUtilsSpec::Define()
 				   for (int32 i = 1; i <= WorkingArray.Num(); i++)
 				   {
 					   int32& RegularIndexedElement = WorkingArray[WorkingArray.Num() - i];
-					   int32& SliceIndexedElement = FArrayUtils::Slice(WorkingArray, -i);
+					   int32& SliceIndexedElement = ArrayUtils::Slice(WorkingArray, -i);
 					   SPEC_TEST_EQUAL(&RegularIndexedElement, &SliceIndexedElement);
 				   }
 
 				   // Check one variant explicitly
-				   SPEC_TEST_EQUAL(FArrayUtils::Slice(WorkingArray, -2), 5);
+				   SPEC_TEST_EQUAL(ArrayUtils::Slice(WorkingArray, -2), 5);
 			   });
 		});
 
 		Describe("called with two input indices", [this]() {
 			It("should copy a range of array elements using positive integers", [this]() {
-				SPEC_TEST_ARRAYS_EQUAL(FArrayUtils::Slice(WorkingArray, 2, 3), (TArray<int32>{3, 4}));
+				SPEC_TEST_ARRAYS_EQUAL(ArrayUtils::Slice(WorkingArray, 2, 3), (TArray<int32>{3, 4}));
 			});
 
 			It("should copy a range of array elements using negative integers", [this]() {
-				SPEC_TEST_ARRAYS_EQUAL(FArrayUtils::Slice(WorkingArray, -4, -2), (TArray<int32>{3, 4, 5}));
+				SPEC_TEST_ARRAYS_EQUAL(ArrayUtils::Slice(WorkingArray, -4, -2), (TArray<int32>{3, 4, 5}));
 			});
 
 			It("should copy a range of array elements using a mix of positive and negative integers (positive then "
 			   "negative)",
 			   [this]() {
-				   SPEC_TEST_ARRAYS_EQUAL(FArrayUtils::Slice(WorkingArray, 2, -2), (TArray<int32>{3, 4, 5}));
+				   SPEC_TEST_ARRAYS_EQUAL(ArrayUtils::Slice(WorkingArray, 2, -2), (TArray<int32>{3, 4, 5}));
 			   });
 
 			It("should copy a range of array elements using a mix of positive and negative integers (negative then "
 			   "positive)",
 			   [this]() {
-				   SPEC_TEST_ARRAYS_EQUAL(FArrayUtils::Slice(WorkingArray, -4, 5), (TArray<int32>{3, 4, 5, 6}));
+				   SPEC_TEST_ARRAYS_EQUAL(ArrayUtils::Slice(WorkingArray, -4, 5), (TArray<int32>{3, 4, 5, 6}));
 			   });
 		});
 	});

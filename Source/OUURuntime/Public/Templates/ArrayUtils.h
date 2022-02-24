@@ -4,9 +4,8 @@
 
 #include "Containers/Array.h"
 
-class OUURUNTIME_API FArrayUtils
+namespace ArrayUtils
 {
-public:
 	/** Set all existing elements in an array to the same value */
 	template <typename ElementType, typename AllocatorType>
 	static void SetAllTo(TArray<ElementType, AllocatorType>& Array, const ElementType& Value)
@@ -197,4 +196,7 @@ public:
 	{
 		return Index >= 0 ? Index : Array.Num() + Index;
 	}
-};
+}; // namespace ArrayUtils
+
+// For backwards compatibility:
+namespace FArrayUtils = ArrayUtils;
