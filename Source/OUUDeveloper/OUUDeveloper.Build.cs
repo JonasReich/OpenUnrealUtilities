@@ -2,12 +2,10 @@
 
 using UnrealBuildTool;
 
-public class OUUDeveloper : ModuleRules
+public class OUUDeveloper : OUUModuleRules
 {
 	public OUUDeveloper(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
 		PublicDependencyModuleNames.AddRange(new string[] {
 
 			// Engine

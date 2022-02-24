@@ -2,12 +2,27 @@
 
 using UnrealBuildTool;
 
-public class OUURuntime : ModuleRules
+public class OUUModuleRules : ModuleRules
+{
+	public OUUModuleRules(ReadOnlyTargetRules Target) : base(Target)
+	{
+		// Disable PCHs for debug configs to ensure the plugin modules are self-contained and stick to IWYU
+		PCHUsage = Target.Configuration == UnrealTargetConfiguration.DebugGame
+			? ModuleRules.PCHUsageMode.NoPCHs
+			: ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+		bEnforceIWYU = true;
+
+		// Also disable unity builds.
+		// Unfortunately even this is needed to ensure that all includes are correct when building the plugin by itself.
+		bUseUnity = false;
+	}
+}
+
+public class OUURuntime : OUUModuleRules
 {
 	public OUURuntime(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
 		PublicDependencyModuleNames.AddRange(new string[] {
 
 			// Engine
@@ -27,7 +42,7 @@ public class OUURuntime : ModuleRules
 			// Engine
 			"HeadMountedDisplay",
 			"Slate",
-			"AIModule"
+			"AIModule",
 		});
 
 		// - Editor only dependencies
