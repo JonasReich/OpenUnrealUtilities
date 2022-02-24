@@ -2,7 +2,9 @@
 
 #include "FlowControl/SharedLock.h"
 
+#include "Engine/World.h"
 #include "LogOpenUnrealUtilities.h"
+#include "TimerManager.h"
 
 void USharedLock::Lock(UObject* Key)
 {

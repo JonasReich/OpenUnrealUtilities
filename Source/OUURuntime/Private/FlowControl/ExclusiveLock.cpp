@@ -2,7 +2,9 @@
 
 #include "FlowControl/ExclusiveLock.h"
 
+#include "Engine/World.h"
 #include "LogOpenUnrealUtilities.h"
+#include "TimerManager.h"
 
 bool UExclusiveLock::TryLock(UObject* Key)
 {

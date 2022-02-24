@@ -3,6 +3,7 @@
 #include "Window/OUUWindow.h"
 
 #include "Components/Widget.h"
+#include "Framework/Application/SlateApplication.h"
 #include "LogOpenUnrealUtilities.h"
 #include "Widgets/SWindow.h"
 

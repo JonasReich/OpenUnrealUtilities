@@ -2,6 +2,8 @@
 
 #include "GameplayAbilities/Debug/GameplayDebuggerCategory_OUUAbilities.h"
 
+#include "TimerManager.h"
+
 #if WITH_GAMEPLAY_DEBUGGER
 
 	#include "AbilitySystemComponent.h"

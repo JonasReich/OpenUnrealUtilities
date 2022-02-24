@@ -8,6 +8,7 @@
 
 	#include "Engine/EngineTypes.h"
 	#include "Engine/GameInstance.h"
+	#include "Engine/LocalPlayer.h"
 	#include "Engine/World.h"
 	#include "GameFramework/GameModeBase.h"
 	#include "GameFramework/PlayerState.h"

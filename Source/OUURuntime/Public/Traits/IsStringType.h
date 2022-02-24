@@ -2,6 +2,9 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+#include "Templates/IsConstructible.h"
+
 /**
  * Traits class which tests if a type is one of unreal's string types
  */

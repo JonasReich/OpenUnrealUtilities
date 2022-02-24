@@ -5,6 +5,7 @@
 #if WITH_AUTOMATION_WORKER
 
 	#include "Runtime/FlowControl/LockTestHelpers.h"
+	#include "TimerManager.h"
 
 BEGIN_DEFINE_SPEC(FExclusiveLockSpec, "OpenUnrealUtilities.Runtime.FlowControl.ExclusiveLock", DEFAULT_OUU_TEST_FLAGS)
 	TSharedPtr<FOUULockTestEnvironment<UExclusiveLock>> Env;

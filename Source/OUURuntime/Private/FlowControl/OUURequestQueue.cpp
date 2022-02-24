@@ -2,6 +2,8 @@
 
 #include "FlowControl/OUURequestQueue.h"
 
+#include "UObject/Package.h"
+
 UOUURequestQueue::UOUURequestQueue()
 {
 	RequestClass = UOUURequest::StaticClass();

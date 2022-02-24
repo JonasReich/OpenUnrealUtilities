@@ -1,6 +1,7 @@
 // Copyright (c) 2022 Jonas Reich
 
 #include "OUUTestUtilities.h"
+#include "TimerManager.h"
 
 #if WITH_AUTOMATION_WORKER
 

@@ -9,6 +9,7 @@
 
 class UWidget;
 class UOUUWindow;
+class SWindow;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnOUUWindowClosed, UOUUWindow*, ClosedWindow);
 

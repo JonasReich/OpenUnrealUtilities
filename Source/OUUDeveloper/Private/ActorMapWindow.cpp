@@ -12,13 +12,18 @@
 #include "GameplayTags/GameplayTagQueryParser.h"
 #include "LogOpenUnrealUtilities.h"
 #include "Misc/RegexUtils.h"
+#include "Tickable.h"
+#include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SCheckBox.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Input/SVectorInputBox.h"
 #include "Widgets/Layout/SScaleBox.h"
 #include "Widgets/Layout/SSpacer.h"
+#include "Widgets/Layout/SSplitter.h"
 #include "Widgets/SWindow.h"
+#include "Widgets/Views/SListView.h"
+#include "Widgets/Views/STableRow.h"
 
 #if WITH_EDITOR
 	#include "LevelEditorViewport.h"

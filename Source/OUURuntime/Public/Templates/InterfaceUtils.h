@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Templates/Casts.h"
+#include "UObject/ScriptInterface.h"
 
 /**
  * Call a function on a blueprint implementable interface object.

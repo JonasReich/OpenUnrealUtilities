@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "PixelFormat.h"
 
 #include "TextureRenderTargetLibrary.generated.h"
 

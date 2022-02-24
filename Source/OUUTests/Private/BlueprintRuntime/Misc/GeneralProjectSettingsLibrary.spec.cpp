@@ -4,6 +4,7 @@
 
 #if WITH_AUTOMATION_WORKER
 
+	#include "Misc/ConfigCacheIni.h"
 	#include "Misc/GeneralProjectSettingsLibrary.h"
 
 BEGIN_DEFINE_SPEC(

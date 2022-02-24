@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 
+#include "WindowAutoCenterRule.generated.h"
+
 /**
  * Enum to describe how to auto-center an SWindow.
  * (This is the same as EAutoCenter, but blueprint/property exposed).

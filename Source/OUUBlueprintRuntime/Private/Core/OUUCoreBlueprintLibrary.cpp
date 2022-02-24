@@ -2,6 +2,8 @@
 
 #include "Core/OUUCoreBlueprintLibrary.h"
 
+#include "Engine/Engine.h"
+
 UObject* UOUUCoreBlueprintLibrary::GetClassDefaultObject(TSubclassOf<UObject> Class)
 {
 	return Class != nullptr ? GetMutableDefault<UObject>(Class) : nullptr;

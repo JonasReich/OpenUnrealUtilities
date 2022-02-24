@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
 #include "Templates/RWLockedVariable.h"
 #include "Traits/ConditionalType.h"
 

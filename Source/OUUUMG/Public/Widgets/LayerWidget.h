@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Layout/WidgetPath.h"
 #include "Widgets/UserFocusResetableWidget.h"
 
 #include "LayerWidget.generated.h"

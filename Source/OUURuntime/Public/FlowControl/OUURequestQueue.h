@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "FlowControl/OUURequest.h"
+#include "Templates/SubclassOf.h"
 
 #include "OUURequestQueue.generated.h"
 
