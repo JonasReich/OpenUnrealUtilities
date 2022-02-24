@@ -75,6 +75,7 @@ public:
 	bool IsValidIndex(SizeType Index) { return GetStorage().IsValidIndex(GetWrappedRingIndex(Index)); }
 
 	ElementType& operator[](SizeType Index) { return GetStorage()[GetWrappedRingIndex(Index)]; }
+	const ElementType& operator[](SizeType Index) const { return GetStorage()[GetWrappedRingIndex(Index)]; }
 
 	void Reset()
 	{
@@ -114,12 +115,54 @@ protected:
 
 template <typename ElementType, typename AllocatorType = FDefaultAllocator>
 class TCircularArrayAdaptor :
-	public TCircularArrayAdaptor_Base<TCircularArrayAdaptor<ElementType, AllocatorType>, ElementType, FDefaultAllocator>
+	public TCircularArrayAdaptor_Base<TCircularArrayAdaptor<ElementType, AllocatorType>, ElementType, AllocatorType>
 {
 public:
 	using SelfType = TCircularArrayAdaptor<ElementType, AllocatorType>;
-	using Super = TCircularArrayAdaptor_Base<SelfType, ElementType, FDefaultAllocator>;
+	using Super = TCircularArrayAdaptor_Base<SelfType, ElementType, AllocatorType>;
 	using ArrayType = typename Super::ArrayType;
 
 	TCircularArrayAdaptor(ArrayType& InArrayReference, int32 InArrayMax) : Super(InArrayReference, InArrayMax) {}
+};
+
+template <typename ElementType, typename AllocatorType = FDefaultAllocator>
+class TCircularArray :
+	public TCircularArrayAdaptor_Base<TCircularArray<ElementType, AllocatorType>, ElementType, AllocatorType>
+{
+public:
+	using SelfType = TCircularArray<ElementType, AllocatorType>;
+	using Super = TCircularArrayAdaptor_Base<SelfType, ElementType, AllocatorType>;
+	using ArrayType = typename Super::ArrayType;
+
+	TCircularArray() : Super(Storage, 32), Storage({}) { Super::StorageReference = Storage; }
+
+	TCircularArray(int32 MaxNum) : Super(Storage, MaxNum), Storage({})
+	{
+		Super::StorageReference = Storage;
+		Storage.Reserve(MaxNum);
+		check(&Storage == &GetStorage());
+		check(Storage == GetStorage());
+	}
+
+	TCircularArray(const TCircularArray& Other) : TCircularArray() { *this = Other; }
+	TCircularArray(TCircularArray&& Other) noexcept : TCircularArray() { *this = MoveTemp(Other); }
+	TCircularArray& operator=(const TCircularArray& Other)
+	{
+		*(static_cast<Super*>(this)) = Other;
+		Storage = Other.Storage;
+		Super::StorageReference = Storage;
+		return *this;
+	}
+	TCircularArray& operator=(TCircularArray&& Other) noexcept
+	{
+		*(static_cast<Super*>(this)) = MoveTemp(Other);
+		Storage = MoveTemp(Other.Storage);
+		Super::StorageReference = Storage;
+		return *this;
+	}
+
+	const ArrayType& GetStorage() const { return Storage; }
+
+private:
+	ArrayType Storage;
 };
