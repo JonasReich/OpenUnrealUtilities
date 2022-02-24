@@ -22,8 +22,10 @@ public:
 	// Type declaration so the type can be used in external type traits.
 	using Type = T;
 
-	/** Implicitly construct reference wrappers from anything that allows implicit conversion to T& that is not a
-	 * reference wrapper */
+	/**
+	 * Implicitly construct reference wrappers from anything that allows implicit conversion to T& that is not a
+	 * reference wrapper
+	 */
 	template <
 		typename U,
 		typename = typename TEnableIf<!TIsSame<TReferenceWrapper, typename TRemoveReference<U>::Type>::Value>::Type>
