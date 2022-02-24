@@ -103,10 +103,23 @@ public:
 	};
 
 	template <EGameplayDebuggerCategoryState InitialState>
+	static void RegisterCategories()
+	{
+		RegisterCategories<InitialState>(IGameplayDebugger::Get());
+	}
+
+	template <EGameplayDebuggerCategoryState InitialState>
 	static void RegisterCategories(IGameplayDebugger& GameplayDebugger)
 	{
 		SingleType::template RegisterCategories<InitialState>(GameplayDebugger);
 		ExpandOtherTypes::template RegisterCategories<InitialState>(GameplayDebugger);
+	}
+
+	static void UnregisterCategories()
+	{
+		if (!IGameplayDebugger::IsAvailable())
+			return;
+		UnregisterCategories(IGameplayDebugger::Get());
 	}
 
 	static void UnregisterCategories(IGameplayDebugger& GameplayDebugger)
@@ -138,6 +151,12 @@ public:
 	};
 
 	template <EGameplayDebuggerCategoryState InitialState>
+	static void RegisterCategories()
+	{
+		RegisterCategories<InitialState>(IGameplayDebugger::Get());
+	}
+
+	template <EGameplayDebuggerCategoryState InitialState>
 	static void RegisterCategories(IGameplayDebugger& GameplayDebugger)
 	{
 		GameplayDebugger.RegisterCategory(
@@ -145,6 +164,13 @@ public:
 			IGameplayDebugger::FOnGetCategory::CreateStatic(
 				TGameplayDebuggerCategoryTraits<DebuggerCategoryType>::MakeInstance),
 			InitialState);
+	}
+
+	static void UnregisterCategories()
+	{
+		if (!IGameplayDebugger::IsAvailable())
+			return;
+		UnregisterCategories(IGameplayDebugger::Get());
 	}
 
 	static void UnregisterCategories(IGameplayDebugger& GameplayDebugger)
