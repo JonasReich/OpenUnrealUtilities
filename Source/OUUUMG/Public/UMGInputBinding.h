@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include "Components/SlateWrapperTypes.h"
 #include "CoreMinimal.h"
+
+#include "Components/SlateWrapperTypes.h"
 
 #include "UMGInputBinding.generated.h"
 

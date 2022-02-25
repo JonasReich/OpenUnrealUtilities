@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
+
+#include "Blueprint/UserWidget.h"
 #include "Widgets/UserFocusResetableWidget.h"
 
 #include "InteractableWidget.generated.h"

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "TimerManager.h"
 
 /** A task that is registered in the SequentialFrameScheduler */

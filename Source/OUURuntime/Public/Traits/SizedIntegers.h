@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Math/StaticIntegerMath.h"
 #include "Traits/AssertValueEquality.h"
 

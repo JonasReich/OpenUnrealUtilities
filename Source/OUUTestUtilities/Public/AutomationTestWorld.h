@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Engine/Engine.h"
 
 #if WITH_AUTOMATION_WORKER

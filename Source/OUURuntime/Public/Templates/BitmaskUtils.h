@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Traits/IsInteger.h"
 
 /** How cases in the enum are distributed. */

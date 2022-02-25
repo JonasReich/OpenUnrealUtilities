@@ -1,9 +1,10 @@
 ﻿// Copyright (c) 2022 Jonas Reich
 
+#include "CoreMinimal.h"
+
 #include "CanvasItem.h"
 #include "Components/SkinnedMeshComponent.h"
 #include "Containers/CircularBuffer.h"
-#include "CoreMinimal.h"
 #include "Engine/Canvas.h"
 #include "Engine/LevelStreaming.h"
 #include "Engine/SkeletalMesh.h"

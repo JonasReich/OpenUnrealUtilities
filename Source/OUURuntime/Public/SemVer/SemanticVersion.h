@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "SemVer/BuildMetadata.h"
 #include "SemVer/PreReleaseIdentifier.h"
 #include "SemVer/SemVerParsingStrictness.h"

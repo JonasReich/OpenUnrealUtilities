@@ -1,6 +1,7 @@
 // Copyright (c) 2022 Jonas Reich
 
 #include "CoreMinimal.h"
+
 #include "Modules/ModuleManager.h"
 
 #if WITH_GAMEPLAY_DEBUGGER

@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include "AutomationTestWorld.h"
 #include "CoreMinimal.h"
+
+#include "AutomationTestWorld.h"
 #include "FlowControl/ExclusiveLock.h"
 #include "FlowControl/SharedLock.h"
 #include "OUUTestObject.h"

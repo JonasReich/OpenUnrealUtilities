@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Templates/Casts.h"
 #include "UObject/ScriptInterface.h"
 

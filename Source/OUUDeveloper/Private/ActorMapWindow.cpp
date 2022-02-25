@@ -1,9 +1,10 @@
 // Copyright (c) 2022 Jonas Reich
 
+#include "CoreMinimal.h"
+
 #include "AbilitySystemComponent.h"
 #include "Brushes/SlateColorBrush.h"
 #include "Components/SceneCaptureComponent2D.h"
-#include "CoreMinimal.h"
 #include "Engine/SceneCapture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "EngineUtils.h"

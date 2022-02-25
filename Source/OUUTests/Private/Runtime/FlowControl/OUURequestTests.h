@@ -1,6 +1,7 @@
 // Copyright (c) 2022 Jonas Reich
 
 #include "CoreMinimal.h"
+
 #include "FlowControl/OUURequest.h"
 
 #include "OUURequestTests.generated.h"

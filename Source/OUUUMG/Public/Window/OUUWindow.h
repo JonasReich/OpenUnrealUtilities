@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Window/OUUWindowParameters.h"
 
 #include "OUUWindow.generated.h"

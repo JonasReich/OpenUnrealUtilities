@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include "Abilities/GameplayAbility.h"
 #include "CoreMinimal.h"
+
+#include "Abilities/GameplayAbility.h"
 
 #include "OUUGameplayAbility.generated.h"
 

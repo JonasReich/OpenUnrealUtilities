@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Window/WindowAutoCenterRule.h"
 #include "Window/WindowSizingRule.h"
 

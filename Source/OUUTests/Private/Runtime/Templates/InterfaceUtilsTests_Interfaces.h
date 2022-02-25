@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "UObject/Interface.h"
 
 #include "InterfaceUtilsTests_Interfaces.generated.h"
