@@ -79,11 +79,13 @@ MacroBlockEnd: "^SLATE_END_ARGS(.*)|END_DEFINE_SPEC|OUU_GTAG_GROUP_END(.*)$"
 IncludeBlocks:  Regroup
 IncludeCategories:
   - Regex:           '^".+\.generated\.h"$'
-    Priority:        4
+    Priority:        5
   - Regex:           '<.+>$'
-    Priority:        3
-  - Regex:           '^".+"$'
+    Priority:        4
+  - Regex:           '^"CoreMinimal\.h"$'
     Priority:        2
+  - Regex:           '^".+"$'
+    Priority:        3
 ---
 Language: Cpp
 ---
