@@ -64,6 +64,11 @@ FString GameplayDebuggerUtils::CleanupName(FString Name)
 	return Name;
 }
 
+FString GameplayDebuggerUtils::GetColoredBoolString(bool bBoolValue)
+{
+	return bBoolValue ? TEXT("{green}true") : TEXT("{red}false");
+}
+
 void GameplayDebuggerUtils::SetCategoryEnabled(
 	AGameplayDebuggerCategoryReplicator& InCategoryReplicator,
 	FGameplayDebuggerCategory& InCategoryToClose,

@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 
+#include "Animation/Debug/GameplayDebugger_Animation.h"
 #include "Modules/ModuleManager.h"
 
 #if WITH_GAMEPLAY_DEBUGGER
@@ -11,7 +12,8 @@
 
 using OUU_GameplayDebuggerCategories = TGameplayDebuggerCategoryTypeList<
 	FGameplayDebuggerCategory_OUUAbilities,
-	FGameplayDebuggerCategory_SequentialFrameScheduler>;
+	FGameplayDebuggerCategory_SequentialFrameScheduler,
+	FGameplayDebuggerCategory_Animation>;
 #endif
 
 class FOUURuntimeModule : public IModuleInterface

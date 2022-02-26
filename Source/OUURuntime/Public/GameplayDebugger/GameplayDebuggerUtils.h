@@ -16,7 +16,8 @@ class FGameplayDebuggerCanvasContext;
  */
 namespace GameplayDebuggerUtils
 {
-	/** Returns a copy of the the InString that is wrapped to fit the TargetWidth when displayed on the CanvasContext.
+	/**
+	 * Returns a copy of the the InString that is wrapped to fit the TargetWidth when displayed on the CanvasContext.
 	 */
 	FString OUURUNTIME_API
 		WrapStringToWidth(const FString& InString, FGameplayDebuggerCanvasContext& CanvasContext, float TargetWidth);
@@ -38,6 +39,8 @@ namespace GameplayDebuggerUtils
 	 * use with care!
 	 */
 	FString OUURUNTIME_API CleanupName(FString Name);
+
+	FString OUURUNTIME_API GetColoredBoolString(bool bBoolValue);
 
 	/**
 	 * Utility for opening / closing categories, which is normally only possible by index, which is private
