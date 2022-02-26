@@ -30,13 +30,19 @@ FGameplayDebuggerCategory_SequentialFrameScheduler::FGameplayDebuggerCategory_Se
 {
 	bShowOnlyWithDebugActor = false;
 
-	const FGameplayDebuggerInputHandlerConfig CycleKeyConfig(TEXT("Cycle Debug Scheduler"), EKeys::PageDown.GetFName());
-	BindKeyPress(CycleKeyConfig, this, &FGameplayDebuggerCategory_SequentialFrameScheduler::CycleDebugScheduler);
+	BindKeyPress(
+		TEXT("Cycle Debug Scheduler"),
+		EKeys::PageDown.GetFName(),
+		FGameplayDebuggerInputModifier::None,
+		this,
+		&FGameplayDebuggerCategory_SequentialFrameScheduler::CycleDebugScheduler);
 
-	const FGameplayDebuggerInputHandlerConfig ToggleDummyTaskKeyConfig(
+	BindKeyPress(
 		TEXT("Add/Remove Dummy Task"),
-		EKeys::Home.GetFName());
-	BindKeyPress(ToggleDummyTaskKeyConfig, this, &FGameplayDebuggerCategory_SequentialFrameScheduler::ToggleDummyTask);
+		EKeys::Home.GetFName(),
+		FGameplayDebuggerInputModifier::None,
+		this,
+		&FGameplayDebuggerCategory_SequentialFrameScheduler::ToggleDummyTask);
 }
 
 void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
@@ -45,9 +51,7 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
 {
 	CanvasContext.FontRenderInfo.bEnableShadow = true;
 
-	CanvasContext.Printf(TEXT("[{yellow}%s{white}]: Cycle Debug Scheduler"), *GetInputHandlerDescription(0));
-	CanvasContext.Printf(TEXT("[{yellow}%s{white}]: Enable/Disable dummy tasks"), *GetInputHandlerDescription(1));
-	CanvasContext.MoveToNewLine();
+	PrintKeyBinds(CanvasContext);
 
 	if (!IsValid(OwnerPC))
 	{
