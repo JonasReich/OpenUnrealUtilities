@@ -102,14 +102,14 @@ void UGenericPlatformProcessLibrary::LaunchFileInDefaultExternalApplication_Open
 	const FString& FileName,
 	const FString& Params)
 {
-	return FPlatformProcess::LaunchFileInDefaultExternalApplication(*FileName, *Params, ELaunchVerb::Open);
+	FPlatformProcess::LaunchFileInDefaultExternalApplication(*FileName, *Params, ELaunchVerb::Open);
 }
 
 void UGenericPlatformProcessLibrary::LaunchFileInDefaultExternalApplication_Edit(
 	const FString& FileName,
 	const FString& Params)
 {
-	return FPlatformProcess::LaunchFileInDefaultExternalApplication(*FileName, *Params, ELaunchVerb::Edit);
+	FPlatformProcess::LaunchFileInDefaultExternalApplication(*FileName, *Params, ELaunchVerb::Edit);
 }
 
 void UGenericPlatformProcessLibrary::ExploreFolder(const FString& FilePath)
