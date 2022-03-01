@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 
 #include "CanvasItem.h"
+#include "Components/InstancedStaticMeshComponent.h"
 #include "Components/SkinnedMeshComponent.h"
 #include "Containers/CircularBuffer.h"
 #include "Engine/Canvas.h"
