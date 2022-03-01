@@ -12,6 +12,7 @@
 #include "GameplayTagContainer.h"
 #include "GameplayTags/GameplayTagQueryParser.h"
 #include "LogOpenUnrealUtilities.h"
+#include "Misc/EngineVersionComparison.h"
 #include "Misc/RegexUtils.h"
 #include "Tickable.h"
 #include "Widgets/Input/SButton.h"
@@ -513,7 +514,11 @@ public:
 					bool bSetLocalCameraLocation = false;
 					if (auto* LocalPlayerController = TargetWorld->GetFirstPlayerController())
 					{
+#if UE_VERSION_OLDER_THAN(5, 0, 0)
 						if (auto* Camera = LocalPlayerController->PlayerCameraManager)
+#else
+						if (APlayerCameraManager* Camera = LocalPlayerController->PlayerCameraManager.Get())
+#endif
 						{
 							bSetLocalCameraLocation = true;
 							LocalCameraLocation = Camera->GetCameraLocation();

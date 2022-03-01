@@ -6,6 +6,7 @@
 
 #if WITH_AUTOMATION_WORKER
 
+	#include "Misc/EngineVersionComparison.h"
 	#include "Engine/EngineTypes.h"
 	#include "Engine/GameInstance.h"
 	#include "Engine/LocalPlayer.h"
@@ -14,7 +15,12 @@
 	#include "GameFramework/PlayerState.h"
 	#include "LogOpenUnrealUtilities.h"
 	#include "Traits/IteratorTraits.h"
-	#include "UObject/CoreOnline.h"
+
+	#if UE_VERSION_OLDER_THAN(5, 0, 0)
+		#include "UObject/CoreOnline.h"
+	#else
+		#include "Online/CoreOnline.h"
+	#endif
 
 FOUUAutomationTestWorld::~FOUUAutomationTestWorld()
 {
@@ -104,8 +110,13 @@ bool FOUUAutomationTestWorld::InitializeGame()
 	BeginPlay();
 
 	// Create a new unique net ID to spawn the local play actor = PlayerController
+
+	#if UE_VERSION_OLDER_THAN(5, 0, 0)
 	TSharedPtr<const FUniqueNetId> UniqueNetId = GameInstance->GetPrimaryPlayerUniqueId();
 	FUniqueNetIdRepl NetIdRepl = UniqueNetId;
+	#else
+	FUniqueNetIdRepl NetIdRepl = GameInstance->GetPrimaryPlayerUniqueIdRepl();
+	#endif
 
 	PlayerController = World->SpawnPlayActor(LocalPlayer, ENetRole::ROLE_Authority, URL, NetIdRepl, OUT ErrorString);
 	CHECK_INIT_GAME_CONDITION(ErrorString.Len() > 0, ErrorString);

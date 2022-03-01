@@ -9,6 +9,7 @@
 #include "GameFramework/WorldSettings.h"
 #include "IXRCamera.h"
 #include "IXRTrackingSystem.h"
+#include "Misc/EngineVersionComparison.h"
 #include "SceneViewExtension.h"
 
 bool UOUUSceneProjectionLibrary::GetViewProjectionData(
@@ -23,7 +24,11 @@ bool UOUUSceneProjectionLibrary::GetViewProjectionData(
 	}
 
 	FViewport* Viewport = LocalPlayer->ViewportClient->Viewport;
+#if UE_VERSION_OLDER_THAN(5, 0, 0)
 	EStereoscopicPass StereoPass = eSSP_FULL;
+#else
+	EStereoscopicPass StereoPass = EStereoscopicPass::eSSP_FULL;
+#endif
 
 	const FIntPoint SizeXY = Viewport->GetSizeXY();
 	if ((SizeXY.X == 0) || (SizeXY.Y == 0))
@@ -49,12 +54,23 @@ bool UOUUSceneProjectionLibrary::GetViewProjectionData(
 	TargetCamera->GetCameraView(0, ViewInfo);
 
 	// If stereo rendering is enabled, update the size and offset appropriately for this pass
+#if UE_VERSION_OLDER_THAN(5, 0, 0)
 	const bool bNeedStereo = (StereoPass != eSSP_FULL) && GEngine->IsStereoscopic3D();
 	const bool bIsHeadTrackingAllowed = GEngine->XRSystem.IsValid() && GEngine->XRSystem->IsHeadTrackingAllowed();
 	if (bNeedStereo)
 	{
 		GEngine->StereoRenderingDevice->AdjustViewRect(StereoPass, X, Y, SizeX, SizeY);
 	}
+#else
+	const bool bNeedStereo = (StereoPass != EStereoscopicPass::eSSP_FULL) && GEngine->IsStereoscopic3D();
+	const bool bIsHeadTrackingAllowed = GEngine->XRSystem.IsValid() && GEngine->XRSystem->IsHeadTrackingAllowed();
+	// #TODO-jreich Adjust ViewIndex
+	int32 ViewIndex = 0;
+	if (bNeedStereo)
+	{
+		GEngine->StereoRenderingDevice->AdjustViewRect(ViewIndex, X, Y, SizeX, SizeY);
+	}
+#endif
 
 	// scale distances for cull distance purposes by the ratio of our current FOV to the default FOV
 	// LocalPlayer->PlayerController->LocalPlayerCachedLODDistanceFactor = ViewInfo.FOV / FMath::Max<float>(0.01f,
@@ -75,7 +91,11 @@ bool UOUUSceneProjectionLibrary::GetViewProjectionData(
 		if (GEngine->StereoRenderingDevice.IsValid())
 		{
 			GEngine->StereoRenderingDevice->CalculateStereoViewOffset(
+#if UE_VERSION_OLDER_THAN(5, 0, 0)
 				StereoPass,
+#else
+				ViewIndex,
+#endif
 				ViewInfo.Rotation,
 				LocalPlayer->GetWorld()->GetWorldSettings()->WorldToMeters,
 				StereoViewLocation);
@@ -106,7 +126,11 @@ bool UOUUSceneProjectionLibrary::GetViewProjectionData(
 	else
 	{
 		// Let the stereoscopic rendering device handle creating its own projection matrix, as needed
+#if UE_VERSION_OLDER_THAN(5, 0, 0)
 		OutProjectionData.ProjectionMatrix = GEngine->StereoRenderingDevice->GetStereoProjectionMatrix(StereoPass);
+#else
+		OutProjectionData.ProjectionMatrix = GEngine->StereoRenderingDevice->GetStereoProjectionMatrix(ViewIndex);
+#endif
 
 		// calculate the out rect
 		OutProjectionData.SetViewRectangle(FIntRect(X, Y, X + SizeX, Y + SizeY));

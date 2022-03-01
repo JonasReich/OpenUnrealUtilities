@@ -2,15 +2,18 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include "GameplayTagContainer.h"
 #include "GameplayTagsManager.h"
 #include "GameplayTagsModule.h"
+#include "Misc/EngineVersionComparison.h"
 #include "Templates/UnrealTypeTraits.h"
 
 // If the NativeGameplayTags are available.
 // They are not necessarily required for the literal gameplay tags, but without them the tooltip descriptions won't be
 // properly updated.
-#define WITH_NATIVE_GAMEPLAY_TAGS ENGINE_MAJOR_VERSION >= 4 && ENGINE_MINOR_VERSION >= 27
+#define WITH_NATIVE_GAMEPLAY_TAGS UE_VERSION_NEWER_THAN(4, 27, 0)
 
 #if WITH_NATIVE_GAMEPLAY_TAGS
 	#include "NativeGameplayTags.h"
