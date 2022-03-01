@@ -2,26 +2,31 @@
 
 #include "Animation/Debug/GameplayDebugger_Animation.h"
 
-#include "GameplayDebugger/GameplayDebugger_DisplayDebugManager.h"
-
 #if WITH_GAMEPLAY_DEBUGGER
 
+	#include "Misc/EngineVersionComparison.h"
 	#include "Animation/Debug/DebuggableAnimInstance.h"
 	#include "Templates/InterfaceUtils.h"
 	#include "Animation/AnimInstanceProxy.h"
 	#include "Components/SkeletalMeshComponent.h"
 	#include "DisplayDebugHelpers.h"
 	#include "Engine/Canvas.h"
-	#include "GameFramework/Pawn.h"
 	#include "GameFramework/PlayerController.h"
 	#include "SkeletalRenderPublic.h"
 	#include "Rendering/SkeletalMeshRenderData.h"
 	#include "Animation/AnimNodeBase.h"
 	#include "DrawDebugHelpers.h"
-	#include "Animation/BlendSpaceBase.h"
 	#include "Animation/AnimSequence.h"
 	#include "Animation/AnimTypes.h"
+	#include "GameplayDebugger/GameplayDebugger_DisplayDebugManager.h"
 	#include "Animation/AnimNotifies/AnimNotifyState.h"
+	#include "Templates/StringUtils.h"
+
+	#if UE_VERSION_OLDER_THAN(5, 0, 0)
+		#include "Animation/BlendSpaceBase.h"
+	#else
+		#include "Animation/BlendSpace.h"
+	#endif
 
 namespace GDC_Animation_Inputs
 {
@@ -36,7 +41,14 @@ namespace GDC_Animation_Inputs
 
 FGameplayDebuggerCategory_Animation::FGameplayDebuggerCategory_Animation()
 {
-	#define BIND_KEY(Name, KeyName, DefaultValue)                                                                      \
+	BindKeyPress(
+		TEXT("Cylce Debug Mesh"),
+		EKeys::Insert.GetFName(),
+		FGameplayDebuggerInputModifier::None,
+		this,
+		&FGameplayDebuggerCategory_Animation::CycleDebugMesh);
+
+	#define BIND_SWITCH_KEY(Name, KeyName, DefaultValue)                                                               \
 		BindKeyPress_Switch(                                                                                           \
 			GDC_Animation_Inputs::Name,                                                                                \
 			EKeys::KeyName.GetFName(),                                                                                 \
@@ -44,21 +56,24 @@ FGameplayDebuggerCategory_Animation::FGameplayDebuggerCategory_Animation()
 			EGameplayDebuggerInputMode::Local,                                                                         \
 			DefaultValue);
 
-	BIND_KEY(SyncGroups, One, true);
-	BIND_KEY(Montages, Two, true);
-	BIND_KEY(Graph, Three, true);
-	BIND_KEY(Curves, Four, true);
-	BIND_KEY(Notifies, Five, true);
-	BIND_KEY(FullGraphDisplay, Six, false);
-	BIND_KEY(FullBlendspaceDisplay, Seven, false);
+	BIND_SWITCH_KEY(SyncGroups, One, true);
+	BIND_SWITCH_KEY(Montages, Two, true);
+	BIND_SWITCH_KEY(Graph, Three, true);
+	BIND_SWITCH_KEY(Curves, Four, true);
+	BIND_SWITCH_KEY(Notifies, Five, true);
+	BIND_SWITCH_KEY(FullGraphDisplay, Six, false);
+	BIND_SWITCH_KEY(FullBlendspaceDisplay, Seven, false);
 
-	#undef BIND_KEY
+	#undef BIND_SWITCH_KEY
 }
 
 void FGameplayDebuggerCategory_Animation::DrawData(
 	APlayerController* OwnerPC,
 	FGameplayDebuggerCanvasContext& CanvasContext)
 {
+	CanvasContext.FontRenderInfo.bEnableShadow = true;
+	CanvasContext.Font = GEngine->GetSmallFont();
+
 	PrintKeyBinds(CanvasContext);
 
 	auto* Canvas = CanvasContext.Canvas.Get();
@@ -75,6 +90,13 @@ void FGameplayDebuggerCategory_Animation::DrawData(
 
 	DebugMeshComponentIndex = DebugMeshComponentIndex % NumSkeletalMeshComponents;
 	auto* DebugMeshComponent = SkeletalMeshComponents[DebugMeshComponentIndex];
+	CanvasContext.Printf(
+		TEXT("Target Mesh [%i / %i]: %s (%s)"),
+		DebugMeshComponentIndex,
+		NumSkeletalMeshComponents,
+		*LexToString(DebugMeshComponent->SkeletalMesh),
+		*LexToString(DebugMeshComponent));
+
 	if (auto* AnimInstance = DebugMeshComponent->GetAnimInstance())
 	{
 		if (auto* DebuggableAnimInstance = Cast<UOUUDebuggableAnimInstance>(AnimInstance))
@@ -90,6 +112,11 @@ void FGameplayDebuggerCategory_Animation::DrawData(
 	}
 }
 
+void FGameplayDebuggerCategory_Animation::CycleDebugMesh()
+{
+	DebugMeshComponentIndex++;
+}
+
 void FGameplayDebuggerCategory_Animation::DisplayDebug(
 	FGameplayDebuggerCanvasContext& CanvasContext,
 	USkeletalMeshComponent* SkeletalMeshComponent,
@@ -100,11 +127,11 @@ void FGameplayDebuggerCategory_Animation::DisplayDebug(
 
 	float Indent = 0.f;
 
-	FLinearColor TextYellow(0.86f, 0.69f, 0.f);
-	FLinearColor TextWhite(0.9f, 0.9f, 0.9f);
-	FLinearColor ActiveColor(0.1f, 0.6f, 0.1f);
-	FLinearColor InactiveColor(0.2f, 0.2f, 0.2f);
-	FLinearColor PoseSourceColor(0.5f, 0.25f, 0.5f);
+	FLinearColor TextYellow = FColorList::Yellow;
+	FLinearColor TextWhite = FColorList::White;
+	FLinearColor ActiveColor = FColorList::YellowGreen;
+	FLinearColor InactiveColor = FColorList::LightGrey;
+	FLinearColor PoseSourceColor = FColorList::VioletRed;
 
 	const bool bShowSyncGroups = GetInputBoolSwitchValue(GDC_Animation_Inputs::SyncGroups);
 	const bool bShowMontages = GetInputBoolSwitchValue(GDC_Animation_Inputs::Montages);
@@ -116,11 +143,8 @@ void FGameplayDebuggerCategory_Animation::DisplayDebug(
 
 	FString Heading = FString::Printf(TEXT("Animation: %s"), *AnimInstance->GetName());
 
-	FGameplayDebugger_DisplayDebugManager DisplayDebugManager;
-	DisplayDebugManager
-		.Initialize(Canvas, GEngine->GetSmallFont(), FVector2D(CanvasContext.CursorX, CanvasContext.CursorY));
+	FGameplayDebugger_DisplayDebugManager DisplayDebugManager{CanvasContext};
 
-	DisplayDebugManager.SetFont(GEngine->GetSmallFont());
 	DisplayDebugManager.SetLinearDrawColor(TextYellow);
 	DisplayDebugManager.DrawString(Heading, Indent);
 
@@ -406,7 +430,11 @@ void FGameplayDebuggerCategory_Animation::DisplayDebugInstance(
 
 	FString DebugText = FString::Printf(
 		TEXT("LOD(%d/%d) UpdateCounter(%d) EvalCounter(%d) CacheBoneCounter(%d) InitCounter(%d) DeltaSeconds(%.3f)"),
+	#if UE_VERSION_OLDER_THAN(5, 0, 0)
 		SkelMeshComp->PredictedLODLevel,
+	#else
+		SkelMeshComp->GetPredictedLODLevel(),
+	#endif
 		MaxLODIndex,
 		Proxy.GetUpdateCounter().Get(),
 		Proxy.GetEvaluationCounter().Get(),
@@ -459,10 +487,16 @@ void FGameplayDebuggerCategory_Animation::OutputTickRecords(
 		// See if we have access to SequenceLength
 		if (UAnimSequenceBase* AnimSeqBase = Cast<UAnimSequenceBase>(Player.SourceAsset))
 		{
+	#if UE_VERSION_OLDER_THAN(5, 0, 0)
+			float SequenceLength = AnimSeqBase->SequenceLength;
+	#else
+			float SequenceLength = AnimSeqBase->GetPlayLength();
+	#endif
+
 			PlayerEntry += FString::Printf(
 				TEXT(" P(%.2f/%.2f)"),
 				Player.TimeAccumulator != nullptr ? *Player.TimeAccumulator : 0.f,
-				AnimSeqBase->SequenceLength);
+				SequenceLength);
 		}
 		else
 		{
@@ -483,7 +517,11 @@ void FGameplayDebuggerCategory_Animation::OutputTickRecords(
 
 		DisplayDebugManager.DrawString(PlayerEntry, Indent);
 
+	#if UE_VERSION_OLDER_THAN(5, 0, 0)
 		if (UBlendSpaceBase* BlendSpace = Cast<UBlendSpaceBase>(Player.SourceAsset))
+	#else
+		if (UBlendSpace* BlendSpace = Cast<UBlendSpace>(Player.SourceAsset))
+	#endif
 		{
 			if (bFullBlendspaceDisplay && Player.BlendSpace.BlendSampleDataCache
 				&& Player.BlendSpace.BlendSampleDataCache->Num() > 0)
@@ -516,7 +554,11 @@ void FGameplayDebuggerCategory_Animation::OutputTickRecords(
 						FBlendSampleData& WeightedSample = SampleData[WeightedSampleIndex];
 						if (WeightedSample.SampleDataIndex == SampleIndex)
 						{
+	#if UE_VERSION_OLDER_THAN(5, 0, 0)
 							Weight += WeightedSample.GetWeight();
+	#else
+							Weight += WeightedSample.GetClampedWeight();
+	#endif
 						}
 						else if (WeightedSample.SampleDataIndex > SampleIndex)
 						{

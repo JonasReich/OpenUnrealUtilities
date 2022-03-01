@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2022 Jonas Reich
 
 #pragma once
+
 #include "GameplayDebugger/GameplayDebuggerCategory_OUUBase.h"
 
 #if WITH_GAMEPLAY_DEBUGGER
@@ -32,6 +33,8 @@ private:
 	int32 DebugMeshComponentIndex = 0;
 
 	FGraphTraversalCounter DebugDataCounter;
+
+	void CycleDebugMesh();
 
 	void DisplayDebug(
 		FGameplayDebuggerCanvasContext& CanvasContext,
