@@ -6,6 +6,8 @@
 
 #include "Traits/IsInteger.h"
 
+#include <type_traits>
+
 /** How cases in the enum are distributed. */
 enum class EEnumSequenceType
 {
@@ -211,3 +213,57 @@ namespace BitmaskUtils
 		return (BitmaskValue & FlagsValue) > 0;
 	};
 }; // namespace BitmaskUtils
+
+template <typename T>
+using TUnderlyingType = std::underlying_type_t<T>;
+
+template <typename T>
+struct TBitmaskWrapper
+{
+	T t;
+	constexpr TBitmaskWrapper(T t) : t(t) {}
+	constexpr operator T() const { return t; }
+	constexpr explicit operator bool() const { return TUnderlyingType<T>(t) != 0; }
+};
+
+/**
+ * Declare logical operators for a bitmask enum class.
+ *
+ */
+#define DECLARE_BITMASK_OPERATORS(EnumType)                                                                            \
+	static_assert(TIsEnumClass<EnumType>::Value, "DECLARE_BITMASK_OPERATORS() must only be used with enum classes");   \
+                                                                                                                       \
+	inline constexpr TBitmaskWrapper<EnumType> operator&(EnumType x, EnumType y)                                       \
+	{                                                                                                                  \
+		return static_cast<EnumType>(                                                                                  \
+			static_cast<TUnderlyingType<EnumType>>(x) & static_cast<TUnderlyingType<EnumType>>(y));                    \
+	}                                                                                                                  \
+	inline constexpr TBitmaskWrapper<EnumType> operator|(EnumType x, EnumType y)                                       \
+	{                                                                                                                  \
+		return static_cast<EnumType>(                                                                                  \
+			static_cast<TUnderlyingType<EnumType>>(x) | static_cast<TUnderlyingType<EnumType>>(y));                    \
+	}                                                                                                                  \
+	inline constexpr TBitmaskWrapper<EnumType> operator^(EnumType x, EnumType y)                                       \
+	{                                                                                                                  \
+		return static_cast<EnumType>(                                                                                  \
+			static_cast<TUnderlyingType<EnumType>>(x) ^ static_cast<TUnderlyingType<EnumType>>(y));                    \
+	}                                                                                                                  \
+	inline constexpr TBitmaskWrapper<EnumType> operator~(EnumType x)                                                   \
+	{                                                                                                                  \
+		return static_cast<EnumType>(~static_cast<TUnderlyingType<EnumType>>(x));                                      \
+	}                                                                                                                  \
+	inline EnumType& operator&=(EnumType& x, EnumType y)                                                               \
+	{                                                                                                                  \
+		x = x & y;                                                                                                     \
+		return x;                                                                                                      \
+	}                                                                                                                  \
+	inline EnumType& operator|=(EnumType& x, EnumType y)                                                               \
+	{                                                                                                                  \
+		x = x | y;                                                                                                     \
+		return x;                                                                                                      \
+	}                                                                                                                  \
+	inline EnumType& operator^=(EnumType& x, EnumType y)                                                               \
+	{                                                                                                                  \
+		x = x ^ y;                                                                                                     \
+		return x;                                                                                                      \
+	}

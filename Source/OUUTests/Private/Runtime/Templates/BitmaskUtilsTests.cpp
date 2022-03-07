@@ -43,6 +43,20 @@ DECLARE_ENUM_SEQUENCE(EPow2TestEnum, EEnumSequenceType::Pow2);
 const int32 TestMultiplePow2Bits_Bitmask = 7;
 
 //////////////////////////////////////////////////////////////////////////
+// Statically test bitmask operators
+//////////////////////////////////////////////////////////////////////////
+
+DECLARE_BITMASK_OPERATORS(EPow2TestEnum);
+
+constexpr EPow2TestEnum CombinedCases = EPow2TestEnum::FirstBit | EPow2TestEnum::SecondBit;
+static_assert(
+	static_cast<int32>(CombinedCases) == 0b11,
+	"combining two enum values results in the correct numerical result");
+static_assert(EPow2TestEnum::FirstBit, "a single bitmask value can be implicitly converted to bool");
+static_assert(EPow2TestEnum::FirstBit | EPow2TestEnum::SecondBit, "combining bits can be converted implicitly to bool");
+static_assert(!(EPow2TestEnum::FirstBit & EPow2TestEnum::SecondBit), "yields correct result -> 0 = false");
+
+//////////////////////////////////////////////////////////////////////////
 // EnumValueAsBitmask
 //////////////////////////////////////////////////////////////////////////
 
