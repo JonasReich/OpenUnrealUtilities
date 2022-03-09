@@ -23,6 +23,7 @@ public class OUUBlueprintRuntime : OUUModuleRules
 			"SlateCore",
 			"EngineSettings",
 			"HeadMountedDisplay",
+			"PropertyPath",
 
 			// Plugin
 			"OUURuntime"
