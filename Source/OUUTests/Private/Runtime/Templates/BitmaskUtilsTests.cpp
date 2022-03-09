@@ -37,7 +37,7 @@ enum class EPow2TestEnum : uint8
 	FifthBit = 0b10000
 };
 
-DECLARE_ENUM_SEQUENCE(EPow2TestEnum, EEnumSequenceType::Pow2);
+DECLARE_BITMASK_OPERATORS(EPow2TestEnum);
 
 // Shared bitmask used for all TestAllBits_* and TestAnyBits_* tests
 const int32 TestMultiplePow2Bits_Bitmask = 7;
@@ -45,8 +45,6 @@ const int32 TestMultiplePow2Bits_Bitmask = 7;
 //////////////////////////////////////////////////////////////////////////
 // Statically test bitmask operators
 //////////////////////////////////////////////////////////////////////////
-
-DECLARE_BITMASK_OPERATORS(EPow2TestEnum);
 
 constexpr EPow2TestEnum CombinedCases = EPow2TestEnum::FirstBit | EPow2TestEnum::SecondBit;
 static_assert(

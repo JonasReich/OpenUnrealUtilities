@@ -6,8 +6,6 @@
 
 #include "Traits/IsInteger.h"
 
-#include <type_traits>
-
 /** How cases in the enum are distributed. */
 enum class EEnumSequenceType
 {
@@ -215,7 +213,7 @@ namespace BitmaskUtils
 }; // namespace BitmaskUtils
 
 template <typename T>
-using TUnderlyingType = std::underlying_type_t<T>;
+using TUnderlyingType = __underlying_type(T);
 
 template <typename T>
 struct TBitmaskWrapper
@@ -229,6 +227,16 @@ struct TBitmaskWrapper
 /**
  * Declare logical operators for a bitmask enum class.
  *
+ * This is replacement for ENUM_CLASS_FLAGS() which misses automatic bool conversion of expressions using one of the
+ * operators, e.g. in contexts like these:
+ *     EFooBar FooBarMask = EFooBar::Foo & EFooBar::Mask
+ *     if (FooBarMask & EFooBar::Foo) { ... }
+ * However the operator! is not overloaded anymore to remove ambiguities, which prevents usage like this:
+ *     if (FooBarMask) { ... }
+ * or like this:
+ *     if (!FooBarMask) { ... }
+ *
+ * Also, this version automatically declares the enum as Pow2 sequence using DECLARE_ENUM_SEQUENCE() (see above)
  */
 #define DECLARE_BITMASK_OPERATORS(EnumType)                                                                            \
 	static_assert(TIsEnumClass<EnumType>::Value, "DECLARE_BITMASK_OPERATORS() must only be used with enum classes");   \
@@ -266,4 +274,5 @@ struct TBitmaskWrapper
 	{                                                                                                                  \
 		x = x ^ y;                                                                                                     \
 		return x;                                                                                                      \
-	}
+	}                                                                                                                  \
+	DECLARE_ENUM_SEQUENCE(EnumType, EEnumSequenceType::Pow2)
