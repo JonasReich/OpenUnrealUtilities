@@ -2,6 +2,7 @@
 
 #include "Logging/MessageLogToken.h"
 
+#include "Localization/OUUTextLibrary.h"
 #include "Logging/MessageLog.h"
 #include "Misc/UObjectToken.h"
 
@@ -64,6 +65,16 @@ FMessageLogToken FMessageLogToken::CreateURLMessageLogToken(const FString& URL, 
 	Result.URL = URL;
 	Result.Text = OptionalLabelOverride;
 	return Result;
+}
+
+FText FMessageLogToken::ListAsText(const TArray<FMessageLogToken>& MessageTokenList)
+{
+	TArray<FText> TokensAsText;
+	for (auto& Token : MessageTokenList)
+	{
+		TokensAsText.Add(Token.CreateNativeMessageToken()->ToText());
+	}
+	return UOUUTextLibrary::JoinBy(TokensAsText, INVTEXT(" "));
 }
 
 TSharedRef<IMessageToken> FMessageLogToken::CreateNativeMessageToken() const

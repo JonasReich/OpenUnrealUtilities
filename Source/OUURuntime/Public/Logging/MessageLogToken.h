@@ -75,6 +75,8 @@ public:
 
 	static FORCEINLINE FMessageLogToken Create(FMessageLogToken Token) { return Token; }
 
+	static FText ListAsText(const TArray<FMessageLogToken>& MessageTokenList);
+
 	template <typename FirstType>
 	static TArray<FMessageLogToken> CreateList(FirstType FirstArgument)
 	{
