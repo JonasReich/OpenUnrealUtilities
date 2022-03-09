@@ -42,7 +42,9 @@ public class OUURuntime : OUUModuleRules
 			// Engine
 			"HeadMountedDisplay",
 			"Slate",
-			"AIModule"
+			"AIModule",
+			"JsonUtilities",
+			"Json"
 		});
 
 		// - Editor only dependencies
