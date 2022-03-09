@@ -9,7 +9,7 @@ FText UOUUTextLibrary::FormatListText(const TArray<FText>& Texts, bool bFormatWi
 	const int32 TextsNum = Texts.Num();
 	switch (TextsNum)
 	{
-	case 0: return FText();
+	case 0: return FText::GetEmpty();
 	case 1: return Texts[0];
 	default: break;
 	}
@@ -35,6 +35,24 @@ FText UOUUTextLibrary::FormatListText_GenericSeparator(const FText& TextA, const
 FText UOUUTextLibrary::FormatListText_FinalAndSeparator(const FText& TextA, const FText& TextB)
 {
 	return FText::FormatOrdered(LOCTEXT("List.CombineFinalItemsInList", "{0} and {1}"), TextA, TextB);
+}
+
+FText UOUUTextLibrary::JoinBy(TArray<FText>& Texts, FText Separator)
+{
+	const int32 TextsNum = Texts.Num();
+	switch (TextsNum)
+	{
+	case 0: return FText::GetEmpty();
+	case 1: return Texts[0];
+	default: break;
+	}
+
+	FText CombinedText = Texts[0];
+	for (int32 i = 1; i < Texts.Num(); i++)
+	{
+		CombinedText = FText::FormatOrdered(INVTEXT("{0}{1}{2}"), CombinedText, Separator, Texts[i]);
+	}
+	return CombinedText;
 }
 
 #undef LOCTEXT_NAMESPACE

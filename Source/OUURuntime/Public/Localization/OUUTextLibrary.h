@@ -36,4 +36,8 @@ public:
 	/** Combined two texts with a "final" separator ("and" if untranslated). */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Text")
 	static FText FormatListText_FinalAndSeparator(const FText& TextA, const FText& TextB);
+
+	/** Combine an arbitrary number of texts with a given separator */
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Text")
+	static FText JoinBy(TArray<FText>& Texts, FText Separator);
 };
