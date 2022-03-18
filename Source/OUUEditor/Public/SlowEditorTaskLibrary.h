@@ -35,7 +35,7 @@ public:
 	 * @param		bInEnabled				When false, this scope will have no effect. Allows for proper scoped objects
 	 *										that are conditionally disabled.
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Editor|Slow Tasks")
 	static FSlowEditorTaskHandle StartSlowTask(float InAmountOfWork, FText InDefaultMessage = FText());
 
 	/**
@@ -46,7 +46,7 @@ public:
 	 * @param		bAllowInPIE				Whether to allow this dialog in PIE. If false, this dialog will not appear
 	 *										during PIE sessions.
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Editor|Slow Tasks")
 	static void MakeSlowTaskDialogDelayed(
 		const FSlowEditorTaskHandle& SlowTaskHandle,
 		float Threshold,
@@ -59,7 +59,7 @@ public:
 	 * @param		bAllowInPIE				Whether to allow this dialog in PIE. If false, this dialog will not appear
 	 *										during PIE sessions.
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Editor|Slow Tasks")
 	static void MakeSlowTaskDialog(
 		const FSlowEditorTaskHandle& SlowTaskHandle,
 		bool bShowCancelButton = false,
@@ -72,14 +72,14 @@ public:
 	 *										numerator of TotalAmountOfWork.
 	 * @param		Text					Optional text to describe this frame's purpose.
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Editor|Slow Tasks")
 	static void EnterSlowTaskProgressFrame(
 		const FSlowEditorTaskHandle& SlowTaskHandle,
 		float ExpectedWorkThisFrame = 1.f,
 		FText Text = FText());
 
 	/** End the slow editor task */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Editor|Slow Tasks")
 	static void EndSlowTask(const FSlowEditorTaskHandle& SlowTaskHandle);
 
 private:
