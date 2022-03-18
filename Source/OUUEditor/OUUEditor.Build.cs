@@ -22,7 +22,9 @@ public class OUUEditor : OUUModuleRules
 			// Engine
 			"CoreUObject",
 			"Engine",
-			"Slate"
+			"Slate",
+			"MaterialEditor",
+			"UnrealEd"
 		});
 	}
 }
