@@ -35,9 +35,9 @@ FOUUAutomationTestWorld::~FOUUAutomationTestWorld()
 	}
 }
 
-void FOUUAutomationTestWorld::CreateWorld()
+void FOUUAutomationTestWorld::CreateWorld(const FString& WorldSuffix)
 {
-	CreateWorldImplementation();
+	CreateWorldImplementation(WorldSuffix);
 }
 
 FWorldContext& FOUUAutomationTestWorld::GetWorldContext() const
@@ -75,22 +75,6 @@ bool FOUUAutomationTestWorld::InitializeGame()
 		UE_LOG(LogOpenUnrealUtilities, Error, TEXT("Could not InitiailizeGame invalid world!"));
 		return false;
 	}
-
-	// Create and initialize game instance
-	GameInstance = NewObject<UGameInstance>(GEngine);
-	GameInstance->InitializeStandalone(); // -> indiretly calls GameInstance->Init();
-
-	auto* GameInstanceWorldContext = GameInstance->GetWorldContext();
-	// This world is created as a temporary placeholder inside UGameInstance::InitializeStandalone()
-	UWorld* GI_TempWorld = GameInstanceWorldContext->World();
-
-	// Must destroy the temp world to prevent memory leaks!
-	// We are supplying the new world that we are "travelling" to, in order to prevent GC of our test world.
-	GI_TempWorld->DestroyWorld(true, World);
-
-	// Tell the game instance and world about each other.
-	GameInstanceWorldContext->SetCurrentWorld(World);
-	World->SetGameInstance(GameInstance);
 
 	// Set game mode
 	bool bIsGameModeSet = World->SetGameMode(URL);
@@ -131,7 +115,7 @@ void FOUUAutomationTestWorld::DestroyWorld()
 	DestroyWorldImplementation();
 }
 
-void FOUUAutomationTestWorld::CreateWorldImplementation()
+void FOUUAutomationTestWorld::CreateWorldImplementation(const FString& WorldSuffix)
 {
 	if (!ensureMsgf(
 			!bHasWorld,
@@ -141,14 +125,13 @@ void FOUUAutomationTestWorld::CreateWorldImplementation()
 		DestroyWorldImplementation();
 	}
 
-	FString NewWorldName = "OUUAutomationTestWorld";
-	if (WorldName.Len() > 0)
-	{
-		NewWorldName += "_" + WorldName;
-	}
-	World = UWorld::CreateWorld(EWorldType::Game, true, *NewWorldName);
-	auto& WorldContext = GEngine->CreateNewWorldContext(EWorldType::Game);
-	WorldContext.SetCurrentWorld(World);
+	const FString NewWorldName = "OUUAutomationTestWorld_" + WorldName + WorldSuffix;
+
+	// Create and initialize game instance
+	GameInstance = NewObject<UGameInstance>(GEngine);
+	GameInstance->InitializeStandalone(*NewWorldName); // -> indiretly calls GameInstance->Init();
+
+	World = GameInstance->GetWorld();
 	World->GetWorldSettings()->DefaultGameMode = AGameModeBase::StaticClass();
 
 	bHasWorld = true;
@@ -199,7 +182,7 @@ void FOUUAutomationTestWorld::DestroyWorldImplementation()
 
 FOUUScopedAutomationTestWorld::FOUUScopedAutomationTestWorld(FString InWorldName) : FOUUAutomationTestWorld(InWorldName)
 {
-	CreateWorldImplementation();
+	CreateWorldImplementation("_SCOPED");
 }
 
 FOUUScopedAutomationTestWorld::~FOUUScopedAutomationTestWorld()
@@ -207,7 +190,7 @@ FOUUScopedAutomationTestWorld::~FOUUScopedAutomationTestWorld()
 	DestroyWorldImplementation();
 }
 
-void FOUUScopedAutomationTestWorld::CreateWorld()
+void FOUUScopedAutomationTestWorld::CreateWorld(const FString& WorldSuffix)
 {
 	ensureMsgf(
 		false,

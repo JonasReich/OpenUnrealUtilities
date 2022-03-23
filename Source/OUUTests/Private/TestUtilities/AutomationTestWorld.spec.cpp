@@ -9,10 +9,9 @@
 	#include "AutomationTestWorld.h"
 	#include "GameFramework/GameModeBase.h"
 
-BEGIN_DEFINE_SPEC(
-	FAutomationTestWorldSpec,
-	"OpenUnrealUtilities.TestUtilities.AutomationTestWorld",
-	DEFAULT_OUU_TEST_FLAGS)
+	#define SPEC_BASE_NAME "OpenUnrealUtilities.TestUtilities.AutomationTestWorld"
+
+BEGIN_DEFINE_SPEC(FAutomationTestWorldSpec, SPEC_BASE_NAME, DEFAULT_OUU_TEST_FLAGS)
 	TSharedPtr<FOUUAutomationTestWorld> TestWorld;
 END_DEFINE_SPEC(FAutomationTestWorldSpec)
 void FAutomationTestWorldSpec::Define()
@@ -22,14 +21,14 @@ void FAutomationTestWorldSpec::Define()
 	Describe("", [this]() {
 		Describe("CreateWorld", [this]() {
 			It("should create a valid test world", [this]() {
-				TestWorld->CreateWorld();
+				TestWorld->CreateWorld(SPEC_BASE_NAME ".CreateWorld");
 				TestTrue("TestWorld is valid", IsValid(TestWorld->World));
 			});
 		});
 
 		Describe("GetWorldContext", [this]() {
 			It("should point to the same world as the World pointer member", [this]() {
-				TestWorld->CreateWorld();
+				TestWorld->CreateWorld(SPEC_BASE_NAME ".GetWorldContext");
 				FWorldContext& WorldContext = TestWorld->GetWorldContext();
 				TestEqual("World", TestWorld->World, WorldContext.World());
 			});
@@ -37,7 +36,7 @@ void FAutomationTestWorldSpec::Define()
 
 		Describe("BeginPlay", [this]() {
 			It("should initialize actors for play", [this]() {
-				TestWorld->CreateWorld();
+				TestWorld->CreateWorld(SPEC_BASE_NAME ".BeginPlay");
 				TestWorld->BeginPlay();
 				TestTrue("AreActorsInitialized", TestWorld->World->AreActorsInitialized());
 			});
@@ -55,7 +54,7 @@ void FAutomationTestWorldSpec::Define()
 		Describe("InitiailizeGame", [this]() {
 			Describe("when called after world creation", [this]() {
 				BeforeEach([this]() {
-					TestWorld->CreateWorld();
+					TestWorld->CreateWorld(SPEC_BASE_NAME ".InitializeGame");
 					bool bInitializeResult = TestWorld->InitializeGame();
 					TestTrue("initialization successful", bInitializeResult);
 				});
@@ -84,13 +83,13 @@ void FAutomationTestWorldSpec::Define()
 
 	Describe("DestroyWorld", [this]() {
 		It("should reset the world to nullptr", [this]() {
-			TestWorld->CreateWorld();
+			TestWorld->CreateWorld(SPEC_BASE_NAME ".DestroyWorld.01");
 			TestWorld->DestroyWorld();
 			TestNull("World pointer is null", TestWorld->World);
 		});
 
 		It("should reset the pointers to game framework objects that were created with InitializeGame()", [this]() {
-			TestWorld->CreateWorld();
+			TestWorld->CreateWorld(SPEC_BASE_NAME "DestoryWorld.02");
 			TestWorld->InitializeGame();
 			TestWorld->DestroyWorld();
 			TestNull("GameInstance", TestWorld->GameInstance);

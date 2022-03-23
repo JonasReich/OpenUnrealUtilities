@@ -32,7 +32,7 @@ public:
 	 * Create the world.
 	 * Before this the World pointer will be null.
 	 */
-	virtual void CreateWorld();
+	virtual void CreateWorld(const FString& WorldSuffix);
 
 	/**
 	 * Get the world context for the world.
@@ -78,7 +78,7 @@ protected:
 	bool bHasWorld = false;
 	FString WorldName;
 
-	void CreateWorldImplementation();
+	void CreateWorldImplementation(const FString& WorldSuffix);
 	void DestroyWorldImplementation();
 };
 
@@ -97,7 +97,7 @@ public:
 	virtual ~FOUUScopedAutomationTestWorld() override;
 
 	// - FAutomationTestWorld
-	virtual void CreateWorld() override;
+	virtual void CreateWorld(const FString& WorldSuffix) override;
 	virtual void DestroyWorld() override;
 	// --
 };
