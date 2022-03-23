@@ -48,17 +48,24 @@ void UOUUMaterialEditingLibrary::ConvertMaterialToMaterialAttributes(UMaterial* 
 
 void UOUUMaterialEditingLibrary::InsertMaterialFunctionBeforeResult(
 	UMaterial* Material,
-	UMaterialFunction* MaterialFunction)
+	UMaterialFunction* MaterialFunction,
+	bool bOnlyAddIfNotPresent /* = true */)
 {
 	if (!Material->bUseMaterialAttributes)
 	{
 		ConvertMaterialToMaterialAttributes(Material);
 	}
 
+	const auto& MaterialAttributesInput = Material->GetExpressionInputForProperty(MP_MaterialAttributes);
+	if (const auto* PreviousLastNodeAsMaterialFunctionCall =
+			Cast<UMaterialExpressionMaterialFunctionCall>(MaterialAttributesInput->Expression))
+	{
+		if (bOnlyAddIfNotPresent && PreviousLastNodeAsMaterialFunctionCall->MaterialFunction == MaterialFunction)
+			return;
+	}
+
 	const FScopedTransaction Transaction(INVTEXT("Insert material function"));
 	Material->Modify();
-
-	const auto& MaterialAttributesInput = Material->GetExpressionInputForProperty(MP_MaterialAttributes);
 
 	const FIntPoint NewNodeLocation{Material->EditorX, Material->EditorY};
 	Material->EditorX += 300;
@@ -72,12 +79,12 @@ void UOUUMaterialEditingLibrary::InsertMaterialFunctionBeforeResult(
 
 	MaterialFunctionCall->SetMaterialFunction(MaterialFunction);
 
-	if (auto* pPreviousLastNode = MaterialAttributesInput->Expression)
+	if (auto* PreviousLastNode = MaterialAttributesInput->Expression)
 	{
 		// Connect the previous last node with our new function input
 		const int32 PreviousOutputIndex = MaterialAttributesInput->OutputIndex;
 		auto* pNewNodeInput = MaterialFunctionCall->GetInput(0);
-		pNewNodeInput->Connect(PreviousOutputIndex, pPreviousLastNode);
+		pNewNodeInput->Connect(PreviousOutputIndex, PreviousLastNode);
 	}
 
 	// Connect output 0 of new material function with material attributes

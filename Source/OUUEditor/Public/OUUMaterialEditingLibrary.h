@@ -24,7 +24,10 @@ public:
 	static void ConvertMaterialToMaterialAttributes(UMaterial* Material);
 
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Editor|Material Editing")
-	static void InsertMaterialFunctionBeforeResult(UMaterial* Material, UMaterialFunction* MaterialFunction);
+	static void InsertMaterialFunctionBeforeResult(
+		UMaterial* Material,
+		UMaterialFunction* MaterialFunction,
+		bool bOnlyAddIfNotPresent = true);
 
 private:
 	static void CopyInputConnection(FExpressionInput* From, FExpressionInput* To);
