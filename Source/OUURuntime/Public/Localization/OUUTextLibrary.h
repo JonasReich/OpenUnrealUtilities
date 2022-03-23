@@ -39,5 +39,5 @@ public:
 
 	/** Combine an arbitrary number of texts with a given separator */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Text")
-	static FText JoinBy(TArray<FText>& Texts, FText Separator);
+	static FText JoinBy(const TArray<FText>& Texts, FText Separator);
 };

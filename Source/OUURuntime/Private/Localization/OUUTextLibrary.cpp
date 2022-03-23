@@ -37,7 +37,7 @@ FText UOUUTextLibrary::FormatListText_FinalAndSeparator(const FText& TextA, cons
 	return FText::FormatOrdered(LOCTEXT("List.CombineFinalItemsInList", "{0} and {1}"), TextA, TextB);
 }
 
-FText UOUUTextLibrary::JoinBy(TArray<FText>& Texts, FText Separator)
+FText UOUUTextLibrary::JoinBy(const TArray<FText>& Texts, FText Separator)
 {
 	const int32 TextsNum = Texts.Num();
 	switch (TextsNum)
