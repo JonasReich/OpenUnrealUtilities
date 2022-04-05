@@ -31,10 +31,12 @@ public:
 
 private:
 	int32 DebugMeshComponentIndex = 0;
+	int32 DebugInstanceIndex = -1;
 
 	FGraphTraversalCounter DebugDataCounter;
 
 	void CycleDebugMesh();
+	void CycleDebugInstance();
 
 	void DisplayDebug(
 		FGameplayDebuggerCanvasContext& CanvasContext,

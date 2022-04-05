@@ -48,6 +48,13 @@ FGameplayDebuggerCategory_Animation::FGameplayDebuggerCategory_Animation()
 		this,
 		&FGameplayDebuggerCategory_Animation::CycleDebugMesh);
 
+	BindKeyPress(
+		TEXT("Cylce Debug Linked Instance"),
+		EKeys::Delete.GetFName(),
+		FGameplayDebuggerInputModifier::None,
+		this,
+		&FGameplayDebuggerCategory_Animation::CycleDebugInstance);
+
 	#define BIND_SWITCH_KEY(Name, KeyName, DefaultValue)                                                               \
 		BindKeyPress_Switch(                                                                                           \
 			GDC_Animation_Inputs::Name,                                                                                \
@@ -84,7 +91,7 @@ void FGameplayDebuggerCategory_Animation::DrawData(
 
 	TArray<USkeletalMeshComponent*> SkeletalMeshComponents;
 	DebugActor->GetComponents<USkeletalMeshComponent>(OUT SkeletalMeshComponents);
-	int32 NumSkeletalMeshComponents = SkeletalMeshComponents.Num();
+	const int32 NumSkeletalMeshComponents = SkeletalMeshComponents.Num();
 	if (NumSkeletalMeshComponents == 0)
 		return;
 
@@ -97,8 +104,25 @@ void FGameplayDebuggerCategory_Animation::DrawData(
 		*LexToString(DebugMeshComponent->SkeletalMesh),
 		*LexToString(DebugMeshComponent));
 
-	if (auto* AnimInstance = DebugMeshComponent->GetAnimInstance())
+	// cast to const USkeletalMeshComponent* is required so the right (public) overload of GetLinkedAnimInstances is
+	// picked
+	const TArray<UAnimInstance*>& LinkedAnimInstances =
+		static_cast<const USkeletalMeshComponent*>(DebugMeshComponent)->GetLinkedAnimInstances();
+
+	const int32 NumLinkedInstances = LinkedAnimInstances.Num();
+	const int32 Offset = 1;
+	DebugInstanceIndex =
+		NumLinkedInstances > 0 ? (((DebugInstanceIndex + Offset) % (NumLinkedInstances + Offset)) - Offset) : -1;
+
+	if (auto* AnimInstance =
+			DebugInstanceIndex >= 0 ? LinkedAnimInstances[DebugInstanceIndex] : DebugMeshComponent->GetAnimInstance())
 	{
+		CanvasContext.Printf(
+			TEXT("Target Anim Instance [%i / %i]: %s"),
+			DebugInstanceIndex,
+			NumLinkedInstances,
+			*LexToString(AnimInstance));
+
 		if (auto* DebuggableAnimInstance = Cast<UOUUDebuggableAnimInstance>(AnimInstance))
 		{
 			DisplayDebug(CanvasContext, DebugMeshComponent, DebuggableAnimInstance, Canvas);
@@ -115,6 +139,11 @@ void FGameplayDebuggerCategory_Animation::DrawData(
 void FGameplayDebuggerCategory_Animation::CycleDebugMesh()
 {
 	DebugMeshComponentIndex++;
+}
+
+void FGameplayDebuggerCategory_Animation::CycleDebugInstance()
+{
+	DebugInstanceIndex++;
 }
 
 void FGameplayDebuggerCategory_Animation::DisplayDebug(
