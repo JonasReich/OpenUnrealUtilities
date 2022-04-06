@@ -11,17 +11,20 @@
 #include "AssetRegistryModule.h"
 #include "AutomationControllerSettings.h"
 #include "Containers/Ticker.h"
+#include "HAL/FileManager.h"
 #include "IAutomationControllerModule.h"
 #include "Misc/App.h"
 #include "Misc/CommandLine.h"
 #include "Misc/CoreMisc.h"
+#include "Misc/FileHelper.h"
 #include "Misc/FilterCollection.h"
 #include "Misc/Guid.h"
+#include "Misc/OutputDeviceRedirector.h"
+#include "Misc/Paths.h"
 #include "Modules/ModuleManager.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogOUUAutomationCommandLine, Log, All);
 
-// #OUU_MOD Added OUU prefix
 /** States for running the automation process */
 enum class EOUUAutomationTestState : uint8
 {
@@ -33,19 +36,15 @@ enum class EOUUAutomationTestState : uint8
 	Complete			// The process is finished
 };
 
-// #OUU_MOD Added OUU prefix
 enum class EOUUAutomationCommand : uint8
 {
-	None,				 // #OUU_MOD Added none entry - no action
 	ListAllTests,		 // List all tests for the session
 	RunCommandLineTests, // Run only tests that are listed on the commandline
-	RunCheckpointTests,	 // Run only tests listed on the commandline with checkpoints in case of a crash.
 	RunAll,				 // Run all the tests that are supported
 	RunFilter,			 //
 	Quit				 // quit the app when tests are done
 };
 
-// #OUU_MOD Added OUU prefix
 class FOUUAutomationExecCmd : private FSelfRegisteringExec
 {
 public:
@@ -56,6 +55,7 @@ public:
 	{
 		DelayTimer = DefaultDelayTimer;
 		FindWorkersTimeout = DefaultFindWorkersTimeout;
+		FindWorkerAttempts = 0;
 	}
 
 	void Init()
@@ -85,7 +85,7 @@ public:
 		}
 
 		TickHandler =
-			FTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateRaw(this, &FOUUAutomationExecCmd::Tick));
+			FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateRaw(this, &FOUUAutomationExecCmd::Tick));
 
 		int32 NumTestLoops = 1;
 		FParse::Value(FCommandLine::Get(), TEXT("TestLoops="), NumTestLoops);
@@ -102,6 +102,7 @@ public:
 		FilterMaps.Add("Stress", EAutomationTestFlags::StressFilter);
 		FilterMaps.Add("Perf", EAutomationTestFlags::PerfFilter);
 		FilterMaps.Add("Product", EAutomationTestFlags::ProductFilter);
+		FilterMaps.Add("All", EAutomationTestFlags::FilterMask);
 	}
 
 	void Shutdown()
@@ -114,7 +115,7 @@ public:
 			AutomationController->OnTestsRefreshed().RemoveAll(this);
 		}
 
-		FTicker::GetCoreTicker().RemoveTicker(TickHandler);
+		FTSTicker::GetCoreTicker().RemoveTicker(TickHandler);
 	}
 
 	bool IsTestingComplete()
@@ -161,12 +162,12 @@ public:
 			const FString GroupPrefix = TEXT("Group:");
 			const FString FilterPrefix = TEXT("Filter:");
 
-			FString ArgumentName = ArgumentNames[ArgumentIndex];
+			FString ArgumentName = ArgumentNames[ArgumentIndex].TrimStartAndEnd();
 
 			// if the argument is a filter (e.g. Filter:System) then create a filter that matches from the start
 			if (ArgumentName.StartsWith(FilterPrefix))
 			{
-				FString FilterName = ArgumentName.RightChop(FilterPrefix.Len());
+				FString FilterName = ArgumentName.RightChop(FilterPrefix.Len()).TrimStart();
 
 				if (FilterName.EndsWith(TEXT(".")) == false)
 				{
@@ -178,7 +179,7 @@ public:
 			else if (ArgumentName.StartsWith(GroupPrefix))
 			{
 				// if the argument is a group (e.g. Group:Rendering) then seach our groups for one that matches
-				FString GroupName = ArgumentName.RightChop(GroupPrefix.Len());
+				FString GroupName = ArgumentName.RightChop(GroupPrefix.Len()).TrimStart();
 
 				bool FoundGroup = false;
 
@@ -214,46 +215,34 @@ public:
 			}
 			else
 			{
-				// old behavior of just string searching
-				ArgumentName = ArgumentName.TrimStart().Replace(TEXT(" "), TEXT(""));
-
 				bool bMatchFromStart = false;
-				// bool bMatchFromEnd = false;
+				bool bMatchFromEnd = false;
 
 				if (ArgumentName.StartsWith("^"))
 				{
 					bMatchFromStart = true;
 					ArgumentName.RightChopInline(1);
 				}
-
-				/*if (ArgumentName.EndsWith("$"))
+				if (ArgumentName.EndsWith("$"))
 				{
 					bMatchFromEnd = true;
 					ArgumentName.LeftChopInline(1);
-				}*/
+				}
 
-				// #agrant todo: restore in 4.26 when headers can be changed
-				Filters.Add(FAutomatedTestFilter(ArgumentName, bMatchFromStart /*, bMatchFromEnd*/));
+				Filters.Add(FAutomatedTestFilter(ArgumentName, bMatchFromStart, bMatchFromEnd));
 			}
 		}
 
 		for (int32 TestIndex = 0; TestIndex < AllTestNames.Num(); ++TestIndex)
 		{
-			FString TestNamesNoWhiteSpaces = AllTestNames[TestIndex].Replace(TEXT(" "), TEXT(""));
+			FString TestName = AllTestNames[TestIndex];
 
 			for (const FAutomatedTestFilter& Filter : Filters)
 			{
-				// #agrant todo: remove in 4.26 when headers can be changed and we store this during parsing
-				bool bMatchFromEnd = false;
 				FString FilterString = Filter.Contains;
-				if (FilterString.EndsWith("$"))
-				{
-					bMatchFromEnd = true;
-					FilterString.LeftChopInline(1);
-				}
 
 				bool bNeedStartMatch = Filter.MatchFromStart;
-				bool bNeedEndMatch = bMatchFromEnd;
+				bool bNeedEndMatch = Filter.MatchFromEnd;
 				bool bMeetsMatch = true; // assume true
 
 				// If we need to match at the start or end,
@@ -261,49 +250,26 @@ public:
 				{
 					if (bNeedStartMatch)
 					{
-						bMeetsMatch = TestNamesNoWhiteSpaces.StartsWith(FilterString);
+						bMeetsMatch = TestName.StartsWith(FilterString);
 					}
 
 					if (bNeedEndMatch && bMeetsMatch)
 					{
-						bMeetsMatch = TestNamesNoWhiteSpaces.EndsWith(FilterString);
+						bMeetsMatch = TestName.EndsWith(FilterString);
 					}
 				}
 				else
 				{
 					// match anywhere
-					bMeetsMatch = TestNamesNoWhiteSpaces.Contains(FilterString);
+					bMeetsMatch = TestName.Contains(FilterString);
 				}
 
 				if (bMeetsMatch)
 				{
-					OutTestNames.Add(AllTestNames[TestIndex]);
+					OutTestNames.Add(TestName);
 					TestCount++;
 					break;
 				}
-			}
-		}
-
-		// If we have the TestsRun array set up and are using the same command as before, clear out already run tests.
-		if (TestsRun.Num() > 0)
-		{
-			if (TestsRun[0] == StringCommand)
-			{
-				for (int i = 1; i < TestsRun.Num(); i++)
-				{
-					if (OutTestNames.Remove(TestsRun[i]))
-					{
-						UE_LOG(
-							LogOUUAutomationCommandLine,
-							Display,
-							TEXT("Skipping %s due to Checkpoint."),
-							*TestsRun[i]);
-					}
-				}
-			}
-			else
-			{
-				AutomationController->CleanUpCheckpointFile();
 			}
 		}
 	}
@@ -318,6 +284,7 @@ public:
 			AutomationController->RequestAvailableWorkers(SessionID);
 			AutomationTestState = EOUUAutomationTestState::RequestTests;
 			FindWorkersTimeout = DefaultFindWorkersTimeout;
+			FindWorkerAttempts++;
 		}
 	}
 
@@ -328,7 +295,24 @@ public:
 		if (FindWorkersTimeout <= 0)
 		{
 			// Call the refresh callback manually
-			HandleRefreshTestCallback();
+			HandleRefreshTimeout();
+		}
+	}
+
+	void HandleRefreshTimeout()
+	{
+		const float TimeOut = GetDefault<UAutomationControllerSettings>()->GameInstanceLostTimerSeconds;
+		if (FindWorkerAttempts * DefaultFindWorkersTimeout >= TimeOut)
+		{
+			LogCommandLineError(
+				FString::Printf(TEXT("Failed to find workers after %.02f seconds. Giving up"), TimeOut));
+			AutomationTestState = EOUUAutomationTestState::Complete;
+		}
+		else
+		{
+			// Go back to looking for workers
+			UE_LOG(LogOUUAutomationCommandLine, Log, TEXT("Can't find any workers! Searching again"));
+			AutomationTestState = EOUUAutomationTestState::FindWorkers;
 		}
 	}
 
@@ -336,24 +320,17 @@ public:
 	{
 		TArray<FString> AllTestNames;
 
-		if (AutomationController->GetNumDeviceClusters() == 0)
+		// This is called by the controller manager when it receives responses. We want to make sure it has a device,
+		// and we want to make sure it's called while we're waiting for a response
+		if (AutomationController->GetNumDeviceClusters() == 0
+			|| AutomationTestState != EOUUAutomationTestState::RequestTests)
 		{
-			static double FirstWarningTime = FPlatformTime::Seconds();
-			static int WarningCount = 0;
-
-			double TimeWaiting = FPlatformTime::Seconds() - FirstWarningTime;
-
-			// This can get called a number of times before a worker is ready, so be conservative in how often we warn
-			if ((++WarningCount % 5) == 0 && TimeWaiting > 10.0)
-			{
-				UE_LOG(LogOUUAutomationCommandLine, Warning, TEXT("Can't find any workers! Searching again"));
-			}
-			else
-			{
-				UE_LOG(LogOUUAutomationCommandLine, Log, TEXT("Can't find any workers! Searching again"));
-			}
-
-			AutomationTestState = EOUUAutomationTestState::FindWorkers;
+			UE_LOG(
+				LogOUUAutomationCommandLine,
+				Log,
+				TEXT("Ignoring refresh from ControllerManager. NumDeviceClusters=%d, CurrentState=%d"),
+				AutomationController->GetNumDeviceClusters(),
+				AutomationTestState);
 			return;
 		}
 
@@ -371,7 +348,7 @@ public:
 			UE_LOG(LogOUUAutomationCommandLine, Display, TEXT("Found %d Automation Tests"), AllTestNames.Num());
 			for (const FString& TestName : AllTestNames)
 			{
-				UE_LOG(LogOUUAutomationCommandLine, Display, TEXT("\t%s"), *TestName);
+				UE_LOG(LogOUUAutomationCommandLine, Display, TEXT("\t'%s'"), *TestName);
 			}
 
 			// Set state to complete
@@ -382,15 +359,23 @@ public:
 			TArray<FString> FilteredTestNames;
 			GenerateTestNamesFromCommandLine(AllTestNames, FilteredTestNames);
 
-			UE_LOG(
-				LogOUUAutomationCommandLine,
-				Display,
-				TEXT("Found %d Automation Tests, based on '%s'."),
-				FilteredTestNames.Num(),
-				*StringCommand);
+			if (FilteredTestNames.Num() == 0)
+			{
+				LogCommandLineError(FString::Printf(TEXT("No automation tests matched '%s'"), *StringCommand));
+			}
+			else
+			{
+				UE_LOG(
+					LogOUUAutomationCommandLine,
+					Display,
+					TEXT("Found %d automation tests based on '%s'"),
+					FilteredTestNames.Num(),
+					*StringCommand);
+			}
 
 			// #OUU_MOD Commented out log listing of all tests. They take an unreasonably long time if you have many
-			// automation tests (> 900)
+			// automation tests. As of 06/04/2022 the > 900 tests in OpenUnrealUtilities already makes this feel like a
+			// drag, especially when you want to iterate fast).
 			/*
 			for (const FString& TestName : FilteredTestNames)
 			{
@@ -413,29 +398,6 @@ public:
 			// frontend The delegate will be readded in Init whenever a new command is executed
 			AutomationController->OnTestsRefreshed().Remove(TestsRefreshedHandle);
 			TestsRefreshedHandle.Reset();
-		}
-		else if (AutomationCommand == EOUUAutomationCommand::RunCheckpointTests)
-		{
-			TArray<FString> FilteredTestNames;
-			GenerateTestNamesFromCommandLine(AllTestNames, FilteredTestNames);
-			if (FilteredTestNames.Num())
-			{
-				AutomationController->StopTests();
-				AutomationController->SetEnabledTests(FilteredTestNames);
-				if (TestsRun.Num())
-				{
-					AutomationController->WriteLoadedCheckpointDataToFile();
-				}
-				else
-				{
-					AutomationController->WriteLineToCheckpointFile(StringCommand);
-				}
-				bRunTests = true;
-			}
-			else
-			{
-				AutomationTestState = EOUUAutomationTestState::Complete;
-			}
 		}
 		else if (AutomationCommand == EOUUAutomationCommand::RunFilter)
 		{
@@ -503,13 +465,11 @@ public:
 			{
 				AutomationTestState = EOUUAutomationTestState::Idle;
 			}
-
+			FindWorkerAttempts = 0;
 			break;
 		}
 		case EOUUAutomationTestState::FindWorkers:
 		{
-			// UE_LOG(LogOUUAutomationCommandLine, Log, TEXT("Finding Workers..."));
-
 			FindWorkers(DeltaTime);
 			break;
 		}
@@ -549,25 +509,22 @@ public:
 			{
 				if (!GIsCriticalError)
 				{
-					if (AutomationController->ReportsHaveErrors())
+					if (AutomationController->ReportsHaveErrors() || Errors.Num())
 					{
 						UE_LOG(
 							LogOUUAutomationCommandLine,
 							Display,
 							TEXT("Setting GIsCriticalError due to test failures (will cause non-zero exit code)."));
-						GIsCriticalError = AutomationController->ReportsHaveErrors();
+						GIsCriticalError = true;
 					}
 				}
-
-				UE_LOG(LogOUUAutomationCommandLine, Log, TEXT("Forcing shutdown."));
-				// some tools parse this.
+				UE_LOG(LogOUUAutomationCommandLine, Log, TEXT("Shutting down. GIsCriticalError=%d"), GIsCriticalError);
 				UE_LOG(
 					LogOUUAutomationCommandLine,
 					Display,
 					TEXT("**** TEST COMPLETE. EXIT CODE: %d ****"),
 					GIsCriticalError ? -1 : 0);
-				FPlatformMisc::RequestExit(true);
-				// We have finished the testing, and results are available
+				FPlatformMisc::RequestExitWithStatus(true, GIsCriticalError ? -1 : 0);
 				AutomationTestState = EOUUAutomationTestState::Complete;
 			}
 			break;
@@ -575,6 +532,9 @@ public:
 		}
 
 		return !IsTestingComplete();
+
+		// some tools parse this.
+		// We have finished the testing, and results are available
 	}
 
 	/** Console commands, see embeded usage statement **/
@@ -639,14 +599,6 @@ public:
 					StringCommand = TempCmd;
 					Ar.Logf(TEXT("Automation: RunTests='%s' Queued."), *StringCommand);
 					AutomationCommandQueue.Add(EOUUAutomationCommand::RunCommandLineTests);
-				}
-				else if (FParse::Command(&TempCmd, TEXT("RunCheckpointedTests")))
-				{
-					StringCommand = TempCmd;
-					Ar.Logf(TEXT("Running all tests with checkpoints matching substring: %s"), *StringCommand);
-					AutomationCommandQueue.Add(EOUUAutomationCommand::RunCheckpointTests);
-					TestsRun = AutomationController->GetCheckpointFileContents();
-					AutomationController->CleanUpCheckpointFile();
 				}
 				else if (FParse::Command(&TempCmd, TEXT("SetMinimumPriority")))
 				{
@@ -723,6 +675,16 @@ public:
 					}
 					AutomationCommandQueue.Add(EOUUAutomationCommand::RunFilter);
 				}
+				else if (FParse::Command(&TempCmd, TEXT("SetFilter")))
+				{
+					FlagToUse = TempCmd;
+					StringCommand = TempCmd;
+					if (FilterMaps.Contains(FlagToUse))
+					{
+						AutomationController->SetRequestedTestFlags(FilterMaps[FlagToUse]);
+						Ar.Logf(TEXT("Setting test filter: %s"), *FlagToUse);
+					}
+				}
 				else if (FParse::Command(&TempCmd, TEXT("RunAll")))
 				{
 					AutomationCommandQueue.Add(EOUUAutomationCommand::RunAll);
@@ -742,6 +704,7 @@ public:
 					Ar.Logf(TEXT("\tAutomation RunTests <test string>"));
 					Ar.Logf(TEXT("\tAutomation RunAll "));
 					Ar.Logf(TEXT("\tAutomation RunFilter <filter name>"));
+					Ar.Logf(TEXT("\tAutomation SetFilter <filter name>"));
 					Ar.Logf(TEXT("\tAutomation Quit"));
 					bHandled = false;
 				}
@@ -753,21 +716,24 @@ public:
 	}
 
 private:
+	// Logs and tracks an error
+	void LogCommandLineError(const FString& InErrorMsg)
+	{
+		UE_LOG(LogOUUAutomationCommandLine, Error, TEXT("%s"), *InErrorMsg);
+		Errors.Add(InErrorMsg);
+	}
+
 	/** The automation controller running the tests */
 	IAutomationControllerManagerPtr AutomationController;
 
 	/** The current state of the automation process */
 	EOUUAutomationTestState AutomationTestState;
 
-	/** The priority flags we would like to run */
-	EAutomationTestFlags::Type AutomationPriority;
-
 	/** What work was requested */
 	TArray<EOUUAutomationCommand> AutomationCommandQueue;
 
-	// #OUU_MOD Added default value with new None case
 	/** What work was requested */
-	EOUUAutomationCommand AutomationCommand = EOUUAutomationCommand::None;
+	EOUUAutomationCommand AutomationCommand;
 
 	/** Handle to Test Refresh delegate */
 	FDelegateHandle TestsRefreshedHandle;
@@ -778,11 +744,14 @@ private:
 	/** Timer Handle for giving up on workers */
 	float FindWorkersTimeout;
 
+	/** How many times we attempted to find a worker... */
+	int FindWorkerAttempts;
+
 	/** Holds the session ID */
 	FGuid SessionID;
 
 	// so we can release control of the app and just get ticked like all other systems
-	FDelegateHandle TickHandler;
+	FTSTicker::FDelegateHandle TickHandler;
 
 	// Extra commandline params
 	FString StringCommand;
@@ -793,19 +762,14 @@ private:
 	// Dictionary that maps flag names to flag values.
 	TMap<FString, int32> FilterMaps;
 
-	// Test pass checkpoint backup file.
-	FArchive* CheckpointFile;
-
-	FString CheckpointCommand;
-
-	TArray<FString> TestsRun;
+	// Any that we encountered during processing. Used in 'Quit' to determine error code
+	TArray<FString> Errors;
 };
 
 const float FOUUAutomationExecCmd::DefaultDelayTimer = 5.0f;
 const float FOUUAutomationExecCmd::DefaultFindWorkersTimeout = 30.0f;
 static FOUUAutomationExecCmd AutomationExecCmd;
 
-// #OUU_MOD Added OUU prefix
 void OUU_EmptyLinkFunctionForStaticInitializationAutomationExecCmd()
 {
 	// This function exists to prevent the object file containing this test from
