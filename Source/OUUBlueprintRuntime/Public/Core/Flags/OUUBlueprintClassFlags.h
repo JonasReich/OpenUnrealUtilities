@@ -28,9 +28,10 @@ enum class EOUUBlueprintClassFlags : uint8
 	Config,
 	/** This object type can't be saved; null it out at save time. */
 	Transient,
-	/** Successfully parsed. */
-	Parsed,
-
+	/** This object type may not be available in certain context. (i.e. game runtime or in certain configuration).
+	   Optional class data is saved separately to other object types. (i.e. might use sidecar files) */
+	Optional,
+	/** */
 	MatchedSerializers,
 	/** Indicates that the config settings for this class will be saved to Project/User*.ini (similar to
 	   GlobalUserConfig) */
@@ -58,9 +59,8 @@ enum class EOUUBlueprintClassFlags : uint8
 	/** all properties and functions in this class are const and should be exported as const */
 	Const,
 
-	/** Class flag indicating the class is having its layout changed, and therefore is not ready for a CDO to be created
-	 */
-	LayoutChanging,
+	/** Class flag indicating objects of this class need deferred dependency loading */
+	NeedsDeferredDependencyLoading,
 
 	/** Indicates that the class was created from blueprint source material */
 	CompiledFromBlueprint,
@@ -95,6 +95,9 @@ enum class EOUUBlueprintClassFlags : uint8
 	ConfigDoNotCheckDefaults,
 	/** Class has been consigned to oblivion as part of a blueprint recompile, and a newer version currently exists. */
 	NewerVersionExists,
+
+	/// FLAG MASKS
+
 	/** Flags to inherit from base class */
 	Inherit,
 	/** These flags will be cleared by the compiler when the class is parsed during script compilation */
