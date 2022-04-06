@@ -120,7 +120,7 @@ void UOUUMaterialEditingLibrary::CopyMaterialAttributeConnections(
 	COPY_INPUT_CONNECTION_SIMPLE(Opacity);
 	COPY_INPUT_CONNECTION_SIMPLE(OpacityMask);
 	// MP_DiffuseColor -> used in Lightmass, not exposed to user, computed from: BaseColor, Metallic
-	// MP_DiffuseColor -> used in Lightmass, not exposed to user, derived from: SpecularColor, Metallic, Specular
+	// MP_SpecularColor -> used in Lightmass, not exposed to user, derived from: SpecularColor, Metallic, Specular
 	COPY_INPUT_CONNECTION_SIMPLE(BaseColor);
 	COPY_INPUT_CONNECTION_SIMPLE(Metallic);
 	COPY_INPUT_CONNECTION_SIMPLE(Specular);
@@ -129,7 +129,8 @@ void UOUUMaterialEditingLibrary::CopyMaterialAttributeConnections(
 	COPY_INPUT_CONNECTION_SIMPLE(Normal);
 	COPY_INPUT_CONNECTION_SIMPLE(Tangent);
 	COPY_INPUT_CONNECTION_SIMPLE(WorldPositionOffset);
-	COPY_INPUT_CONNECTION_SIMPLE(TessellationMultiplier);
+	// MP_WorldDisplacement_DEPRECATED
+	// MP_TessellationMultiplier_DEPRECATED
 	COPY_INPUT_CONNECTION_SIMPLE(SubsurfaceColor);
 	// MP_CustomData0 -> not exposed in material attributes
 	// MP_CustomData1 -> not exposed in material attributes
@@ -145,6 +146,7 @@ void UOUUMaterialEditingLibrary::CopyMaterialAttributeConnections(
 	COPY_INPUT_CONNECTION_CUSTOM_UV(7);
 	COPY_INPUT_CONNECTION_SIMPLE(PixelDepthOffset);
 	COPY_INPUT_CONNECTION_SIMPLE(ShadingModel);
+	// MP_FrontMaterial -> not exposed in material attributes
 	const int32 LineAfter = __LINE__;
 	// clang-format on
 
@@ -152,10 +154,10 @@ void UOUUMaterialEditingLibrary::CopyMaterialAttributeConnections(
 #undef COPY_INPUT_CONNECTION_CUSTOMUV
 
 	static_assert(
-		MP_EmissiveColor == 0 && MP_ShadingModel == 29 && MP_MaterialAttributes == 30,
+		MP_EmissiveColor == 0 && MP_FrontMaterial == 30 && MP_MaterialAttributes == 31,
 		"The material property enum has changed, so this conversion probably misses some material property. Please "
 		"check the engine source and fix this.");
 	static_assert(
-		LineBefore + 30 == LineAfter,
+		LineBefore + static_cast<int32>(MP_MaterialAttributes) + 1 == LineAfter,
 		"Number of CopyInputConnection() calls does not match the number of material properties.");
 }
