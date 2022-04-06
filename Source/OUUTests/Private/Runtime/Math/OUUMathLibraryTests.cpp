@@ -43,12 +43,16 @@ OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_BEGIN(SignedAngleBetweenVectors, DEFAULT_O
 // 100% opposing vectors will always result in -180 because cross product is (0,0,0)
 OUU_COMPLEX_AUTOMATION_TESTCASE("X=+1,Y=+0,Z=+0|X=-1,Y=+0,Z=+0|X=+0,Y=+1,Z=+0|-180")
 OUU_COMPLEX_AUTOMATION_TESTCASE("X=+1,Y=+0,Z=+0|X=-1,Y=+0,Z=+0|X=+0,Y=-1,Z=+0|-180")
+
 // ...so we add a variant with a little difference on one axis that does not affect the angle
-OUU_COMPLEX_AUTOMATION_TESTCASE("X=+1,Y=+0,Z=+0|X=-1,Y=+0,Z=+0.0001|X=+0,Y=+1,Z=+0|+180")
-OUU_COMPLEX_AUTOMATION_TESTCASE("X=+1,Y=+0,Z=+0|X=-1,Y=+0,Z=+0.0001|X=+0,Y=-1,Z=+0|-180")
+// OUU_COMPLEX_AUTOMATION_TESTCASE("X=+1,Y=+0,Z=+0|X=-1,Y=+0,Z=+0.0001|X=+0,Y=+1,Z=+0|+180")
+// OUU_COMPLEX_AUTOMATION_TESTCASE("X=+1,Y=+0,Z=+0|X=-1,Y=+0,Z=+0.0001|X=+0,Y=-1,Z=+0|-180")
+// !!! -> this used to be the case before Epic introduced high precision floats/doubles for FVector
+
 // for smaller angles everything is fine
 OUU_COMPLEX_AUTOMATION_TESTCASE("X=+1,Y=+0,Z=+0|X=+0,Y=+0,Z=+1|X=+0,Y=+1,Z=+0|+90")
 OUU_COMPLEX_AUTOMATION_TESTCASE("X=+1,Y=+0,Z=+0|X=+0,Y=+0,Z=+1|X=+0,Y=-1,Z=+0|-90")
+
 // changing vectors A and B (compared to the two cases directly above) should result in opposite signs
 OUU_COMPLEX_AUTOMATION_TESTCASE("X=+0,Y=+0,Z=+1|X=+1,Y=+0,Z=+0|X=+0,Y=+1,Z=+0|-90")
 OUU_COMPLEX_AUTOMATION_TESTCASE("X=+0,Y=+0,Z=+1|X=+1,Y=+0,Z=+0|X=+0,Y=-1,Z=+0|+90")
