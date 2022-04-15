@@ -12,7 +12,7 @@
 class UCameraComponent;
 class APlayerController;
 
-// #TODO-OpenUnrealUtilities Add overloads for arbitrary view target actors
+// #TODO-OUU Add overloads for arbitrary view target actors
 /**
  * Utility library that allows arbitrary projection from world to screen space and vice versa.
  */

@@ -64,7 +64,7 @@ bool UOUUSceneProjectionLibrary::GetViewProjectionData(
 #else
 	const bool bNeedStereo = (StereoPass != EStereoscopicPass::eSSP_FULL) && GEngine->IsStereoscopic3D();
 	const bool bIsHeadTrackingAllowed = GEngine->XRSystem.IsValid() && GEngine->XRSystem->IsHeadTrackingAllowed();
-	// #TODO-jreich Adjust ViewIndex
+	// #TODO-OUU Adjust ViewIndex
 	int32 ViewIndex = 0;
 	if (bNeedStereo)
 	{

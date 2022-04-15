@@ -36,7 +36,7 @@ struct CBidirectionalIterator
 		--It,
 		++It,
 		*It
-		// TIteratorTraits<IteratorType>::ElementType(*It) #TODO-j.reich move to ByValue iterator?
+		// TIteratorTraits<IteratorType>::ElementType(*It) #TODO-OUU move to ByValue iterator?
 	);
 };
 

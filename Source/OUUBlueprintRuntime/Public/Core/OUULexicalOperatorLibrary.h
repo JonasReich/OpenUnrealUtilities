@@ -10,7 +10,7 @@
 
 /**
  * Comparison operators for lexical core types (FString, FName).
- * #TODO-j.reich Rename functions to Lexical... for UE5 to avoid confusion with built-in comparison operators
+ * #TODO-OUU Rename functions to Lexical... for UE5 to avoid confusion with built-in comparison operators
  */
 UCLASS()
 class OUUBLUEPRINTRUNTIME_API UOUULexicalOperatorLibrary : public UBlueprintFunctionLibrary

@@ -41,7 +41,7 @@ public class OUUDeveloper : OUUModuleRules
 		}
 		// --
 
-		// #TODO-j.reich Figure out if it makes sense to move the gameplay debugger stuff into this module as well!
+		// #TODO-OUU Figure out if it makes sense to move the gameplay debugger stuff into this module as well!
 		if (Target.bBuildDeveloperTools
 			|| (Target.Configuration != UnrealTargetConfiguration.Shipping
 				&& Target.Configuration != UnrealTargetConfiguration.Test))

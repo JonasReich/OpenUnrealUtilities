@@ -422,7 +422,7 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 			if (AbilitySpec.Ability == nullptr)
 				continue;
 
-			// #TODO-j.reich Add debugging for instance-per-execution abilities. Right now only instance-per-actor and
+			// #TODO-OUU Add debugging for instance-per-execution abilities. Right now only instance-per-actor and
 			// non-instanced abilities are supported.
 			UGameplayAbility* Ability = AbilitySpec.GetPrimaryInstance();
 			if (!IsValid(Ability))
@@ -502,7 +502,7 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 					if (!Instance)
 						continue;
 
-					// #TODO-j.reich Add error/warning/fallback for non ouu abilities
+					// #TODO-OUU Add error/warning/fallback for non ouu abilities
 
 					if (Info.Canvas)
 					{

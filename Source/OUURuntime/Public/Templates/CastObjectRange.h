@@ -19,7 +19,7 @@ private:
 	using PointerType = typename TIteratorTraits<IteratorType>::PointerType;
 	using ReferenceType = typename TIteratorTraits<IteratorType>::ReferenceType;
 
-	// #TODO-j.reich Rephrase individual checks into single condition
+	// #TODO-OUU Rephrase individual checks into single condition
 	// These requirements stem from the usage of Cast<T> in the operator*():
 	static_assert(TIsPointer<ElementType>::Value == true, "Array ElementType must be a pointer type");
 	static_assert(TIsPointer<CastTargetType>::Value == false, "TargetType must not be a pointer type");
