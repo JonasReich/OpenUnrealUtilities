@@ -13,7 +13,10 @@ template <typename T, T A, T B>
 struct TAssertValuesEqual
 {
 	static const bool Value = A == B;
-	static_assert(Value, "A and B are not equal");
+	static_assert(
+		Value,
+		"A and B are not equal. Check the error message from invoking static_assert below for more precise "
+		"information.");
 };
 
 /**
@@ -25,5 +28,8 @@ template <typename T, T A, T B>
 struct TAssertValuesUnequal
 {
 	static const bool Value = A != B;
-	static_assert(Value, "A and B are equal");
+	static_assert(
+		Value,
+		"A and B are equal. Check the error message from invoking static_assert below for more precise "
+		"information.");
 };

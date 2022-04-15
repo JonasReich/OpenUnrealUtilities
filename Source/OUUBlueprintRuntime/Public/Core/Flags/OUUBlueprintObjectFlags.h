@@ -22,7 +22,7 @@ enum class EOUUBlueprintObjectFlags : uint8
 	NoFlags = 0,
 
 	// DO NOT USE DIRECTLY!!!
-	Group_ObjectType UMETA(DisplayName = "-- Object Types --"),
+	GROUP_ObjectType UMETA(DisplayName = "-- Object Types --"),
 
 	// Object is visible outside its package.
 	Public,
@@ -40,7 +40,7 @@ enum class EOUUBlueprintObjectFlags : uint8
 	Transient,
 
 	// DO NOT USE DIRECTLY!!!
-	Group_GC UMETA(DisplayName = "-- Garbage Collection --"),
+	GROUP_GC UMETA(DisplayName = "-- Garbage Collection --"),
 
 	// Object will be marked as root set on construction and not be garbage collected, even if unreferenced
 	MarkAsRootSet,
@@ -49,7 +49,7 @@ enum class EOUUBlueprintObjectFlags : uint8
 	TagGarbageTemp,
 
 	// DO NOT USE DIRECTLY!!!
-	Group_Lifetime UMETA(DisplayName = "-- Lifetime --"),
+	GROUP_Lifetime UMETA(DisplayName = "-- Lifetime --"),
 
 	// This object has not completed its initialization process. Cleared when
 	// ~FObjectInitializer completes
@@ -72,7 +72,7 @@ enum class EOUUBlueprintObjectFlags : uint8
 	FinishDestroyed,
 
 	// DO NOT USE DIRECTLY!!!
-	Group_Misc UMETA(DisplayName = "-- Misc --"),
+	GROUP_Misc UMETA(DisplayName = "-- Misc --"),
 
 	// Flagged on UObjects that are used to create UClasses (e.g. Blueprints) while
 	// they are regenerating their UClass on load (See FLinkerLoad::CreateExport()), as
@@ -102,15 +102,24 @@ enum class EOUUBlueprintObjectFlags : uint8
 	// getting the outermost package
 	HasExternalPackage,
 
+	// Allocated from a ref-counted page shared with other UObjects
+	AllocatedInSharedPage,
+
 	// DO NOT USE DIRECTLY!!!
-	Group_MaskPresets UMETA(DisplayName = "-- Mask Presets --"),
+	GROUP_MaskPresets UMETA(DisplayName = "-- Mask Presets --"),
 
 	// All flags, used mainly for error checking
 	AllFlags,
 	// Flags to load from unreal asset files
 	Load,
 	// Sub-objects will inherit these flags from their SuperObject
-	PropagateToSubObjects
+	PropagateToSubObjects,
+
+	/// HIDDEN META FLAGS FOR STATIC VALIDATION
+	META_NumFlagsAndGroups UMETA(Hidden),
+	// Adjust manually to match number of group headings above
+	META_NumGroups = 5 UMETA(Hidden),
+	META_NumFlags = META_NumFlagsAndGroups - META_NumGroups UMETA(Hidden)
 };
 
 UCLASS()

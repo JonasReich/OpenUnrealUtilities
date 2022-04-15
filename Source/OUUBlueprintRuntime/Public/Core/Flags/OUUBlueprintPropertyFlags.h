@@ -20,6 +20,9 @@ enum class EOUUBlueprintPropertyFlags : uint8
 {
 	None,
 
+	// DO NOT USE DIRECTLY!!!
+	Group_IndividualFlags UMETA(DisplayName = "-- Individual Flags --"),
+
 	// Property is user-settable in the editor.
 	Edit,
 	// This is a constant function parameter
@@ -126,10 +129,33 @@ enum class EOUUBlueprintPropertyFlags : uint8
 	NativeAccessSpecifierPrivate,
 	// Property shouldn't be serialized, can still be exported to text
 	SkipSerialization,
+
+	// DO NOT USE DIRECTLY!!!
+	Group_MaskPresets UMETA(DisplayName = "-- Mask Presets --"),
+
+	/** All Native Access Specifier flags */
+	NativeAccessSpecifiers,
+	/** All parameter flags */
+	ParmFlags,
+	/** Flags that are propagated to properties inside containers */
+	PropagateToArrayInner,
+	PropagateToMapValue,
+	PropagateToMapKey,
+	PropagateToSetElement,
+	/** The flags that should never be set on interface properties */
+	InterfaceClearMask,
+	/** All the properties that can be stripped for final release console builds */
+	DevelopmentAssets,
 	/** All the properties that should never be loaded or saved */
 	ComputedFlags,
 	/** Mask of all property flags */
-	AllFlags
+	AllFlags,
+
+	/// HIDDEN META FLAGS FOR STATIC VALIDATION
+	META_NumFlagsAndGroups UMETA(Hidden),
+	// Adjust manually to match number of group headings above
+	META_NumGroups = 2 UMETA(Hidden),
+	META_NumFlags = META_NumFlagsAndGroups - META_NumGroups UMETA(Hidden)
 };
 
 UCLASS()

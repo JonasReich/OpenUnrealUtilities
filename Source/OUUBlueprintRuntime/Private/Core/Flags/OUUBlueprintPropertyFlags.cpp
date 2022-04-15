@@ -2,15 +2,23 @@
 
 #include "Core/Flags/OUUBlueprintPropertyFlags.h"
 
+#include "OUUValidateInlineFiles.h"
+#include "Traits/AssertValueEquality.h"
+
 namespace OUUBlueprintPropertyFlags_Private
 {
+#define OUU_DECLARE_PROPERTY_FLAGS(EnumCase) EOUUBlueprintPropertyFlags::EnumCase
+	STATIC_ASSERT_INLINE_FLAGS_START(EOUUBlueprintPropertyFlags)
+#include "Core/Flags/OUUPropertyFlagsEnum.inl"
+	STATIC_ASSERT_INLINE_FLAGS_END(EOUUBlueprintPropertyFlags)
+#undef OUU_DECLARE_PROPERTY_FLAGS
 	//------------
 #define OUU_DECLARE_PROPERTY_FLAGS(EnumCase)                                                                           \
 	{                                                                                                                  \
 		CPF_##EnumCase, EOUUBlueprintPropertyFlags::EnumCase                                                           \
 	}
 
-	TMap<EPropertyFlags, EOUUBlueprintPropertyFlags> NativeToBlueprintFlags{
+	const TMap<EPropertyFlags, EOUUBlueprintPropertyFlags> NativeToBlueprintFlags{
 #include "Core/Flags/OUUPropertyFlagsEnum.inl"
 	};
 #undef OUU_DECLARE_PROPERTY_FLAGS
@@ -19,13 +27,13 @@ namespace OUUBlueprintPropertyFlags_Private
 	{                                                                                                                  \
 		EOUUBlueprintPropertyFlags::EnumCase, CPF_##EnumCase                                                           \
 	}
-	TMap<EOUUBlueprintPropertyFlags, EPropertyFlags> BlueprintToNativeFlags{
+	const TMap<EOUUBlueprintPropertyFlags, EPropertyFlags> BlueprintToNativeFlags{
 #include "Core/Flags/OUUPropertyFlagsEnum.inl"
 	};
 #undef OUU_DECLARE_PROPERTY_FLAGS
 	//------------
 #define OUU_DECLARE_PROPERTY_FLAGS(EnumCase) CPF_##EnumCase
-	TArray<EPropertyFlags> AllNativeFlags = {
+	const TArray<EPropertyFlags> AllNativeFlags = {
 #include "Core/Flags/OUUPropertyFlagsEnum.inl"
 	};
 #undef OUU_DECLARE_PROPERTY_FLAGS

@@ -2,8 +2,15 @@
 
 #include "Core/Flags/OUUBlueprintClassFlags.h"
 
+#include "OUUValidateInlineFiles.h"
+
 namespace OUUBlueprintClassFlags_Private
 {
+#define OUU_DECLARE_CLASS_FLAGS(EnumCase) EOUUBlueprintClassFlags::EnumCase
+	STATIC_ASSERT_INLINE_FLAGS_START(EOUUBlueprintClassFlags)
+#include "Core/Flags/OUUClassFlagsEnum.inl"
+	STATIC_ASSERT_INLINE_FLAGS_END(EOUUBlueprintClassFlags)
+#undef OUU_DECLARE_CLASS_FLAGS
 	//------------
 #define OUU_DECLARE_CLASS_FLAGS(EnumCase)                                                                              \
 	{                                                                                                                  \

@@ -20,6 +20,10 @@ enum class EOUUBlueprintClassFlags : uint8
 {
 	/** No Flags */
 	None,
+
+	// DO NOT USE DIRECTLY!!!
+	Group_IndividualFlags UMETA(DisplayName = "-- Individual Flags --"),
+
 	/** Class is abstract and can't be instantiated directly. */
 	Abstract,
 	/** Save object configuration only to Default INIs, never to local INIs. Must be combined with Config */
@@ -96,7 +100,8 @@ enum class EOUUBlueprintClassFlags : uint8
 	/** Class has been consigned to oblivion as part of a blueprint recompile, and a newer version currently exists. */
 	NewerVersionExists,
 
-	/// FLAG MASKS
+	// DO NOT USE DIRECTLY!!!
+	GROUP_MaskPresets UMETA(DisplayName = "-- Mask Presets --"),
 
 	/** Flags to inherit from base class */
 	Inherit,
@@ -111,7 +116,13 @@ enum class EOUUBlueprintClassFlags : uint8
 	/** This is used as a mask for the flags put into generated code for "compiled in" classes. */
 	SaveInCompiledInClasses,
 
-	AllFlags
+	AllFlags,
+
+	/// HIDDEN META FLAGS FOR STATIC VALIDATION
+	META_NumFlagsAndGroups UMETA(Hidden),
+	// Adjust manually to match number of group headings above
+	META_NumGroups = 2 UMETA(Hidden),
+	META_NumFlags = META_NumFlagsAndGroups - META_NumGroups UMETA(Hidden)
 };
 
 UCLASS()
