@@ -32,12 +32,7 @@ struct TIteratorTraits<IteratorType, true>
 struct CBidirectionalIterator
 {
 	template <typename IteratorType>
-	auto Requires(IteratorType It) -> decltype(
-		--It,
-		++It,
-		*It
-		// TIteratorTraits<IteratorType>::ElementType(*It) #TODO-OUU move to ByValue iterator?
-	);
+	auto Requires(IteratorType It) -> decltype(--It, ++It, *It);
 };
 
 // To check if the CBidirectionalIterator concept works as expected, we test TActorIterator, which cannot be decremented
