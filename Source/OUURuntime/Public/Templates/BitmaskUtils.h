@@ -93,8 +93,9 @@ namespace BitmaskUtils
 			"have it defined via trait.");
 
 		// Use static_cast instead of StaticCast, because the latter is not constexpr
-		return SequenceType == EEnumSequenceType::Pow2 ? static_cast<MaskIntegerType>(EnumValue)
-													   : (1 << static_cast<MaskIntegerType>(EnumValue));
+		return SequenceType == EEnumSequenceType::Pow2
+			? static_cast<MaskIntegerType>(EnumValue)
+			: (static_cast<MaskIntegerType>(1) << static_cast<MaskIntegerType>(EnumValue));
 	}
 
 	template <
