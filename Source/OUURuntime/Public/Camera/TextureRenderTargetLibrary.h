@@ -12,7 +12,7 @@
 class UTextureRenderTarget2D;
 
 /**
- *
+ * Utility library to query data from and modify render targets.
  */
 UCLASS()
 class OUURUNTIME_API UTextureRenderTargetLibrary : public UBlueprintFunctionLibrary
