@@ -27,7 +27,7 @@ struct TIteratorTraits<IteratorType, true>
 	using ReferenceType = ElementType&;
 };
 
-// Concept for iterator that is bidirectional, i.e. one that can be incremented and decremented.
+// Concept for iterator that is bidirectional, i.e. one that can be both incremented and decremented.
 // See "Models.h"
 struct CBidirectionalIterator
 {
@@ -39,3 +39,11 @@ struct CBidirectionalIterator
 static_assert(
 	TModels<CBidirectionalIterator, TActorIterator<AActor>>::Value == false,
 	"Actor iterator is not bidirectional!");
+
+// Also check TArray<int32> iterators, which can all be decremented
+static_assert(
+	TModels<CBidirectionalIterator, TArray<int32>::TConstIterator>::Value == true
+		&& TModels<CBidirectionalIterator, TArray<int32>::TIterator>::Value == true
+		&& TModels<CBidirectionalIterator, TArray<int32>::RangedForIteratorType>::Value == true
+		&& TModels<CBidirectionalIterator, TArray<int32>::RangedForConstIteratorType>::Value == true,
+	"TArray iterators are bidirectional!");
