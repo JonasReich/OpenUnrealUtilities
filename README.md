@@ -3,67 +3,99 @@
 
 ![OUU logo](./Resources/ouu.png)
 
-The Open Unreal Utilities plugin is a general purpose utility plugin for Unreal Engine 4.
+The Open Unreal Utilities plugin is a general purpose utility plugin for Unreal Engine.
 
 ## Contents
 
 The plugin is divided into several modules for different application purposes:
 
-- **OUUBlueprintRuntime:** Blueprint exposed functionality that is already present in C++ UE4 off-the-shelf
-- **OUUEditor:** Functionality that only works when running the Editor
-- **OUURuntime:** Main runtime plugin. These utilties should be useful in all kinds of different contexts
-	ranging from container templates, execution flow helpers, etc
-- **OUUTests:** Automated tests that test test the plugin functionality. Only contains private content.
-	You will never need to reference this from other modules!
-- **OUUTestUtilities:** Testing utilities that help writing automated tests. Almost all of the tests in OUUTests
-	use at least some of the functionality from here.
-- **OUUUMG:** UMG Widgets and UI implementation helpers
+| Module              |   |
+|---------------------|---|
+| OUUBlueprintRuntime | Blueprint exposed functionality that is already present in C++ UE4 off-the-shelf |
+| OUUDeveloper        | Developer tools, esp. debug commands that are available in editor and development builds |
+| OUUEditor           | Blueprint function libraries for editor utilities |
+| OUURuntime          | The core of the plugin. These are runtime utilities that are also available in shipping builds. These utilities should be useful in all kinds of different contexts ranging from container templates, execution flow helpers, etc |
+| OUUTests            | Automated tests that test test the plugin functionality. Only contains private content. You will never need to reference this from other modules! |
+| OUUUMG              | UMG Widgets and UI implementation helpers. Use with care! Many of these tools may be deprecated in favor of UE5's CommonUI plugin. |
 
 For a more detailed overview of all utilities you should check out the plugin source code,
 as most of the documentation is provided in the form of source code comments.
-If you want to know how a type is meant to be used, it can be useful to check the automation tests.
+If you want to know how a type is meant to be used, it can be useful to check the automation tests in the ``OUUTests`` module.
 
 ## Workflows
 
 ### Versions
 
 - Latest plugin version: 0.8.0
-- Supported UE4 versions: 4.26, 4.27, 5.0-EA
+- Supported Unreal Engine versions: 4.26, 4.27, 5.0
 
-The plugin is still in a pre-1.0 development phase, so the API of many utilities is still up to change a lot.
+Active support can only be provided for the latest version, but we try to maintain compatibility to the last two minor engine versions.
+
+#### Deprecation
+
+Any major changes to the API will be assisted via the use of deprecation macros so you have time to upgrade your code. Deprecations are phased out alongside with new minor version upgrades of Unreal Engine.
+
+For example, changes introduced for UE5 that deprecate old types were marked with ``UE_DEPRECATED(5.0, "...")``.
+These warnings may be removed as soon as we upgrade the plugin to support UE5.1, so at that point any code referencing the deprecated symbols or headers will no longer compile.  
 
 #### Versions History (Summary)
 
-Short summary of version changes so you don't have to sift through the entire history to find out what changed (roughly):
+Short summary of changes between minor versions so you don't have to sift through the entire changelog:
 
+- **_1.0.0 (pending)_**
+  - Upgrade to UE 5.0
+  - Runtime
+    - Added a string parser for gameplay tag queries - not very optimized, don't use at runtime (yet)
+    - Added a template for read-write-locked variables to simplify access management
+    - Added text library for dynamic list concatenation of FTexts
+    - Added macro that enables bitmask operator support
+    - Added Json library that allows serializing object properties from json
+  - Blueprint
+    - Generic Platform Process (allows launching external applications from Blueprint code)
+    - Property path helpers to get and set arbitrary property values from strings
+    - Exposed object, class and property flags to Blueprint
+    - Added new flow control Blueprint macros (also available for AnimInstances now)
+  - Debugging utilities
+    - Canvas graph plotting (used e.g. in sequential frame scheduler gameplay debugger)
+    - Added animation gameplay debugger
+  - Editor utilities
+    - Added some generic editor asset actions
+    - Added ouu.CompileAllBlueprints console command (same syntax as CompileAllBlueprints commandlet)
+  - Code style/quality
+    - Introduced clang-format file and unified/fixed formatting accordingly
+    - Renamed namespaces to comply with implicit UE5 naming conventions
+  - Other
+    - Added texel checker materials
+    - Added material functions for sRGB/linear conversion of entire vectors
+    - Various bug fixes
 - **0.8.0**
-	- Upgrade to UE 4.27
-	- Added lexical operators for Blueprint
-	- Simplified message log functions and added UE_LOG-like macros
-	- Reworked bitmask utilty functions to work with both engine enums and custom enums that implement OUU bitmask traits
-	- Debugging tools
-		- Added gameplay debugger category type list which simplifies registering of debugger categories
-		- Added enhanced ability system gameplay debugger category
-		- Added actor map window
-		- Moved all debugging tools into new module OUUDeveloper
+    - Upgrade to UE 4.27
+    - Added lexical operators for Blueprint
+    - Simplified message log functions and added UE_LOG-like macros
+    - Reworked bitmask utilty functions to work with both engine enums and custom enums that implement OUU bitmask traits
+    - Debugging tools
+        - Added gameplay debugger category type list which simplifies registering of debugger categories
+        - Added enhanced ability system gameplay debugger category
+        - Added actor map window
+        - Moved all debugging tools into new module OUUDeveloper
 - **0.7.0**
-	- Added plugin logo (matching to Open Unreal Conventions)
-	- Improved clang compatibility for PS4/Linux targets (still not guaranteed to run on those platforms)
+    - Added plugin logo (matching to Open Unreal Conventions)
+    - Improved clang compatibility for PS4/Linux targets (still not guaranteed to run on those platforms)
 - **0.6.0**
-	- New Utilities: Spiral IDs, GarbageCollectionListener
-	- Various smaller bug fixes, improvements and cleanups
+    - New Utilities: Spiral IDs, GarbageCollectionListener
+    - Various smaller bug fixes, improvements and cleanups
 - **0.5.1**
-	- Stability Fixes
+    - Stability Fixes
 - **0.5.0**
-	- New Utilities: Literal Gameplay Tags, WorldBoundSFSchedulerRegistry
-	- Renamed/moved a bunch of utilities to reduce conflicts with other projects
+    - New Utilities: Literal Gameplay Tags, WorldBoundSFSchedulerRegistry
+    - Renamed/moved a bunch of utilities to reduce conflicts with other projects
 - **0.4.0**
-	- Various fixes and stability improvements
-	- Unified plugin log category usages
+    - Various fixes and stability improvements
+    - Unified plugin log category usages
 - **0.3.0**
-	- Upgrade to UE 4.26
-	- New Utilities: Ring Aggregator, Sequential Frame Scheduler
-	- Module Cleanup
+    - Upgrade to UE 4.26
+    - New Utilities: Ring Aggregator, Sequential Frame Scheduler
+    - Module Cleanup
 - **0.2.0** Split repo into master and develop branches
 - **0.1.0** Base set of utilities (All changes prior to 0.2.0 with no clear versioning strategy)
 
@@ -83,9 +115,10 @@ Follow the following steps to promote changes from develop to master:
 
 ### Branch Strategy
 
-- Active development on develop
-- (Semi) stable releases on master
-- Tag releases with plugin version number
+- (Semi) stable releases for latest supported engine version on ``master``
+- Active development for latest supported engine version on ``develop``
+- Separate branches for supported engine versions (e.g. ``ue.27`` and ``ue5.0`` as of writing this) 
+- Tag release commits on master with plugin version number, e.g. ``v0.1.0``
 
 ### Future Workflow Changes
 
