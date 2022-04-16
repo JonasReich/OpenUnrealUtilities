@@ -121,6 +121,40 @@ void FRegexUtilsSpec::Define()
 			}
 		});
 	});
+
+	Describe("ReplaceFirstRegexMatch", [this]() {
+		It("should replace a single occurence with a given string", [this]() {
+			const FString Input = "My test string";
+			const FString Result = FRegexUtils::ReplaceFirstRegexMatch("t.{2}t", Input, "foo");
+			SPEC_TEST_EQUAL(Result, "My foo string");
+		});
+
+		It("should replace a single occurence with a given string (even when longer than input)", [this]() {
+			const FString Input = "My test string";
+			const FString Result = FRegexUtils::ReplaceFirstRegexMatch("t.{2}t", Input, "foobar");
+			SPEC_TEST_EQUAL(Result, "My foobar string");
+		});
+
+		It("should only replace the first occurence", [this]() {
+			const FString Input = "My test string test test";
+			const FString Result = FRegexUtils::ReplaceFirstRegexMatch("t.{2}t", Input, "foobar");
+			SPEC_TEST_EQUAL(Result, "My foobar string test test");
+		});
+	});
+
+	Describe("ReplaceAllRegexMatches", [this]() {
+		It("should replace all occurrences", [this]() {
+			const FString Input = "My test string test test";
+			const FString Result = FRegexUtils::ReplaceAllRegexMatches("t.{2}t", Input, "foobar");
+			SPEC_TEST_EQUAL(Result, "My foobar string foobar foobar");
+		});
+
+		It("should replace all occurrences even when first match starts at first character", [this]() {
+			const FString Input = "test My test string test test";
+			const FString Result = FRegexUtils::ReplaceAllRegexMatches("t.{2}t", Input, "foobar");
+			SPEC_TEST_EQUAL(Result, "foobar My foobar string foobar foobar");
+		});
+	});
 }
 
 #endif

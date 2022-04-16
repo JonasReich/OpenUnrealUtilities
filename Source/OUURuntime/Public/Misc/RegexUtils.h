@@ -114,6 +114,18 @@ public:
 		const FString& RegexPattern,
 		int32 GroupCount,
 		const FString& TestString);
+
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Regex")
+	static FString ReplaceFirstRegexMatch(
+		const FString& RegexPattern,
+		const FString& InputString,
+		const FString& ReplaceString);
+
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Regex")
+	static FString ReplaceAllRegexMatches(
+		const FString& RegexPattern,
+		const FString& InputString,
+		const FString& ReplaceString);
 };
 
 namespace OUU::Runtime
