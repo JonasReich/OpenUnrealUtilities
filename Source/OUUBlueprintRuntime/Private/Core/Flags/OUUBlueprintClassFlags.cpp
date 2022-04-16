@@ -4,7 +4,7 @@
 
 #include "OUUValidateInlineFiles.h"
 
-namespace OUUBlueprintClassFlags_Private
+namespace OUU::BlueprintRuntime::Private::BlueprintClassFlags
 {
 #define OUU_DECLARE_CLASS_FLAGS(EnumCase) EOUUBlueprintClassFlags::EnumCase
 	STATIC_ASSERT_INLINE_FLAGS_START(EOUUBlueprintClassFlags)
@@ -74,22 +74,23 @@ namespace OUUBlueprintClassFlags_Private
 		}
 		return ResultSet;
 	}
-} // namespace OUUBlueprintClassFlags_Private
+} // namespace OUU::BlueprintRuntime::Private::BlueprintClassFlags
 
 int64 UOUUBlueprintClassFlagsLibrary::CreateClassFlagsMask(TSet<EOUUBlueprintClassFlags> Flags)
 {
-	return static_cast<int64>(OUUBlueprintClassFlags_Private::ToNativeFlags(Flags));
+	return static_cast<int64>(OUU::BlueprintRuntime::Private::BlueprintClassFlags::ToNativeFlags(Flags));
 }
 
 TSet<EOUUBlueprintClassFlags> UOUUBlueprintClassFlagsLibrary::BreakClassFlagsMask(int64 Flags)
 {
-	return OUUBlueprintClassFlags_Private::ToBlueprintFlagsSet(static_cast<EClassFlags>(Flags));
+	return OUU::BlueprintRuntime::Private::BlueprintClassFlags::ToBlueprintFlagsSet(static_cast<EClassFlags>(Flags));
 }
 
 TSet<EOUUBlueprintClassFlags> UOUUBlueprintClassFlagsLibrary::GetClassFlagsSet(const UClass* Class)
 {
-	return IsValid(Class) ? OUUBlueprintClassFlags_Private::ToBlueprintFlagsSet(Class->GetClassFlags())
-						  : TSet<EOUUBlueprintClassFlags>{};
+	return IsValid(Class)
+		? OUU::BlueprintRuntime::Private::BlueprintClassFlags::ToBlueprintFlagsSet(Class->GetClassFlags())
+		: TSet<EOUUBlueprintClassFlags>{};
 }
 
 int64 UOUUBlueprintClassFlagsLibrary::GetClassFlagsMask(const UClass* Class)
@@ -99,10 +100,14 @@ int64 UOUUBlueprintClassFlagsLibrary::GetClassFlagsMask(const UClass* Class)
 
 bool UOUUBlueprintClassFlagsLibrary::ClassHasAnyFlags(const UClass* Class, TSet<EOUUBlueprintClassFlags> Flags)
 {
-	return IsValid(Class) ? Class->HasAnyClassFlags(OUUBlueprintClassFlags_Private::ToNativeFlags(Flags)) : false;
+	return IsValid(Class)
+		? Class->HasAnyClassFlags(OUU::BlueprintRuntime::Private::BlueprintClassFlags::ToNativeFlags(Flags))
+		: false;
 }
 
 bool UOUUBlueprintClassFlagsLibrary::ClassHasAllFlags(const UClass* Class, TSet<EOUUBlueprintClassFlags> Flags)
 {
-	return IsValid(Class) ? Class->HasAllClassFlags(OUUBlueprintClassFlags_Private::ToNativeFlags(Flags)) : false;
+	return IsValid(Class)
+		? Class->HasAllClassFlags(OUU::BlueprintRuntime::Private::BlueprintClassFlags::ToNativeFlags(Flags))
+		: false;
 }

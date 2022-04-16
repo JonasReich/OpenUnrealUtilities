@@ -10,7 +10,7 @@
 	#include "GameplayDebuggerTypes.h"
 	#include "Templates/StringUtils.h"
 
-FString GameplayDebuggerUtils::WrapStringToWidth(
+FString OUU::Runtime::GameplayDebuggerUtils::WrapStringToWidth(
 	const FString& InString,
 	FGameplayDebuggerCanvasContext& CanvasContext,
 	float TargetWidth)
@@ -23,7 +23,7 @@ FString GameplayDebuggerUtils::WrapStringToWidth(
 	return InString;
 }
 
-bool GameplayDebuggerUtils::TryWrapStringToWidth(
+bool OUU::Runtime::GameplayDebuggerUtils::TryWrapStringToWidth(
 	const FString& InString,
 	FString& OutString,
 	FGameplayDebuggerCanvasContext& CanvasContext,
@@ -57,19 +57,19 @@ bool GameplayDebuggerUtils::TryWrapStringToWidth(
 	return false;
 }
 
-FString GameplayDebuggerUtils::CleanupName(FString Name)
+FString OUU::Runtime::GameplayDebuggerUtils::CleanupName(FString Name)
 {
 	Name.RemoveFromStart(DEFAULT_OBJECT_PREFIX);
 	Name.RemoveFromEnd(TEXT("_C"));
 	return Name;
 }
 
-FString GameplayDebuggerUtils::GetColoredBoolString(bool bBoolValue)
+FString OUU::Runtime::GameplayDebuggerUtils::GetColoredBoolString(bool bBoolValue)
 {
 	return bBoolValue ? TEXT("{green}true") : TEXT("{red}false");
 }
 
-void GameplayDebuggerUtils::SetCategoryEnabled(
+void OUU::Runtime::GameplayDebuggerUtils::SetCategoryEnabled(
 	AGameplayDebuggerCategoryReplicator& InCategoryReplicator,
 	FGameplayDebuggerCategory& InCategoryToClose,
 	bool bEnabled)

@@ -63,10 +63,11 @@ void UOUULayerWidget::NativeOnFocusChanging(
 {
 	Super::NativeOnFocusChanging(PreviousFocusPath, NewWidgetPath, InFocusEvent);
 	auto SafeWidget = TakeWidget();
+	auto SafeWidgetPtr = &SafeWidget.Get();
 
-	if (PreviousFocusPath.ContainsWidget(SafeWidget))
+	if (PreviousFocusPath.ContainsWidget(SafeWidgetPtr))
 		LastValidFocusPath = PreviousFocusPath;
-	if (!NewWidgetPath.ContainsWidget(SafeWidget))
+	if (!NewWidgetPath.ContainsWidget(SafeWidgetPtr))
 	{
 		// probable loss of focus on the layer
 		// we want to check if the new focus path is outside of the game viewport, because that is a common scenario in
@@ -82,8 +83,9 @@ bool UOUULayerWidget::DoesPathContainGameViewport(const FWidgetPath& NewWidgetPa
 {
 #if WITH_EDITOR
 	// In the editor we need to actually perform the check:
-	TSharedPtr<SWidget> GameViewport = StaticCastSharedPtr<SWidget>(FSlateApplication::Get().GetGameViewport());
-	return GameViewport.IsValid() && NewWidgetPath.ContainsWidget(GameViewport.ToSharedRef());
+	const TSharedPtr<SWidget> GameViewportPtr =
+		StaticCastSharedPtr<SWidget>(FSlateApplication::Get().GetGameViewport());
+	return GameViewportPtr.IsValid() && NewWidgetPath.ContainsWidget(GameViewportPtr.Get());
 #else
 	// Assume the game viewport is always part of a focus path in non-editor builds as there should only be the game:
 	return true;
@@ -112,9 +114,9 @@ void UOUULayerWidget::CheckLayerVisibility()
 		bIsLayerVisible = false;
 		bIsLayerInputVisible = false;
 
-		UMGUtils::ForEachWidgetAndDescendants<const UWidget>(this, false, [&](const UWidget* W) -> bool {
+		OUU::Runtime::UMGUtils::ForEachWidgetAndDescendants<const UWidget>(this, false, [&](const UWidget* W) -> bool {
 			bIsLayerVisible |= W->IsVisible();
-			bIsLayerInputVisible = bAllowInput && UMGUtils::IsInputVisible(W);
+			bIsLayerInputVisible = bAllowInput && OUU::Runtime::UMGUtils::IsInputVisible(W);
 
 			// break when we have all the info we need
 			return bIsLayerInputVisible || (!bAllowInput && bIsLayerVisible);

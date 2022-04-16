@@ -13,7 +13,7 @@
  * Concept types to use for static type checks in TGameplayDebuggerCategoryTraits.
  * Used to check if the required functions exist and return the correct types.
  */
-namespace GameplayDebuggerCategoryConcepts
+namespace OUU::Runtime::GameplayDebuggerUtils
 {
 	struct CHasCategoryName
 	{
@@ -26,7 +26,7 @@ namespace GameplayDebuggerCategoryConcepts
 		template <typename T>
 		auto Requires() -> decltype(TSharedRef<FGameplayDebuggerCategory>(T::MakeInstance()));
 	};
-} // namespace GameplayDebuggerCategoryConcepts
+} // namespace OUU::Runtime::GameplayDebuggerUtils
 
 /**
  * Trait class for gameplay debugger categories that simplifies category registration and de-registration.
@@ -45,11 +45,14 @@ template <class GameplayDebuggerCategoryType>
 struct TGameplayDebuggerCategoryTraits
 {
 public:
+	using CHasCategoryName = OUU::Runtime::GameplayDebuggerUtils::CHasCategoryName;
+	using CHasExplicitInstanceMethod = OUU::Runtime::GameplayDebuggerUtils::CHasExplicitInstanceMethod;
+
 	static_assert(
 		TIsDerivedFrom<GameplayDebuggerCategoryType, FGameplayDebuggerCategory>::Value,
 		"GameplayDebuggerCategoryType must be derived from FGameplayDebuggerCategory");
 	static_assert(
-		TModels<GameplayDebuggerCategoryConcepts::CHasCategoryName, GameplayDebuggerCategoryType>::Value,
+		TModels<CHasCategoryName, GameplayDebuggerCategoryType>::Value,
 		"GameplayDebuggerCategoryType must have a static constexpr member function called GetCategoryName that "
 		"returns a string literal which can be used to initialize an FName");
 
@@ -64,18 +67,13 @@ public:
 	}
 
 private:
-	template <
-		bool bEnable =
-			TModels<GameplayDebuggerCategoryConcepts::CHasExplicitInstanceMethod, GameplayDebuggerCategoryType>::Value>
+	template <bool bEnable = TModels<CHasExplicitInstanceMethod, GameplayDebuggerCategoryType>::Value>
 	FORCEINLINE static typename TEnableIf<bEnable, TSharedRef<FGameplayDebuggerCategory>>::Type MakeInstance_Internal()
 	{
 		return GameplayDebuggerCategoryType::MakeInstance();
 	}
 
-	template <
-		bool bEnable =
-			TModels<GameplayDebuggerCategoryConcepts::CHasExplicitInstanceMethod, GameplayDebuggerCategoryType>::Value
-			== false>
+	template <bool bEnable = TModels<CHasExplicitInstanceMethod, GameplayDebuggerCategoryType>::Value == false>
 	FORCEINLINE static typename TEnableIf<bEnable, TSharedRef<FGameplayDebuggerCategory>>::Type MakeInstance_Internal(
 		int32 OverloadArg = 0)
 	{

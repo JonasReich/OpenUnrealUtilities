@@ -229,7 +229,7 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 				Info,
 				FString::Printf(
 					TEXT("%s %s %s %s %s"),
-					*GameplayDebuggerUtils::CleanupName(GetNameSafe(ActiveGE.Spec.Def)),
+					*OUU::Runtime::GameplayDebuggerUtils::CleanupName(GetNameSafe(ActiveGE.Spec.Def)),
 					*DurationStr,
 					*StackString,
 					*LevelString,
@@ -430,7 +430,8 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 				Ability = AbilitySpec.Ability;
 			}
 
-			const FString AbilityName = GameplayDebuggerUtils::CleanupName(GetNameSafe(AbilitySpec.Ability));
+			const FString AbilityName =
+				OUU::Runtime::GameplayDebuggerUtils::CleanupName(GetNameSafe(AbilitySpec.Ability));
 			if (!FRegexUtils::MatchesRegex(AbilityFilter.GetValueOnGameThread(), AbilityName))
 				continue;
 
@@ -639,7 +640,11 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 						{
 							Info.Canvas->SetDrawColor(bIsValidForThisACS ? FColorList::Green : FColorList::Grey);
 						}
-						DebugLine(Info, GameplayDebuggerUtils::CleanupName(CueClass->GetName()), 7.f, 0.f);
+						DebugLine(
+							Info,
+							OUU::Runtime::GameplayDebuggerUtils::CleanupName(CueClass->GetName()),
+							7.f,
+							0.f);
 					}
 				}
 			}

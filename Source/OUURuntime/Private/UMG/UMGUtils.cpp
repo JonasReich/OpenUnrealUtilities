@@ -5,7 +5,7 @@
 #include "LogOpenUnrealUtilities.h"
 #include "Widgets/SWidget.h"
 
-namespace UMGUtils
+namespace OUU::Runtime::UMGUtils
 {
 	template <class WidgetClass>
 	bool ForEachWidget(WidgetClass* RootWidget, TFunctionRef<bool(WidgetClass*)> Predicate)
@@ -217,4 +217,4 @@ namespace UMGUtils
 	template bool OUURUNTIME_API
 		ForChildWidgets<const UWidget>(const UWidget* Widget, TFunctionRef<bool(const UWidget*)> Predicate);
 
-} // namespace UMGUtils
+} // namespace OUU::Runtime::UMGUtils

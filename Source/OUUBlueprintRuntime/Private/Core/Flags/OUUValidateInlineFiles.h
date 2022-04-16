@@ -26,15 +26,18 @@
 		"Mismatch of count of flags declarations in " PREPROCESSOR_TO_STRING(                                          \
 			FlagsType) " and entries in inline file");                                                                 \
 	static_assert(                                                                                                     \
-		TOr<TAssertValuesEqual<int32, FlagsList.size(), OUUFlags_Private::NumUniqueValues<FlagsType>(FlagsList)>,      \
-			OUUFlags_Private::TAssertErrorShowEnumValue<                                                               \
+		TOr<TAssertValuesEqual<                                                                                        \
+				int32,                                                                                                 \
+				FlagsList.size(),                                                                                      \
+				OUU::BlueprintRuntime::Private::Flags::NumUniqueValues<FlagsType>(FlagsList)>,                         \
+			OUU::BlueprintRuntime::Private::Flags::TAssertErrorShowEnumValue<                                          \
 				FlagsType,                                                                                             \
-				OUUFlags_Private::GetFirstNonUniqueValue<FlagsType>(FlagsList)>>::Value,                               \
+				OUU::BlueprintRuntime::Private::Flags::GetFirstNonUniqueValue<FlagsType>(FlagsList)>>::Value,          \
 		"Initializer list from inline file contains duplicate values. "                                                \
 		"Check the last enum value referenced in error message above to find out which enum case is affected by "      \
 		"this.");
 
-namespace OUUFlags_Private
+namespace OUU::BlueprintRuntime::Private::Flags
 {
 	template <typename T>
 	constexpr int32 NumUniqueValues(const std::initializer_list<T>& FlagsList)
@@ -45,7 +48,7 @@ namespace OUUFlags_Private
 		{
 			auto Entry = *(FlagsList.begin() + i);
 			const SIZE_T BitmaskBefore = CheckBitmask;
-			BitmaskUtils::SetBit<T, EEnumSequenceType::Natural, SIZE_T>(CheckBitmask, Entry);
+			OUU::Runtime::BitmaskUtils::SetBit<T, EEnumSequenceType::Natural, SIZE_T>(CheckBitmask, Entry);
 			if (CheckBitmask != BitmaskBefore)
 			{
 				NumUniqueElements++;
@@ -63,7 +66,7 @@ namespace OUUFlags_Private
 		{
 			auto Entry = *(FlagsList.begin() + i);
 			const SIZE_T BitmaskBefore = CheckBitmask;
-			BitmaskUtils::SetBit<T, EEnumSequenceType::Natural, SIZE_T>(CheckBitmask, Entry);
+			OUU::Runtime::BitmaskUtils::SetBit<T, EEnumSequenceType::Natural, SIZE_T>(CheckBitmask, Entry);
 			if (CheckBitmask == BitmaskBefore)
 			{
 				return Entry;
@@ -77,4 +80,4 @@ namespace OUUFlags_Private
 	{
 		static const bool Value = static_cast<int32>(A) == -1;
 	};
-} // namespace OUUFlags_Private
+} // namespace OUU::BlueprintRuntime::Private::Flags

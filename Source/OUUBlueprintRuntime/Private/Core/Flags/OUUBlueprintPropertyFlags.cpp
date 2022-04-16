@@ -5,7 +5,7 @@
 #include "OUUValidateInlineFiles.h"
 #include "Traits/AssertValueEquality.h"
 
-namespace OUUBlueprintPropertyFlags_Private
+namespace OUU::BlueprintRuntime::Private::BlueprintPropertyFlags
 {
 #define OUU_DECLARE_PROPERTY_FLAGS(EnumCase) EOUUBlueprintPropertyFlags::EnumCase
 	STATIC_ASSERT_INLINE_FLAGS_START(EOUUBlueprintPropertyFlags)
@@ -75,14 +75,15 @@ namespace OUUBlueprintPropertyFlags_Private
 		}
 		return ResultSet;
 	}
-} // namespace OUUBlueprintPropertyFlags_Private
+} // namespace OUU::BlueprintRuntime::Private::BlueprintPropertyFlags
 
 int64 UOUUBlueprintPropertyFlagsLibrary::CreatePropertyFlagsMask(TSet<EOUUBlueprintPropertyFlags> Flags)
 {
-	return static_cast<int64>(OUUBlueprintPropertyFlags_Private::ToNativeFlags(Flags));
+	return static_cast<int64>(OUU::BlueprintRuntime::Private::BlueprintPropertyFlags::ToNativeFlags(Flags));
 }
 
 TSet<EOUUBlueprintPropertyFlags> UOUUBlueprintPropertyFlagsLibrary::BreakPropertyFlagsMask(int64 Flags)
 {
-	return OUUBlueprintPropertyFlags_Private::ToBlueprintFlagsSet(static_cast<EPropertyFlags>(Flags));
+	return OUU::BlueprintRuntime::Private::BlueprintPropertyFlags::ToBlueprintFlagsSet(
+		static_cast<EPropertyFlags>(Flags));
 }

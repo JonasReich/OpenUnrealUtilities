@@ -591,8 +591,8 @@ public:
 
 		MapBrush = FSlateBrush();
 		MapBrush.SetResourceObject(CaptureComponent->TextureTarget);
-		MapBrush.ImageSize.X = CaptureComponent->TextureTarget->Resource->GetSizeX();
-		MapBrush.ImageSize.Y = CaptureComponent->TextureTarget->Resource->GetSizeY();
+		MapBrush.ImageSize.X = CaptureComponent->TextureTarget->GetResource()->GetSizeX();
+		MapBrush.ImageSize.Y = CaptureComponent->TextureTarget->GetResource()->GetSizeY();
 
 		MainColumns.LeftColumnWidth = TAttribute<float>(this, &FActorMap::OnGetDetailsWidth);
 		MainColumns.RightColumnWidth = TAttribute<float>(this, &FActorMap::OnGetMapWidth);
@@ -798,7 +798,6 @@ protected:
 					.X(this, &FActorMap::GetPositionX)
 					.Y(this, &FActorMap::GetPositionY)
 					.Z(this, &FActorMap::GetPositionZ)
-					.AllowResponsiveLayout(true)
 					.AllowSpin(true)
 					.OnXCommitted(this, &FActorMap::OnSetPosition, 0)
 					.OnYCommitted(this, &FActorMap::OnSetPosition, 1)

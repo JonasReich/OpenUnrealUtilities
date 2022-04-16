@@ -59,22 +59,25 @@ public:
 			"ImplementingType must be the class that derives from the template");
 
 		ImplementingType* ThisAsImplementingType = StaticCast<ImplementingType*>(this);
-		return UMGUtils::ForEachWidgetAndDescendants<UWidget>(ThisAsImplementingType, true, [&](UWidget* W) -> bool {
-			// Skip the initial widget implementing the interface, otherwise we end up in an endless loop
-			if (W != ThisAsImplementingType)
-			{
-				if (IUserFocusResetableWidget::TryResetUserFocusTo(W))
+		return OUU::Runtime::UMGUtils::ForEachWidgetAndDescendants<UWidget>(
+			ThisAsImplementingType,
+			true,
+			[&](UWidget* W) -> bool {
+				// Skip the initial widget implementing the interface, otherwise we end up in an endless loop
+				if (W != ThisAsImplementingType)
+				{
+					if (IUserFocusResetableWidget::TryResetUserFocusTo(W))
+						return true;
+				}
+
+				if (OUU::Runtime::UMGUtils::IsFocusable(W))
+				{
+					W->SetUserFocus(ThisAsImplementingType->GetOwningPlayer());
 					return true;
-			}
+				}
 
-			if (UMGUtils::IsFocusable(W))
-			{
-				W->SetUserFocus(ThisAsImplementingType->GetOwningPlayer());
-				return true;
-			}
-
-			return false;
-		});
+				return false;
+			});
 
 		return false;
 	}

@@ -17,4 +17,12 @@ public:
 	static bool IsValidSemanticVersion(const FString& InString, ESemVerParsingStrictness ParsingStrictness);
 };
 
-using FSemVerStringUtils = USemVerStringLibrary;
+namespace OUU::Runtime
+{
+	using SemVerStringUtils = USemVerStringLibrary;
+} // namespace OUU::Runtime
+
+using FSemVerStringUtils UE_DEPRECATED(
+	5.0,
+	"FSemVerStringUtils has been deprecated in favor of OUU::Runtime::SemVerStringUtils.") =
+	OUU::Runtime::SemVerStringUtils;

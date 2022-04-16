@@ -9,7 +9,7 @@
 
 class UWidget;
 
-namespace UMGUtils
+namespace OUU::Runtime::UMGUtils
 {
 	/**
 	 * Execute a predicate on the widget and all widgets nested as Slot or Named Slot children.
@@ -88,4 +88,17 @@ namespace UMGUtils
 	extern template bool ForChildWidgets<const UWidget>(
 		const UWidget* Widget,
 		TFunctionRef<bool(const UWidget*)> Predicate);
+} // namespace OUU::Runtime::UMGUtils
+
+namespace UE_DEPRECATED(5.0, "The UMGUtils namespace has been deprecated in favor of OUU::Runtime::UMGUtils.") UMGUtils
+{
+	using OUU::Runtime::UMGUtils::ForChildWidgets;
+	using OUU::Runtime::UMGUtils::ForEachWidget;
+	using OUU::Runtime::UMGUtils::ForEachWidgetAndDescendants;
+	using OUU::Runtime::UMGUtils::GetFirstFocusableDescendantIncludingSelf;
+	using OUU::Runtime::UMGUtils::HasInputVisibleDescendantsExcludingSelf;
+	using OUU::Runtime::UMGUtils::HasInputVisibleDescendantsIncludingSelf;
+	using OUU::Runtime::UMGUtils::IsFocusable;
+	using OUU::Runtime::UMGUtils::IsInputVisible;
+
 } // namespace UMGUtils

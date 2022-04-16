@@ -64,8 +64,8 @@ CONSTEXPR auto CreateCastObjectIterator(IteratorType Iterator)
 template <
 	typename ContainerType,
 	typename CastTargetType,
-	typename BeginIteratorType = decltype(IteratorUtils::begin(DeclVal<ContainerType>())),
-	typename EndIteratorType = decltype(IteratorUtils::end(DeclVal<ContainerType>()))>
+	typename BeginIteratorType = decltype(OUU::Runtime::Private::IteratorUtils::begin(DeclVal<ContainerType>())),
+	typename EndIteratorType = decltype(OUU::Runtime::Private::IteratorUtils::end(DeclVal<ContainerType>()))>
 class TCastObjectRangeAdaptor
 {
 private:
@@ -74,10 +74,16 @@ private:
 public:
 	CONSTEXPR explicit TCastObjectRangeAdaptor(ContainerType c) : Container(c) {}
 
-	auto begin() const noexcept { return CreateCastObjectIterator<CastTargetType>(IteratorUtils::begin(Container)); }
-	auto end() const noexcept { return CreateCastObjectIterator<CastTargetType>(IteratorUtils::end(Container)); }
-	auto begin() noexcept { return CreateCastObjectIterator<CastTargetType>(IteratorUtils::begin(Container)); }
-	auto end() noexcept { return CreateCastObjectIterator<CastTargetType>(IteratorUtils::end(Container)); }
+#define DECLARE_RANGED_FOR_OPERATOR(Operator, OptionalConst)                                                           \
+	auto Operator() OptionalConst noexcept                                                                             \
+	{                                                                                                                  \
+		return CreateCastObjectIterator<CastTargetType>(OUU::Runtime::Private::IteratorUtils::Operator(Container));    \
+	}
+	DECLARE_RANGED_FOR_OPERATOR(begin, PREPROCESSOR_NOTHING);
+	DECLARE_RANGED_FOR_OPERATOR(begin, const);
+	DECLARE_RANGED_FOR_OPERATOR(end, PREPROCESSOR_NOTHING);
+	DECLARE_RANGED_FOR_OPERATOR(end, const);
+#undef DECLARE_RANGED_FOR_OPERATOR
 };
 
 /**

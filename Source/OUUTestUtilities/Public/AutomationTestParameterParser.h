@@ -11,7 +11,7 @@
 	#include "Templates/UnrealTypeTraits.h"
 	#include "Traits/StringConversionTraits.h"
 
-namespace OUUTests_Internal
+namespace OUU::TestUtilities::Private
 {
 	template <
 		typename T,
@@ -63,7 +63,7 @@ namespace OUUTests_Internal
 		Result.InitFromString(s);
 		return Result;
 	}
-} // namespace OUUTests_Internal
+} // namespace OUU::TestUtilities::Private
 
 /**
  * Utility that allows easy parsing of test parameters for complex automation tests.
@@ -108,7 +108,7 @@ public:
 			return T();
 		}
 
-		return OUUTests_Internal::ParseValue<T>(Parameters[Index]);
+		return OUU::TestUtilities::Private::ParseValue<T>(Parameters[Index]);
 	}
 
 	template <typename T>
@@ -129,7 +129,7 @@ public:
 		Parameters[Index].ParseIntoArray(ParameterArray, *ArrayDelimiter);
 		for (const FString& s : ParameterArray)
 		{
-			Result.Add(OUUTests_Internal::ParseValue<T>(s));
+			Result.Add(OUU::TestUtilities::Private::ParseValue<T>(s));
 		}
 		return Result;
 	}

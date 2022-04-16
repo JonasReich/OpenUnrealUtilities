@@ -42,7 +42,7 @@ public:
 	{
 		IteratorType Temp = WrappedIterator;
 		--Temp;
-		return IteratorUtils::OperatorArrow(Temp);
+		return OUU::Runtime::Private::IteratorUtils::OperatorArrow(Temp);
 	}
 
 	// preincrement
@@ -100,8 +100,8 @@ private:
 public:
 	CONSTEXPR explicit TReverseRangeAdaptor_ByRef(ContainerType& c) : Container(c) {}
 
-	auto begin() const noexcept { return MakeReverseIterator(IteratorUtils::end(Container)); }
-	auto end() const noexcept { return MakeReverseIterator(IteratorUtils::begin(Container)); }
+	auto begin() const noexcept { return MakeReverseIterator(OUU::Runtime::Private::IteratorUtils::end(Container)); }
+	auto end() const noexcept { return MakeReverseIterator(OUU::Runtime::Private::IteratorUtils::begin(Container)); }
 };
 
 /** Swaps begin() and end() iterators to allow for reversed iteration over a container, */
@@ -114,8 +114,8 @@ private:
 public:
 	CONSTEXPR explicit TReverseRangeAdaptor_ByValue(ContainerType&& c) : Container(c) {}
 
-	auto begin() const noexcept { return MakeReverseIterator(IteratorUtils::end(Container)); }
-	auto end() const noexcept { return MakeReverseIterator(IteratorUtils::begin(Container)); }
+	auto begin() const noexcept { return MakeReverseIterator(OUU::Runtime::Private::IteratorUtils::end(Container)); }
+	auto end() const noexcept { return MakeReverseIterator(OUU::Runtime::Private::IteratorUtils::begin(Container)); }
 };
 
 /**	Adapts the referenced container so it can be iterated in reverse with a ranged-for-loop. */

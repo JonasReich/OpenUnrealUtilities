@@ -30,7 +30,7 @@ void AddButtonToLayer(UOUULayerWidget* Layer)
 
 void SetVisiblityOfAllChildren(UWidget* Widget, ESlateVisibility Visibility)
 {
-	UMGUtils::ForEachWidgetAndDescendants<UWidget>(Widget, true, [Visibility](UWidget* W) -> bool {
+	OUU::Runtime::UMGUtils::ForEachWidgetAndDescendants<UWidget>(Widget, true, [Visibility](UWidget* W) -> bool {
 		W->SetVisibility(Visibility);
 		return false;
 	});

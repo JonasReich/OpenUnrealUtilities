@@ -14,7 +14,7 @@ class FGameplayDebuggerCanvasContext;
  * Utility functions for writing custom gameplay debugger categories.
  * Mostly concerned with string handling.
  */
-namespace GameplayDebuggerUtils
+namespace OUU::Runtime::GameplayDebuggerUtils
 {
 	/**
 	 * Returns a copy of the the InString that is wrapped to fit the TargetWidth when displayed on the CanvasContext.
@@ -51,6 +51,18 @@ namespace GameplayDebuggerUtils
 		FGameplayDebuggerCategory& InCategoryToClose,
 		bool bEnabled);
 
+} // namespace OUU::Runtime::GameplayDebuggerUtils
+
+namespace UE_DEPRECATED(
+	5.0,
+	"The GameplayDebuggerUtils namespace has been deprecated in favor of OUU::Runtime::GameplayDebuggerUtils.")
+	GameplayDebuggerUtils
+{
+	using OUU::Runtime::GameplayDebuggerUtils::CleanupName;
+	using OUU::Runtime::GameplayDebuggerUtils::GetColoredBoolString;
+	using OUU::Runtime::GameplayDebuggerUtils::SetCategoryEnabled;
+	using OUU::Runtime::GameplayDebuggerUtils::TryWrapStringToWidth;
+	using OUU::Runtime::GameplayDebuggerUtils::WrapStringToWidth;
 } // namespace GameplayDebuggerUtils
 
 #endif

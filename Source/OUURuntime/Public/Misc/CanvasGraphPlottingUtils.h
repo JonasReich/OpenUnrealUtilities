@@ -6,7 +6,7 @@
 
 class FCanvas;
 
-namespace CanvasGraphPlottingUtils
+namespace OUU::Runtime::CanvasGraphPlottingUtils
 {
 	struct OUURUNTIME_API FGraphStatData
 	{
@@ -65,4 +65,13 @@ namespace CanvasGraphPlottingUtils
 		const FString GraphTitle,
 		float HighestValue,
 		bool bUseLogarithmicYAxis = false);
+} // namespace OUU::Runtime::CanvasGraphPlottingUtils
+
+namespace UE_DEPRECATED(
+	5.0,
+	"The namespace CanvasGraphPlottingUtils has been deprecated in favor of OUU::Runtime::CanvasGraphPlottingUtils.")
+	CanvasGraphPlottingUtils
+{
+	using OUU::Runtime::CanvasGraphPlottingUtils::DrawCanvasGraph;
+	using OUU::Runtime::CanvasGraphPlottingUtils::FGraphStatData;
 } // namespace CanvasGraphPlottingUtils

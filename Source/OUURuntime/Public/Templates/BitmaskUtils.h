@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 
+#include "Templates/UnderlyingType.h"
 #include "Traits/IsInteger.h"
 
 /** How cases in the enum are distributed. */
@@ -59,7 +60,7 @@ struct TEnumSequenceTraits
  *       The integer type to use for the mask
  *
  */
-namespace BitmaskUtils
+namespace OUU::Runtime::BitmaskUtils
 {
 	template <
 		class EnumType,
@@ -211,19 +212,32 @@ namespace BitmaskUtils
 		MaskIntegerType FlagsValue = EnumValuesAsBitmask<EnumType, SequenceType, MaskIntegerType>(EnumFlags);
 		return (BitmaskValue & FlagsValue) > 0;
 	};
-}; // namespace BitmaskUtils
+}; // namespace OUU::Runtime::BitmaskUtils
 
-template <typename T>
-using TUnderlyingType = __underlying_type(T);
-
-template <typename T>
-struct TBitmaskWrapper
+namespace UE_DEPRECATED(5.0, "BitmaskUtils has been deprecated in favor of OUU::Runtime::BitmaskUtils.") BitmaskUtils
 {
-	T t;
-	constexpr TBitmaskWrapper(T t) : t(t) {}
-	constexpr operator T() const { return t; }
-	constexpr explicit operator bool() const { return TUnderlyingType<T>(t) != 0; }
-};
+	using OUU::Runtime::BitmaskUtils::ClearBit;
+	using OUU::Runtime::BitmaskUtils::ClearBits;
+	using OUU::Runtime::BitmaskUtils::EnumValueAsBitmask;
+	using OUU::Runtime::BitmaskUtils::EnumValuesAsBitmask;
+	using OUU::Runtime::BitmaskUtils::SetBit;
+	using OUU::Runtime::BitmaskUtils::SetBits;
+	using OUU::Runtime::BitmaskUtils::TestAllBits;
+	using OUU::Runtime::BitmaskUtils::TestAnyBits;
+	using OUU::Runtime::BitmaskUtils::TestBit;
+} // namespace BitmaskUtils
+
+namespace OUU::Runtime::Private::BitmaskUtils
+{
+	template <typename T>
+	struct TBitmaskWrapper
+	{
+		T t;
+		constexpr TBitmaskWrapper(T t) : t(t) {}
+		constexpr operator T() const { return t; }
+		constexpr explicit operator bool() const { return TUnderlyingType<T>(t) != 0; }
+	};
+} // namespace OUU::Runtime::Private::BitmaskUtils
 
 /**
  * Declare logical operators for a bitmask enum class.
@@ -242,22 +256,22 @@ struct TBitmaskWrapper
 #define DECLARE_BITMASK_OPERATORS(EnumType)                                                                            \
 	static_assert(TIsEnumClass<EnumType>::Value, "DECLARE_BITMASK_OPERATORS() must only be used with enum classes");   \
                                                                                                                        \
-	inline constexpr TBitmaskWrapper<EnumType> operator&(EnumType x, EnumType y)                                       \
+	inline constexpr OUU::Runtime::Private::BitmaskUtils::TBitmaskWrapper<EnumType> operator&(EnumType x, EnumType y)  \
 	{                                                                                                                  \
 		return static_cast<EnumType>(                                                                                  \
 			static_cast<TUnderlyingType<EnumType>>(x) & static_cast<TUnderlyingType<EnumType>>(y));                    \
 	}                                                                                                                  \
-	inline constexpr TBitmaskWrapper<EnumType> operator|(EnumType x, EnumType y)                                       \
+	inline constexpr OUU::Runtime::Private::BitmaskUtils::TBitmaskWrapper<EnumType> operator|(EnumType x, EnumType y)  \
 	{                                                                                                                  \
 		return static_cast<EnumType>(                                                                                  \
 			static_cast<TUnderlyingType<EnumType>>(x) | static_cast<TUnderlyingType<EnumType>>(y));                    \
 	}                                                                                                                  \
-	inline constexpr TBitmaskWrapper<EnumType> operator^(EnumType x, EnumType y)                                       \
+	inline constexpr OUU::Runtime::Private::BitmaskUtils::TBitmaskWrapper<EnumType> operator^(EnumType x, EnumType y)  \
 	{                                                                                                                  \
 		return static_cast<EnumType>(                                                                                  \
 			static_cast<TUnderlyingType<EnumType>>(x) ^ static_cast<TUnderlyingType<EnumType>>(y));                    \
 	}                                                                                                                  \
-	inline constexpr TBitmaskWrapper<EnumType> operator~(EnumType x)                                                   \
+	inline constexpr OUU::Runtime::Private::BitmaskUtils::TBitmaskWrapper<EnumType> operator~(EnumType x)              \
 	{                                                                                                                  \
 		return static_cast<EnumType>(~static_cast<TUnderlyingType<EnumType>>(x));                                      \
 	}                                                                                                                  \

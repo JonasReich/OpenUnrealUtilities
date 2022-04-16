@@ -5,11 +5,11 @@
 #include "JsonUtilities.h"
 #include "LogOpenUnrealUtilities.h"
 
-namespace JsonLibrary_Private
+namespace OUU::Runtime::Private::JsonLibrary
 {
 	// The string to return from invalid conversion results.
 	const FString InvalidConversionResultString = TEXT("");
-} // namespace JsonLibrary_Private
+} // namespace OUU::Runtime::Private::JsonLibrary
 
 struct FJsonLibraryExportHelper
 {
@@ -101,7 +101,7 @@ struct FJsonLibraryExportHelper
 			Indent,
 			&CustomCB,
 			bPrettyPrint);
-		return bSuccess ? Result : JsonLibrary_Private::InvalidConversionResultString;
+		return bSuccess ? Result : OUU::Runtime::Private::JsonLibrary::InvalidConversionResultString;
 	}
 };
 
@@ -114,7 +114,7 @@ FString UOUUJsonLibrary::UObjectToJsonString(
 	if (!IsValid(Object))
 	{
 		UE_LOG(LogOpenUnrealUtilities, Error, TEXT("Failed to convert invalid object TO Json string"));
-		return JsonLibrary_Private::InvalidConversionResultString;
+		return OUU::Runtime::Private::JsonLibrary::InvalidConversionResultString;
 	}
 
 	FJsonLibraryExportHelper Helper{CheckFlags, SkipFlags, SubObjectFilter};

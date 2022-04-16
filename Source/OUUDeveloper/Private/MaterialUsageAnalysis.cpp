@@ -342,7 +342,7 @@ private:
 	// Component stats
 	TCircularAggregator<float> Buffer_ComponentsNow{NumFramesForBuffer};
 	TCircularAggregator<float> Buffer_ComponentsBest{NumFramesForBuffer};
-	TArray<CanvasGraphPlottingUtils::FGraphStatData> ComponentStats;
+	TArray<OUU::Runtime::CanvasGraphPlottingUtils::FGraphStatData> ComponentStats;
 	float MaxNumComponents = 0.f;
 
 	// Draw calls
@@ -350,14 +350,14 @@ private:
 	TCircularAggregator<float> Buffer_DrawCallsBest{NumFramesForBuffer};
 	TCircularAggregator<float> Buffer_Materials{NumFramesForBuffer};
 	TCircularAggregator<float> Buffer_MaterialCombinations{NumFramesForBuffer};
-	TArray<CanvasGraphPlottingUtils::FGraphStatData> DrawCallsStats;
+	TArray<OUU::Runtime::CanvasGraphPlottingUtils::FGraphStatData> DrawCallsStats;
 	float MaxDrawCalls = 0.f;
 
 	// Instances
 	TCircularAggregator<float> Buffer_NumStaticMeshInstances_Max{NumFramesForBuffer};
 	TCircularAggregator<float> Buffer_NumStaticMeshInstances_Now{NumFramesForBuffer};
 	TCircularAggregator<float> Buffer_NumStaticMeshInstances_Possible{NumFramesForBuffer};
-	TArray<CanvasGraphPlottingUtils::FGraphStatData> InstanceStats;
+	TArray<OUU::Runtime::CanvasGraphPlottingUtils::FGraphStatData> InstanceStats;
 	float MaxInstances = 0.f;
 
 	// - FTickableGameObject
@@ -416,7 +416,7 @@ private:
 
 		const bool bUseLogarithmicYAxis = CVarUseLogarithmicYAxis.GetValueOnAnyThread();
 
-		CanvasGraphPlottingUtils::DrawCanvasGraph(
+		OUU::Runtime::CanvasGraphPlottingUtils::DrawCanvasGraph(
 			InCanvas->Canvas,
 			80.0f + 450.0f + 350.f * 0.f,
 			GraphBottomYPos,
@@ -424,7 +424,7 @@ private:
 			"static mesh components",
 			MaxNumComponents,
 			bUseLogarithmicYAxis);
-		CanvasGraphPlottingUtils::DrawCanvasGraph(
+		OUU::Runtime::CanvasGraphPlottingUtils::DrawCanvasGraph(
 			InCanvas->Canvas,
 			80.0f + 450.0f + 350.f * 1.f,
 			GraphBottomYPos,
@@ -432,7 +432,7 @@ private:
 			"static mesh draw calls",
 			MaxDrawCalls,
 			bUseLogarithmicYAxis);
-		CanvasGraphPlottingUtils::DrawCanvasGraph(
+		OUU::Runtime::CanvasGraphPlottingUtils::DrawCanvasGraph(
 			InCanvas->Canvas,
 			80.0f + 450.0f + 350.f * 2.f,
 			GraphBottomYPos,

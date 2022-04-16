@@ -4,7 +4,7 @@
 
 #include "Core/Flags/OUUValidateInlineFiles.h"
 
-namespace OUUBlueprintObjectFlags_Private
+namespace OUU::BlueprintRuntime::Private::BlueprintObjectFlags
 {
 #define OUU_DECLARE_OBJECT_FLAGS(EnumCase) EOUUBlueprintObjectFlags::EnumCase
 	STATIC_ASSERT_INLINE_FLAGS_START(EOUUBlueprintObjectFlags)
@@ -74,22 +74,23 @@ namespace OUUBlueprintObjectFlags_Private
 		}
 		return ResultSet;
 	}
-} // namespace OUUBlueprintObjectFlags_Private
+} // namespace OUU::BlueprintRuntime::Private::BlueprintObjectFlags
 
 int64 UOUUBlueprintObjectFlagsLibrary::CreateObjectFlagsMask(TSet<EOUUBlueprintObjectFlags> Flags)
 {
-	return static_cast<int64>(OUUBlueprintObjectFlags_Private::ToNativeFlags(Flags));
+	return static_cast<int64>(OUU::BlueprintRuntime::Private::BlueprintObjectFlags::ToNativeFlags(Flags));
 }
 
 TSet<EOUUBlueprintObjectFlags> UOUUBlueprintObjectFlagsLibrary::BreakObjectFlagsMask(int64 Flags)
 {
-	return OUUBlueprintObjectFlags_Private::ToBlueprintFlagsSet(static_cast<EObjectFlags>(Flags));
+	return OUU::BlueprintRuntime::Private::BlueprintObjectFlags::ToBlueprintFlagsSet(static_cast<EObjectFlags>(Flags));
 }
 
 TSet<EOUUBlueprintObjectFlags> UOUUBlueprintObjectFlagsLibrary::GetObjectFlagsSet(const UObject* Object)
 {
-	return IsValid(Object) ? OUUBlueprintObjectFlags_Private::ToBlueprintFlagsSet(Object->GetFlags())
-						   : TSet<EOUUBlueprintObjectFlags>{};
+	return IsValid(Object)
+		? OUU::BlueprintRuntime::Private::BlueprintObjectFlags::ToBlueprintFlagsSet(Object->GetFlags())
+		: TSet<EOUUBlueprintObjectFlags>{};
 }
 
 int64 UOUUBlueprintObjectFlagsLibrary::GetObjectFlagsMask(const UObject* Object)
@@ -99,10 +100,14 @@ int64 UOUUBlueprintObjectFlagsLibrary::GetObjectFlagsMask(const UObject* Object)
 
 bool UOUUBlueprintObjectFlagsLibrary::ObjectHasAnyFlags(const UObject* Object, TSet<EOUUBlueprintObjectFlags> Flags)
 {
-	return IsValid(Object) ? Object->HasAnyFlags(OUUBlueprintObjectFlags_Private::ToNativeFlags(Flags)) : false;
+	return IsValid(Object)
+		? Object->HasAnyFlags(OUU::BlueprintRuntime::Private::BlueprintObjectFlags::ToNativeFlags(Flags))
+		: false;
 }
 
 bool UOUUBlueprintObjectFlagsLibrary::ObjectHasAllFlags(const UObject* Object, TSet<EOUUBlueprintObjectFlags> Flags)
 {
-	return IsValid(Object) ? Object->HasAllFlags(OUUBlueprintObjectFlags_Private::ToNativeFlags(Flags)) : false;
+	return IsValid(Object)
+		? Object->HasAllFlags(OUU::BlueprintRuntime::Private::BlueprintObjectFlags::ToNativeFlags(Flags))
+		: false;
 }

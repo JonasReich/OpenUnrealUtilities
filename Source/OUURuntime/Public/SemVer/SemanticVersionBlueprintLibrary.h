@@ -10,6 +10,8 @@
 #include "SemanticVersionBlueprintLibrary.generated.h"
 
 /**
+ * #TODO-OUU Move this function library to BlueprintRuntime module. It only exposes existing C++ code.
+ *
  * This blueprint library exposes member functions of SemVer struct types to Blueprint.
  * Any additional functionality that is not present in existing C++ member functions should be placed in other blueprint
  * libraries.

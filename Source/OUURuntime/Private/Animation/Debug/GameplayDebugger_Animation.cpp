@@ -28,7 +28,7 @@
 		#include "Animation/BlendSpace.h"
 	#endif
 
-namespace GDC_Animation_Inputs
+namespace OUU::Runtime::Animation::GameplayDebugger::Private
 {
 	FName SyncGroups = TEXT("Toggle Sync Groups");
 	FName Montages = TEXT("Toggle Montages");
@@ -37,7 +37,7 @@ namespace GDC_Animation_Inputs
 	FName Notifies = TEXT("Toggle Notifies");
 	FName FullGraphDisplay = TEXT("Toggle Full Graph Display");
 	FName FullBlendspaceDisplay = TEXT("Toggle Full Blendspace Display");
-} // namespace GDC_Animation_Inputs
+} // namespace OUU::Runtime::Animation::GameplayDebugger::Private
 
 FGameplayDebuggerCategory_Animation::FGameplayDebuggerCategory_Animation()
 {
@@ -57,7 +57,7 @@ FGameplayDebuggerCategory_Animation::FGameplayDebuggerCategory_Animation()
 
 	#define BIND_SWITCH_KEY(Name, KeyName, DefaultValue)                                                               \
 		BindKeyPress_Switch(                                                                                           \
-			GDC_Animation_Inputs::Name,                                                                                \
+			OUU::Runtime::Animation::GameplayDebugger::Private::Name,                                                  \
 			EKeys::KeyName.GetFName(),                                                                                 \
 			FGameplayDebuggerInputModifier::Ctrl,                                                                      \
 			EGameplayDebuggerInputMode::Local,                                                                         \
@@ -162,13 +162,15 @@ void FGameplayDebuggerCategory_Animation::DisplayDebug(
 	FLinearColor InactiveColor = FColorList::LightGrey;
 	FLinearColor PoseSourceColor = FColorList::VioletRed;
 
-	const bool bShowSyncGroups = GetInputBoolSwitchValue(GDC_Animation_Inputs::SyncGroups);
-	const bool bShowMontages = GetInputBoolSwitchValue(GDC_Animation_Inputs::Montages);
-	const bool bShowGraph = GetInputBoolSwitchValue(GDC_Animation_Inputs::Graph);
-	const bool bShowCurves = GetInputBoolSwitchValue(GDC_Animation_Inputs::Curves);
-	const bool bShowNotifies = GetInputBoolSwitchValue(GDC_Animation_Inputs::Notifies);
-	const bool bFullGraph = GetInputBoolSwitchValue(GDC_Animation_Inputs::FullGraphDisplay);
-	const bool bFullBlendspaceDisplay = GetInputBoolSwitchValue(GDC_Animation_Inputs::FullBlendspaceDisplay);
+	namespace GameplayDebuggerSwitches = ::OUU::Runtime::Animation::GameplayDebugger::Private;
+
+	const bool bShowSyncGroups = GetInputBoolSwitchValue(GameplayDebuggerSwitches::SyncGroups);
+	const bool bShowMontages = GetInputBoolSwitchValue(GameplayDebuggerSwitches::Montages);
+	const bool bShowGraph = GetInputBoolSwitchValue(GameplayDebuggerSwitches::Graph);
+	const bool bShowCurves = GetInputBoolSwitchValue(GameplayDebuggerSwitches::Curves);
+	const bool bShowNotifies = GetInputBoolSwitchValue(GameplayDebuggerSwitches::Notifies);
+	const bool bFullGraph = GetInputBoolSwitchValue(GameplayDebuggerSwitches::FullGraphDisplay);
+	const bool bFullBlendspaceDisplay = GetInputBoolSwitchValue(GameplayDebuggerSwitches::FullBlendspaceDisplay);
 
 	FString Heading = FString::Printf(TEXT("Animation: %s"), *AnimInstance->GetName());
 

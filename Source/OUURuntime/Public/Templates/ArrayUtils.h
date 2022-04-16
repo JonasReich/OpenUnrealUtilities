@@ -4,7 +4,7 @@
 
 #include "Containers/Array.h"
 
-namespace ArrayUtils
+namespace OUU::Runtime::ArrayUtils
 {
 	/** Set all existing elements in an array to the same value */
 	template <typename ElementType, typename AllocatorType>
@@ -196,7 +196,23 @@ namespace ArrayUtils
 	{
 		return Index >= 0 ? Index : Array.Num() + Index;
 	}
-}; // namespace ArrayUtils
+}; // namespace OUU::Runtime::ArrayUtils
 
-// For backwards compatibility:
+namespace UE_DEPRECATED(5.0, "ArrayUtils has been deprecated in favor of OUU::Runtime::ArrayUtils.") ArrayUtils
+{
+	using OUU::Runtime::ArrayUtils::CopyRange;
+	using OUU::Runtime::ArrayUtils::GetRandomElement;
+	using OUU::Runtime::ArrayUtils::SetAllTo;
+	using OUU::Runtime::ArrayUtils::SetNumTo;
+	using OUU::Runtime::ArrayUtils::Slice;
+	using OUU::Runtime::ArrayUtils::SliceIndex;
+	using OUU::Runtime::ArrayUtils::TakeAt;
+	using OUU::Runtime::ArrayUtils::TakeAtSwap;
+	using OUU::Runtime::ArrayUtils::TakeRandomElement;
+	using OUU::Runtime::ArrayUtils::TakeRandomElementSwap;
+} // namespace ArrayUtils
+
+// FArrayUtils is also deprecated.
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
 namespace FArrayUtils = ArrayUtils;
+PRAGMA_ENABLE_DEPRECATION_WARNINGS

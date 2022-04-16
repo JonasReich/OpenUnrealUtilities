@@ -10,7 +10,7 @@
  * Contains STL like function templates to use for iterators.
  * These functions are discouraged to use directly outside of iterator utilities.
  */
-namespace IteratorUtils
+namespace OUU::Runtime::Private::IteratorUtils
 {
 	template <class ContainerType>
 	CONSTEXPR auto begin(ContainerType& Container) -> decltype(Container.begin())
@@ -61,4 +61,4 @@ namespace IteratorUtils
 	{
 		return Forward(Target).operator->();
 	}
-} // namespace IteratorUtils
+} // namespace OUU::Runtime::Private::IteratorUtils

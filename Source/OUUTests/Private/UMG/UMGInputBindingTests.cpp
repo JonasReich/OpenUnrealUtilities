@@ -14,9 +14,8 @@
 FKeyEvent SimulateKeyEvent(UPlayerInput* PlayerInput, UUMGInputBindingTestWidget* Widget, FKey Key, EInputEvent Event)
 {
 	FKeyEvent KeyEvent{Key, FModifierKeysState(), 0, false, 0, 0};
-	PlayerInput->InputKey(Key, Event, 0.f, false);
-	TArray<UInputComponent*> InputComponents;
-	PlayerInput->ProcessInputStack(InputComponents, 0.f, false);
+	PlayerInput->InputKey(FInputKeyParams(Key, Event, 0.0, false));
+	PlayerInput->ProcessInputStack(TArray<UInputComponent*>{}, 0.f, false);
 	switch (Event)
 	{
 	case IE_Pressed:
@@ -29,6 +28,7 @@ FKeyEvent SimulateKeyEvent(UPlayerInput* PlayerInput, UUMGInputBindingTestWidget
 		Widget->NativeOnKeyUp(FGeometry(), KeyEvent);
 		break;
 	}
+	default: break;
 	}
 	return KeyEvent;
 }

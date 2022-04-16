@@ -8,11 +8,11 @@
 #include "HitProxies.h"
 #include "Math/OUUMathLibrary.h"
 
-void CanvasGraphPlottingUtils::DrawCanvasGraph(
+void OUU::Runtime::CanvasGraphPlottingUtils::DrawCanvasGraph(
 	FCanvas* InCanvas,
 	float GraphLeftXPos,
 	float GraphBottomYPos,
-	const TArray<FGraphStatData>& StatsToDraw,
+	const TArray<OUU::Runtime::CanvasGraphPlottingUtils::FGraphStatData>& StatsToDraw,
 	const FString GraphTitle,
 	float HighestValue,
 	bool bUseLogarithmicYAxis)

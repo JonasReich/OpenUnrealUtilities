@@ -16,7 +16,7 @@
  * @param InterfaceObject: An object pointer, interface pointer or script interface of the matching interface
  */
 #define CALL_INTERFACE(InterfaceType, Function, InterfaceObject, ...)                                                  \
-	((OUU_Interface_Private::Ignore(&InterfaceType::Function)),                                                        \
+	((OUU::Runtime::Private::Interface::Ignore(&InterfaceType::Function)),                                             \
 	 (InterfaceType::Execute_##Function(GetInterfaceObject(InterfaceObject), ##__VA_ARGS__)))
 
 template <typename T>
@@ -104,12 +104,11 @@ FORCEINLINE bool IsValidInterface(const TScriptInterface<T>& InterfaceObject)
 	return false;
 }
 
-namespace OUU_Interface_Private
+namespace OUU::Runtime::Private::Interface
 {
 	/* Use this to let the compiler ignore what you have passed in */
 	template <typename... Ts>
 	void Ignore(Ts...)
 	{
 	}
-
-} // namespace OUU_Interface_Private
+} // namespace OUU::Runtime::Private::Interface

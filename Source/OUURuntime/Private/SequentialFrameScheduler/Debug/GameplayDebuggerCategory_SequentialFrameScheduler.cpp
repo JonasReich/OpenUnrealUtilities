@@ -173,15 +173,15 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
 
 		// tasks to execute
 		{
-			TArray<CanvasGraphPlottingUtils::FGraphStatData> FrameTimesStats;
+			TArray<OUU::Runtime::CanvasGraphPlottingUtils::FGraphStatData> FrameTimesStats;
 			using TaskHistoryType = FSequentialFrameScheduler::FDebugData::TaskHistoryType;
-			CanvasGraphPlottingUtils::FGraphStatData::FValueRangeRef MaxRef{
+			OUU::Runtime::CanvasGraphPlottingUtils::FGraphStatData::FValueRangeRef MaxRef{
 				&DebugScheduler->DebugData.TaskHistory,
 				[&](const void*, int32) -> float { return DebugScheduler->MaxNumTasksToExecutePerFrame; },
 				[&](const void*) -> int32 { return DebugScheduler->DebugData.NumTasksExecutedRingBuffer.Num(); }};
 			FrameTimesStats.Add({MaxRef, FLinearColor::Red, "max"});
 
-			CanvasGraphPlottingUtils::FGraphStatData::FValueRangeRef ActualRef{
+			OUU::Runtime::CanvasGraphPlottingUtils::FGraphStatData::FValueRangeRef ActualRef{
 				&DebugScheduler->DebugData.TaskHistory,
 				[&](const void*, int32 Idx) -> float {
 					return static_cast<float>(DebugScheduler->DebugData.NumTasksExecutedRingBuffer[Idx]);
@@ -189,7 +189,7 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
 				[&](const void*) -> int32 { return DebugScheduler->DebugData.NumTasksExecutedRingBuffer.Num(); }};
 			FrameTimesStats.Add({ActualRef, FLinearColor::Green, "actual"});
 
-			CanvasGraphPlottingUtils::DrawCanvasGraph(
+			OUU::Runtime::CanvasGraphPlottingUtils::DrawCanvasGraph(
 				Canvas->Canvas,
 				80.0f,
 				GraphBottomYPos - 250.f,
@@ -200,11 +200,11 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
 
 		// delays
 		{
-			TArray<CanvasGraphPlottingUtils::FGraphStatData> DelayStats;
+			TArray<OUU::Runtime::CanvasGraphPlottingUtils::FGraphStatData> DelayStats;
 			DelayStats.Add({DebugScheduler->DebugData.MaxDelaySecondsRingBuffer, FLinearColor::Red, "max"});
 			DelayStats.Add({DebugScheduler->DebugData.AverageDelaySecondsRingBuffer, FLinearColor::Yellow, "avg"});
 
-			CanvasGraphPlottingUtils::DrawCanvasGraph(
+			OUU::Runtime::CanvasGraphPlottingUtils::DrawCanvasGraph(
 				Canvas->Canvas,
 				80.f + 300.f,
 				GraphBottomYPos - 250.f,
@@ -215,7 +215,7 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
 
 		// task times
 		{
-			TArray<CanvasGraphPlottingUtils::FGraphStatData> DelayTimeStats;
+			TArray<OUU::Runtime::CanvasGraphPlottingUtils::FGraphStatData> DelayTimeStats;
 			int32 i = 0;
 			for (auto& Entry : DebugScheduler->TaskHandlesToTaskInfos)
 			{
@@ -226,10 +226,10 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
 				auto& TaskHandle = Entry.Key;
 				FString TaskName = DebugScheduler->DebugData.TaskDebugNames[TaskHandle].ToString();
 
-				TArray<CanvasGraphPlottingUtils::FGraphStatData> FrameTimesStats;
+				TArray<OUU::Runtime::CanvasGraphPlottingUtils::FGraphStatData> FrameTimesStats;
 				using TaskHistoryType = FSequentialFrameScheduler::FDebugData::TaskHistoryType;
 
-				CanvasGraphPlottingUtils::FGraphStatData::FValueRangeRef TaskDelayRef{
+				OUU::Runtime::CanvasGraphPlottingUtils::FGraphStatData::FValueRangeRef TaskDelayRef{
 					&DebugScheduler->DebugData.TaskHistory,
 					[&](const void* ContainerPtr, int32 Idx) -> float {
 						auto HistoryEntry = static_cast<const TaskHistoryType*>(ContainerPtr)->operator[](Idx);
@@ -252,7 +252,7 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
 				auto UniqueDelayColor = FMath::Lerp(FLinearColor::Green, FLinearColor::Red, iAsAlpha);
 				DelayTimeStats.Add({TaskDelayRef, UniqueDelayColor, TaskName});
 
-				CanvasGraphPlottingUtils::FGraphStatData::FValueRangeRef TaskTimeRef{
+				OUU::Runtime::CanvasGraphPlottingUtils::FGraphStatData::FValueRangeRef TaskTimeRef{
 					&DebugScheduler->DebugData.TaskHistory,
 					[&](const void* ContainerPtr, int32 Idx) -> float {
 						auto HistoryEntry = static_cast<const TaskHistoryType*>(ContainerPtr)->operator[](Idx);
@@ -273,7 +273,7 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
 					}};
 				FrameTimesStats.Add({TaskTimeRef, FLinearColor::Green, "task time"});
 
-				CanvasGraphPlottingUtils::DrawCanvasGraph(
+				OUU::Runtime::CanvasGraphPlottingUtils::DrawCanvasGraph(
 					Canvas->Canvas,
 					80.0f + 300.f * i,
 					GraphBottomYPos,
@@ -281,7 +281,7 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
 					TaskName,
 					0.1f);
 			}
-			CanvasGraphPlottingUtils::DrawCanvasGraph(
+			OUU::Runtime::CanvasGraphPlottingUtils::DrawCanvasGraph(
 				Canvas->Canvas,
 				80.0f,
 				GraphBottomYPos,

@@ -9,7 +9,7 @@
 #include "Traits/ConditionalType.h"
 
 /** Implementation details for TScopedMultiRWLock */
-namespace OUU_ScopedMultiRWLock_Private
+namespace OUU::Runtime::Private::ScopedMultiRWLock
 {
 	/**
 	 * Reference to FRWLockedVariable_Base.
@@ -73,7 +73,7 @@ namespace OUU_ScopedMultiRWLock_Private
 		 */
 		RWLockedVariableType& RWLockedVariable_Ref;
 	};
-}; // namespace OUU_ScopedMultiRWLock_Private
+}; // namespace OUU::Runtime::Private::ScopedMultiRWLock
 
 /**
  * TScopedMultiRWLock allows locking multiple TRWLockedVariable's at the same time and ensure at runtime time that
@@ -113,7 +113,7 @@ template <typename... LockRefTypes>
 class TScopedMultiRWLock
 {
 public:
-	using FScopedMultiRWLockRef_Base = OUU_ScopedMultiRWLock_Private::FScopedMultiRWLockRef_Base;
+	using FScopedMultiRWLockRef_Base = OUU::Runtime::Private::ScopedMultiRWLock::FScopedMultiRWLockRef_Base;
 	using ThisType = TScopedMultiRWLock<LockRefTypes...>;
 
 	// Number of variables / locks controlled by this multi lock
@@ -235,7 +235,7 @@ auto MakeScopedMultiRWLock(LockRefTypes... LockRefs)
 template <typename VariableType>
 auto Write(TRWLockedVariable<VariableType>& RWLockedVariable)
 {
-	return OUU_ScopedMultiRWLock_Private::TScopedMultiRWLockRef<VariableType, true>(RWLockedVariable);
+	return OUU::Runtime::Private::ScopedMultiRWLock::TScopedMultiRWLockRef<VariableType, true>(RWLockedVariable);
 }
 
 /**
@@ -244,5 +244,5 @@ auto Write(TRWLockedVariable<VariableType>& RWLockedVariable)
 template <typename VariableType>
 auto Read(TRWLockedVariable<VariableType>& RWLockedVariable)
 {
-	return OUU_ScopedMultiRWLock_Private::TScopedMultiRWLockRef<VariableType, false>(RWLockedVariable);
+	return OUU::Runtime::Private::ScopedMultiRWLock::TScopedMultiRWLockRef<VariableType, false>(RWLockedVariable);
 }

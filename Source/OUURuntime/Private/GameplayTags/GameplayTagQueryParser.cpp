@@ -5,7 +5,7 @@
 #include "Templates/StringUtils.h"
 
 /** Internal helper functions for query parsing. Should not be required outside. */
-namespace QueryParser
+namespace OUU::Runtime::Private::GameplayTagQueryParser
 {
 	/**
 	 * Start strings for operators.
@@ -311,10 +311,12 @@ namespace QueryParser
 			Str = TagEnd;
 		}
 	}
-} // namespace QueryParser
+} // namespace OUU::Runtime::Private::GameplayTagQueryParser
 
 FGameplayTagQuery FGameplayTagQueryParser::ParseQuery(const FString& SourceString)
 {
+	namespace QueryParser = OUU::Runtime::Private::GameplayTagQueryParser;
+
 	// Declare replacement string on outer scope so we can assign it to Str without going out of scope
 	FString ReplacementString;
 	const TCHAR* Str = *SourceString;

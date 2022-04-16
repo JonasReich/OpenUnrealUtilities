@@ -27,7 +27,7 @@ void FGameplayDebuggerCategory_OUUBase::PrintKeyBind(FGameplayDebuggerCanvasCont
 		// case 1: we have a bool switch and print its current value
 		FString::Printf(
 			TEXT(" (%s{white})"),
-			*GameplayDebuggerUtils::GetColoredBoolString(GetInputBoolSwitchValue(InputName)))
+			*OUU::Runtime::GameplayDebuggerUtils::GetColoredBoolString(GetInputBoolSwitchValue(InputName)))
 		// case 2: we don't have a bool switch and print nothing
 		: "";
 

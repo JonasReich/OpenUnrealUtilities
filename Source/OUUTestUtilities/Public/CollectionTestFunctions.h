@@ -8,7 +8,7 @@
 #if WITH_AUTOMATION_WORKER
 
 /** Functions used within other functions declared in this file. */
-namespace OUUTests_Internal
+namespace OUU::TestUtilities::Private
 {
 	template <typename ElementType>
 	void AddArrayValueError(
@@ -27,7 +27,7 @@ namespace OUUTests_Internal
 				*LexToString(ActualValue)),
 			1);
 	}
-} // namespace OUUTests_Internal
+} // namespace OUU::TestUtilities::Private
 
 /**
  * Test if two arrays are equal.
@@ -72,7 +72,7 @@ void TestArraysEqual(
 	{
 		if (ActualArray[i] != ExpectedArray[i])
 		{
-			OUUTests_Internal::AddArrayValueError(AutomationTest, What, i, ActualArray[i], ExpectedArray[i]);
+			OUU::TestUtilities::Private::AddArrayValueError(AutomationTest, What, i, ActualArray[i], ExpectedArray[i]);
 			ConditionalPrintEntireArrayContents();
 			return;
 		}

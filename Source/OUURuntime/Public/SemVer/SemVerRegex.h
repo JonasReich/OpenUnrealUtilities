@@ -12,7 +12,7 @@ struct TSemVerRegex
 		"Strictness must be one of the three enum cases Strict, Regular or Liberal");
 };
 
-namespace SemVerRegex_Internal
+namespace OUU::Runtime::Private::SemVerRegex
 {
 	const FString SemVerRegex_Strict = "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)" // major.minor.patch
 									   "(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-"
@@ -28,24 +28,24 @@ namespace SemVerRegex_Internal
 										"(?:\\+(\\S*))?";									  // +build_metadata
 
 	const FString NoneString = "";
-} // namespace SemVerRegex_Internal
+} // namespace OUU::Runtime::Private::SemVerRegex
 
 template <>
 struct TSemVerRegex<ESemVerParsingStrictness::Strict>
 {
-	static constexpr const FString& String() { return SemVerRegex_Internal::SemVerRegex_Strict; }
+	static constexpr const FString& String() { return OUU::Runtime::Private::SemVerRegex::SemVerRegex_Strict; }
 };
 
 template <>
 struct TSemVerRegex<ESemVerParsingStrictness::Regular>
 {
-	static constexpr const FString& String() { return SemVerRegex_Internal::SemVerRegex_Regular; }
+	static constexpr const FString& String() { return OUU::Runtime::Private::SemVerRegex::SemVerRegex_Regular; }
 };
 
 template <>
 struct TSemVerRegex<ESemVerParsingStrictness::Liberal>
 {
-	static constexpr const FString& String() { return SemVerRegex_Internal::SemVerRegex_Liberal; }
+	static constexpr const FString& String() { return OUU::Runtime::Private::SemVerRegex::SemVerRegex_Liberal; }
 };
 
 struct FSemVerRegex
@@ -57,7 +57,7 @@ struct FSemVerRegex
 		case ESemVerParsingStrictness::Strict: return TSemVerRegex<ESemVerParsingStrictness::Strict>::String();
 		case ESemVerParsingStrictness::Regular: return TSemVerRegex<ESemVerParsingStrictness::Regular>::String();
 		case ESemVerParsingStrictness::Liberal: return TSemVerRegex<ESemVerParsingStrictness::Liberal>::String();
-		default: return SemVerRegex_Internal::NoneString;
+		default: return OUU::Runtime::Private::SemVerRegex::NoneString;
 		}
 	}
 };

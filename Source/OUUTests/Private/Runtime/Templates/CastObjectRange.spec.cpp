@@ -8,7 +8,7 @@
 	#include "GameFramework/Actor.h"
 	#include "Templates/CastObjectRange.h"
 
-namespace CastObjectRangeTests
+namespace OUU::Tests::CastObjectRangeTests
 {
 	template <
 		bool bSourceConst,
@@ -52,7 +52,7 @@ namespace CastObjectRangeTests
 		// Assert
 		TestArraysEqual(AutomationTest, "CastObjectRange (" + TestString + ")", ResultActorArray, ExpectedActorArray);
 	}
-} // namespace CastObjectRangeTests
+} // namespace OUU::Tests::CastObjectRangeTests
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -62,15 +62,19 @@ void FCastObjectRangeSpec::Define()
 {
 	Describe("when the collection is passed by non-const reference", [this]() {
 		It("should cast elements of TArray<const UObject*>& to const AActor*", [this]() {
-			CastObjectRangeTests::TestObjectRange<true, true, false, false>(*this, "const to const by ref");
+			OUU::Tests::CastObjectRangeTests::TestObjectRange<true, true, false, false>(*this, "const to const by ref");
 		});
 
 		It("should cast elements of TArray<UObject*>& to const AActor*", [this]() {
-			CastObjectRangeTests::TestObjectRange<false, true, false, false>(*this, "non-const to const by ref");
+			OUU::Tests::CastObjectRangeTests::TestObjectRange<false, true, false, false>(
+				*this,
+				"non-const to const by ref");
 		});
 
 		It("should cast elements of TArray<UObject*>& to AActor*", [this]() {
-			CastObjectRangeTests::TestObjectRange<false, false, false, false>(*this, "non-const to non-const by ref");
+			OUU::Tests::CastObjectRangeTests::TestObjectRange<false, false, false, false>(
+				*this,
+				"non-const to non-const by ref");
 		});
 
 		// No 4th case: cannot convert from 'const AActor *' to 'TargetType' with [ TargetType=AActor * ]
@@ -78,11 +82,13 @@ void FCastObjectRangeSpec::Define()
 
 	Describe("when the collection is passed by const reference", [this]() {
 		It("should cast elements of const TArray<const UObject*>& to const AActor*", [this]() {
-			CastObjectRangeTests::TestObjectRange<true, true, false, true>(*this, "const to const by ref");
+			OUU::Tests::CastObjectRangeTests::TestObjectRange<true, true, false, true>(*this, "const to const by ref");
 		});
 
 		It("should cast elements of const TArray<UObject*>& to const AActor*", [this]() {
-			CastObjectRangeTests::TestObjectRange<false, true, false, true>(*this, "non-const to const by ref");
+			OUU::Tests::CastObjectRangeTests::TestObjectRange<false, true, false, true>(
+				*this,
+				"non-const to const by ref");
 		});
 
 		// No 3rd case: cannot convert from 'const AActor *' to 'TargetType' with [ TargetType=AActor * ]
@@ -91,15 +97,21 @@ void FCastObjectRangeSpec::Define()
 
 	Describe("when the collection is passed by value", [this]() {
 		It("should cast elements of TArray<const UObject*> to const AActor*", [this]() {
-			CastObjectRangeTests::TestObjectRange<true, true, true, false>(*this, "const to const by value");
+			OUU::Tests::CastObjectRangeTests::TestObjectRange<true, true, true, false>(
+				*this,
+				"const to const by value");
 		});
 
 		It("should cast elements of TArray<UObject*> to const AActor*", [this]() {
-			CastObjectRangeTests::TestObjectRange<false, true, true, false>(*this, "non-const to const by value");
+			OUU::Tests::CastObjectRangeTests::TestObjectRange<false, true, true, false>(
+				*this,
+				"non-const to const by value");
 		});
 
 		It("should cast elements of TArray<UObject*> to AActor*", [this]() {
-			CastObjectRangeTests::TestObjectRange<false, false, true, false>(*this, "non-const to non-const by value");
+			OUU::Tests::CastObjectRangeTests::TestObjectRange<false, false, true, false>(
+				*this,
+				"non-const to non-const by value");
 		});
 
 		// No 4th case: cannot convert from 'const AActor *' to 'TargetType' with [ TargetType=AActor * ]
