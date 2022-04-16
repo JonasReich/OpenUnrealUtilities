@@ -103,7 +103,7 @@ public:
 		if (!NameRegexPattern.IsEmpty())
 		{
 			bAtLeastOneFilterActive = true;
-			if (!FRegexUtils::MatchesRegex(NameRegexPattern, ActorName))
+			if (!OUU::Runtime::RegexUtils::MatchesRegex(NameRegexPattern, ActorName))
 				return false;
 		}
 

@@ -133,5 +133,7 @@ namespace OUU::Runtime
 	using RegexUtils = URegexFunctionLibrary;
 } // namespace OUU::Runtime
 
-using FRegexUtils UE_DEPRECATED(5.0, "FRegexUtils has been deprecated in favor of OUU::Runtime::RegexUtils.") =
-	OUU::Runtime::RegexUtils;
+class UE_DEPRECATED(5.0, "FRegexUtils has been deprecated in favor of OUU::Runtime::RegexUtils.") FRegexUtils :
+	public OUU::Runtime::RegexUtils
+{
+};

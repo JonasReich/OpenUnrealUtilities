@@ -28,7 +28,7 @@ bool FSemVerBuildMetadata::TryParseString(const FString& SourceString, ESemVerPa
 
 	if (Strictness == ESemVerParsingStrictness::Strict)
 	{
-		if (FRegexUtils::MatchesRegexExact("([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*)", SourceString))
+		if (OUU::Runtime::RegexUtils::MatchesRegexExact("([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*)", SourceString))
 		{
 			Metadata = SourceString;
 			return true;

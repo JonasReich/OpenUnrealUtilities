@@ -12,50 +12,51 @@ void FRegexUtilsSpec::Define()
 {
 	Describe("MatchesRegex", [this]() {
 		It("should return true if the regex is an exact match",
-		   [this]() { SPEC_TEST_TRUE(FRegexUtils::MatchesRegex("[a-z]*", "alphabet")); });
+		   [this]() { SPEC_TEST_TRUE(OUU::Runtime::RegexUtils::MatchesRegex("[a-z]*", "alphabet")); });
 
 		It("should return true if the test string contains a pattern match and some additional content",
-		   [this]() { SPEC_TEST_TRUE(FRegexUtils::MatchesRegex("[a-z]*", "1234alphabet1234")); });
+		   [this]() { SPEC_TEST_TRUE(OUU::Runtime::RegexUtils::MatchesRegex("[a-z]*", "1234alphabet1234")); });
 
 		It("should return false if the test string does not contain a pattern match",
-		   [this]() { SPEC_TEST_FALSE(FRegexUtils::MatchesRegex("[a-z]*", "1234")); });
+		   [this]() { SPEC_TEST_FALSE(OUU::Runtime::RegexUtils::MatchesRegex("[a-z]*", "1234")); });
 
 		It("should return false if the test string has length 0",
-		   [this]() { SPEC_TEST_FALSE(FRegexUtils::MatchesRegex("[a-z]*", "")); });
+		   [this]() { SPEC_TEST_FALSE(OUU::Runtime::RegexUtils::MatchesRegex("[a-z]*", "")); });
 	});
 
 	Describe("MatchesRegexExact", [this]() {
 		It("should return true if the regex is an exact match",
-		   [this]() { SPEC_TEST_TRUE(FRegexUtils::MatchesRegexExact("[a-z]*", "alphabet")); });
+		   [this]() { SPEC_TEST_TRUE(OUU::Runtime::RegexUtils::MatchesRegexExact("[a-z]*", "alphabet")); });
 
 		It("should return false if the test string contains a pattern match and some additional content",
-		   [this]() { SPEC_TEST_FALSE(FRegexUtils::MatchesRegexExact("[a-z]*", "1234alphabet1234")); });
+		   [this]() { SPEC_TEST_FALSE(OUU::Runtime::RegexUtils::MatchesRegexExact("[a-z]*", "1234alphabet1234")); });
 
 		It("should return false if the test string has length 0",
-		   [this]() { SPEC_TEST_FALSE(FRegexUtils::MatchesRegexExact("[a-z]*", "")); });
+		   [this]() { SPEC_TEST_FALSE(OUU::Runtime::RegexUtils::MatchesRegexExact("[a-z]*", "")); });
 
 		It("should be the same as using MatchesRegex and ^$ as line start/end delimiters", [this]() {
-			SPEC_TEST_FALSE(FRegexUtils::MatchesRegexExact("[a-z]*", "1234alphabet1234"));
-			SPEC_TEST_FALSE(FRegexUtils::MatchesRegex("^[a-z]*$", "1234alphabet1234"));
-			SPEC_TEST_TRUE(FRegexUtils::MatchesRegex("[a-z]*", "1234alphabet1234"));
-			SPEC_TEST_TRUE(FRegexUtils::MatchesRegex("^[a-z]$*", "alphabet"));
+			SPEC_TEST_FALSE(OUU::Runtime::RegexUtils::MatchesRegexExact("[a-z]*", "1234alphabet1234"));
+			SPEC_TEST_FALSE(OUU::Runtime::RegexUtils::MatchesRegex("^[a-z]*$", "1234alphabet1234"));
+			SPEC_TEST_TRUE(OUU::Runtime::RegexUtils::MatchesRegex("[a-z]*", "1234alphabet1234"));
+			SPEC_TEST_TRUE(OUU::Runtime::RegexUtils::MatchesRegex("^[a-z]$*", "alphabet"));
 		});
 	});
 
 	Describe("CountRegexMatches", [this]() {
 		It("should return 0 if no matches were found",
-		   [this]() { SPEC_TEST_EQUAL(FRegexUtils::CountRegexMatches("[a-z]*", "1234"), 0); });
+		   [this]() { SPEC_TEST_EQUAL(OUU::Runtime::RegexUtils::CountRegexMatches("[a-z]*", "1234"), 0); });
 
 		It("should return 0 if the test string has length 0",
-		   [this]() { SPEC_TEST_EQUAL(FRegexUtils::CountRegexMatches("[a-z]*", ""), 0); });
+		   [this]() { SPEC_TEST_EQUAL(OUU::Runtime::RegexUtils::CountRegexMatches("[a-z]*", ""), 0); });
 
-		It("should return the count of matches if there are multiple matches",
-		   [this]() { SPEC_TEST_EQUAL(FRegexUtils::CountRegexMatches("[a-z]*", "alphabet 1234 noodle soup"), 3); });
+		It("should return the count of matches if there are multiple matches", [this]() {
+			SPEC_TEST_EQUAL(OUU::Runtime::RegexUtils::CountRegexMatches("[a-z]*", "alphabet 1234 noodle soup"), 3);
+		});
 	});
 
 	Describe("GetRegexMatches", [this]() {
 		It("should return an empty list if no matches were found", [this]() {
-			auto Matches = FRegexUtils::GetRegexMatches("[a-z]*", "1234");
+			auto Matches = OUU::Runtime::RegexUtils::GetRegexMatches("[a-z]*", "1234");
 			SPEC_TEST_ARRAYS_EQUAL(Matches, {});
 		});
 
@@ -65,14 +66,14 @@ void FRegexUtilsSpec::Define()
 				FRegexMatch{14, 20, "noodle"},
 				FRegexMatch{21, 25, "soup"},
 			};
-			auto Matches = FRegexUtils::GetRegexMatches("[a-z]*", "alphabet 1234 noodle soup");
+			auto Matches = OUU::Runtime::RegexUtils::GetRegexMatches("[a-z]*", "alphabet 1234 noodle soup");
 			SPEC_TEST_ARRAYS_EQUAL(Matches, ExpectedMatches);
 		});
 	});
 
 	Describe("GetRegexMatchesAndGroups", [this]() {
 		It("should return an empty list if no matches were found", [this]() {
-			auto Matches = FRegexUtils::GetRegexMatches("[a-z]*", "1234");
+			auto Matches = OUU::Runtime::RegexUtils::GetRegexMatches("[a-z]*", "1234");
 			SPEC_TEST_ARRAYS_EQUAL(Matches, {});
 		});
 
@@ -115,7 +116,8 @@ void FRegexUtilsSpec::Define()
 					   FString Pattern = "([\\w-]+)\\.(\\w+)";
 					   FString TestString = TestCase.Get<0>();
 					   TArray<FRegexGroups> ExpectedResult = TestCase.Get<1>();
-					   auto MatchesAndGroups = FRegexUtils::GetRegexMatchesAndGroups(Pattern, 2, TestString);
+					   auto MatchesAndGroups =
+						   OUU::Runtime::RegexUtils::GetRegexMatchesAndGroups(Pattern, 2, TestString);
 					   SPEC_TEST_ARRAYS_EQUAL(MatchesAndGroups, ExpectedResult);
 				   });
 			}
@@ -125,19 +127,19 @@ void FRegexUtilsSpec::Define()
 	Describe("ReplaceFirstRegexMatch", [this]() {
 		It("should replace a single occurence with a given string", [this]() {
 			const FString Input = "My test string";
-			const FString Result = FRegexUtils::ReplaceFirstRegexMatch("t.{2}t", Input, "foo");
+			const FString Result = OUU::Runtime::RegexUtils::ReplaceFirstRegexMatch("t.{2}t", Input, "foo");
 			SPEC_TEST_EQUAL(Result, "My foo string");
 		});
 
 		It("should replace a single occurence with a given string (even when longer than input)", [this]() {
 			const FString Input = "My test string";
-			const FString Result = FRegexUtils::ReplaceFirstRegexMatch("t.{2}t", Input, "foobar");
+			const FString Result = OUU::Runtime::RegexUtils::ReplaceFirstRegexMatch("t.{2}t", Input, "foobar");
 			SPEC_TEST_EQUAL(Result, "My foobar string");
 		});
 
 		It("should only replace the first occurence", [this]() {
 			const FString Input = "My test string test test";
-			const FString Result = FRegexUtils::ReplaceFirstRegexMatch("t.{2}t", Input, "foobar");
+			const FString Result = OUU::Runtime::RegexUtils::ReplaceFirstRegexMatch("t.{2}t", Input, "foobar");
 			SPEC_TEST_EQUAL(Result, "My foobar string test test");
 		});
 	});
@@ -145,13 +147,13 @@ void FRegexUtilsSpec::Define()
 	Describe("ReplaceAllRegexMatches", [this]() {
 		It("should replace all occurrences", [this]() {
 			const FString Input = "My test string test test";
-			const FString Result = FRegexUtils::ReplaceAllRegexMatches("t.{2}t", Input, "foobar");
+			const FString Result = OUU::Runtime::RegexUtils::ReplaceAllRegexMatches("t.{2}t", Input, "foobar");
 			SPEC_TEST_EQUAL(Result, "My foobar string foobar foobar");
 		});
 
 		It("should replace all occurrences even when first match starts at first character", [this]() {
 			const FString Input = "test My test string test test";
-			const FString Result = FRegexUtils::ReplaceAllRegexMatches("t.{2}t", Input, "foobar");
+			const FString Result = OUU::Runtime::RegexUtils::ReplaceAllRegexMatches("t.{2}t", Input, "foobar");
 			SPEC_TEST_EQUAL(Result, "foobar My foobar string foobar foobar");
 		});
 	});

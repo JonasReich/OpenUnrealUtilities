@@ -432,7 +432,7 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 
 			const FString AbilityName =
 				OUU::Runtime::GameplayDebuggerUtils::CleanupName(GetNameSafe(AbilitySpec.Ability));
-			if (!FRegexUtils::MatchesRegex(AbilityFilter.GetValueOnGameThread(), AbilityName))
+			if (!OUU::Runtime::RegexUtils::MatchesRegex(AbilityFilter.GetValueOnGameThread(), AbilityName))
 				continue;
 
 			FString StatusText;

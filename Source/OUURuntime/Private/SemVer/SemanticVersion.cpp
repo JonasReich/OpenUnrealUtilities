@@ -162,7 +162,7 @@ bool FSemanticVersion::TryParseString_Internal(const FString& SourceString, ESem
 	if (Strictness == ESemVerParsingStrictness::Liberal)
 	{
 		TArray<FRegexGroups> Matches =
-			FRegexUtils::GetRegexMatchesAndGroups(FSemVerRegex::String(Strictness), 5, SourceString);
+			OUU::Runtime::RegexUtils::GetRegexMatchesAndGroups(FSemVerRegex::String(Strictness), 5, SourceString);
 		if (Matches.Num() > 0)
 		{
 			Result = Matches[0];
@@ -170,7 +170,8 @@ bool FSemanticVersion::TryParseString_Internal(const FString& SourceString, ESem
 	}
 	else
 	{
-		Result = FRegexUtils::GetRegexMatchAndGroupsExact(FSemVerRegex::String(Strictness), 5, SourceString);
+		Result =
+			OUU::Runtime::RegexUtils::GetRegexMatchAndGroupsExact(FSemVerRegex::String(Strictness), 5, SourceString);
 	}
 
 	if (!Result.IsValid())

@@ -8,5 +8,5 @@
 
 bool USemVerStringLibrary::IsValidSemanticVersion(const FString& InString, ESemVerParsingStrictness ParsingStrictness)
 {
-	return FRegexUtils::MatchesRegexExact(FSemVerRegex::String(ParsingStrictness), InString);
+	return OUU::Runtime::RegexUtils::MatchesRegexExact(FSemVerRegex::String(ParsingStrictness), InString);
 }

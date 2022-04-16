@@ -55,7 +55,7 @@ bool FSemVerPreReleaseIdentifier::TryParseString(const FString& SourceString, ES
 			}
 		}
 
-		if (!FRegexUtils::MatchesRegexExact("^(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)$", Identifier))
+		if (!OUU::Runtime::RegexUtils::MatchesRegexExact("^(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)$", Identifier))
 		{
 			bIdentifiersOk = false;
 			break;
@@ -74,7 +74,7 @@ bool FSemVerPreReleaseIdentifier::TryParseString(const FString& SourceString, ES
 	return false;
 }
 
-const TArray<FString> FSemVerPreReleaseIdentifier::GetIdentifiers()
+const TArray<FString>& FSemVerPreReleaseIdentifier::GetIdentifiers() const
 {
 	return Identifiers;
 }

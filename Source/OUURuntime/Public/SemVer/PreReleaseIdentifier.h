@@ -43,7 +43,7 @@ public:
 	bool TryParseString(const FString& SourceString, ESemVerParsingStrictness InStrictness);
 
 	/** @returns the dot-separated identifiers that comprise the combined pre-release identifier */
-	const TArray<FString> GetIdentifiers();
+	const TArray<FString>& GetIdentifiers() const;
 
 	/**
 	 * Try to increment this pre-release identifier. Only works if the last identifier has only digits or is empty.
