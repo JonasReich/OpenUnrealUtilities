@@ -51,10 +51,11 @@ Short summary of changes between minor versions so you don't have to sift throug
     - Added macro that enables bitmask operator support
     - Added Json library that allows serializing object properties from json
   - Blueprint
-    - Generic Platform Process (allows launching external applications from Blueprint code)
-    - Property path helpers to get and set arbitrary property values from strings
+    - Added generic platform process library (allows launching external applications from Blueprint code)
+    - Added property path helpers to get and set arbitrary property values from strings
     - Exposed object, class and property flags to Blueprint
     - Added new flow control Blueprint macros (also available for AnimInstances now)
+    - Added clipboard library to read and write OS clipboard
   - Debugging utilities
     - Canvas graph plotting (used e.g. in sequential frame scheduler gameplay debugger)
     - Added animation gameplay debugger

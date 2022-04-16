@@ -24,6 +24,7 @@ public class OUUBlueprintRuntime : OUUModuleRules
 			"EngineSettings",
 			"HeadMountedDisplay",
 			"PropertyPath",
+			"ApplicationCore",
 
 			// Plugin
 			"OUURuntime"
