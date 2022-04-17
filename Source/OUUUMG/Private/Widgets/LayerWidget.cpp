@@ -9,7 +9,9 @@
 #include "Widgets/SViewport.h"
 #include "Widgets/SWidget.h"
 
-void UOUULayerWidget::UpdateLayer(const UOUULayerWidget* LayerAbove)
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
+
+void UOUULayerWidget_DEPRECATED::UpdateLayer(const UOUULayerWidget_DEPRECATED* LayerAbove)
 {
 	if (IsValid(LayerAbove))
 	{
@@ -24,12 +26,12 @@ void UOUULayerWidget::UpdateLayer(const UOUULayerWidget* LayerAbove)
 	SetVisibility(GetDesiredVisibility());
 }
 
-bool UOUULayerWidget::IsActivelyConcealing() const
+bool UOUULayerWidget_DEPRECATED::IsActivelyConcealing() const
 {
 	return bConcealLayersBelow && IsVisible();
 }
 
-ESlateVisibility UOUULayerWidget::GetDesiredVisibility() const
+ESlateVisibility UOUULayerWidget_DEPRECATED::GetDesiredVisibility() const
 {
 	if (!IsConcealed() && bIsLayerVisible)
 	{
@@ -39,7 +41,7 @@ ESlateVisibility UOUULayerWidget::GetDesiredVisibility() const
 	return ESlateVisibility::Collapsed;
 }
 
-UUMGInputActionBindingStack* UOUULayerWidget::GetInputActionBindingStack()
+UUMGInputActionBindingStack_DEPRECATED* UOUULayerWidget_DEPRECATED::GetInputActionBindingStack()
 {
 	if (!bAllowInput)
 	{
@@ -51,12 +53,12 @@ UUMGInputActionBindingStack* UOUULayerWidget::GetInputActionBindingStack()
 	}
 	if (!IsValid(InputActionBindingStack))
 	{
-		InputActionBindingStack = UUMGInputActionBindingStack::CreateUMGInputActionBindingStack(this);
+		InputActionBindingStack = UUMGInputActionBindingStack_DEPRECATED::CreateUMGInputActionBindingStack(this);
 	}
 	return InputActionBindingStack;
 }
 
-void UOUULayerWidget::NativeOnFocusChanging(
+void UOUULayerWidget_DEPRECATED::NativeOnFocusChanging(
 	const FWeakWidgetPath& PreviousFocusPath,
 	const FWidgetPath& NewWidgetPath,
 	const FFocusEvent& InFocusEvent)
@@ -79,7 +81,7 @@ void UOUULayerWidget::NativeOnFocusChanging(
 	}
 }
 
-bool UOUULayerWidget::DoesPathContainGameViewport(const FWidgetPath& NewWidgetPath)
+bool UOUULayerWidget_DEPRECATED::DoesPathContainGameViewport(const FWidgetPath& NewWidgetPath)
 {
 #if WITH_EDITOR
 	// In the editor we need to actually perform the check:
@@ -92,12 +94,12 @@ bool UOUULayerWidget::DoesPathContainGameViewport(const FWidgetPath& NewWidgetPa
 #endif
 }
 
-bool UOUULayerWidget::IsConcealed() const
+bool UOUULayerWidget_DEPRECATED::IsConcealed() const
 {
 	return bHasConcealingLayerAbove && bMayBeConcealedFromAbove;
 }
 
-void UOUULayerWidget::CheckLayerVisibility()
+void UOUULayerWidget_DEPRECATED::CheckLayerVisibility()
 {
 	if (bIsFocusable)
 	{
@@ -129,12 +131,12 @@ void UOUULayerWidget::CheckLayerVisibility()
 	}
 }
 
-bool UOUULayerWidget::IsLayerInputVisible() const
+bool UOUULayerWidget_DEPRECATED::IsLayerInputVisible() const
 {
 	return bIsLayerInputVisible;
 }
 
-bool UOUULayerWidget::ResetUserFocus_Implementation()
+bool UOUULayerWidget_DEPRECATED::ResetUserFocus_Implementation()
 {
 	if (LastValidFocusPath.IsValid())
 	{
@@ -161,3 +163,5 @@ bool UOUULayerWidget::ResetUserFocus_Implementation()
 
 	return ResetUserFocus_TemplateImplementation();
 }
+
+PRAGMA_ENABLE_DEPRECATION_WARNINGS

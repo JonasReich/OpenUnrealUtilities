@@ -4,16 +4,18 @@
 
 #include "UMGInputBinding.h"
 
-UUMGInputActionBindingStack* UOUUInteractableWidget::GetInputActionBindingStack()
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
+
+UUMGInputActionBindingStack_DEPRECATED* UOUUInteractableWidget_DEPRECATED::GetInputActionBindingStack()
 {
 	if (!IsValid(InputActionBindingStack))
 	{
-		InputActionBindingStack = UUMGInputActionBindingStack::CreateUMGInputActionBindingStack(this);
+		InputActionBindingStack = UUMGInputActionBindingStack_DEPRECATED::CreateUMGInputActionBindingStack(this);
 	}
 	return InputActionBindingStack;
 }
 
-FReply UOUUInteractableWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+FReply UOUUInteractableWidget_DEPRECATED::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
 	if (IsValid(InputActionBindingStack))
 	{
@@ -27,7 +29,7 @@ FReply UOUUInteractableWidget::NativeOnKeyDown(const FGeometry& InGeometry, cons
 	return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
 
-FReply UOUUInteractableWidget::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+FReply UOUUInteractableWidget_DEPRECATED::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
 	if (IsValid(InputActionBindingStack))
 	{
@@ -40,7 +42,9 @@ FReply UOUUInteractableWidget::NativeOnKeyUp(const FGeometry& InGeometry, const 
 	return Super::NativeOnKeyUp(InGeometry, InKeyEvent);
 }
 
-bool UOUUInteractableWidget::ResetUserFocus_Implementation()
+bool UOUUInteractableWidget_DEPRECATED::ResetUserFocus_Implementation()
 {
 	return ResetUserFocus_TemplateImplementation();
 }
+
+PRAGMA_ENABLE_DEPRECATION_WARNINGS

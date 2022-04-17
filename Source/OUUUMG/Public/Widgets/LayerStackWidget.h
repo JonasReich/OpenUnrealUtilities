@@ -9,7 +9,7 @@
 #include "LayerStackWidget.generated.h"
 
 class UOverlay;
-class UOUULayerWidget;
+class UOUULayerWidget_DEPRECATED;
 
 /**
  * Layer stack widgets allow organizing all of the UI of a game into activatable layers that manage
@@ -25,11 +25,11 @@ class UOUULayerWidget;
  * is a useful approach that should be taken when  switching between bigger contexts (e.g. based on game mode).
  */
 UCLASS()
-class OUUUMG_API UOUULayerStackWidget : public UUserWidget
+class OUUUMG_API UOUULayerStackWidget_DEPRECATED : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	UOUULayerStackWidget(const FObjectInitializer& ObjectInitializer);
+	UOUULayerStackWidget_DEPRECATED(const FObjectInitializer& ObjectInitializer);
 
 	/**
 	 * This does the same as AddToPlayerScreen(), but the semantics are a bit more specific and tell the reader
@@ -37,16 +37,16 @@ public:
 	 * functions below.
 	 */
 	void StartNewLinkedStack();
-	void InsertToLinkedStackAbove(UOUULayerStackWidget* OtherStack);
-	void InsertToLinkedStackBelow(UOUULayerStackWidget* OtherStack);
+	void InsertToLinkedStackAbove(UOUULayerStackWidget_DEPRECATED* OtherStack);
+	void InsertToLinkedStackBelow(UOUULayerStackWidget_DEPRECATED* OtherStack);
 	void RemoveFromLinkedStack();
 
 	bool IsLinkedStackHead() const;
 	bool IsLinkedStackRoot() const;
-	UOUULayerStackWidget* GetStackAbove() const;
-	UOUULayerStackWidget* GetStackBelow() const;
-	UOUULayerStackWidget* GetLinkedStackHead();
-	UOUULayerStackWidget* GetLinkedStackRoot();
+	UOUULayerStackWidget_DEPRECATED* GetStackAbove() const;
+	UOUULayerStackWidget_DEPRECATED* GetStackBelow() const;
+	UOUULayerStackWidget_DEPRECATED* GetLinkedStackHead();
+	UOUULayerStackWidget_DEPRECATED* GetLinkedStackRoot();
 
 protected:
 	/**
@@ -67,12 +67,12 @@ private:
 	// Insert functions, or if the stack was just added to the viewport.
 	bool bAddedCorrectly = false;
 
-	TWeakObjectPtr<UOUULayerStackWidget> LinkedStackAbove;
-	TWeakObjectPtr<UOUULayerStackWidget> LinkedStackBelow;
+	TWeakObjectPtr<UOUULayerStackWidget_DEPRECATED> LinkedStackAbove;
+	TWeakObjectPtr<UOUULayerStackWidget_DEPRECATED> LinkedStackBelow;
 
-	void InsertBetween(UOUULayerStackWidget* NewAbove, UOUULayerStackWidget* NewBelow);
+	void InsertBetween(UOUULayerStackWidget_DEPRECATED* NewAbove, UOUULayerStackWidget_DEPRECATED* NewBelow);
 
-	void UpdateLayers(UOUULayerWidget* BottomLayerFromStackAbove);
+	void UpdateLayers(UOUULayerWidget_DEPRECATED* BottomLayerFromStackAbove);
 
 	UFUNCTION()
 	void HandleRequestResetFocusFromTopLayer();
@@ -82,4 +82,14 @@ private:
 	void AddRecursivelyToPlayerScreenFromRoot();
 
 	void AddRecursivelyToPlayerScreen(int32 ZOrder);
+};
+
+class OUUUMG_API UE_DEPRECATED(
+	5.0,
+	"UOUULayerStackWidget is deprecated in favor of UE5's UPrimaryGameLayout and UCommonActivatableWidget.")
+	UOUULayerStackWidget;
+UCLASS()
+class UOUULayerStackWidget : public UOUULayerStackWidget_DEPRECATED
+{
+	GENERATED_BODY()
 };

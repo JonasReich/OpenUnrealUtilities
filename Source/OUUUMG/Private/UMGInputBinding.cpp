@@ -6,17 +6,18 @@
 #include "GameFramework/PlayerInput.h"
 #include "LogOpenUnrealUtilities.h"
 
-void UUMGInputActionBindingStack::SetOwningPlayerInput(UPlayerInput* InOwningPlayerInput)
+void UUMGInputActionBindingStack_DEPRECATED::SetOwningPlayerInput(UPlayerInput* InOwningPlayerInput)
 {
 	OwningPlayerInput = InOwningPlayerInput;
 }
 
-UPlayerInput* UUMGInputActionBindingStack::GetOwningPlayerInput() const
+UPlayerInput* UUMGInputActionBindingStack_DEPRECATED::GetOwningPlayerInput() const
 {
 	return OwningPlayerInput.IsValid() ? OwningPlayerInput.Get() : nullptr;
 }
 
-UUMGInputActionBindingStack* UUMGInputActionBindingStack::CreateUMGInputActionBindingStack(UUserWidget* InOwningWidget)
+UUMGInputActionBindingStack_DEPRECATED* UUMGInputActionBindingStack_DEPRECATED::CreateUMGInputActionBindingStack(
+	UUserWidget* InOwningWidget)
 {
 	if (!IsValid(InOwningWidget))
 	{
@@ -31,40 +32,43 @@ UUMGInputActionBindingStack* UUMGInputActionBindingStack::CreateUMGInputActionBi
 	if (!ensure(IsValid(OwningPlayer)))
 		return nullptr;
 
-	UUMGInputActionBindingStack* NewStack = NewObject<UUMGInputActionBindingStack>(InOwningWidget);
+	UUMGInputActionBindingStack_DEPRECATED* NewStack =
+		NewObject<UUMGInputActionBindingStack_DEPRECATED>(InOwningWidget);
 	NewStack->SetOwningPlayerInput(OwningPlayer->PlayerInput);
 	return NewStack;
 }
 
-void UUMGInputActionBindingStack::BindAction(FUMGInputAction Action, FUMGInputActionDelegate Delegate)
+void UUMGInputActionBindingStack_DEPRECATED::BindAction(FUMGInputAction Action, FUMGInputActionDelegate Delegate)
 {
 	BindingStack.Add({Action, Delegate});
 }
 
-void UUMGInputActionBindingStack::RemoveSingleBinding(FUMGInputAction Action, FUMGInputActionDelegate Delegate)
+void UUMGInputActionBindingStack_DEPRECATED::RemoveSingleBinding(
+	FUMGInputAction Action,
+	FUMGInputActionDelegate Delegate)
 {
 	BindingStack.Remove({Action, Delegate});
 }
 
-void UUMGInputActionBindingStack::RemoveBindings(FUMGInputAction Action)
+void UUMGInputActionBindingStack_DEPRECATED::RemoveBindings(FUMGInputAction Action)
 {
 	BindingStack.RemoveAll(
 		[&Action](const FUMGInputActionBinding& Binding) -> bool { return Binding.BindingSignature == Action; });
 }
 
-void UUMGInputActionBindingStack::RemoveBindingsByObject(UObject* TargetObject)
+void UUMGInputActionBindingStack_DEPRECATED::RemoveBindingsByObject(UObject* TargetObject)
 {
 	BindingStack.RemoveAll([&TargetObject](const FUMGInputActionBinding& Binding) -> bool {
 		return Binding.Delegate.IsBoundToObject(TargetObject);
 	});
 }
 
-void UUMGInputActionBindingStack::RemoveAllBindings()
+void UUMGInputActionBindingStack_DEPRECATED::RemoveAllBindings()
 {
 	BindingStack.Empty();
 }
 
-int32 UUMGInputActionBindingStack::GetNumBindingsToObject(UObject* Object)
+int32 UUMGInputActionBindingStack_DEPRECATED::GetNumBindingsToObject(UObject* Object)
 {
 	int32 Count = 0;
 	for (const FUMGInputActionBinding& Binding : BindingStack)
@@ -75,21 +79,25 @@ int32 UUMGInputActionBindingStack::GetNumBindingsToObject(UObject* Object)
 	return Count;
 }
 
-FEventReply UUMGInputActionBindingStack::ProcessOnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)
+FEventReply UUMGInputActionBindingStack_DEPRECATED::ProcessOnKeyDown(
+	const FGeometry& MyGeometry,
+	const FKeyEvent& InKeyEvent)
 {
 	bool bHandled = ProcessKeyEvent(MyGeometry, InKeyEvent);
 	CleanUpStack();
 	return bHandled;
 }
 
-FEventReply UUMGInputActionBindingStack::ProcessOnKeyUp(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)
+FEventReply UUMGInputActionBindingStack_DEPRECATED::ProcessOnKeyUp(
+	const FGeometry& MyGeometry,
+	const FKeyEvent& InKeyEvent)
 {
 	bool bHandled = ProcessKeyEvent(MyGeometry, InKeyEvent);
 	CleanUpStack();
 	return bHandled;
 }
 
-int32 UUMGInputActionBindingStack::GetFirstBindingWithKey(FKey Key) const
+int32 UUMGInputActionBindingStack_DEPRECATED::GetFirstBindingWithKey(FKey Key) const
 {
 	for (int32 i = 0; i < BindingStack.Num(); i++)
 	{
@@ -104,7 +112,7 @@ int32 UUMGInputActionBindingStack::GetFirstBindingWithKey(FKey Key) const
 	return INDEX_NONE;
 }
 
-bool UUMGInputActionBindingStack::ProcessKeyEvent(FGeometry MyGeometry, FKeyEvent InKeyEvent)
+bool UUMGInputActionBindingStack_DEPRECATED::ProcessKeyEvent(FGeometry MyGeometry, FKeyEvent InKeyEvent)
 {
 	FKey Key = InKeyEvent.GetKey();
 
@@ -178,7 +186,7 @@ bool UUMGInputActionBindingStack::ProcessKeyEvent(FGeometry MyGeometry, FKeyEven
 	return false;
 }
 
-bool UUMGInputActionBindingStack::ProcessBindingMatch(int32 BindingIndex, EUMGInputActionKeyEvent Event)
+bool UUMGInputActionBindingStack_DEPRECATED::ProcessBindingMatch(int32 BindingIndex, EUMGInputActionKeyEvent Event)
 {
 	check(BindingStack.IsValidIndex(BindingIndex));
 	FUMGInputActionBinding& Binding = BindingStack[BindingIndex];
@@ -192,7 +200,7 @@ bool UUMGInputActionBindingStack::ProcessBindingMatch(int32 BindingIndex, EUMGIn
 		|| ConsumeMode == EUMGInputActionKeyEventConsumeMode::All;
 }
 
-void UUMGInputActionBindingStack::CleanUpStack()
+void UUMGInputActionBindingStack_DEPRECATED::CleanUpStack()
 {
 	int32 NumRemoved = 0;
 	for (int32 Index : IndicesToRemoveThisFrame)
