@@ -41,6 +41,8 @@ enum class EUMGInputActionKeyEventConsumeMode : uint8
 	All
 };
 
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
+
 /**
  * Utility struct used to bind delegates to an input action.
  * Only works for Input ACTION mappings, not Axis mappings.
@@ -104,7 +106,7 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FUMGInputActionDelegate, EUMGInputActionKeyEve
  * up in the hierarchy.
  */
 UCLASS(BlueprintType)
-class OUUUMG_API UUMGInputActionBindingStack : public UObject
+class OUUUMG_API UUMGInputActionBindingStack_DEPRECATED : public UObject
 {
 	GENERATED_BODY()
 public:
@@ -121,7 +123,7 @@ public:
 	/** Create a UUMGInputActionBindingStack object and initialize it with the specified UUserWidget as outer and owner.
 	 */
 	UFUNCTION(BlueprintCallable)
-	static UUMGInputActionBindingStack* CreateUMGInputActionBindingStack(UUserWidget* InOwningWidget);
+	static UUMGInputActionBindingStack_DEPRECATED* CreateUMGInputActionBindingStack(UUserWidget* InOwningWidget);
 
 	//-------------
 	// Action binding/unbinding
@@ -206,4 +208,16 @@ private:
 	bool ProcessBindingMatch(int32 BindingIndex, EUMGInputActionKeyEvent Event);
 
 	void CleanUpStack();
+};
+
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
+
+class UE_DEPRECATED(
+	5.0,
+	"UUMGInputActionBindingStack is deprecated in favor of input bindings available via CommonUI's "
+	"FActivatableTreeNode.") UUMGInputActionBindingStack;
+
+UCLASS() class OUUUMG_API UUMGInputActionBindingStack : public UUMGInputActionBindingStack_DEPRECATED
+{
+	GENERATED_BODY()
 };
