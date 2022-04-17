@@ -26,7 +26,7 @@ If you want to know how a type is meant to be used, it can be useful to check th
 
 ### Versions
 
-- Latest plugin version: 0.8.0
+- Latest plugin version: 1.0.0
 - Supported Unreal Engine versions: 4.26, 4.27, 5.0
 
 Active support can only be provided for the latest version, but we try to maintain compatibility to the last two minor engine versions.
@@ -44,9 +44,9 @@ deprecated symbols or headers will no longer compile.
 
 Short summary of changes between minor versions so you don't have to sift through the entire changelog:
 
-- **_1.0.0 (pending)_**
+- **1.0.0**
   - Upgrade to UE 5.0
-    - Updated code for new Engine API  
+    - Updated code for new engine API  
     - Deprecated all OUUUMG utilities besides the ``UOUUWindow`` user widget class.
       Please use UE5's CommonUI plugin instead for managing widget layer stacks and input routing.
       Check out Epic's _LYRA_ sample project for reference.
