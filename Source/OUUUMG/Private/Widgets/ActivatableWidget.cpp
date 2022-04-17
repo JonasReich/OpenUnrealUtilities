@@ -8,7 +8,9 @@
 #include "UMG/UMGUtils.h"
 #include "UMGInputBinding.h"
 
-UUMGInputActionBindingStack* UOUUActivatableWidget::GetInputActionBindingStack()
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
+
+UUMGInputActionBindingStack_DEPRECATED* UOUUActivatableWidget_DEPRECATED::GetInputActionBindingStack()
 {
 	if (!bAllowInput)
 	{
@@ -21,29 +23,29 @@ UUMGInputActionBindingStack* UOUUActivatableWidget::GetInputActionBindingStack()
 	}
 	if (!IsValid(InputActionBindingStack))
 	{
-		InputActionBindingStack = UUMGInputActionBindingStack::CreateUMGInputActionBindingStack(this);
+		InputActionBindingStack = UUMGInputActionBindingStack_DEPRECATED::CreateUMGInputActionBindingStack(this);
 	}
 	return InputActionBindingStack;
 }
 
-ESlateVisibility UOUUActivatableWidget::NativeGetDesiredVisibility() const
+ESlateVisibility UOUUActivatableWidget_DEPRECATED::NativeGetDesiredVisibility() const
 {
 	return bIsActivated ? ActivatedVisibility : DeactivatedVisibility;
 }
 
-void UOUUActivatableWidget::NativeUpdateVisibility()
+void UOUUActivatableWidget_DEPRECATED::NativeUpdateVisibility()
 {
 	SetVisibility(GetDesiredVisibility());
 }
 
-void UOUUActivatableWidget::NativeOnInitialized()
+void UOUUActivatableWidget_DEPRECATED::NativeOnInitialized()
 {
 	bIsActivated = bIsActivatedByDefault;
 	ForceUpdateVisibility();
 	Super::NativeOnInitialized();
 }
 
-FReply UOUUActivatableWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+FReply UOUUActivatableWidget_DEPRECATED::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
 	if (IsValid(InputActionBindingStack))
 	{
@@ -56,7 +58,7 @@ FReply UOUUActivatableWidget::NativeOnKeyDown(const FGeometry& InGeometry, const
 	return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
 
-FReply UOUUActivatableWidget::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+FReply UOUUActivatableWidget_DEPRECATED::NativeOnKeyUp(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
 	if (IsValid(InputActionBindingStack))
 	{
@@ -69,12 +71,12 @@ FReply UOUUActivatableWidget::NativeOnKeyUp(const FGeometry& InGeometry, const F
 	return Super::NativeOnKeyUp(InGeometry, InKeyEvent);
 }
 
-bool UOUUActivatableWidget::ResetUserFocus_Implementation()
+bool UOUUActivatableWidget_DEPRECATED::ResetUserFocus_Implementation()
 {
 	return ResetUserFocus_TemplateImplementation();
 }
 
-ESlateVisibility UOUUActivatableWidget::GetDesiredVisibility() const
+ESlateVisibility UOUUActivatableWidget_DEPRECATED::GetDesiredVisibility() const
 {
 	ESlateVisibility OutVisibility;
 	FEventReply EventReply = BlueprintGetDesiredVisibility(OutVisibility);
@@ -84,12 +86,12 @@ ESlateVisibility UOUUActivatableWidget::GetDesiredVisibility() const
 	return NativeGetDesiredVisibility();
 }
 
-bool UOUUActivatableWidget::IsActivated() const
+bool UOUUActivatableWidget_DEPRECATED::IsActivated() const
 {
 	return bIsActivated;
 }
 
-void UOUUActivatableWidget::Activate()
+void UOUUActivatableWidget_DEPRECATED::Activate()
 {
 	if (bIsActivated)
 		return;
@@ -98,7 +100,7 @@ void UOUUActivatableWidget::Activate()
 	ForceUpdateVisibility();
 }
 
-void UOUUActivatableWidget::Deactivate()
+void UOUUActivatableWidget_DEPRECATED::Deactivate()
 {
 	if (!bIsActivated)
 		return;
@@ -107,7 +109,7 @@ void UOUUActivatableWidget::Deactivate()
 	ForceUpdateVisibility();
 }
 
-void UOUUActivatableWidget::ForceUpdateVisibility()
+void UOUUActivatableWidget_DEPRECATED::ForceUpdateVisibility()
 {
 	FEventReply Reply = BlueprintUpdateVisibility();
 	if (!Reply.NativeReply.IsEventHandled())
@@ -115,3 +117,5 @@ void UOUUActivatableWidget::ForceUpdateVisibility()
 		NativeUpdateVisibility();
 	}
 }
+
+PRAGMA_ENABLE_DEPRECATION_WARNINGS

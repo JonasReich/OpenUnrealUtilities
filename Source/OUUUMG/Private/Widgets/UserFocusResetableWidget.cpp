@@ -4,6 +4,8 @@
 
 #include "Templates/InterfaceUtils.h"
 
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
+
 bool IUserFocusResetableWidget::ResetUserFocus_Implementation()
 {
 	return false;
@@ -20,3 +22,5 @@ bool IUserFocusResetableWidget::TryResetUserFocusTo(UWidget* W)
 		return false;
 	}
 }
+
+PRAGMA_ENABLE_DEPRECATION_WARNINGS

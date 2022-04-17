@@ -7,18 +7,21 @@
 #include "Templates/CastObjectRange.h"
 #include "Widgets/LayerWidget.h"
 
-UOUULayerStackWidget::UOUULayerStackWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
+
+UOUULayerStackWidget_DEPRECATED::UOUULayerStackWidget_DEPRECATED(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer)
 {
 	SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 }
 
-void UOUULayerStackWidget::StartNewLinkedStack()
+void UOUULayerStackWidget_DEPRECATED::StartNewLinkedStack()
 {
 	bAddedCorrectly = true;
 	AddRecursivelyToPlayerScreenFromRoot();
 }
 
-void UOUULayerStackWidget::InsertToLinkedStackAbove(UOUULayerStackWidget* OtherStack)
+void UOUULayerStackWidget_DEPRECATED::InsertToLinkedStackAbove(UOUULayerStackWidget_DEPRECATED* OtherStack)
 {
 	if (!IsValid(OtherStack))
 	{
@@ -29,7 +32,7 @@ void UOUULayerStackWidget::InsertToLinkedStackAbove(UOUULayerStackWidget* OtherS
 	InsertBetween(OtherStack->GetStackAbove(), OtherStack);
 }
 
-void UOUULayerStackWidget::InsertToLinkedStackBelow(UOUULayerStackWidget* OtherStack)
+void UOUULayerStackWidget_DEPRECATED::InsertToLinkedStackBelow(UOUULayerStackWidget_DEPRECATED* OtherStack)
 {
 	if (!IsValid(OtherStack))
 	{
@@ -40,14 +43,14 @@ void UOUULayerStackWidget::InsertToLinkedStackBelow(UOUULayerStackWidget* OtherS
 	InsertBetween(OtherStack, OtherStack->GetStackBelow());
 }
 
-void UOUULayerStackWidget::RemoveFromLinkedStack()
+void UOUULayerStackWidget_DEPRECATED::RemoveFromLinkedStack()
 {
-	if (UOUULayerStackWidget* StackAbove = GetStackAbove())
+	if (UOUULayerStackWidget_DEPRECATED* StackAbove = GetStackAbove())
 	{
 		StackAbove->LinkedStackBelow = LinkedStackBelow;
 	}
 
-	if (UOUULayerStackWidget* StackBelow = GetStackBelow())
+	if (UOUULayerStackWidget_DEPRECATED* StackBelow = GetStackBelow())
 	{
 		StackBelow->LinkedStackAbove = LinkedStackAbove;
 	}
@@ -56,7 +59,7 @@ void UOUULayerStackWidget::RemoveFromLinkedStack()
 	LinkedStackBelow.Reset();
 }
 
-bool UOUULayerStackWidget::IsLinkedStackHead() const
+bool UOUULayerStackWidget_DEPRECATED::IsLinkedStackHead() const
 {
 	if (!bAddedCorrectly)
 	{
@@ -72,7 +75,7 @@ bool UOUULayerStackWidget::IsLinkedStackHead() const
 	return LinkedStackAbove.IsValid() == false;
 }
 
-bool UOUULayerStackWidget::IsLinkedStackRoot() const
+bool UOUULayerStackWidget_DEPRECATED::IsLinkedStackRoot() const
 {
 	if (!bAddedCorrectly)
 	{
@@ -88,31 +91,31 @@ bool UOUULayerStackWidget::IsLinkedStackRoot() const
 	return LinkedStackBelow.IsValid() == false;
 }
 
-UOUULayerStackWidget* UOUULayerStackWidget::GetStackAbove() const
+UOUULayerStackWidget_DEPRECATED* UOUULayerStackWidget_DEPRECATED::GetStackAbove() const
 {
 	if (LinkedStackAbove.IsValid())
 		return LinkedStackAbove.Get();
 	return nullptr;
 }
 
-UOUULayerStackWidget* UOUULayerStackWidget::GetStackBelow() const
+UOUULayerStackWidget_DEPRECATED* UOUULayerStackWidget_DEPRECATED::GetStackBelow() const
 {
 	if (LinkedStackBelow.IsValid())
 		return LinkedStackBelow.Get();
 	return nullptr;
 }
 
-UOUULayerStackWidget* UOUULayerStackWidget::GetLinkedStackHead()
+UOUULayerStackWidget_DEPRECATED* UOUULayerStackWidget_DEPRECATED::GetLinkedStackHead()
 {
 	return IsLinkedStackHead() ? this : LinkedStackAbove->GetLinkedStackHead();
 }
 
-UOUULayerStackWidget* UOUULayerStackWidget::GetLinkedStackRoot()
+UOUULayerStackWidget_DEPRECATED* UOUULayerStackWidget_DEPRECATED::GetLinkedStackRoot()
 {
 	return IsLinkedStackRoot() ? this : LinkedStackBelow->GetLinkedStackRoot();
 }
 
-void UOUULayerStackWidget::NativeOnInitialized()
+void UOUULayerStackWidget_DEPRECATED::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 	if (!IsValid(WidgetStack))
@@ -126,21 +129,21 @@ void UOUULayerStackWidget::NativeOnInitialized()
 	}
 
 	int32 NumLayersFound = 0;
-	for (UOUULayerWidget* Layer : CastObjectRange<UOUULayerWidget>(WidgetStack->GetAllChildren()))
+	for (UOUULayerWidget_DEPRECATED* Layer : CastObjectRange<UOUULayerWidget_DEPRECATED>(WidgetStack->GetAllChildren()))
 	{
 		NumLayersFound++;
 		Layer->OnRequestResetFocusFromTopLayer
-			.AddDynamic(this, &UOUULayerStackWidget::HandleRequestResetFocusFromTopLayer);
+			.AddDynamic(this, &UOUULayerStackWidget_DEPRECATED::HandleRequestResetFocusFromTopLayer);
 	}
 
 	UE_CLOG(
 		NumLayersFound == 0,
 		LogOpenUnrealUtilities,
 		Warning,
-		TEXT("WidgetStack overlay widget does not contain any UOUULayerWidget children"));
+		TEXT("WidgetStack overlay widget does not contain any UOUULayerWidget_DEPRECATED children"));
 }
 
-void UOUULayerStackWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+void UOUULayerStackWidget_DEPRECATED::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
 	if (IsLinkedStackHead())
@@ -149,20 +152,23 @@ void UOUULayerStackWidget::NativeTick(const FGeometry& MyGeometry, float InDelta
 	}
 }
 
-void UOUULayerStackWidget::NativeDestruct()
+void UOUULayerStackWidget_DEPRECATED::NativeDestruct()
 {
 	if (IsValid(WidgetStack))
 	{
-		for (UOUULayerWidget* Layer : CastObjectRange<UOUULayerWidget>(WidgetStack->GetAllChildren()))
+		for (UOUULayerWidget_DEPRECATED* Layer :
+			 CastObjectRange<UOUULayerWidget_DEPRECATED>(WidgetStack->GetAllChildren()))
 		{
 			Layer->OnRequestResetFocusFromTopLayer
-				.RemoveDynamic(this, &UOUULayerStackWidget::HandleRequestResetFocusFromTopLayer);
+				.RemoveDynamic(this, &UOUULayerStackWidget_DEPRECATED::HandleRequestResetFocusFromTopLayer);
 		}
 	}
 	Super::NativeDestruct();
 }
 
-void UOUULayerStackWidget::InsertBetween(UOUULayerStackWidget* NewAbove, UOUULayerStackWidget* NewBelow)
+void UOUULayerStackWidget_DEPRECATED::InsertBetween(
+	UOUULayerStackWidget_DEPRECATED* NewAbove,
+	UOUULayerStackWidget_DEPRECATED* NewBelow)
 {
 	bAddedCorrectly = true;
 
@@ -181,12 +187,13 @@ void UOUULayerStackWidget::InsertBetween(UOUULayerStackWidget* NewAbove, UOUULay
 	AddRecursivelyToPlayerScreenFromRoot();
 }
 
-void UOUULayerStackWidget::UpdateLayers(UOUULayerWidget* BottomLayerFromStackAbove)
+void UOUULayerStackWidget_DEPRECATED::UpdateLayers(UOUULayerWidget_DEPRECATED* BottomLayerFromStackAbove)
 {
-	UOUULayerWidget* LastLayer = BottomLayerFromStackAbove;
+	UOUULayerWidget_DEPRECATED* LastLayer = BottomLayerFromStackAbove;
 	if (IsValid(WidgetStack))
 	{
-		for (UOUULayerWidget* Layer : CastObjectRange<UOUULayerWidget>(WidgetStack->GetAllChildren()))
+		for (UOUULayerWidget_DEPRECATED* Layer :
+			 CastObjectRange<UOUULayerWidget_DEPRECATED>(WidgetStack->GetAllChildren()))
 		{
 			Layer->UpdateLayer(LastLayer);
 			LastLayer = Layer;
@@ -198,7 +205,7 @@ void UOUULayerStackWidget::UpdateLayers(UOUULayerWidget* BottomLayerFromStackAbo
 	}
 }
 
-void UOUULayerStackWidget::HandleRequestResetFocusFromTopLayer()
+void UOUULayerStackWidget_DEPRECATED::HandleRequestResetFocusFromTopLayer()
 {
 	// forward to linked stack head.
 	// we do not bind this delegate to linked stack head directly to make it a bit easier to link in new stack widgets
@@ -206,11 +213,12 @@ void UOUULayerStackWidget::HandleRequestResetFocusFromTopLayer()
 	GetLinkedStackHead()->ResetUserFocusRecursively();
 }
 
-void UOUULayerStackWidget::ResetUserFocusRecursively()
+void UOUULayerStackWidget_DEPRECATED::ResetUserFocusRecursively()
 {
 	if (IsValid(WidgetStack))
 	{
-		for (UOUULayerWidget* Layer : CastObjectRange<UOUULayerWidget>(WidgetStack->GetAllChildren()))
+		for (UOUULayerWidget_DEPRECATED* Layer :
+			 CastObjectRange<UOUULayerWidget_DEPRECATED>(WidgetStack->GetAllChildren()))
 		{
 			if (IUserFocusResetableWidget::TryResetUserFocusTo(Layer))
 				return;
@@ -222,12 +230,12 @@ void UOUULayerStackWidget::ResetUserFocusRecursively()
 	}
 }
 
-void UOUULayerStackWidget::AddRecursivelyToPlayerScreenFromRoot()
+void UOUULayerStackWidget_DEPRECATED::AddRecursivelyToPlayerScreenFromRoot()
 {
 	GetLinkedStackRoot()->AddRecursivelyToPlayerScreen(0);
 }
 
-void UOUULayerStackWidget::AddRecursivelyToPlayerScreen(int32 ZOrder)
+void UOUULayerStackWidget_DEPRECATED::AddRecursivelyToPlayerScreen(int32 ZOrder)
 {
 	RemoveFromViewport();
 	AddToPlayerScreen(ZOrder);
@@ -236,3 +244,5 @@ void UOUULayerStackWidget::AddRecursivelyToPlayerScreen(int32 ZOrder)
 		LinkedStackAbove->AddRecursivelyToPlayerScreen(ZOrder + 100);
 	}
 }
+
+PRAGMA_ENABLE_DEPRECATION_WARNINGS

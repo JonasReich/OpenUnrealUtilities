@@ -15,6 +15,11 @@ class OUUUMG_API UUserFocusResetableWidget : public UInterface
 	GENERATED_BODY()
 };
 
+class UE_DEPRECATED(
+	5.0,
+	"IUserFocusResetableWidget is deprecated in favor of UE5's Action Routing system from CommonUI plugin (see "
+	"FActivatableTreeNode).") IUserFocusResetableWidget;
+
 /**
  * Base widget that shows how you can integrate UUMGInputActionBindingStack and how
  * to implement the IUserFocusResettableWidget interface

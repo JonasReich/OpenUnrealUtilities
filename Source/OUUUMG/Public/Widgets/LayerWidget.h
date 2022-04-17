@@ -9,9 +9,11 @@
 
 #include "LayerWidget.generated.h"
 
-class UUMGInputActionBindingStack;
+class UUMGInputActionBindingStack_DEPRECATED;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRequestResetFocusToHighestLayer);
+
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
 
 /**
  * Widget that acts as a UI layer which are managed by layer stack widgets (see LayerStackWidget.h).
@@ -23,10 +25,10 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRequestResetFocusToHighestLayer);
  *		from the visibility of contained widgets (see UpdateLayer() and CheckIsInputVisible()).
  */
 UCLASS()
-class OUUUMG_API UOUULayerWidget :
+class OUUUMG_API UOUULayerWidget_DEPRECATED :
 	public UUserWidget,
 	public IUserFocusResetableWidget,
-	public TUserFocusResetableWidget_Impl<UOUULayerWidget>
+	public TUserFocusResetableWidget_Impl<UOUULayerWidget_DEPRECATED>
 {
 	GENERATED_BODY()
 public:
@@ -58,7 +60,7 @@ public:
 	 * This function must be called on the topmost layer first and go from there downwards through the stack
 	 * to ensure proper layer concealment, focus restoration, etc.
 	 */
-	virtual void UpdateLayer(const UOUULayerWidget* LayerAbove);
+	virtual void UpdateLayer(const UOUULayerWidget_DEPRECATED* LayerAbove);
 
 	/**
 	 * If this layer is actively concealing layers below
@@ -78,7 +80,7 @@ public:
 
 protected:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Input")
-	UUMGInputActionBindingStack* GetInputActionBindingStack();
+	UUMGInputActionBindingStack_DEPRECATED* GetInputActionBindingStack();
 
 	// - UUserWidget
 	virtual void NativeOnFocusChanging(
@@ -96,7 +98,7 @@ protected:
 private:
 	/** Input action binding stack. To be lazily created by GetInputActionBindingStack() function. */
 	UPROPERTY(Transient)
-	UUMGInputActionBindingStack* InputActionBindingStack = nullptr;
+	UUMGInputActionBindingStack_DEPRECATED* InputActionBindingStack = nullptr;
 
 	/**
 	 * Is there a concealing layer above? This info is still required even if the layer itself cannot be concealed,
@@ -122,4 +124,15 @@ private:
 	FWeakWidgetPath LastValidFocusPath;
 
 	bool DoesPathContainGameViewport(const FWidgetPath& NewWidgetPath);
+};
+
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
+
+class UE_DEPRECATED(
+	5.0,
+	"UOUULayerWidget is deprecated in favor of UE5's UPrimaryGameLayout and UCommonActivatableWidget.") UOUULayerWidget;
+UCLASS()
+class OUUUMG_API UOUULayerWidget : public UOUULayerWidget_DEPRECATED
+{
+	GENERATED_BODY()
 };

@@ -9,22 +9,24 @@
 
 #include "InteractableWidget.generated.h"
 
-class UUMGInputActionBindingStack;
+class UUMGInputActionBindingStack_DEPRECATED;
+
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
 
 /**
  * Base widget that shows how you can integrate UUMGInputActionBindingStack and how
  * to implement the IUserFocusResettableWidget interface using the template TUserFocusResetableWidget_Impl<T>.
  */
 UCLASS()
-class OUUUMG_API UOUUInteractableWidget :
+class OUUUMG_API UOUUInteractableWidget_DEPRECATED :
 	public UUserWidget,
 	public IUserFocusResetableWidget,
-	public TUserFocusResetableWidget_Impl<UOUUInteractableWidget>
+	public TUserFocusResetableWidget_Impl<UOUUInteractableWidget_DEPRECATED>
 {
 	GENERATED_BODY()
 protected:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Input")
-	UUMGInputActionBindingStack* GetInputActionBindingStack();
+	UUMGInputActionBindingStack_DEPRECATED* GetInputActionBindingStack();
 
 	// - UUserWidget
 	FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
@@ -37,5 +39,15 @@ protected:
 private:
 	/** Input action binding stack. To be lazily created by GetInputActionBindingStack() function. */
 	UPROPERTY(Transient)
-	UUMGInputActionBindingStack* InputActionBindingStack = nullptr;
+	UUMGInputActionBindingStack_DEPRECATED* InputActionBindingStack = nullptr;
+};
+
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
+
+class UE_DEPRECATED(5.0, "UOUUInteractableWidget is deprecated in favor of UE5's UCommonActivatableWidget.")
+	UOUUInteractableWidget;
+UCLASS()
+class OUUUMG_API UOUUInteractableWidget : public UOUUInteractableWidget_DEPRECATED
+{
+	GENERATED_BODY()
 };

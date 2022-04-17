@@ -9,7 +9,9 @@
 
 #include "ActivatableWidget.generated.h"
 
-class UUMGInputActionBindingStack;
+class UUMGInputActionBindingStack_DEPRECATED;
+
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
 
 /**
  * Activatable widgets manage a widgets visibility and interactability based on an activation state.
@@ -17,10 +19,10 @@ class UUMGInputActionBindingStack;
  * creation of user widgets that handle input and focus events for gamepad interactable widgets.
  */
 UCLASS()
-class OUUUMG_API UOUUActivatableWidget :
+class OUUUMG_API UOUUActivatableWidget_DEPRECATED :
 	public UUserWidget,
 	public IUserFocusResetableWidget,
-	public TUserFocusResetableWidget_Impl<UOUUActivatableWidget>
+	public TUserFocusResetableWidget_Impl<UOUUActivatableWidget_DEPRECATED>
 {
 	GENERATED_BODY()
 public:
@@ -79,7 +81,7 @@ public:
 
 protected:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Input")
-	UUMGInputActionBindingStack* GetInputActionBindingStack();
+	UUMGInputActionBindingStack_DEPRECATED* GetInputActionBindingStack();
 
 	/** Get the desired visibility based on the current widget state */
 	virtual ESlateVisibility NativeGetDesiredVisibility() const;
@@ -128,5 +130,15 @@ private:
 
 	/** Input action binding stack. To be lazily created by GetInputActionBindingStack() function. */
 	UPROPERTY(Transient)
-	UUMGInputActionBindingStack* InputActionBindingStack = nullptr;
+	UUMGInputActionBindingStack_DEPRECATED* InputActionBindingStack = nullptr;
+};
+
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
+
+class UE_DEPRECATED(5.0, "UOUUActivatableWidget is deprecated in favor of UE5's UCommonActivatableWidget.")
+	UOUUActivatableWidget;
+UCLASS()
+class OUUUMG_API UOUUActivatableWidget : public UOUUActivatableWidget_DEPRECATED
+{
+	GENERATED_BODY()
 };
