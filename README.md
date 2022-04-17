@@ -22,16 +22,20 @@ For a more detailed overview of all utilities you should check out the plugin so
 as most of the documentation is provided in the form of source code comments.
 If you want to know how a type is meant to be used, it can be useful to check the automation tests in the ``OUUTests`` module.
 
-## Workflows
+## Versions
 
-### Versions
+Active development for latest supported engine version happens on [develop](https://github.com/JonasReich/OpenUnrealUtilities/tree/develop).
 
-- Latest plugin version: 1.0.0
-- Supported Unreal Engine versions: 4.26, 4.27, 5.0
+Versions are flagged with tags. Check the [GitHub Releases](https://github.com/JonasReich/OpenUnrealUtilities/releases) for a brief summary of changes between versions. [master](https://github.com/JonasReich/OpenUnrealUtilities/tree/master) always points to the latest release.
 
-Active support can only be provided for the latest version, but we try to maintain compatibility to the last two minor engine versions.
+> Latest plugin release: [v1.0.0](https://github.com/JonasReich/OpenUnrealUtilities/tree/v1.0.0) on [master](https://github.com/JonasReich/OpenUnrealUtilities/tree/master)
 
-#### Deprecation
+Supported Unreal Engine versions are marked with branches (pattern: ``ue<major>.<minor>``, e.g. ``ue5.0``).
+
+> **active development: [ue5.0](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue5.0)**<br>
+> old versions: [ue4.27](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue4.27)
+
+### Deprecation
 
 Any major changes to the API will be assisted via the use of deprecation macros so you have time to upgrade your code.
 Deprecations are phased out alongside with new minor version upgrades of Unreal Engine.
@@ -40,73 +44,7 @@ For example, changes introduced for UE5 that deprecate old types were marked wit
 These warnings may be removed as soon as we upgrade the plugin to support UE5.1, so at that point any code referencing the
 deprecated symbols or headers will no longer compile.  
 
-#### Versions History (Summary)
-
-Short summary of changes between minor versions so you don't have to sift through the entire changelog:
-
-- **1.0.0**
-  - Upgrade to UE 5.0
-    - Updated code for new engine API  
-    - Deprecated all OUUUMG utilities besides the ``UOUUWindow`` user widget class.
-      Please use UE5's CommonUI plugin instead for managing widget layer stacks and input routing.
-      Check out Epic's _LYRA_ sample project for reference.
-  - Runtime
-    - Added a string parser for gameplay tag queries - not very optimized, don't use at runtime (yet)
-    - Added a template for read-write-locked variables to simplify access management
-    - Added text library for dynamic list concatenation of FTexts
-    - Added macro that enables bitmask operator support
-    - Added Json library that allows serializing object properties from json
-  - Blueprint
-    - Added generic platform process library (allows launching external applications from Blueprint code)
-    - Added property path helpers to get and set arbitrary property values from strings
-    - Exposed object, class and property flags to Blueprint
-    - Added new flow control Blueprint macros (also available for AnimInstances now)
-    - Added clipboard library to read and write OS clipboard
-  - Debugging utilities
-    - Canvas graph plotting (used e.g. in sequential frame scheduler gameplay debugger)
-    - Added animation gameplay debugger
-  - Editor utilities
-    - Added some generic editor asset actions
-    - Added ouu.CompileAllBlueprints console command (same syntax as CompileAllBlueprints commandlet)
-  - Code style/quality
-    - Introduced clang-format file and unified/fixed formatting accordingly
-    - Renamed namespaces to comply with implicit UE5 naming conventions
-  - Other
-    - Added texel checker materials
-    - Added material functions for sRGB/linear conversion of entire vectors
-    - Various bug fixes
-- **0.8.0**
-    - Upgrade to UE 4.27
-    - Added lexical operators for Blueprint
-    - Simplified message log functions and added UE_LOG-like macros
-    - Reworked bitmask utilty functions to work with both engine enums and custom enums that implement OUU bitmask traits
-    - Debugging tools
-        - Added gameplay debugger category type list which simplifies registering of debugger categories
-        - Added enhanced ability system gameplay debugger category
-        - Added actor map window
-        - Moved all debugging tools into new module OUUDeveloper
-- **0.7.0**
-    - Added plugin logo (matching to Open Unreal Conventions)
-    - Improved clang compatibility for PS4/Linux targets (still not guaranteed to run on those platforms)
-- **0.6.0**
-    - New Utilities: Spiral IDs, GarbageCollectionListener
-    - Various smaller bug fixes, improvements and cleanups
-- **0.5.1**
-    - Stability Fixes
-- **0.5.0**
-    - New Utilities: Literal Gameplay Tags, WorldBoundSFSchedulerRegistry
-    - Renamed/moved a bunch of utilities to reduce conflicts with other projects
-- **0.4.0**
-    - Various fixes and stability improvements
-    - Unified plugin log category usages
-- **0.3.0**
-    - Upgrade to UE 4.26
-    - New Utilities: Ring Aggregator, Sequential Frame Scheduler
-    - Module Cleanup
-- **0.2.0** Split repo into master and develop branches
-- **0.1.0** Base set of utilities (All changes prior to 0.2.0 with no clear versioning strategy)
-
-#### Increasing Version
+### Increasing Version
 
 Follow the following steps to promote changes from develop to master:
 
@@ -119,18 +57,6 @@ Follow the following steps to promote changes from develop to master:
 4. Tag the submit with annotated tag that matches the version number: Tag and annotation message should match exactly, e.g. both could be "v0.6.0"
 5. Fast-forward merge develop into master
 6. Push develop, master _and(!)_ tags
-
-### Branch Strategy
-
-- (Semi) stable releases for latest supported engine version on ``master``
-- Active development for latest supported engine version on ``develop``
-- Separate branches for supported engine versions (e.g. ``ue.27`` and ``ue5.0`` as of writing this) 
-- Tag release commits on master with plugin version number, e.g. ``v0.1.0``
-
-### Future Workflow Changes
-
-- Add branches or tags for supported engine versions (e.g. UE4.25), which are updated along with releases
-- No updates of deprecated code. As soon as the plugin breaks for an old engine version we drop support for it
 
 ## Automated Testing
 
@@ -156,8 +82,8 @@ which are supplied as a single FString per test case
 - **CollectionTestFunctions** are test functions similar to the FAutomationTestBase member functions TestTrue(), TestEqual(), etc.
 that allow comparing collections to expected result values while adding some additional checks and error messages to aid in debugging failed tests
 - **OUUTestMacros** is a collection of macros that simplify the creation of tests
-	- OUU_\* macros help declaring test cases with significantly less redundancy/boilerplate compared to test declaration macros provided out-of-the-box
-	- SPEC_TEST_\* macros are wrappers for test functions to be used in [Automation Specs] without adding duplicate descriptions for every test (see below)
+	- ``OUU_*`` macros help declaring test cases with significantly less redundancy/boilerplate compared to test declaration macros provided out-of-the-box
+	- ``SPEC_TEST_*`` macros are wrappers for test functions to be used in [Automation Specs] without adding duplicate descriptions for every test (see below)
 - **UOUUTestObject and UOUUTestWidget** are not-abstract classes derived directly from UObject and UUserWidget respectively available to use in tests
 
 ### Automation Specs
