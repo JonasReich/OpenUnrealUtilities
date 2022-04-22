@@ -24,7 +24,11 @@ public class OUUEditor : OUUModuleRules
 			"Engine",
 			"Slate",
 			"MaterialEditor",
-			"UnrealEd"
+			"UnrealEd",
+			"Projects",
+			"SessionFrontend",
+			"Blutility", 
+			"UMGEditor"
 		});
 	}
 }
