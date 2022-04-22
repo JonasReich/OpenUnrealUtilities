@@ -35,6 +35,10 @@ Supported Unreal Engine versions are marked with branches (pattern: ``ue<major>.
 > **active development: [ue5.0](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue5.0)**<br>
 > old versions: [ue4.27](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue4.27)
 
+From time to time we might get pull requests for old engine versions, because the plugin is still used in projects that did not upgrade to the latest version. These changes may be merged into the respective engine version branch and will eventually be merged into develop for the next release.
+
+If you want stable versions, you should stick to the labeled release commits.
+
 ### Deprecation
 
 Any major changes to the API will be assisted via the use of deprecation macros so you have time to upgrade your code.
