@@ -15,7 +15,7 @@ The plugin is divided into several modules for different application purposes:
 | OUUDeveloper        | Developer tools, esp. debug commands that are available in editor and development builds |
 | OUUEditor           | Blueprint function libraries for editor utilities |
 | OUURuntime          | The core of the plugin. These are runtime utilities that are also available in shipping builds. These utilities should be useful in all kinds of different contexts ranging from container templates, execution flow helpers, etc |
-| OUUTests            | Automated tests that test test the plugin functionality. Only contains private content. _You will never need to reference this from other modules!_ |
+| OUUTests            | Automated tests that test the plugin functionality. Only contains private content. _You will never need to reference this from other modules!_ |
 | OUUUMG              | UMG Widgets and UI implementation helpers. <br> Many of these tools were deprecated in favor of UE5's CommonUI plugin. |
 
 For a more detailed overview of all utilities you should check out the plugin source code,
