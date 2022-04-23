@@ -23,12 +23,16 @@ public class OUUEditor : OUUModuleRules
 			"CoreUObject",
 			"Engine",
 			"Slate",
+			"SlateCore",
 			"MaterialEditor",
 			"UnrealEd",
+			"EditorStyle",
 			"Projects",
 			"SessionFrontend",
 			"Blutility", 
-			"UMGEditor"
+			"UMGEditor",
+			"WorkspaceMenuStructure",
+			"PropertyEditor"
 		});
 	}
 }

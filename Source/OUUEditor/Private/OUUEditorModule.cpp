@@ -8,6 +8,7 @@
 #include "EditorUtilityWidget.h"
 #include "EditorUtilityWidgetBlueprint.h"
 #include "Modules/ModuleManager.h"
+#include "Widgets/OUUMaterialParametersOverview.h"
 
 class FOUUEditorModule : public IModuleInterface
 {
@@ -23,7 +24,11 @@ public:
 		{
 			RegisterAllEditorUtilityWidgetTabs();
 		}
+
+		OUU::Editor::MaterialParametersOverview::RegisterNomadTabSpawner();
 	}
+
+	virtual void ShutdownModule() override { OUU::Editor::MaterialParametersOverview::UnregisterNomadTabSpawner(); }
 
 private:
 	FDelegateHandle OnFilesLoadedHandle;
@@ -40,6 +45,9 @@ private:
 	 */
 	static void RegisterAllEditorUtilityWidgetTabs()
 	{
+		if (!GEditor)
+			return;
+
 		TArray<FAssetData> BlueprintList;
 		FARFilter Filter;
 		Filter.ClassNames.Add(UEditorUtilityWidgetBlueprint::StaticClass()->GetFName());
@@ -47,6 +55,9 @@ private:
 		IAssetRegistry::GetChecked().GetAssets(Filter, BlueprintList);
 
 		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
+		if (!IsValid(EditorUtilitySubsystem))
+			return;
+
 		for (auto& Asset : BlueprintList)
 		{
 			if (auto* EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(Asset.GetAsset()))
