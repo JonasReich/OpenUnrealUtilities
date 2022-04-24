@@ -8,8 +8,9 @@
 
 #include "OUUMaterialEditingLibrary.generated.h"
 
-class UMaterialFunction;
 class UMaterial;
+class UMaterialFunction;
+class UMaterialExpression;
 class UMaterialExpressionMakeMaterialAttributes;
 
 struct FExpressionInput;
@@ -28,6 +29,13 @@ public:
 		UMaterial* Material,
 		UMaterialFunction* MaterialFunction,
 		bool bOnlyAddIfNotPresent = true);
+
+	/**
+	 * Open an editor for the material containing this expression and jump to the node.
+	 * Jumping to the node only works for parameter expressions.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Editor|Material Editing")
+	static void OpenMaterialEditorAndJumpToExpression(UMaterialExpression* MaterialExpression);
 
 private:
 	static void CopyInputConnection(FExpressionInput* From, FExpressionInput* To);

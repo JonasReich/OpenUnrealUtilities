@@ -2,12 +2,16 @@
 
 #include "OUUMaterialEditingLibrary.h"
 
+#include "IMaterialEditor.h"
 #include "LogOpenUnrealUtilities.h"
 #include "MaterialEditor/Public/MaterialEditingLibrary.h"
+#include "MaterialEditorUtilities.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialExpressionBreakMaterialAttributes.h"
 #include "Materials/MaterialExpressionMakeMaterialAttributes.h"
 #include "ScopedTransaction.h"
+#include "Toolkits/IToolkit.h"
+#include "Toolkits/ToolkitManager.h"
 
 void UOUUMaterialEditingLibrary::ConvertMaterialToMaterialAttributes(UMaterial* Material)
 {
@@ -89,6 +93,34 @@ void UOUUMaterialEditingLibrary::InsertMaterialFunctionBeforeResult(
 
 	// Connect output 0 of new material function with material attributes
 	MaterialAttributesInput->Connect(0, MaterialFunctionCall);
+}
+
+void UOUUMaterialEditingLibrary::OpenMaterialEditorAndJumpToExpression(UMaterialExpression* Expression)
+{
+	auto* Outer = Expression->GetOuter();
+
+	if (Outer->IsA<UMaterialInterface>())
+	{
+		FMaterialEditorUtilities::OnOpenMaterial(Outer);
+	}
+	else if (Outer->IsA<UMaterialFunctionInterface>())
+	{
+		FMaterialEditorUtilities::OnOpenFunction(Outer);
+	}
+	else
+	{
+		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("Cannot open asset because outer is undefined"));
+		return;
+	}
+
+	const TSharedPtr<IToolkit> FoundAssetEditor = FToolkitManager::Get().FindEditorForAsset(Outer);
+	const TSharedPtr<IMaterialEditor> EditorPtr = StaticCastSharedPtr<IMaterialEditor>(FoundAssetEditor);
+
+	if (EditorPtr.IsValid())
+	{
+		EditorPtr->FocusWindow();
+		EditorPtr->JumpToExpression(Expression);
+	}
 }
 
 void UOUUMaterialEditingLibrary::CopyInputConnection(FExpressionInput* From, FExpressionInput* To)
