@@ -7,8 +7,8 @@
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidget.h"
 #include "EditorUtilityWidgetBlueprint.h"
+#include "MaterialAnalyzer/OUUMaterialAnalyzer.h"
 #include "Modules/ModuleManager.h"
-#include "Widgets/OUUMaterialParametersOverview.h"
 
 class FOUUEditorModule : public IModuleInterface
 {
@@ -25,10 +25,10 @@ public:
 			RegisterAllEditorUtilityWidgetTabs();
 		}
 
-		OUU::Editor::MaterialParametersOverview::RegisterNomadTabSpawner();
+		OUU::Editor::MaterialAnalyzer::RegisterNomadTabSpawner();
 	}
 
-	virtual void ShutdownModule() override { OUU::Editor::MaterialParametersOverview::UnregisterNomadTabSpawner(); }
+	virtual void ShutdownModule() override { OUU::Editor::MaterialAnalyzer::UnregisterNomadTabSpawner(); }
 
 private:
 	FDelegateHandle OnFilesLoadedHandle;
