@@ -2,8 +2,6 @@
 
 #include "Localization/ScopedCultureOverride.h"
 
-#include "LocalizationModule.h"
-
 FScopedCultureOverride::FScopedCultureOverride(const FString& OverrideCultureCode)
 {
 	auto& Internationalization = FInternationalization::Get();
