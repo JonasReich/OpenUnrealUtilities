@@ -3,5 +3,11 @@
 #include "CoreMinimal.h"
 
 #include "Modules/ModuleManager.h"
+#include "OUUMapsToCookSettings.h"
 
-IMPLEMENT_MODULE(FDefaultModuleImpl, OUUDeveloper)
+class FOUUDeveloperModule : public IModuleInterface
+{
+	virtual void StartupModule() override { UOUUMapsToCookSettings::TryInjectMapIniSectionCommandlineForCook(); }
+};
+
+IMPLEMENT_MODULE(FOUUDeveloperModule, OUUDeveloper)

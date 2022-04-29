@@ -9,64 +9,71 @@
 #include "EditorUtilityWidgetBlueprint.h"
 #include "MaterialAnalyzer/OUUMaterialAnalyzer.h"
 #include "Modules/ModuleManager.h"
+#include "OUUMapsToCookSettingsDetails.h"
 
-class FOUUEditorModule : public IModuleInterface
+namespace OUU::Editor
 {
-public:
-	virtual void StartupModule() override
+	class FOUUEditorModule : public IModuleInterface
 	{
-		IAssetRegistry& AssetRegistry = IAssetRegistry::GetChecked();
-		if (AssetRegistry.IsLoadingAssets())
+	public:
+		virtual void StartupModule() override
 		{
-			OnFilesLoadedHandle = AssetRegistry.OnFilesLoaded().AddRaw(this, &FOUUEditorModule::HandleOnFiledLoaded);
+			IAssetRegistry& AssetRegistry = IAssetRegistry::GetChecked();
+			if (AssetRegistry.IsLoadingAssets())
+			{
+				OnFilesLoadedHandle =
+					AssetRegistry.OnFilesLoaded().AddRaw(this, &FOUUEditorModule::HandleOnFiledLoaded);
+			}
+			else
+			{
+				RegisterAllEditorUtilityWidgetTabs();
+			}
+
+			MaterialAnalyzer::RegisterNomadTabSpawner();
+			FOUUMapsToCookSettingsDetails::Register();
 		}
-		else
+
+		virtual void ShutdownModule() override { MaterialAnalyzer::UnregisterNomadTabSpawner(); }
+
+	private:
+		FDelegateHandle OnFilesLoadedHandle;
+
+		void HandleOnFiledLoaded()
 		{
+			IAssetRegistry::GetChecked().OnFilesLoaded().Remove(OnFilesLoadedHandle);
+			OnFilesLoadedHandle.Reset();
 			RegisterAllEditorUtilityWidgetTabs();
 		}
 
-		OUU::Editor::MaterialAnalyzer::RegisterNomadTabSpawner();
-	}
-
-	virtual void ShutdownModule() override { OUU::Editor::MaterialAnalyzer::UnregisterNomadTabSpawner(); }
-
-private:
-	FDelegateHandle OnFilesLoadedHandle;
-
-	void HandleOnFiledLoaded()
-	{
-		IAssetRegistry::GetChecked().OnFilesLoaded().Remove(OnFilesLoadedHandle);
-		OnFilesLoadedHandle.Reset();
-		RegisterAllEditorUtilityWidgetTabs();
-	}
-
-	/**
-	 * Search and register all editor utility widget blueprints so they can be opened from the "Developer Tools" menu.
-	 */
-	static void RegisterAllEditorUtilityWidgetTabs()
-	{
-		if (!GEditor)
-			return;
-
-		TArray<FAssetData> BlueprintList;
-		FARFilter Filter;
-		Filter.ClassNames.Add(UEditorUtilityWidgetBlueprint::StaticClass()->GetFName());
-		Filter.bRecursiveClasses = true;
-		IAssetRegistry::GetChecked().GetAssets(Filter, BlueprintList);
-
-		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
-		if (!IsValid(EditorUtilitySubsystem))
-			return;
-
-		for (auto& Asset : BlueprintList)
+		/**
+		 * Search and register all editor utility widget blueprints so they can be opened from the "Developer Tools"
+		 * menu.
+		 */
+		static void RegisterAllEditorUtilityWidgetTabs()
 		{
-			if (auto* EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(Asset.GetAsset()))
+			if (!GEditor)
+				return;
+
+			TArray<FAssetData> BlueprintList;
+			FARFilter Filter;
+			Filter.ClassNames.Add(UEditorUtilityWidgetBlueprint::StaticClass()->GetFName());
+			Filter.bRecursiveClasses = true;
+			IAssetRegistry::GetChecked().GetAssets(Filter, BlueprintList);
+
+			UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
+			if (!IsValid(EditorUtilitySubsystem))
+				return;
+
+			for (auto& Asset : BlueprintList)
 			{
-				FName TabId;
-				EditorUtilitySubsystem->RegisterTabAndGetID(EditorWidget, OUT TabId);
+				if (auto* EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(Asset.GetAsset()))
+				{
+					FName TabId;
+					EditorUtilitySubsystem->RegisterTabAndGetID(EditorWidget, OUT TabId);
+				}
 			}
 		}
-	}
-};
+	};
+} // namespace OUU::Editor
 
-IMPLEMENT_MODULE(FOUUEditorModule, OUUEditor)
+IMPLEMENT_MODULE(OUU::Editor::FOUUEditorModule, OUUEditor)

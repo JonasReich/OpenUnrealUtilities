@@ -32,7 +32,10 @@ public class OUUEditor : OUUModuleRules
 			"Blutility", 
 			"UMGEditor",
 			"WorkspaceMenuStructure",
-			"PropertyEditor"
+			"PropertyEditor",
+
+			// OUU
+			"OUUDeveloper"
 		});
 	}
 }
