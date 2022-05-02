@@ -212,15 +212,23 @@ FName UOUUMapsToCookSettings::GetCategoryName() const
 
 void UOUUMapsToCookSettings::TryInjectMapIniSectionCommandlineForCook()
 {
+	UE_LOG(LogOpenUnrealUtilities, Log, TEXT("Checking for cook..."));
+
 	if (!IsRunningCommandlet())
+	{
+		UE_LOG(LogOpenUnrealUtilities, Log, TEXT("No cook command detected (not running commandlet)."));
 		return;
+	}
 
-	const TCHAR* CommandLine = FCommandLine::Get();
+	FString CommandLine = FCommandLine::Get();
 
-	FString CommandletName;
-	const bool bFoundCommandletName = FParse::Value(CommandLine, TEXT("run="), OUT CommandletName);
-	if (!bFoundCommandletName || CommandletName.Equals(TEXT("cook"), ESearchCase::IgnoreCase))
+	const bool bFoundCommandletName =
+		CommandLine.Contains(TEXT("cookcommandlet")) || CommandLine.Contains(TEXT("run=cook"));
+	if (!bFoundCommandletName)
+	{
+		UE_LOG(LogOpenUnrealUtilities, Log, TEXT("No cook command detected (running different commandlet)."));
 		return;
+	}
 
 	UE_LOG(
 		LogOpenUnrealUtilities,
@@ -228,19 +236,13 @@ void UOUUMapsToCookSettings::TryInjectMapIniSectionCommandlineForCook()
 		TEXT("Cook command detected. "
 			 "Attempting to modify command line based on UOUUMapsToCookSettings..."));
 
-	auto* MapsToCookSettings = GetDefault<UOUUMapsToCookSettings>();
+	auto* MapsToCookSettings = GetMutableDefault<UOUUMapsToCookSettings>();
 	if (!IsValid(MapsToCookSettings))
-		return;
-
-	if (MapsToCookSettings->DefaultConfigSection.IsEmpty())
-		return;
-
-	if (!GConfig->DoesSectionExist(*MapsToCookSettings->DefaultConfigSection, GGameIni))
 		return;
 
 	// do not modify the commandline if MAPINISECTION parameter was set
 	FString CombinedSectionStr;
-	const bool bHasNativeIniSectionCliArg = FParse::Value(CommandLine, TEXT("MAPINISECTION="), OUT CombinedSectionStr);
+	const bool bHasNativeIniSectionCliArg = FParse::Value(*CommandLine, TEXT("MAPINISECTION="), OUT CombinedSectionStr);
 	if (!bHasNativeIniSectionCliArg)
 	{
 		CombinedSectionStr = MapsToCookSettings->DefaultConfigSection;
@@ -261,22 +263,31 @@ void UOUUMapsToCookSettings::TryInjectMapIniSectionCommandlineForCook()
 		MapIniSections.Add(CombinedSectionStr);
 	}
 
-	if (MapIniSections.Num() > 0)
+	if (MapIniSections.Num() <= 0)
 	{
-		GetMutableDefault<UOUUMapsToCookSettings>()->SetDefaultConfigSection(MapIniSections[0]);
-		auto* GameMapSettings = GetDefault<UGameMapsSettings>();
-		if (GameMapSettings->GetGameDefaultMap().IsEmpty())
-		{
-			UE_LOG(LogOpenUnrealUtilities, Fatal, TEXT("Game default map is not set"));
-			FPlatformMisc::RequestExitWithStatus(false, 1);
-		}
+		UE_LOG(LogOpenUnrealUtilities, Log, TEXT("No map ini sections found. Cooking with default map settings."));
+		return;
+	}
+
+	const auto& FirstMapSection = MapIniSections[0];
+	if (!GConfig->DoesSectionExist(*FirstMapSection, GGameIni))
+	{
+		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("Map ini section '%s' does not exist"), *FirstMapSection);
+	}
+
+	GetMutableDefault<UOUUMapsToCookSettings>()->SetDefaultConfigSection(FirstMapSection);
+	auto* GameMapSettings = GetDefault<UGameMapsSettings>();
+	if (GameMapSettings->GetGameDefaultMap().IsEmpty())
+	{
+		UE_LOG(LogOpenUnrealUtilities, Fatal, TEXT("Game default map is not set"));
+		FPlatformMisc::RequestExitWithStatus(false, 1);
 	}
 
 	if (!bHasNativeIniSectionCliArg)
 	{
 		// append custom MAPINISECTION parameter at the end of original commandline
 		const FString NewArgument = FString::Printf(TEXT("-MAPINISECTION=%s"), *CombinedSectionStr);
-		FCommandLine::Set(*FString::Printf(TEXT("%s %s"), CommandLine, *NewArgument));
+		FCommandLine::Set(*FString::Printf(TEXT("%s %s"), *CommandLine, *NewArgument));
 
 		UE_LOG(
 			LogOpenUnrealUtilities,
