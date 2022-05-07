@@ -33,7 +33,11 @@ namespace OUU::Editor
 			FOUUMapsToCookSettingsDetails::Register();
 		}
 
-		virtual void ShutdownModule() override { MaterialAnalyzer::UnregisterNomadTabSpawner(); }
+		virtual void ShutdownModule() override
+		{
+			MaterialAnalyzer::UnregisterNomadTabSpawner();
+			FOUUMapsToCookSettingsDetails::Unregister();
+		}
 
 	private:
 		FDelegateHandle OnFilesLoadedHandle;

@@ -17,6 +17,7 @@ namespace OUU::Editor
 	{
 	public:
 		static void Register();
+		static void Unregister();
 
 		// IDetailCustomization interface
 		virtual void CustomizeDetails(IDetailLayoutBuilder& DetailLayout) override;

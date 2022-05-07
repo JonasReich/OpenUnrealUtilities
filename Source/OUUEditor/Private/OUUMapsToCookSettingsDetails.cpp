@@ -7,22 +7,20 @@
 #include "DetailWidgetRow.h"
 #include "Modules/ModuleManager.h"
 #include "OUUMapsToCookSettings.h"
+#include "PropertyEditorUtils.h"
 #include "Widgets/Input/STextComboBox.h"
 
 namespace OUU::Editor
 {
-	namespace Private::OUUMapsToCookSettingsDetails
-	{
-		TSharedRef<IDetailCustomization> MakeInstance() { return MakeShareable(new FOUUMapsToCookSettingsDetails()); }
-	} // namespace Private::OUUMapsToCookSettingsDetails
-
 	void FOUUMapsToCookSettingsDetails::Register()
 	{
-		FPropertyEditorModule& PropertyModule =
-			FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-		PropertyModule.RegisterCustomClassLayout(
-			UOUUMapsToCookSettings::StaticClass()->GetFName(),
-			FOnGetDetailCustomizationInstance::CreateStatic(&Private::OUUMapsToCookSettingsDetails::MakeInstance));
+		OUU::Editor::PropertyEditorUtils::
+			RegisterCustomClassLayout<UOUUMapsToCookSettings, FOUUMapsToCookSettingsDetails>();
+	}
+
+	void FOUUMapsToCookSettingsDetails::Unregister()
+	{
+		OUU::Editor::PropertyEditorUtils::UnregisterCustomClassLayout<UOUUMapsToCookSettings>();
 	}
 
 	void FOUUMapsToCookSettingsDetails::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
