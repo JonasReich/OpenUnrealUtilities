@@ -341,18 +341,20 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 
 namespace OUU::Editor::MaterialAnalyzer
 {
-	const FName TabName = TEXT("OUU.MaterialParametersOverview");
+	const FName GTabName = TEXT("OUU.MaterialParametersOverview");
 
 	void RegisterNomadTabSpawner()
 	{
 		FGlobalTabmanager::Get()
-			->RegisterNomadTabSpawner(TabName, FOnSpawnTab::CreateStatic(&Private::MaterialAnalyzer::Widgets::SpawnTab))
+			->RegisterNomadTabSpawner(
+				GTabName,
+				FOnSpawnTab::CreateStatic(&Private::MaterialAnalyzer::Widgets::SpawnTab))
 			.SetDisplayName(INVTEXT("Material Analyzer (OUU)"))
 			.SetTooltipText(INVTEXT("Search and navigate through material expressions and parameters"))
 			.SetGroup(WorkspaceMenu::GetMenuStructure().GetDeveloperToolsMiscCategory())
 			.SetIcon(FSlateIcon(FEditorStyle::GetStyleSetName(), "LevelEditor.Tabs.Details"));
 	}
 
-	void UnregisterNomadTabSpawner() { FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(TabName); }
+	void UnregisterNomadTabSpawner() { FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(GTabName); }
 
 } // namespace OUU::Editor::MaterialAnalyzer

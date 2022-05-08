@@ -39,7 +39,9 @@ public class OUUDeveloper : OUUModuleRules
 			PrivateDependencyModuleNames.AddRange(new string[] {
 
 				// Engine
-				"UnrealEd"
+				"UnrealEd",
+				"EditorStyle",
+				"WorkspaceMenuStructure"
 			});
 		}
 		// --
