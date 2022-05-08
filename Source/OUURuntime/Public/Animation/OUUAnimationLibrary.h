@@ -20,11 +20,11 @@ public:
 	static bool ImplementsAnimationLayerInterface(
 		TSubclassOf<UAnimInstance> AnimInstanceClass,
 		TSubclassOf<UAnimLayerInterface> AnimationLayerInterfaceClass);
-#endif
 
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Animation")
 	static USkeleton* GetAnimInstanceClassTargetSkeleton(TSubclassOf<UAnimInstance> AnimInstanceClass);
 
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Animation")
 	static USkeleton* GetAnimInstanceTargetSkeleton(UAnimInstance* AnimInstance);
+#endif
 };

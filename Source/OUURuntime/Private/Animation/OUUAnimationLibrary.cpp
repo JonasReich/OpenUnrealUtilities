@@ -27,7 +27,6 @@ bool UOUUAnimationLibrary::ImplementsAnimationLayerInterface(
 
 	return false;
 }
-#endif WITH_EDITOR
 
 USkeleton* UOUUAnimationLibrary::GetAnimInstanceClassTargetSkeleton(TSubclassOf<UAnimInstance> AnimInstanceClass)
 {
@@ -48,3 +47,4 @@ USkeleton* UOUUAnimationLibrary::GetAnimInstanceTargetSkeleton(UAnimInstance* An
 
 	return GetAnimInstanceClassTargetSkeleton(AnimInstance->GetClass());
 }
+#endif WITH_EDITOR
