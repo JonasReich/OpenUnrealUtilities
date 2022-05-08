@@ -14,6 +14,7 @@
 #include "LogOpenUnrealUtilities.h"
 #include "Misc/EngineVersionComparison.h"
 #include "Misc/RegexUtils.h"
+#include "OUUActorMapWindow.h"
 #include "Tickable.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SCheckBox.h"
@@ -177,39 +178,6 @@ public:
 	}
 };
 
-/** Utility structure for a SSplitter column */
-struct FColumnSizeData
-{
-	TAttribute<float> LeftColumnWidth;
-	TAttribute<float> RightColumnWidth;
-	SSplitter::FOnSlotResized OnWidthChanged;
-
-	void SetColumnWidth(float InWidth) const { OnWidthChanged.ExecuteIfBound(InWidth); }
-
-	TSharedRef<SWidget> DetailsSplitter(const FText& Label, const FText& Tooltip, TSharedRef<SWidget> RightWidget) const
-	{
-		// clang-format off
-		return SNew(SSplitter)
-			+ SSplitter::Slot()
-				.SizeRule(SSplitter::ESizeRule::FractionOfParent)
-				.Value(LeftColumnWidth)
-				.OnSlotResized(OnWidthChanged)
-			[
-				SNew(STextBlock)
-				.Text(Label)
-				.ToolTipText(Tooltip)
-			]
-			+ SSplitter::Slot()
-				.SizeRule(SSplitter::ESizeRule::FractionOfParent)
-				.Value(RightColumnWidth)
-				.OnSlotResized(OnWidthChanged)
-			[
-				RightWidget
-			];
-		// clang-format on
-	}
-};
-
 /**
  * The actual overlay widget that paints actor locations, names, etc.
  * on-top of the scene capture in the background.
@@ -337,7 +305,7 @@ public:
 		{
 		}
 
-		SLATE_ARGUMENT(FColumnSizeData*, ColumnSizeData)
+		SLATE_ARGUMENT(FSplitterColumnSizeData*, ColumnSizeData)
 	SLATE_END_ARGS()
 
 	void Construct(
@@ -363,7 +331,7 @@ public:
 				]
 				+ SVerticalBox::Slot()
 				[
-					ColumnSizeData->DetailsSplitter(
+					ColumnSizeData->MakeSimpleDetailsSplitter(
 						INVTEXT("Name Filter"),
 						INVTEXT("Name string that must be contained within the actor names, for the actor to be "
 							"included in the query."),
@@ -375,7 +343,7 @@ public:
 				]
 				+ SVerticalBox::Slot()
 				[
-					ColumnSizeData->DetailsSplitter(
+					ColumnSizeData->MakeSimpleDetailsSplitter(
 						INVTEXT("Name Regex Pattern"),
 						INVTEXT("Regular expression pattern that must match to actor names, for the actor to be "
 							"included in the query."),
@@ -387,7 +355,7 @@ public:
 				]
 				+ SVerticalBox::Slot()
 				[
-					ColumnSizeData->DetailsSplitter(
+					ColumnSizeData->MakeSimpleDetailsSplitter(
 						INVTEXT("Class Filter"),
 						INVTEXT("Name string that must be contained within the actors class name or any of its "
 							"super classes, for the actor to be included in the query."),
@@ -399,7 +367,7 @@ public:
 				]
 				+ SVerticalBox::Slot()
 				[
-					ColumnSizeData->DetailsSplitter(
+					ColumnSizeData->MakeSimpleDetailsSplitter(
 						INVTEXT("Gameplay Tag Query"),
 						INVTEXT("Gameplay tag query. Must use the "),
 						SNew(SEditableTextBox)
@@ -414,7 +382,7 @@ public:
 
 private:
 	TSharedPtr<FActorQuery> ActorQuery;
-	FColumnSizeData* ColumnSizeData = nullptr;
+	FSplitterColumnSizeData* ColumnSizeData = nullptr;
 	FString GameplayTagQueryString;
 
 	FText GetNameFilter_Text() const
@@ -468,333 +436,257 @@ private:
 	}
 };
 
-/**
- * The data and core functionality of the actor map window:
- * FActorMap takes care of creating objects, widgets and performing actor queries in tick.
- */
-class FActorMap : public TSharedFromThis<FActorMap>, public FTickableGameObject
+static const TCHAR* GetWorldTypeString(EWorldType::Type Type)
 {
-public:
-	~FActorMap()
+	switch (Type)
 	{
-		if (SceneCaptureActor.IsValid())
-		{
-			SceneCaptureActor->Destroy();
-			SceneCaptureActor.Reset();
-		}
+	case EWorldType::None: return TEXT("None");
+	case EWorldType::Game: return TEXT("Game");
+	case EWorldType::Editor: return TEXT("Editor");
+	case EWorldType::PIE: return TEXT("PIE");
+	case EWorldType::EditorPreview: return TEXT("EditorPreview");
+	case EWorldType::GamePreview: return TEXT("GamePreview");
+	case EWorldType::GameRPC: return TEXT("GameRPC");
+	case EWorldType::Inactive: return TEXT("Inactive");
+	default: return TEXT("Unknown");
+	}
+}
 
-		MapBrush.SetResourceObject(nullptr);
+FActorMap::~FActorMap()
+{
+	if (SceneCaptureActor.IsValid())
+	{
+		SceneCaptureActor->Destroy();
+		SceneCaptureActor.Reset();
 	}
 
-	// - FTickableGameObject
-	virtual bool IsTickableInEditor() const override { return true; }
-	virtual bool IsTickableWhenPaused() const override { return true; }
+	MapBrush.SetResourceObject(nullptr);
+}
 
-	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(FActorMap, STATGROUP_Tickables); }
+bool FActorMap::IsTickableInEditor() const
+{
+	return true;
+}
 
-	virtual void Tick(float DeltaTime) override
+bool FActorMap::IsTickableWhenPaused() const
+{
+	return true;
+}
+
+TStatId FActorMap::GetStatId() const
+{
+	RETURN_QUICK_DECLARE_CYCLE_STAT(FActorMap, STATGROUP_Tickables);
+}
+
+void FActorMap::Tick(float DeltaTime)
+{
+	AccumulatedDeltaTime += DeltaTime;
+
+	if (!ensure(TickRate > 0))
+		return;
+
+	if (AccumulatedDeltaTime >= TickRate)
 	{
-		AccumulatedDeltaTime += DeltaTime;
-
-		if (!ensure(TickRate > 0))
-			return;
-
-		if (AccumulatedDeltaTime >= TickRate)
+		while (AccumulatedDeltaTime >= TickRate)
 		{
-			while (AccumulatedDeltaTime >= TickRate)
-			{
-				AccumulatedDeltaTime -= TickRate;
-			}
+			AccumulatedDeltaTime -= TickRate;
+		}
 
-			if (SceneCaptureActor.IsValid())
+		if (SceneCaptureActor.IsValid())
+		{
+			LocalCameraLocation = FVector::ZeroVector;
+			if (bShouldFollowCamera)
 			{
-				LocalCameraLocation = FVector::ZeroVector;
-				if (bShouldFollowCamera)
+				bool bSetLocalCameraLocation = false;
+				if (auto* LocalPlayerController = TargetWorld->GetFirstPlayerController())
 				{
-					bool bSetLocalCameraLocation = false;
-					if (auto* LocalPlayerController = TargetWorld->GetFirstPlayerController())
-					{
 #if UE_VERSION_OLDER_THAN(5, 0, 0)
-						if (auto* Camera = LocalPlayerController->PlayerCameraManager)
+					if (auto* Camera = LocalPlayerController->PlayerCameraManager)
 #else
-						if (APlayerCameraManager* Camera = LocalPlayerController->PlayerCameraManager.Get())
+					if (APlayerCameraManager* Camera = LocalPlayerController->PlayerCameraManager.Get())
 #endif
-						{
-							bSetLocalCameraLocation = true;
-							LocalCameraLocation = Camera->GetCameraLocation();
-						}
-					}
-					if (!bSetLocalCameraLocation)
 					{
-#if WITH_EDITOR
-						for (FLevelEditorViewportClient* LevelVC : GEditor->GetLevelViewportClients())
-						{
-							if (LevelVC && LevelVC->IsPerspective())
-							{
-								LocalCameraLocation = LevelVC->GetViewLocation();
-							}
-						}
-#endif
+						bSetLocalCameraLocation = true;
+						LocalCameraLocation = Camera->GetCameraLocation();
 					}
 				}
-
-				SceneCaptureActor->SetActorLocation(LocalCameraLocation + ReferencePosition);
-				SceneCaptureActor->GetCaptureComponent2D()->CaptureScene();
+				if (!bSetLocalCameraLocation)
+				{
+#if WITH_EDITOR
+					for (FLevelEditorViewportClient* LevelVC : GEditor->GetLevelViewportClients())
+					{
+						if (LevelVC && LevelVC->IsPerspective())
+						{
+							LocalCameraLocation = LevelVC->GetViewLocation();
+						}
+					}
+#endif
+				}
 			}
 
-			// Update the actor queries
-			UWorld* World = TargetWorld.Get();
-			if (!IsValid(World))
-				return;
+			SceneCaptureActor->SetActorLocation(LocalCameraLocation + ReferencePosition);
+			SceneCaptureActor->GetCaptureComponent2D()->CaptureScene();
+		}
 
-			for (auto Query : ActorQueries)
-			{
-				if (!Query.IsValid())
-					continue;
+		// Update the actor queries
+		UWorld* World = TargetWorld.Get();
+		if (!IsValid(World))
+			return;
 
-				Query->ExecuteAndCacheQuery(World);
-			}
+		for (auto Query : ActorQueries)
+		{
+			if (!Query.IsValid())
+				continue;
+
+			Query->ExecuteAndCacheQuery(World);
 		}
 	}
+}
 
-	// --
+void FActorMap::Initialize(UWorld* InTargetWorld)
+{
+	check(IsValid(InTargetWorld));
 
-	/** Separate initializer outside of constructor, so shared pointer from this works as expected */
-	void Initialize(UWorld* InTargetWorld)
-	{
-		check(IsValid(InTargetWorld));
+	TargetWorld = InTargetWorld;
 
-		TargetWorld = InTargetWorld;
+	// Look down
+	const FRotator Direction(-90, 0, 0);
+	SceneCaptureActor = TargetWorld->SpawnActor<ASceneCapture2D>(ReferencePosition, Direction);
+	auto* CaptureComponent = SceneCaptureActor->GetCaptureComponent2D();
 
-		// Look down
-		const FRotator Direction(-90, 0, 0);
-		SceneCaptureActor = TargetWorld->SpawnActor<ASceneCapture2D>(ReferencePosition, Direction);
-		auto* CaptureComponent = SceneCaptureActor->GetCaptureComponent2D();
+	CaptureComponent->bCaptureEveryFrame = false;
+	CaptureComponent->bCaptureOnMovement = false;
+	CaptureComponent->ProjectionType = ECameraProjectionMode::Orthographic;
+	CaptureComponent->OrthoWidth = OrthoWidth;
+	CaptureComponent->CaptureSource = ESceneCaptureSource::SCS_BaseColor;
+	CaptureComponent->bEnableClipPlane = false;
 
-		CaptureComponent->bCaptureEveryFrame = false;
-		CaptureComponent->bCaptureOnMovement = false;
-		CaptureComponent->ProjectionType = ECameraProjectionMode::Orthographic;
-		CaptureComponent->OrthoWidth = OrthoWidth;
-		CaptureComponent->CaptureSource = ESceneCaptureSource::SCS_BaseColor;
-		CaptureComponent->bEnableClipPlane = false;
+	const FName TargetName = MakeUniqueObjectName(
+		SceneCaptureActor.Get(),
+		UTextureRenderTarget2D::StaticClass(),
+		TEXT("SceneCaptureTextureTarget"));
+	CaptureComponent->TextureTarget = NewObject<UTextureRenderTarget2D>(SceneCaptureActor.Get(), TargetName);
+	CaptureComponent->TextureTarget->InitCustomFormat(CaptureSize, CaptureSize, PF_FloatRGB, false);
+	CaptureComponent->TextureTarget->ClearColor = FLinearColor::Black;
+	CaptureComponent->TextureTarget->TargetGamma = 2.2f;
 
-		const FName TargetName = MakeUniqueObjectName(
-			SceneCaptureActor.Get(),
-			UTextureRenderTarget2D::StaticClass(),
-			TEXT("SceneCaptureTextureTarget"));
-		CaptureComponent->TextureTarget = NewObject<UTextureRenderTarget2D>(SceneCaptureActor.Get(), TargetName);
-		CaptureComponent->TextureTarget->InitCustomFormat(CaptureSize, CaptureSize, PF_FloatRGB, false);
-		CaptureComponent->TextureTarget->ClearColor = FLinearColor::Black;
-		CaptureComponent->TextureTarget->TargetGamma = 2.2f;
+	CaptureComponent->CaptureScene();
 
-		CaptureComponent->CaptureScene();
+	MapBrush = FSlateBrush();
+	MapBrush.SetResourceObject(CaptureComponent->TextureTarget);
+	MapBrush.ImageSize.X = CaptureComponent->TextureTarget->GetResource()->GetSizeX();
+	MapBrush.ImageSize.Y = CaptureComponent->TextureTarget->GetResource()->GetSizeY();
+}
 
-		MapBrush = FSlateBrush();
-		MapBrush.SetResourceObject(CaptureComponent->TextureTarget);
-		MapBrush.ImageSize.X = CaptureComponent->TextureTarget->GetResource()->GetSizeX();
-		MapBrush.ImageSize.Y = CaptureComponent->TextureTarget->GetResource()->GetSizeY();
-
-		MainColumns.LeftColumnWidth = TAttribute<float>(this, &FActorMap::OnGetDetailsWidth);
-		MainColumns.RightColumnWidth = TAttribute<float>(this, &FActorMap::OnGetMapWidth);
-		MainColumns.OnWidthChanged = SSplitter::FOnSlotResized::CreateSP(this, &FActorMap::OnSetMapWidth);
-
-		DetailsColumns.LeftColumnWidth = TAttribute<float>(this, &FActorMap::OnGetLeftDetailsColumnWidth);
-		DetailsColumns.RightColumnWidth = TAttribute<float>(this, &FActorMap::OnGetRightDetailsColumnWidth);
-		DetailsColumns.OnWidthChanged = SSplitter::FOnSlotResized::CreateSP(this, &FActorMap::OnSetDetailsColumnWidth);
-	}
-
-	UWorld* GetTargetWorld() const { return TargetWorld.Get(); }
-
-	TSharedRef<SWidget> TakeWidget()
-	{
-		// clang-format off
-		return SNew(SBorder).BorderImage(&DarkGrey).Content()[SNew(SSplitter)
-			+ SSplitter::Slot()
-			  .SizeRule(SSplitter::ESizeRule::FractionOfParent)
-			  .Value(MainColumns.LeftColumnWidth)
-			  .OnSlotResized(MainColumns.OnWidthChanged)
-			[
-				SNew(SBorder)
+TSharedRef<SWidget> FActorMap::TakeWidget()
+{
+	// clang-format off
+	return SNew(SBorder).BorderImage(&DarkGrey).Content()[SNew(SSplitter)
+		+ SSplitter::Slot()
+		.SizeRule(SSplitter::ESizeRule::FractionOfParent)
+		.Value(MainColumns.LeftColumnWidth)
+		.OnSlotResized(MainColumns.OnWidthChanged)
+		[
+			SNew(SBorder)
 				.Padding(2.f)
 				.BorderImage(&MediumGrey)
 				.Content()
-				[
-					SNew(SBox)
+			[
+				SNew(SBox)
 					.Padding(2.f)
 					.Content()
-					[
-						DetailsWidget()
-					]
+				[
+					DetailsWidget()
 				]
 			]
-			+ SSplitter::Slot()
-			  .SizeRule(SSplitter::ESizeRule::FractionOfParent)
-			  .Value(MainColumns.RightColumnWidth)
-			  .OnSlotResized(MainColumns.OnWidthChanged)
-			[
-				SNew(SBorder)
+		]
+		+ SSplitter::Slot()
+		.SizeRule(SSplitter::ESizeRule::FractionOfParent)
+		.Value(MainColumns.RightColumnWidth)
+		.OnSlotResized(MainColumns.OnWidthChanged)
+		[
+			SNew(SBorder)
 				.Padding(2.f)
 				.BorderImage(&MediumGrey)
 				.Content()
-				[
-					SNew(SBox)
+			[
+				SNew(SBox)
 					.Padding(2.f)
 					.Content()
-					[
-						MapWidget()
-					]
+				[
+					MapWidget()
 				]
 			]
-		];
-		// clang-format on
-	}
+		]
+	];
+	// clang-format on
+}
 
-	FText GetTitleText() const
+FText FActorMap::GetTitleText() const
+{
+	return FText::FromString(FString::Printf(
+		TEXT("OUU Actor Map (%s) [%s]"),
+		*TargetWorld->GetName(),
+		GetWorldTypeString(TargetWorld->WorldType)));
+}
+
+void FActorMap::OnSetOrthoWidth(float InOrthoSize)
+{
+	OrthoWidth = InOrthoSize;
+	if (SceneCaptureActor.IsValid())
 	{
-		return FText::FromString(FString::Printf(
-			TEXT("OUU Actor Map (%s) [%s]"),
-			*TargetWorld->GetName(),
-			GetWorldTypeString(TargetWorld->WorldType)));
+		SceneCaptureActor->GetCaptureComponent2D()->OrthoWidth = OrthoWidth;
 	}
+}
 
-protected:
-	TWeakObjectPtr<UWorld> TargetWorld = nullptr;
-	TWeakObjectPtr<ASceneCapture2D> SceneCaptureActor = nullptr;
-	FSlateBrush MapBrush;
-	float AccumulatedDeltaTime = 0.f;
-
-	static const TCHAR* GetWorldTypeString(EWorldType::Type Type)
+void FActorMap::AddActorQuery()
+{
+	const int32 NewIndex = ActorQueries.Add(MakeShared<FActorQuery>());
+	ActorQueries[NewIndex]->QueryColor = DefaultColors[NewIndex % DefaultColors.Num()];
+	if (ActorQueryListWidget.IsValid())
 	{
-		switch (Type)
-		{
-		case EWorldType::None: return TEXT("None");
-		case EWorldType::Game: return TEXT("Game");
-		case EWorldType::Editor: return TEXT("Editor");
-		case EWorldType::PIE: return TEXT("PIE");
-		case EWorldType::EditorPreview: return TEXT("EditorPreview");
-		case EWorldType::GamePreview: return TEXT("GamePreview");
-		case EWorldType::GameRPC: return TEXT("GameRPC");
-		case EWorldType::Inactive: return TEXT("Inactive");
-		default: return TEXT("Unknown");
-		}
+		ActorQueryListWidget->RebuildList();
 	}
+}
 
-	//------------------------
-	// Property accessors
-	//------------------------
-
-	float OrthoWidth = 10000.f;
-	float CaptureSize = 2048.f;
-	TOptional<float> OnGetOptionalOrthoWidth() const { return OrthoWidth; }
-	float GetOrthoWidth() const { return OrthoWidth; }
-
-	void OnSetOrthoWidth(float InOrthoSize)
+void FActorMap::RemoveLastActorQuery()
+{
+	if (ActorQueries.Num() > 0)
 	{
-		OrthoWidth = InOrthoSize;
-		if (SceneCaptureActor.IsValid())
-		{
-			SceneCaptureActor->GetCaptureComponent2D()->OrthoWidth = OrthoWidth;
-		}
+		ActorQueries.Pop();
 	}
-
-	FColumnSizeData MainColumns;
-	float MapColumnWidthFactor = 0.75f;
-	float OnGetDetailsWidth() const { return 1.0f - MapColumnWidthFactor; }
-	float OnGetMapWidth() const { return MapColumnWidthFactor; }
-	void OnSetMapWidth(float InWidth) { MapColumnWidthFactor = InWidth; }
-
-	FColumnSizeData DetailsColumns;
-	float DetailsColumnWidthFactor = 0.6f;
-	float OnGetLeftDetailsColumnWidth() const { return 1.0f - DetailsColumnWidthFactor; }
-	float OnGetRightDetailsColumnWidth() const { return DetailsColumnWidthFactor; }
-	void OnSetDetailsColumnWidth(float InWidth) { DetailsColumnWidthFactor = InWidth; }
-
-	FVector ReferencePosition = FVector(0, 0, 10000);
-	TOptional<float> GetPositionX() const { return ReferencePosition.X; }
-	TOptional<float> GetPositionY() const { return ReferencePosition.Y; }
-	TOptional<float> GetPositionZ() const { return ReferencePosition.Z; }
-
-	void OnSetPosition(float NewValue, ETextCommit::Type CommitInfo, int32 Axis)
+	if (ActorQueryListWidget.IsValid())
 	{
-		ReferencePosition.Component(Axis) = NewValue;
+		ActorQueryListWidget->RebuildList();
 	}
+}
 
-	FVector LocalCameraLocation = FVector::ZeroVector;
-	FVector GetReferencePosition() const { return ReferencePosition + LocalCameraLocation; }
-
-	bool bShouldFollowCamera = false;
-	ECheckBoxState GetFollowCameraCheckBoxState() const
-	{
-		return bShouldFollowCamera ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
-	}
-	void OnFollowCameraCheckBoxStateChanged(ECheckBoxState CheckBoxState)
-	{
-		bShouldFollowCamera = CheckBoxState == ECheckBoxState::Checked;
-	}
-
-	float TickRate = 0.1f;
-	TOptional<float> OnGetOptionalTickRate() const { return TickRate; }
-	float GetTickRate() const { return TickRate; }
-	void OnSetTickRate(float InTickRate) { TickRate = InTickRate; }
-
-	TArray<TSharedPtr<FActorQuery>> ActorQueries;
-
-	void AddActorQuery()
-	{
-		const int32 NewIndex = ActorQueries.Add(MakeShared<FActorQuery>());
-		ActorQueries[NewIndex]->QueryColor = DefaultColors[NewIndex % DefaultColors.Num()];
-		if (ActorQueryListWidget.IsValid())
-		{
-			ActorQueryListWidget->RebuildList();
-		}
-	}
-
-	void RemoveLastActorQuery()
-	{
-		if (ActorQueries.Num() > 0)
-		{
-			ActorQueries.Pop();
-		}
-		if (ActorQueryListWidget.IsValid())
-		{
-			ActorQueryListWidget->RebuildList();
-		}
-	}
-
-	//------------------------
-	// Cached Widgets
-	//------------------------
-	TSharedPtr<SListView<TSharedPtr<FActorQuery>>> ActorQueryListWidget;
-
-	//------------------------
-	// Widget builder functions
-	//------------------------
-	TSharedRef<SWidget> DetailsWidget()
-	{
-		// clang-format off
-		return SNew(SBox)
+TSharedRef<SWidget> FActorMap::DetailsWidget()
+{
+	// clang-format off
+	return SNew(SBox)
 		.MinDesiredWidth(200.f)
 		.Content()
+	[
+		SNew(SVerticalBox)
+		+ SVerticalBox::Slot()
+		.AutoHeight()
 		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			[
-				DetailsColumns.DetailsSplitter(
-					INVTEXT("Ortho Width"),
-					INVTEXT("Orthographic height and width of the actor map. Always assumes a square map / render target background"),
-					SNew(SNumericEntryBox<float>)
+			DetailsColumns.MakeSimpleDetailsSplitter(
+				INVTEXT("Ortho Width"),
+				INVTEXT("Orthographic height and width of the actor map. Always assumes a square map / render target background"),
+				SNew(SNumericEntryBox<float>)
 					.Value(this, &FActorMap::OnGetOptionalOrthoWidth)
 					.OnValueChanged(this, &FActorMap::OnSetOrthoWidth)
-				)
-			]
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			[
-				DetailsColumns.DetailsSplitter(
-					INVTEXT("Origin"),
-					INVTEXT("The position from which the render capture of the world is made"),
-					SNew(SVectorInputBox)
+			)
+		]
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			DetailsColumns.MakeSimpleDetailsSplitter(
+				INVTEXT("Origin"),
+				INVTEXT("The position from which the render capture of the world is made"),
+				SNew(SVectorInputBox)
 					.X(this, &FActorMap::GetPositionX)
 					.Y(this, &FActorMap::GetPositionY)
 					.Z(this, &FActorMap::GetPositionZ)
@@ -802,98 +694,97 @@ protected:
 					.OnXCommitted(this, &FActorMap::OnSetPosition, 0)
 					.OnYCommitted(this, &FActorMap::OnSetPosition, 1)
 					.OnZCommitted(this, &FActorMap::OnSetPosition, 2)
-				)
-			]
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			[
-				DetailsColumns.DetailsSplitter(
-					INVTEXT("Follow Camera"),
-					INVTEXT("If to apply the Origin relative to the location of the currently possessed camera"),
-					SNew(SCheckBox)
+			)
+		]
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			DetailsColumns.MakeSimpleDetailsSplitter(
+				INVTEXT("Follow Camera"),
+				INVTEXT("If to apply the Origin relative to the location of the currently possessed camera"),
+				SNew(SCheckBox)
 					.IsChecked(this, &FActorMap::GetFollowCameraCheckBoxState)
 					.OnCheckStateChanged(this, &FActorMap::OnFollowCameraCheckBoxStateChanged)
-					)
-			]
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			[
-				DetailsColumns.DetailsSplitter(
-					INVTEXT("Tick Rate"),
-					INVTEXT("Time between two map updates in seconds"),
-					SNew(SNumericEntryBox<float>)
+			)
+		]
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			DetailsColumns.MakeSimpleDetailsSplitter(
+				INVTEXT("Tick Rate"),
+				INVTEXT("Time between two map updates in seconds"),
+				SNew(SNumericEntryBox<float>)
 					.Value(this, &FActorMap::OnGetOptionalTickRate)
 					.OnValueChanged(this, &FActorMap::OnSetTickRate)
-				)
-			]
-			+ SVerticalBox::Slot()
-			.AutoHeight()
+			)
+		]
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			SNew(SSpacer)
+			.Size(FVector2D{0.f, 20.f})
+		]
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot()
 			[
-				SNew(SSpacer)
-				.Size(FVector2D{0.f, 20.f})
-			]
-			+ SVerticalBox::Slot()
-			.AutoHeight()
-			[
-				SNew(SHorizontalBox)
-				+ SHorizontalBox::Slot()
-				[
-					SNew(SButton)
+				SNew(SButton)
 					.Text(INVTEXT("Add Actor Query"))
 					.OnPressed(this, &FActorMap::AddActorQuery)
-				]
-				+ SHorizontalBox::Slot()
-				[
-					SNew(SButton)
+			]
+			+ SHorizontalBox::Slot()
+			[
+				SNew(SButton)
 					.Text(INVTEXT("Remove Last Actor Query"))
 					.OnPressed(this, &FActorMap::RemoveLastActorQuery)
-				]
 			]
-			+ SVerticalBox::Slot()
-			.FillHeight(1.f)
-			[
-				SAssignNew(ActorQueryListWidget, SListView<TSharedPtr<FActorQuery>>)
+		]
+		+ SVerticalBox::Slot()
+		.FillHeight(1.f)
+		[
+			SAssignNew(ActorQueryListWidget, SListView<TSharedPtr<FActorQuery>>)
 				.ListItemsSource(&ActorQueries)
 				.OnGenerateRow(this, &FActorMap::OnGenerateActorQueryRow)
-			]
-		];
-		// clang-format on
-	}
+		]
+	];
+	// clang-format on
+}
 
-	TSharedRef<ITableRow> OnGenerateActorQueryRow(
-		TSharedPtr<FActorQuery> InItem,
-		const TSharedRef<STableViewBase>& OwnerTable)
-	{
-		return SNew(SActorQueryRow, OwnerTable, InItem).ColumnSizeData(&DetailsColumns);
-	}
+TSharedRef<ITableRow> FActorMap::OnGenerateActorQueryRow(
+	TSharedPtr<FActorQuery> InItem,
+	const TSharedRef<STableViewBase>& OwnerTable)
+{
+	return SNew(SActorQueryRow, OwnerTable, InItem).ColumnSizeData(&DetailsColumns);
+}
 
-	TSharedRef<SWidget> MapWidget()
-	{
-		// clang-format off
-		return
-			SNew(SOverlay)
-			+ SOverlay::Slot()
-			[
-				SNew(SScaleBox)
+TSharedRef<SWidget> FActorMap::MapWidget()
+{
+	// clang-format off
+	return
+		SNew(SOverlay)
+		+ SOverlay::Slot()
+		[
+			SNew(SScaleBox)
 				.VAlign(VAlign_Center)
 				.HAlign(HAlign_Center)
 				.Stretch(EStretch::ScaleToFit)
 				.Content()
-				[
-					SNew(SImage)
-					.Image(&MapBrush)
-				]
-			]
-			+ SOverlay::Slot()
 			[
-				SNew(SActorLocationOverlay)
+				SNew(SImage)
+				.Image(&MapBrush)
+			]
+		]
+		+ SOverlay::Slot()
+		[
+			SNew(SActorLocationOverlay)
 				.ActorQueries(&ActorQueries)
 				.MapSize(this, &FActorMap::GetOrthoWidth)
 				.ReferencePosition(this, &FActorMap::GetReferencePosition)
-			];
-		// clang-format on
-	}
-};
+		];
+	// clang-format on
+}
 
 /**
  * This is a bootstrapper class that opens the actor map inside a standalone editor window.
