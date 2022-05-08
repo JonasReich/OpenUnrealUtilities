@@ -84,12 +84,13 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 
 			// Loop through all types of parameters for this material and add them to the parameter arrays.
 			TArray<FMaterialParameterInfo> ParameterInfos;
-			TArray<FGuid> Guids;
-
-			auto FillParameters = [&]() {
-				for (int32 ParameterIdx = 0; ParameterIdx < ParameterInfos.Num(); ParameterIdx++)
+			TArray<FGuid> ParameterIds;
+			for (int32 ParameterTypeIndex = 0; ParameterTypeIndex < NumMaterialParameterTypes; ++ParameterTypeIndex)
+			{
+				const EMaterialParameterType ParameterType = StaticCast<EMaterialParameterType>(ParameterTypeIndex);
+				TargetMaterial->GetAllParameterInfoOfType(ParameterType, ParameterInfos, ParameterIds);
+				for (const FMaterialParameterInfo& ParameterInfo : ParameterInfos)
 				{
-					auto& ParameterInfo = ParameterInfos[ParameterIdx];
 					int32 SortPriority = 0;
 					TargetMaterial->GetParameterSortPriority(ParameterInfo.Name, SortPriority);
 
@@ -98,22 +99,7 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 						Parameters.Add(MakeShared<FOUUMaterialAnalyzer_ParameterData>(ParameterInfo, SortPriority));
 					}
 				}
-			};
-
-			TargetMaterial->GetAllVectorParameterInfo(OUT ParameterInfos, OUT Guids);
-			FillParameters();
-			TargetMaterial->GetAllScalarParameterInfo(OUT ParameterInfos, OUT Guids);
-			FillParameters();
-			TargetMaterial->GetAllTextureParameterInfo(ParameterInfos, OUT Guids);
-			FillParameters();
-			TargetMaterial->GetAllFontParameterInfo(OUT ParameterInfos, OUT Guids);
-			FillParameters();
-			TargetMaterial->GetAllMaterialLayersParameterInfo(OUT ParameterInfos, OUT Guids);
-			FillParameters();
-			TargetMaterial->GetAllStaticSwitchParameterInfo(OUT ParameterInfos, OUT Guids);
-			FillParameters();
-			TargetMaterial->GetAllStaticComponentMaskParameterInfo(OUT ParameterInfos, OUT Guids);
-			FillParameters();
+			}
 
 			FillInExpressions<UMaterialExpressionTextureSampleParameter>();
 			FillInExpressions<UMaterialExpressionParameter>();
@@ -340,7 +326,6 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 		{
 			// clang-format off
 			return SNew(SDockTab)
-			.Icon(FEditorStyle::GetBrush("LevelEditor.Tabs.Details"))
 			.Label(INVTEXT("Material Analyzer (OUU)"))
 			[
 				SNew(SBox)
