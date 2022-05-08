@@ -27,7 +27,10 @@ public class OUUDeveloper : OUUModuleRules
 			"Slate",
 			"AIModule",
 			"GameplayTags",
-			"GameplayAbilities"
+			"GameplayAbilities",
+			"DeveloperSettings",
+			"EngineSettings",
+			"SourceControl"
 		});
 
 		// - Editor only dependencies

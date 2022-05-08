@@ -5,6 +5,7 @@
 #include "Animation/AnimBlueprint.h"
 #include "Animation/AnimInstance.h"
 
+#if WITH_EDITOR
 bool UOUUAnimationLibrary::ImplementsAnimationLayerInterface(
 	TSubclassOf<UAnimInstance> AnimInstanceClass,
 	TSubclassOf<UAnimLayerInterface> AnimationLayerInterface)
@@ -26,6 +27,7 @@ bool UOUUAnimationLibrary::ImplementsAnimationLayerInterface(
 
 	return false;
 }
+#endif WITH_EDITOR
 
 USkeleton* UOUUAnimationLibrary::GetAnimInstanceClassTargetSkeleton(TSubclassOf<UAnimInstance> AnimInstanceClass)
 {

@@ -15,10 +15,12 @@ class OUURUNTIME_API UOUUAnimationLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
+#if WITH_EDITOR
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Animation")
 	static bool ImplementsAnimationLayerInterface(
 		TSubclassOf<UAnimInstance> AnimInstanceClass,
 		TSubclassOf<UAnimLayerInterface> AnimationLayerInterfaceClass);
+#endif
 
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Animation")
 	static USkeleton* GetAnimInstanceClassTargetSkeleton(TSubclassOf<UAnimInstance> AnimInstanceClass);
