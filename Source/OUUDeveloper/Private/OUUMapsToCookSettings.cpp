@@ -306,7 +306,7 @@ void UOUUMapsToCookSettings::SetDefaultConfigSection(FString ConfigSectionString
 
 	// Write out the changed DefaultConfigSection
 	OUU::Developer::Private::CheckoutConfigFile(GetDefaultConfigFilename());
-	UpdateDefaultConfigFile();
+	TryUpdateDefaultConfigFile();
 
 	TryApplyGameDefaultMap();
 }
@@ -343,6 +343,6 @@ void UOUUMapsToCookSettings::TryApplyGameDefaultMap() const
 
 		// Write out the changed default game map, so it's applied for the build.
 		OUU::Developer::Private::CheckoutConfigFile(GameMapSettings->GetDefaultConfigFilename());
-		GameMapSettings->UpdateDefaultConfigFile();
+		GameMapSettings->TryUpdateDefaultConfigFile();
 	}
 }
