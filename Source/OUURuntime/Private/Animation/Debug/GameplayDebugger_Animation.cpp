@@ -37,6 +37,7 @@ namespace GDC_Animation_Inputs
 	FName Notifies = TEXT("Toggle Notifies");
 	FName FullGraphDisplay = TEXT("Toggle Full Graph Display");
 	FName FullBlendspaceDisplay = TEXT("Toggle Full Blendspace Display");
+	FName SceneComponentTree = TEXT("Toggle Scene Component Tree");
 } // namespace GDC_Animation_Inputs
 
 FGameplayDebuggerCategory_Animation::FGameplayDebuggerCategory_Animation()
@@ -63,13 +64,14 @@ FGameplayDebuggerCategory_Animation::FGameplayDebuggerCategory_Animation()
 			EGameplayDebuggerInputMode::Local,                                                                         \
 			DefaultValue);
 
-	BIND_SWITCH_KEY(SyncGroups, One, true);
+	BIND_SWITCH_KEY(SyncGroups, One, false);
 	BIND_SWITCH_KEY(Montages, Two, true);
-	BIND_SWITCH_KEY(Graph, Three, true);
-	BIND_SWITCH_KEY(Curves, Four, true);
+	BIND_SWITCH_KEY(Graph, Three, false);
+	BIND_SWITCH_KEY(Curves, Four, false);
 	BIND_SWITCH_KEY(Notifies, Five, true);
 	BIND_SWITCH_KEY(FullGraphDisplay, Six, false);
 	BIND_SWITCH_KEY(FullBlendspaceDisplay, Seven, false);
+	BIND_SWITCH_KEY(SceneComponentTree, Eight, false);
 
 	#undef BIND_SWITCH_KEY
 }
@@ -114,6 +116,11 @@ void FGameplayDebuggerCategory_Animation::DrawData(
 	DebugInstanceIndex =
 		NumLinkedInstances > 0 ? (((DebugInstanceIndex + Offset) % (NumLinkedInstances + Offset)) - Offset) : -1;
 
+	if (GetInputBoolSwitchValue(GDC_Animation_Inputs::SceneComponentTree))
+	{
+		DrawSceneComponentTree(CanvasContext, DebugActor, DebugMeshComponent);
+	}
+
 	if (auto* AnimInstance =
 			DebugInstanceIndex >= 0 ? LinkedAnimInstances[DebugInstanceIndex] : DebugMeshComponent->GetAnimInstance())
 	{
@@ -144,6 +151,48 @@ void FGameplayDebuggerCategory_Animation::CycleDebugMesh()
 void FGameplayDebuggerCategory_Animation::CycleDebugInstance()
 {
 	DebugInstanceIndex++;
+}
+
+void FGameplayDebuggerCategory_Animation::DrawSceneComponentTree(
+	FGameplayDebuggerCanvasContext& CanvasContext,
+	const AActor* DebugActor,
+	USkeletalMeshComponent* DebugMeshComponent) const
+{
+	float Indent = 0;
+
+	FGameplayDebugger_DisplayDebugManager DisplayDebugManager{CanvasContext};
+	DisplayDebugManager.DrawTree(
+		DebugActor->GetRootComponent(),
+		OUT Indent,
+		// GetNumNodeChildren
+		[](const USceneComponent* SceneComp) -> int32 { return SceneComp->GetNumChildrenComponents(); },
+		// OnGetChildByIndex
+		[](USceneComponent* SceneComponent, int32 ChildIdx) -> USceneComponent* {
+			return SceneComponent->GetChildComponent(ChildIdx);
+		},
+		// OnGetDebugString
+		[&](USceneComponent* SceneComponent) -> FString {
+			const FName SocketName = SceneComponent->GetAttachSocketName();
+			const FString SocketNameString = (SocketName == NAME_None ? FString("") : SocketName.ToString());
+			const FString ColorString = SceneComponent == DebugMeshComponent ? "{green}" : "{white}";
+			const FString SceneComponentName = SceneComponent->GetName();
+			FString OptionalMeshString = "";
+			if (auto* StaticMeshComponent = Cast<UStaticMeshComponent>(SceneComponent))
+			{
+				OptionalMeshString = FString::Printf(TEXT("(%s)"), *LexToString(StaticMeshComponent->GetStaticMesh()));
+			}
+			else if (auto* SkelMeshComp = Cast<USkeletalMeshComponent>(SceneComponent))
+			{
+				OptionalMeshString = FString::Printf(TEXT("(%s)"), *LexToString(SkelMeshComp->SkeletalMesh));
+			}
+
+			return FString::Printf(
+				TEXT("[{yellow}%s{white}] %s%s %s"),
+				*SocketNameString,
+				*ColorString,
+				*SceneComponentName,
+				*OptionalMeshString);
+		});
 }
 
 void FGameplayDebuggerCategory_Animation::DisplayDebug(

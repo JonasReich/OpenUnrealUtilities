@@ -2,6 +2,9 @@
 
 #include "GameplayDebugger/GameplayDebugger_DisplayDebugManager.h"
 
+#include "DisplayDebugHelpers.h"
+#include "DrawDebugHelpers.h"
+
 #if WITH_GAMEPLAY_DEBUGGER
 
 	#include "Engine/Canvas.h"
@@ -85,6 +88,78 @@ void FGameplayDebugger_DisplayDebugManager::ShiftYDrawPosition(const float& YOff
 	CanvasContext.CursorY += YOffset;
 	MaxCursorY = FMath::Max(CanvasContext.CursorY, MaxCursorY);
 	AddColumnIfNeeded();
+}
+
+void FGameplayDebugger_DisplayDebugManager::DrawTree_Impl(TArray<FFlattenedDebugData> LineHelpers, float& Indent)
+{
+	auto* Canvas = CanvasContext.Canvas.Get();
+	if (!IsValid(Canvas))
+		return;
+
+	constexpr float NodeIndent = 8.f;
+	constexpr float LineIndent = 4.f;
+	constexpr float AttachLineLength = NodeIndent - LineIndent;
+	int32 PrevChainID = -1;
+	SetLinearDrawColor(FColor::White);
+
+	FIndenter AnimNodeTreeIndent(Indent);
+	// Index represents indent level, track the current starting point for that
+	TArray<FVector2D> IndentLineStartCoord;
+	for (auto& Line : LineHelpers)
+	{
+		float CurrIndent = Indent + (Line.Indent * NodeIndent);
+		float CurrLineYBase = GetYPos() + GetMaxCharHeight();
+
+		if (PrevChainID != Line.ChainID)
+		{
+			// Extra spacing to delimit different chains, CurrLineYBase now
+			// roughly represents middle of text line, so we can use it for line drawing
+			const int32 HalfStep = static_cast<int32>(GetMaxCharHeight() / 2);
+			ShiftYDrawPosition(static_cast<float>(HalfStep));
+
+			// Handle line drawing
+			const int32 VerticalLineIndex = Line.Indent - 1;
+			if (IndentLineStartCoord.IsValidIndex(VerticalLineIndex))
+			{
+				const FVector2D LineStartCoord = IndentLineStartCoord[VerticalLineIndex];
+				IndentLineStartCoord[VerticalLineIndex] = FVector2D(GetXPos(), CurrLineYBase);
+
+				// If indent parent is not in same column, ignore line.
+				if (FMath::IsNearlyEqual(LineStartCoord.X, GetXPos()))
+				{
+					const float EndX = GetXPos() + CurrIndent;
+					const float StartX = EndX - AttachLineLength;
+
+					// horizontal line to node
+					DrawDebugCanvas2DLine(
+						Canvas,
+						FVector(StartX, CurrLineYBase, 0.f),
+						FVector(EndX, CurrLineYBase, 0.f),
+						FColor::White);
+
+					// vertical line
+					DrawDebugCanvas2DLine(
+						Canvas,
+						FVector(StartX, LineStartCoord.Y, 0.f),
+						FVector(StartX, CurrLineYBase, 0.f),
+						FColor::White);
+				}
+			}
+
+			// move CurrYLineBase back to base of line
+			CurrLineYBase += HalfStep;
+		}
+
+		// Update our base position for subsequent line drawing
+		if (!IndentLineStartCoord.IsValidIndex(Line.Indent))
+		{
+			IndentLineStartCoord.AddZeroed(Line.Indent + 1 - IndentLineStartCoord.Num());
+		}
+		IndentLineStartCoord[Line.Indent] = FVector2D(GetXPos(), CurrLineYBase);
+
+		PrevChainID = Line.ChainID;
+		DrawString(Line.DebugString, CurrIndent);
+	}
 }
 
 #endif

@@ -38,6 +38,11 @@ private:
 	void CycleDebugMesh();
 	void CycleDebugInstance();
 
+	void DrawSceneComponentTree(
+		FGameplayDebuggerCanvasContext& CanvasContext,
+		const AActor* DebugActor,
+		USkeletalMeshComponent* DebugMeshComponent) const;
+
 	void DisplayDebug(
 		FGameplayDebuggerCanvasContext& CanvasContext,
 		USkeletalMeshComponent* SkeletalMeshComponent,
