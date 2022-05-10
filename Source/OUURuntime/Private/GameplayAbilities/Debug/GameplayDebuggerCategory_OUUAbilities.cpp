@@ -47,28 +47,17 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawData(
 	FGameplayDebuggerCanvasContext& CanvasContext)
 {
 	CanvasContext.Font = GEngine->GetTinyFont();
-
-	FVector2D ViewPortSize;
-	GEngine->GameViewport->GetViewportSize(OUT ViewPortSize);
-
 	CanvasContext.CursorY += 10.f;
 
-	const float RemainingViewportHeight = ViewPortSize.Y - CanvasContext.CursorY;
-
-	const float BackgroundPadding = 5.0f;
-	const FVector2D BackgroundLocation = FVector2D(BackgroundPadding, CanvasContext.CursorY - BackgroundPadding);
-	const FVector2D BackgroundSize(
-		ViewPortSize.X - 2 * BackgroundPadding,
-		RemainingViewportHeight - 2 * BackgroundPadding);
-	DrawBackground(CanvasContext, BackgroundLocation, BackgroundSize);
-
-	AActor* LocalDebugActor = FindLocalDebugActor();
-	UAbilitySystemComponent* AbilityComp = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(LocalDebugActor);
-
-	if (AbilityComp)
+	if (auto* AbilityComp = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(FindLocalDebugActor()))
 	{
 		if (auto* OUUAbilityComp = Cast<UOUUAbilitySystemComponent>(AbilityComp))
 		{
+			FVector2D ViewPortSize;
+			GEngine->GameViewport->GetViewportSize(OUT ViewPortSize);
+			const float RemainingViewportHeight = ViewPortSize.Y - CanvasContext.CursorY;
+
+			constexpr float BackgroundPadding = 5.0f;
 			FAbilitySystemComponentDebugInfo DebugInfo;
 			DebugInfo.bPrintToLog = false;
 
@@ -82,34 +71,27 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawData(
 			DebugInfo.MaxY = ViewPortSize.Y - BackgroundPadding - 50.f;
 			DebugInfo.NewColumnYPadding = DebugInfo.OriginalY + 30.f;
 
+			const FVector2D BackgroundLocation =
+				FVector2D(BackgroundPadding, CanvasContext.CursorY - BackgroundPadding);
+			const FVector2D BackgroundSize(
+				ViewPortSize.X - 2 * BackgroundPadding,
+				RemainingViewportHeight - 2 * BackgroundPadding);
+
+			DrawBackground(CanvasContext, BackgroundLocation, BackgroundSize);
+
 			// Use custom debugger for UOUUAbilitySystemComponents
 			Debug_Custom(DebugInfo, OUUAbilityComp);
+			CanvasContext.CursorY = ViewPortSize.Y;
 		}
 		else
 		{
-			UAbilitySystemComponent::FAbilitySystemComponentDebugInfo DebugInfo;
-			DebugInfo.bShowAbilities = true;
-			DebugInfo.bShowAttributes = true;
-			DebugInfo.bShowGameplayEffects = true;
-			DebugInfo.bPrintToLog = false;
-
-			DebugInfo.Canvas = CanvasContext.Canvas.Get();
-			DebugInfo.XPos = CanvasContext.CursorX;
-			DebugInfo.YPos = CanvasContext.CursorY;
-			DebugInfo.OriginalX = CanvasContext.CursorX;
-			DebugInfo.OriginalY = CanvasContext.CursorY;
-			// Add some extra padding on the bottom.
-			// It's likely the task bar overlaps or some other clipping issues cause content to get lost here otherwise.
-			DebugInfo.MaxY = ViewPortSize.Y - BackgroundPadding - 50.f;
-			DebugInfo.NewColumnYPadding = DebugInfo.OriginalY + 30.f;
-
-			// Native UAbilitySystemComponent has too little information exposed
-			// so we just invoke the built-in debugging tool
-			AbilityComp->Debug_Internal(DebugInfo);
+			CanvasContext.Printf(
+				TEXT("{yellow}Ability system component %s (%s) is not a UOUUAbilitySystemComponent.\nPlease "
+					 "use the regular ability system debugger or reparent your component class."),
+				*AbilityComp->GetName(),
+				*AbilityComp->GetClass()->GetName());
 		}
 	}
-
-	CanvasContext.CursorY = ViewPortSize.Y;
 }
 
 void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
@@ -302,8 +284,12 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 			float FinalValue = AbilitySystem->GetNumericAttribute(Attribute);
 			float BaseValue = SnaphotAggregator.GetBaseValue();
 
+			FString PaddedAttributeName = Attribute.GetName();
+			while (PaddedAttributeName.Len() < 30)
+				PaddedAttributeName += " ";
+
 			FString AttributeString =
-				FString::Printf(TEXT("%s %.2f "), *Attribute.GetName(), AbilitySystem->GetNumericAttribute(Attribute));
+				FString::Printf(TEXT("%s %.2f "), *PaddedAttributeName, AbilitySystem->GetNumericAttribute(Attribute));
 			if (FMath::Abs<float>(BaseValue - FinalValue) > SMALL_NUMBER)
 			{
 				AttributeString += FString::Printf(TEXT(" (Base: %.2f)"), BaseValue);
@@ -392,8 +378,11 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 				if (Attribute.IsValid())
 				{
 					float Value = AbilitySystem->GetNumericAttribute(Attribute);
+					FString PaddedAttributeName = Attribute.GetName();
+					while (PaddedAttributeName.Len() < 30)
+						PaddedAttributeName += " ";
 
-					DebugLine(Info, FString::Printf(TEXT("%s %.2f"), *Attribute.GetName(), Value), 4.f, 0.f);
+					DebugLine(Info, FString::Printf(TEXT("%s %.2f"), *PaddedAttributeName, Value), 4.f, 0.f);
 				}
 			}
 		}
@@ -487,9 +476,17 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 				Info.Canvas->SetDrawColor(AbilityTextColor);
 			}
 
+			const FString AbilitySourceName = GameplayDebuggerUtils::CleanupName(GetNameSafe(AbilitySpec.SourceObject));
+
 			DebugLine(
 				Info,
-				FString::Printf(TEXT("%s %s %s %s"), *AbilityName, *StatusText, *InputPressedStr, *ActivationModeStr),
+				FString::Printf(
+					TEXT("%s (%s) %s %s %s"),
+					*AbilityName,
+					*AbilitySourceName,
+					*StatusText,
+					*InputPressedStr,
+					*ActivationModeStr),
 				4.f,
 				0.f);
 
@@ -663,12 +660,19 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 		DrawTitle(Info, "GAMEPLAY EVENTS");
 
 		auto Now = FDateTime::Now();
-		for (auto Entry : AbilitySystem->CircularGameplayEventHistory)
+		for (auto Entry : ReverseRange(AbilitySystem->CircularGameplayEventHistory))
 		{
 			float SecondsSinceEvent = (Now - Entry.Timestamp).GetTotalSeconds();
+			FNumberFormattingOptions NumberFormattingOptions;
+			NumberFormattingOptions.MinimumIntegralDigits = 3;
+			NumberFormattingOptions.MaximumIntegralDigits = 3;
+			NumberFormattingOptions.MinimumFractionalDigits = 2;
+			NumberFormattingOptions.MaximumFractionalDigits = 2;
+			FString SecondsSinceEventString = FText::AsNumber(SecondsSinceEvent, &NumberFormattingOptions).ToString();
+
 			FString DebugString = FString::Printf(
-				TEXT("%.1fs ago: [%s](%.2f) %s -> %s"),
-				SecondsSinceEvent,
+				TEXT("#%2i: [%s](%.2f) %s -> %s"),
+				Entry.EventNumber,
 				*Entry.EventTag.ToString(),
 				Entry.EventMagnitude,
 				*LexToString(Entry.Instigator),
