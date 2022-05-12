@@ -21,6 +21,7 @@
 	#include "GameplayDebugger/GameplayDebugger_DisplayDebugManager.h"
 	#include "Animation/AnimNotifies/AnimNotifyState.h"
 	#include "Templates/StringUtils.h"
+	#include "Engine/StaticMesh.h"
 
 	#if UE_VERSION_OLDER_THAN(5, 0, 0)
 		#include "Animation/BlendSpaceBase.h"
@@ -187,11 +188,13 @@ void FGameplayDebuggerCategory_Animation::DrawSceneComponentTree(
 			}
 
 			return FString::Printf(
-				TEXT("[{yellow}%s{white}] %s%s %s"),
+				TEXT("[{yellow}%s{white}] %s%s %s\n"
+					 "\t\t{grey}T|R|S = %s"),
 				*SocketNameString,
 				*ColorString,
 				*SceneComponentName,
-				*OptionalMeshString);
+				*OptionalMeshString,
+				*SceneComponent->GetRelativeTransform().ToString());
 		});
 }
 
