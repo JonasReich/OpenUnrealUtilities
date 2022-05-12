@@ -4,44 +4,11 @@
 
 #include "CoreMinimal.h"
 
-#include "Templates/ReverseIterator.h"
+#include "Animation/Skeleton.h"
 
 namespace OUU::Runtime::Animation
 {
 	constexpr int32 ROOT_BONE_IDX = 0;
-
-	/**
-	 * Utility container to support ranged-for loop based on bone-chain in reference skeleton.
-	 * Usage:
-	 * for (int32 BoneIndex : FBoneChainRange(ReferenceSkeleton, LeafBoneIndex)) { ... }
-	 */
-	struct FBoneChainRange
-	{
-		enum class ELeafStatus
-		{
-			Include,
-			Exclude
-		};
-
-		FBoneChainRange(
-			const FReferenceSkeleton& ReferenceSkeleton,
-			int32 LeafBoneIndex,
-			ELeafStatus KeepLeaf = ELeafStatus::Include)
-		{
-			BoneChain_RootToLeaf.Add(LeafBoneIndex);
-			ReferenceSkeleton.EnsureParentsExistAndSort(BoneChain_RootToLeaf);
-			if (KeepLeaf == ELeafStatus::Exclude)
-			{
-				BoneChain_RootToLeaf.Pop();
-			}
-		}
-
-		auto begin() const noexcept { return MakeReverseIterator(IteratorUtils::end(BoneChain_RootToLeaf)); }
-		auto end() const noexcept { return MakeReverseIterator(IteratorUtils::begin(BoneChain_RootToLeaf)); }
-
-	private:
-		TArray<FBoneIndexType> BoneChain_RootToLeaf;
-	};
 
 	enum class ETraverseBoneTreeAction
 	{

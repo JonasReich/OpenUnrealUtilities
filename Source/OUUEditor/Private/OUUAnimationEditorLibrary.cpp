@@ -4,7 +4,8 @@
 
 #include "Animation/AnimBlueprint.h"
 #include "Animation/AnimInstance.h"
-#include "Animation/TraverseBones.h"
+#include "Animation/BoneChainRange.h"
+#include "Animation/TraverseBoneTree.h"
 #include "LODUtilities.h"
 #include "MeshUtilities.h"
 #include "Misc/RegexUtils.h"
@@ -87,8 +88,9 @@ int32 UOUUAnimationEditorLibrary::RemoveUnskinnedBonesFromMesh(
 		return EFilterAction::Include;
 	};
 
+	using OUU::Runtime::Animation::EBoneChainLeaf;
 	using OUU::Runtime::Animation::ETraverseBoneTreeAction;
-	using OUU::Runtime::Animation::FBoneChainRange;
+	using OUU::Runtime::Animation::TBoneChainRange;
 
 	OUU::Runtime::Animation::TraverseBoneTree(Skeleton, [&](int32 SkeletonBoneIndex) -> ETraverseBoneTreeAction {
 		const auto BoneName = Skeleton->GetReferenceSkeleton().GetBoneName(SkeletonBoneIndex);
@@ -109,7 +111,7 @@ int32 UOUUAnimationEditorLibrary::RemoveUnskinnedBonesFromMesh(
 			BonesToKeep_Indices.Add(MeshBoneIndex);
 			// This bone is excluded. If any parent bone was included we must remove it from the list.
 			for (const FBoneIndexType ParentBoneIndex :
-				 FBoneChainRange(SkeletalMesh->RefSkeleton, MeshBoneIndex, FBoneChainRange::ELeafStatus::Exclude))
+				 TBoneChainRange(SkeletalMesh->RefSkeleton, MeshBoneIndex, EBoneChainLeaf::Exclude))
 			{
 				BonesToKeep_Indices.Add(ParentBoneIndex);
 				if (BonesToRemove_Indices.Contains(ParentBoneIndex))
@@ -139,18 +141,18 @@ int32 UOUUAnimationEditorLibrary::RemoveUnskinnedBonesFromMesh(
 	for (const int32 MeshBoneIndex : BonesToRemove_Indices)
 	{
 		auto BoneName = SkeletalMesh->RefSkeleton.GetBoneName(MeshBoneIndex);
-		bool bIsImplcitlyExcluded = false;
+		bool bIsImplicitlyExcluded = false;
 		for (const FBoneIndexType ParentMeshBoneIndex :
-			 FBoneChainRange(SkeletalMesh->RefSkeleton, MeshBoneIndex, FBoneChainRange::ELeafStatus::Exclude))
+			 TBoneChainRange(SkeletalMesh->RefSkeleton, MeshBoneIndex, EBoneChainLeaf::Exclude))
 		{
 			if (BonesToRemove_Indices.Contains(ParentMeshBoneIndex))
 			{
-				bIsImplcitlyExcluded = true;
+				bIsImplicitlyExcluded = true;
 				break;
 			}
 		}
 
-		if (!bIsImplcitlyExcluded)
+		if (!bIsImplicitlyExcluded)
 		{
 			BonesToRemove_FilteredNames.Add(BoneName);
 		}

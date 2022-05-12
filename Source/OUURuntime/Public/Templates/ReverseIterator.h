@@ -85,9 +85,24 @@ public:
  * Equivalent to std::make_reverse_iterator()
  */
 template <typename IteratorType>
-CONSTEXPR auto MakeReverseIterator(IteratorType Iterator)
+CONSTEXPR TReverseIterator<IteratorType> MakeReverseIterator(IteratorType Iterator)
 {
 	return TReverseIterator<IteratorType>(Iterator);
+}
+
+template <bool bReverse, typename IteratorType>
+using TReverseIteratorIf = typename TEnableIf<bReverse, IteratorType>::Type;
+
+template <bool bReverse, typename IteratorType>
+CONSTEXPR TReverseIteratorIf<bReverse == true, IteratorType> MakeReverseIteratorIf(IteratorType Iterator)
+{
+	return TReverseIterator<IteratorType>(Iterator);
+}
+
+template <bool bReverse, typename IteratorType>
+CONSTEXPR TReverseIteratorIf<bReverse == false, IteratorType> MakeReverseIteratorIf(IteratorType Iterator)
+{
+	return Iterator;
 }
 
 /** Swaps begin() and end() iterators to allow for reversed iteration over a container, */
