@@ -33,6 +33,7 @@ public class OUUEditor : OUUModuleRules
 			"UMGEditor",
 			"WorkspaceMenuStructure",
 			"PropertyEditor",
+			"SkeletalMeshUtilitiesCommon",
 
 			// OUU
 			"OUUDeveloper"
