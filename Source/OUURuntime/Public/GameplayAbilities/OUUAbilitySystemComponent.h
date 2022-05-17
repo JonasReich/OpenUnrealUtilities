@@ -18,7 +18,8 @@ struct OUURUNTIME_API FOUUGameplayEventData
 	GENERATED_BODY()
 public:
 	FOUUGameplayEventData() = default;
-	FOUUGameplayEventData(const FGameplayEventData& SourcePayload) :
+	FOUUGameplayEventData(int32 EventCounter, const FGameplayEventData& SourcePayload) :
+		EventNumber(EventCounter),
 		Timestamp(FDateTime::Now()),
 		EventTag(SourcePayload.EventTag),
 		Instigator(SourcePayload.Instigator),
@@ -26,6 +27,9 @@ public:
 		EventMagnitude(SourcePayload.EventMagnitude)
 	{
 	}
+
+	UPROPERTY()
+	int32 EventNumber = 0;
 
 	/** When the event occured (compare with FDateTime::Now()) */
 	UPROPERTY()
@@ -66,16 +70,18 @@ public:
 	// --
 
 protected:
+	int32 EventCounter = 0;
+
 	/**
 	 * History of all gameplay events encountered via HandleGameplayEvent()
 	 * Intended for debugging purposes.
 	 */
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TArray<FOUUGameplayEventData> GameplayEventHistory;
 
 	/**
 	 * Circular buffer adapter for the gameplay event history.
 	 * Use this to access the history elements!
 	 */
-	TCircularArrayAdaptor<FOUUGameplayEventData> CircularGameplayEventHistory{GameplayEventHistory, 10};
+	TCircularArrayAdaptor<FOUUGameplayEventData> CircularGameplayEventHistory{GameplayEventHistory, 50};
 };

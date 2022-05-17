@@ -6,7 +6,8 @@ int32 UOUUAbilitySystemComponent::HandleGameplayEvent(FGameplayTag EventTag, con
 {
 	if (Payload != nullptr)
 	{
-		CircularGameplayEventHistory.Add(FOUUGameplayEventData(*Payload));
+		EventCounter++;
+		CircularGameplayEventHistory.Add(FOUUGameplayEventData(EventCounter, *Payload));
 	}
 	return Super::HandleGameplayEvent(EventTag, Payload);
 }
