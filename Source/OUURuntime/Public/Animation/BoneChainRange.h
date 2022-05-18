@@ -45,12 +45,12 @@ namespace OUU::Runtime::Animation
 		auto begin() const noexcept
 		{
 			return MakeReverseIteratorIf<Direction == EBoneChainDirection::LeafToRoot>(
-				IteratorUtils::end(BoneChain_RootToLeaf));
+				OUU::Runtime::Private::IteratorUtils::end(BoneChain_RootToLeaf));
 		}
 		auto end() const noexcept
 		{
 			return MakeReverseIteratorIf<Direction == EBoneChainDirection::LeafToRoot>(
-				IteratorUtils::begin(BoneChain_RootToLeaf));
+				OUU::Runtime::Private::IteratorUtils::begin(BoneChain_RootToLeaf));
 		}
 
 	private:

@@ -12,6 +12,7 @@
 #include "Modules/ModuleManager.h"
 #include "Rendering/SkeletalMeshRenderData.h"
 #include "ScopedTransaction.h"
+#include "SkeletalMeshEditorSubsystem.h"
 
 bool UOUUAnimationEditorLibrary::ImplementsAnimationLayerInterface(
 	TSubclassOf<UAnimInstance> AnimInstanceClass,
@@ -67,7 +68,7 @@ int32 UOUUAnimationEditorLibrary::RemoveUnskinnedBonesFromMesh(
 	TSet<int32> BonesToRemove_Indices;
 	TSet<int32> BonesToKeep_Indices;
 	const FSkeletalMeshLODRenderData& LODData = SkeletalMesh->GetResourceForRendering()->LODRenderData[MinLOD];
-	auto* Skeleton = SkeletalMesh->Skeleton;
+	auto* Skeleton = SkeletalMesh->GetSkeleton();
 
 	enum class EFilterAction
 	{
@@ -81,9 +82,11 @@ int32 UOUUAnimationEditorLibrary::RemoveUnskinnedBonesFromMesh(
 		if (LODData.ActiveBoneIndices.Find(MeshBoneIndex) != INDEX_NONE)
 			return EFilterAction::Exclude;
 		const auto BoneNameString = BoneName.ToString();
-		if (BoneNameIncludePattern.Len() > 0 && !FRegexUtils::MatchesRegex(BoneNameIncludePattern, BoneNameString))
+		if (BoneNameIncludePattern.Len() > 0
+			&& !OUU::Runtime::RegexUtils::MatchesRegex(BoneNameIncludePattern, BoneNameString))
 			return EFilterAction::Unknown;
-		if (BoneNameExcludePattern.Len() > 0 && FRegexUtils::MatchesRegex(BoneNameExcludePattern, BoneNameString))
+		if (BoneNameExcludePattern.Len() > 0
+			&& OUU::Runtime::RegexUtils::MatchesRegex(BoneNameExcludePattern, BoneNameString))
 			return EFilterAction::Exclude;
 		return EFilterAction::Include;
 	};
@@ -94,7 +97,7 @@ int32 UOUUAnimationEditorLibrary::RemoveUnskinnedBonesFromMesh(
 
 	OUU::Runtime::Animation::TraverseBoneTree(Skeleton, [&](int32 SkeletonBoneIndex) -> ETraverseBoneTreeAction {
 		const auto BoneName = Skeleton->GetReferenceSkeleton().GetBoneName(SkeletonBoneIndex);
-		const int32 MeshBoneIndex = SkeletalMesh->RefSkeleton.FindRawBoneIndex(BoneName);
+		const int32 MeshBoneIndex = SkeletalMesh->GetRefSkeleton().FindRawBoneIndex(BoneName);
 		// Bone does not exist on this mesh. Children can also be skipped. No actions can be taken.
 		if (MeshBoneIndex == INDEX_NONE)
 			return ETraverseBoneTreeAction::SkipChildBones;
@@ -111,7 +114,7 @@ int32 UOUUAnimationEditorLibrary::RemoveUnskinnedBonesFromMesh(
 			BonesToKeep_Indices.Add(MeshBoneIndex);
 			// This bone is excluded. If any parent bone was included we must remove it from the list.
 			for (const FBoneIndexType ParentBoneIndex :
-				 TBoneChainRange(SkeletalMesh->RefSkeleton, MeshBoneIndex, EBoneChainLeaf::Exclude))
+				 TBoneChainRange(SkeletalMesh->GetRefSkeleton(), MeshBoneIndex, EBoneChainLeaf::Exclude))
 			{
 				BonesToKeep_Indices.Add(ParentBoneIndex);
 				if (BonesToRemove_Indices.Contains(ParentBoneIndex))
@@ -140,10 +143,10 @@ int32 UOUUAnimationEditorLibrary::RemoveUnskinnedBonesFromMesh(
 	TSet<FName> BonesToRemove_FilteredNames;
 	for (const int32 MeshBoneIndex : BonesToRemove_Indices)
 	{
-		auto BoneName = SkeletalMesh->RefSkeleton.GetBoneName(MeshBoneIndex);
+		auto BoneName = SkeletalMesh->GetRefSkeleton().GetBoneName(MeshBoneIndex);
 		bool bIsImplicitlyExcluded = false;
 		for (const FBoneIndexType ParentMeshBoneIndex :
-			 TBoneChainRange(SkeletalMesh->RefSkeleton, MeshBoneIndex, EBoneChainLeaf::Exclude))
+			 TBoneChainRange(SkeletalMesh->GetRefSkeleton(), MeshBoneIndex, EBoneChainLeaf::Exclude))
 		{
 			if (BonesToRemove_Indices.Contains(ParentMeshBoneIndex))
 			{
@@ -177,7 +180,7 @@ int32 UOUUAnimationEditorLibrary::RemoveUnskinnedBonesFromMesh(
 	constexpr int32 NewLodCount = 0;
 	constexpr bool bRegenerateEvenIfImported = true;
 	constexpr bool bGenerateBaseLOD = true;
-	FLODUtilities::RegenerateLOD(SkeletalMesh, NewLodCount, bRegenerateEvenIfImported, bGenerateBaseLOD);
+	USkeletalMeshEditorSubsystem::RegenerateLOD(SkeletalMesh, NewLodCount, bRegenerateEvenIfImported, bGenerateBaseLOD);
 
 	return true;
 }
