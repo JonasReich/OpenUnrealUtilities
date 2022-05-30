@@ -2,6 +2,7 @@
 
 #include "Misc/MessageDialogLibrary.h"
 
+#include "EditorDialogLibrary.h"
 #include "Misc/MessageDialog.h"
 
 void UMessageDialogLibrary::ShowMessageDialogueNotification(FText OptionalTitle, FText Message)
@@ -9,26 +10,21 @@ void UMessageDialogLibrary::ShowMessageDialogueNotification(FText OptionalTitle,
 	FMessageDialog::Debugf(Message, GetOptionalTitlePtr(OptionalTitle));
 }
 
-EBlueprintAppReturnType UMessageDialogLibrary::OpenMessageDialog(
-	EBlueprintAppMsgType MessageType,
+TEnumAsByte<EAppReturnType::Type> UMessageDialogLibrary::OpenMessageDialog(
+	TEnumAsByte<EAppMsgType::Type> MessageType,
 	FText OptionalTitle,
 	FText Message)
 {
-	return StaticCast<EBlueprintAppReturnType>(
-		FMessageDialog::Open(StaticCast<EAppMsgType::Type>(MessageType), Message, GetOptionalTitlePtr(OptionalTitle)));
+	return UEditorDialogLibrary::ShowMessage(OptionalTitle, Message, MessageType);
 }
 
-EBlueprintAppReturnType UMessageDialogLibrary::OpenMessageDialogWithDefaultValue(
-	EBlueprintAppMsgType MessageType,
-	EBlueprintAppReturnType DefaultValue,
+TEnumAsByte<EAppReturnType::Type> UMessageDialogLibrary::OpenMessageDialogWithDefaultValue(
+	TEnumAsByte<EAppMsgType::Type> MessageType,
+	TEnumAsByte<EAppReturnType::Type> DefaultValue,
 	FText OptionalTitle,
 	FText Message)
 {
-	return StaticCast<EBlueprintAppReturnType>(FMessageDialog::Open(
-		StaticCast<EAppMsgType::Type>(MessageType),
-		StaticCast<EAppReturnType::Type>(DefaultValue),
-		Message,
-		GetOptionalTitlePtr(OptionalTitle)));
+	return UEditorDialogLibrary::ShowMessage(OptionalTitle, Message, MessageType, DefaultValue);
 }
 
 const FText* UMessageDialogLibrary::GetOptionalTitlePtr(FText& Text)

@@ -6,42 +6,6 @@
 
 #include "MessageDialogLibrary.generated.h"
 
-/** Blueprint exposed copy of EAppReturnType */
-UENUM()
-enum class EBlueprintAppReturnType : uint8
-{
-	No = 0,
-	Yes = EAppReturnType::Yes,
-	YesAll = EAppReturnType::YesAll,
-	NoAll = EAppReturnType::NoAll,
-	Cancel = EAppReturnType::Cancel,
-	Ok = EAppReturnType::Ok,
-	Retry = EAppReturnType::Retry,
-	Continue = EAppReturnType::Continue,
-};
-
-static_assert(
-	EBlueprintAppReturnType::No == static_cast<EBlueprintAppReturnType>(EAppReturnType::No),
-	"EBlueprintAppReturnType::No must be equal to EAppReturnType::No");
-
-/** Blueprint exposed copy of EAppMsgType */
-UENUM()
-enum class EBlueprintAppMsgType : uint8
-{
-	Ok = 0,
-	YesNo = EAppMsgType::YesNo,
-	OkCancel = EAppMsgType::OkCancel,
-	YesNoCancel = EAppMsgType::YesNoCancel,
-	CancelRetryContinue = EAppMsgType::CancelRetryContinue,
-	YesNoYesAllNoAll = EAppMsgType::YesNoYesAllNoAll,
-	YesNoYesAllNoAllCancel = EAppMsgType::YesNoYesAllNoAllCancel,
-	YesNoYesAll = EAppMsgType::YesNoYesAll
-};
-
-static_assert(
-	EBlueprintAppMsgType::Ok == static_cast<EBlueprintAppMsgType>(EAppMsgType::Ok),
-	"EBlueprintAppMsgType::Ok must be equal to EAppMsgType::Ok");
-
 /**
  * Library to open blocking message dialog popups from blueprint (editor utilities).
  */
@@ -64,9 +28,15 @@ public:
 	 * @param OptionalTitle Optional title to use (defaults to "Message")
 	 * @param Message Text of message to show
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Messsage Dialog")
-	static EBlueprintAppReturnType OpenMessageDialog(
-		EBlueprintAppMsgType MessageType,
+	UE_DEPRECATED(5.0, TEXT("Please use UEditorDialogLibrary::ShowMessage instead"))
+	UFUNCTION(
+		BlueprintCallable,
+		Category = "Open Unreal Utilities|Messsage Dialog",
+		meta =
+			(DeprecatedFunction,
+			 DeprecationMessage = "OpenMessageDialog is deprecated - Use UEditorDialogLibrary::ShowMessage instead"))
+	static TEnumAsByte<EAppReturnType::Type> OpenMessageDialog(
+		TEnumAsByte<EAppMsgType::Type> MessageType,
 		FText OptionalTitle,
 		FText Message);
 
@@ -77,10 +47,17 @@ public:
 	 * @param OptionalTitle Optional title to use (defaults to "Message")
 	 * @param Message Text of message to show
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Messsage Dialog")
-	static EBlueprintAppReturnType OpenMessageDialogWithDefaultValue(
-		EBlueprintAppMsgType MessageType,
-		EBlueprintAppReturnType DefaultValue,
+	UE_DEPRECATED(5.0, TEXT("Please use UEditorDialogLibrary::ShowMessage instead"))
+	UFUNCTION(
+		BlueprintCallable,
+		Category = "Open Unreal Utilities|Messsage Dialog",
+		meta =
+			(DeprecatedFunction,
+			 DeprecationMessage =
+				 "OpenMessageDialogWithDefaultValue is deprecated - Use UEditorDialogLibrary::ShowMessage instead"))
+	static TEnumAsByte<EAppReturnType::Type> OpenMessageDialogWithDefaultValue(
+		TEnumAsByte<EAppMsgType::Type> MessageType,
+		TEnumAsByte<EAppReturnType::Type> DefaultValue,
 		FText OptionalTitle,
 		FText Message);
 

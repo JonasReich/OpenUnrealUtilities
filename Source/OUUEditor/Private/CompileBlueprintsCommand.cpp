@@ -530,35 +530,25 @@ namespace OUU::Editor::CompileBlueprints
 		GRecompileHelper.Reset();
 	}
 
-	FString GetIncludeFoldersArg(FString Mode)
+	FString GetIncludeFoldersArg(bool bIncludeProject, bool bIncludeEngine)
 	{
 		TArray<FString> IncludeFoldersList;
-		bool bIncludeProjectPlugins = false;
-		bool bIncludeEnginePlugins = false;
-		if (Mode == TEXT("Project"))
+
+		if (bIncludeProject)
 		{
-			bIncludeProjectPlugins = true;
 			IncludeFoldersList.Add(TEXT("/Game/"));
 		}
-		else if (Mode == TEXT("Engine"))
+
+		if (bIncludeEngine)
 		{
-			bIncludeEnginePlugins = true;
 			IncludeFoldersList.Add(TEXT("/Engine/"));
-		}
-		else
-		{
-			// no filter
-			return TEXT("");
 		}
 
 		TArray<TSharedRef<IPlugin>> AllContentPlugins = IPluginManager::Get().GetEnabledPluginsWithContent();
 		for (TSharedRef<IPlugin> Plugin : AllContentPlugins)
 		{
-			const bool bIncludePlugin =
-				(bIncludeProjectPlugins && Plugin->GetLoadedFrom() == EPluginLoadedFrom::Project)
-				|| (bIncludeEnginePlugins && Plugin->GetLoadedFrom() == EPluginLoadedFrom::Engine);
-
-			if (bIncludePlugin)
+			if (const bool bIncludePlugin = (bIncludeProject && Plugin->GetLoadedFrom() == EPluginLoadedFrom::Project)
+					|| (bIncludeEngine && Plugin->GetLoadedFrom() == EPluginLoadedFrom::Engine))
 			{
 				FString PluginContentPath = Plugin->GetMountedAssetPath();
 				IncludeFoldersList.Add(PluginContentPath);
@@ -568,31 +558,52 @@ namespace OUU::Editor::CompileBlueprints
 		return FString::Printf(TEXT("-IncludeFolders=%s"), *FString::Join(IncludeFoldersList, TEXT(",")));
 	}
 
-	static FAutoConsoleCommand CompileBlueprintsCommand_Preset(
-		TEXT("ouu.CompileBlueprints.Preset"),
-		TEXT("Compile all Blueprints matching the given pattern. Possible values: Project, Engine, All."),
-		FConsoleCommandWithArgsDelegate::CreateStatic([](const TArray<FString>& Args) {
-			const FString Mode = Args.Num() > 0 ? Args[0] : "";
-			const FString IncludeFoldersArg = GetIncludeFoldersArg(Mode);
-			FString ArgsLine = FString::Printf(TEXT("-SimpleAssetList %s"), *IncludeFoldersArg);
+	FConsoleCommandWithArgsDelegate CompileBlueprintsCommand_Preset(
+		FString PresetName,
+		bool bIncludeProject,
+		bool bIncludeEngine)
+	{
+		return FConsoleCommandWithArgsDelegate::CreateLambda([=](const TArray<FString>&) {
+			FString ArgsLine =
+				FString::Printf(TEXT("-SimpleAssetList %s"), *GetIncludeFoldersArg(bIncludeProject, bIncludeEngine));
 
 			UE_LOG(
 				LogOpenUnrealUtilities,
-				Log,
-				TEXT("Compiling all Blueprints with the following command line args: %s"),
+				Display,
+				TEXT("Compiling '%s' Blueprints with the following command line args: %s"),
+				*PresetName,
 				*ArgsLine);
 
 			GRecompileHelper = MakeUnique<FOUUCompileBlueprintsCommandHelper>(ArgsLine);
-		}));
+		});
+	}
+
+	static FAutoConsoleCommand CompileBlueprintsCommand_Project(
+		TEXT("ouu.CompileBlueprints.Project"),
+		TEXT("Compile all Blueprints in the project and project plugins."),
+		CompileBlueprintsCommand_Preset("Project", true, false));
+
+	static FAutoConsoleCommand CompileBlueprintsCommand_Engine(
+		TEXT("ouu.CompileBlueprints.Engine"),
+		TEXT("Compile all Blueprints in the engine and engine plugins."),
+		CompileBlueprintsCommand_Preset("Engine", false, true));
+
+	static FAutoConsoleCommand CompileBlueprintsCommand_All(
+		TEXT("ouu.CompileBlueprints.All"),
+		TEXT("Compile all Blueprints in the project, engine and plugins."),
+		CompileBlueprintsCommand_Preset("All", false, true));
 
 	static FAutoConsoleCommand CompileBlueprintsCommand_Custom(
 		TEXT("ouu.CompileBlueprints.Custom"),
-		TEXT("Compile all Blueprints matching a certain pattern."),
+		TEXT("Compile all Blueprints with custom command line args."),
 		FConsoleCommandWithArgsDelegate::CreateStatic([](const TArray<FString>& Args) {
 			FString ArgsLine = FString::Join(Args, TEXT(" "));
 			if (ArgsLine.IsEmpty())
 			{
-				UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("No arguments provided to ouu.CompileBlueprints command"));
+				UE_LOG(
+					LogOpenUnrealUtilities,
+					Display,
+					TEXT("No arguments provided to ouu.CompileBlueprints.Custom command"));
 				return;
 			}
 			GRecompileHelper = MakeUnique<FOUUCompileBlueprintsCommandHelper>(ArgsLine);
