@@ -2,7 +2,6 @@
 
 #include "Misc/MessageDialogLibrary.h"
 
-#include "EditorDialogLibrary.h"
 #include "Misc/MessageDialog.h"
 
 void UMessageDialogLibrary::ShowMessageDialogueNotification(FText OptionalTitle, FText Message)
@@ -15,7 +14,7 @@ TEnumAsByte<EAppReturnType::Type> UMessageDialogLibrary::OpenMessageDialog(
 	FText OptionalTitle,
 	FText Message)
 {
-	return UEditorDialogLibrary::ShowMessage(OptionalTitle, Message, MessageType);
+	return FMessageDialog::Open(MessageType, Message, GetOptionalTitlePtr(OptionalTitle));
 }
 
 TEnumAsByte<EAppReturnType::Type> UMessageDialogLibrary::OpenMessageDialogWithDefaultValue(
@@ -24,7 +23,11 @@ TEnumAsByte<EAppReturnType::Type> UMessageDialogLibrary::OpenMessageDialogWithDe
 	FText OptionalTitle,
 	FText Message)
 {
-	return UEditorDialogLibrary::ShowMessage(OptionalTitle, Message, MessageType, DefaultValue);
+	return FMessageDialog::Open(
+		StaticCast<EAppMsgType::Type>(MessageType),
+		DefaultValue,
+		Message,
+		GetOptionalTitlePtr(OptionalTitle));
 }
 
 const FText* UMessageDialogLibrary::GetOptionalTitlePtr(FText& Text)

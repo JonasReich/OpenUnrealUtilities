@@ -7,7 +7,8 @@
 #include "MessageDialogLibrary.generated.h"
 
 /**
- * Library to open blocking message dialog popups from blueprint (editor utilities).
+ * Library to open blocking message dialog popups from blueprint.
+ * In contrast to UEditorDialogLibrary, these also work in non-editor builds in case a message log is present.
  */
 UCLASS()
 class OUUBLUEPRINTRUNTIME_API UMessageDialogLibrary : public UBlueprintFunctionLibrary
@@ -28,13 +29,7 @@ public:
 	 * @param OptionalTitle Optional title to use (defaults to "Message")
 	 * @param Message Text of message to show
 	 */
-	UE_DEPRECATED(5.0, TEXT("Please use UEditorDialogLibrary::ShowMessage instead"))
-	UFUNCTION(
-		BlueprintCallable,
-		Category = "Open Unreal Utilities|Messsage Dialog",
-		meta =
-			(DeprecatedFunction,
-			 DeprecationMessage = "OpenMessageDialog is deprecated - Use UEditorDialogLibrary::ShowMessage instead"))
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Messsage Dialog")
 	static TEnumAsByte<EAppReturnType::Type> OpenMessageDialog(
 		TEnumAsByte<EAppMsgType::Type> MessageType,
 		FText OptionalTitle,
@@ -47,14 +42,7 @@ public:
 	 * @param OptionalTitle Optional title to use (defaults to "Message")
 	 * @param Message Text of message to show
 	 */
-	UE_DEPRECATED(5.0, TEXT("Please use UEditorDialogLibrary::ShowMessage instead"))
-	UFUNCTION(
-		BlueprintCallable,
-		Category = "Open Unreal Utilities|Messsage Dialog",
-		meta =
-			(DeprecatedFunction,
-			 DeprecationMessage =
-				 "OpenMessageDialogWithDefaultValue is deprecated - Use UEditorDialogLibrary::ShowMessage instead"))
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Messsage Dialog")
 	static TEnumAsByte<EAppReturnType::Type> OpenMessageDialogWithDefaultValue(
 		TEnumAsByte<EAppMsgType::Type> MessageType,
 		TEnumAsByte<EAppReturnType::Type> DefaultValue,
