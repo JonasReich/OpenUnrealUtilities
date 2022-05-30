@@ -117,7 +117,7 @@ void FGameplayDebuggerCategory_Animation::DrawData(
 	DebugInstanceIndex =
 		NumLinkedInstances > 0 ? (((DebugInstanceIndex + Offset) % (NumLinkedInstances + Offset)) - Offset) : -1;
 
-	if (GetInputBoolSwitchValue(GDC_Animation_Inputs::SceneComponentTree))
+	if (GetInputBoolSwitchValue(OUU::Runtime::Animation::GameplayDebugger::Private::SceneComponentTree))
 	{
 		DrawSceneComponentTree(CanvasContext, DebugActor, DebugMeshComponent);
 	}

@@ -477,7 +477,8 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 				Info.Canvas->SetDrawColor(AbilityTextColor);
 			}
 
-			const FString AbilitySourceName = GameplayDebuggerUtils::CleanupName(GetNameSafe(AbilitySpec.SourceObject));
+			const FString AbilitySourceName =
+				OUU::Runtime::GameplayDebuggerUtils::CleanupName(GetNameSafe(AbilitySpec.SourceObject));
 
 			DebugLine(
 				Info,
