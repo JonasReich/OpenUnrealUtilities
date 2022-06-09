@@ -22,12 +22,12 @@ class OUURUNTIME_API UOUUSceneProjectionLibrary : public UBlueprintFunctionLibra
 	GENERATED_BODY()
 public:
 	/**
-	 * Get SceneViewProjectionData for a given camera
-	 * @paramOUURequestQueue_TestRequest TargetCamera:
-	 * @param Player: The player for this view projection. Required for Viewport and stereo settings.
-	 * @param OutProjectionData: Resulting projection data
-	 * @returns if the operation was successful
+	 * Get SceneViewProjectionData for a given camera.
 	 * Copied from LocalPlayer::GetProjectionData(), which always uses the (cached) active ViewTarget
+	 * @param	TargetCamera		The camera from which to retrieve the view projection data
+	 * @param	Player				The player for this view projection. Required for Viewport and stereo settings.
+	 * @param	OutProjectionData	Resulting projection data
+	 * @returns						if the operation was successful
 	 */
 	static bool GetViewProjectionData(
 		UCameraComponent* TargetCamera,

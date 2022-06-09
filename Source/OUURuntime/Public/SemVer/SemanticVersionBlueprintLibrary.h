@@ -29,10 +29,10 @@ public:
 	 * Try to parse a semantic version object from a source string.
 	 * If the string cannot be parsed to a valid semantic version,
 	 * it's reset to a default constructed SemVer.
-	 * @param SourceString The string that contains the semantic version
-	 * @param Strictness How strict the string parsing functions should be adhering to the standard
-	 * @param OutSemanticVersion The resulting semantic version object
-	 * @returns if parsing was successful
+	 * @param	SourceString		The string that contains the semantic version
+	 * @param	Strictness			How strict the string parsing functions should be adhering to the standard
+	 * @param	OutSemanticVersion	The resulting semantic version object
+	 * @returns						if parsing was successful
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
 	static bool TryParseSemVerString(
@@ -61,8 +61,7 @@ public:
 	static bool TryIncrementSemVerPreReleaseVersion(UPARAM(ref) FSemanticVersion& Version);
 
 	/**
-	 * @returns Is the precedence of the other version equal to this version.
-	 * Ignores the build metadata.
+	 * @returns Is the precedence of the other version equal to this version. Ignores the build metadata.
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Semantic Versioning|Semantic Version")
 	static bool SemVerEqualPrecedence(const FSemanticVersion& A, const FSemanticVersion& B);
@@ -145,10 +144,10 @@ public:
 	 * Try to create a pre-release identifier from a string.
 	 * If the string cannot be parsed to a valid pre-release identifier,
 	 * the identifier remains empty.
-	 * @param SourceString The string from which the semver will be constructed
-	 * @param Strictness How strict the string parsing functions should be adhering to the standard
-	 * @param OutReleaseIdentifier The resulting pre-release identifier
-	 * @returns if parsing was successful
+	 * @param	SourceString			The string from which the semver will be constructed
+	 * @param	Strictness				How strict the string parsing functions should be adhering to the standard
+	 * @param	OutReleaseIdentifier	The resulting pre-release identifier
+	 * @returns							if parsing was successful
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Semantic Versioning|Pre-Release Identifier")
 	static bool TryParseSemVerPreReleaseIdentifierString(
@@ -243,10 +242,10 @@ public:
 	 * Try to create a metadata object from a string.
 	 * If the string cannot be parsed to a valid metadata object,
 	 * the object remains empty.
-	 * @param SourceString The string from which the build metadata is constructed
-	 * @param Strictness How strict the string parsing functions should be adhering to the standard
-	 * @param OutBuildMetadata The resulting build metadata
-	 * @returns if parsing was successful
+	 * @param	SourceString		The string from which the build metadata is constructed
+	 * @param	Strictness			How strict the string parsing functions should be adhering to the standard
+	 * @param	OutBuildMetadata	The resulting build metadata
+	 * @returns						if parsing was successful
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Semantic Versioning|Build Metadata")
 	static bool TryParseSemVerBuildMetadataString(

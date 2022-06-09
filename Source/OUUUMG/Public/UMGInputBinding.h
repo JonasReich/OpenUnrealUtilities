@@ -131,8 +131,8 @@ public:
 
 	/**
 	 * Add an input action binding
-	 * @param Action: Action to react to
-	 * @param Delegate: Callback delegate that will be called once the action is recognized
+	 * @param	Action		Action to react to
+	 * @param	Delegate	Callback delegate that will be called once the action is recognized
 	 */
 	UFUNCTION(BlueprintCallable)
 	void BindAction(FUMGInputAction Action, FUMGInputActionDelegate Delegate);

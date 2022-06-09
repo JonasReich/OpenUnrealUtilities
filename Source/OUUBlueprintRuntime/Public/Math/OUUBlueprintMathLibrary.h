@@ -20,7 +20,7 @@ public:
 	// Rotator functions.
 	//
 
-	/** Returns addition of Rotator A and Rotator B (A + B) */
+	/** @returns addition of Rotator A and Rotator B (A + B) */
 	UFUNCTION(
 		BlueprintPure,
 		meta =
@@ -31,7 +31,7 @@ public:
 		Category = "Open Unreal Utilities|Math|Rotator")
 	static FRotator Add_RotatorRotator(const FRotator& A, const FRotator& B);
 
-	/** Returns subtraction of Rotator A and Rotator B (A - B) */
+	/** @returns subtraction of Rotator A and Rotator B (A - B) */
 	UFUNCTION(
 		BlueprintPure,
 		meta = (DisplayName = "rotator - rotator", CompactNodeTitle = "-", Keywords = "- subtract minus"),

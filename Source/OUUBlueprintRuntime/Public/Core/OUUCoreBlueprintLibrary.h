@@ -29,7 +29,7 @@ public:
 
 	/**
 	 * Attempts to get the world from a world context object.
-	 * Returns nullptr if no world was found.
+	 * @returns nullptr if no world was found.
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|World")
 	static UWorld* TryGetWorldFromObject(UObject* WorldContextObject);
@@ -37,7 +37,8 @@ public:
 	/**
 	 * Attempts to get the world from the current blueprint context.
 	 * Functionally the same as TryGetWorldFromObject(), but this version auto-populates the WorldContextObject
-	 * parameter in Blueprints. Returns nullptr if not world was found.
+	 * parameter in Blueprints.
+	 * @returns nullptr if not world was found.
 	 */
 	UFUNCTION(
 		BlueprintPure,
@@ -54,8 +55,8 @@ public:
 	static void ModifyObject(UObject* Object);
 
 	/**
-	 * Reruns the construction scripts of an actor
-	 * Be careful when calling this
+	 * Reruns the construction scripts of an actor.
+	 * Be careful when calling this, as it can have various unexpected side effects and is pretty slow.
 	 */
 	UFUNCTION(BlueprintCallable)
 	static void RerunConstructionScripts(AActor* Actor);

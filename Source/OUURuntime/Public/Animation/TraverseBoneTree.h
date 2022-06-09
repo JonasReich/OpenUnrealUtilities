@@ -22,11 +22,11 @@ namespace OUU::Runtime::Animation
 
 	/**
 	 * Traverse through all bone indices in a skeleton root to leaf starting from a given root bone index.
-	 * @param Skeleton: The skeleton through which to iterate
-	 * @param Predicate: This functional parameter is invoked for every bone index in the tree. The result determines
-	 * how the traversal is continued.
-	 * @param StartBoneIndex: Index of the bone at which to start the traversal.
-	 * @tparam PredicateType: ETraverseBonesAction(int32)
+	 * @param	Skeleton			The skeleton through which to iterate
+	 * @param	Predicate			This functional parameter is invoked for every bone index in the tree. The result
+	 *								determines how the traversal is continued.
+	 * @param	StartBoneIndex		Index of the bone at which to start the traversal.
+	 * @tparam	PredicateType		ETraverseBonesAction(int32)
 	 */
 	template <typename PredicateType>
 	void TraverseBoneTree(USkeleton* Skeleton, PredicateType Predicate, int32 StartBoneIndex = ROOT_BONE_IDX)

@@ -42,8 +42,8 @@ public:
 
 	/**
 	 * Release a single key from the lock. May release the entire lock if it was the last active key.
-	 * @param Key: Key to release from the lock
-	 * @returns if the entire lock was successfully released
+	 * @param	Key		Key to release from the lock
+	 * @returns			if the entire lock was successfully released
 	 */
 	UFUNCTION(BlueprintCallable)
 	bool TryUnlock(UObject* Key);

@@ -27,9 +27,9 @@ public:
 
 	/**
 	 * Add a raw text message to the message log.
-	 * @param MessageLogName: Name of the message log to add this message to. E.g. "PIE" for play-in-editor messages.
-	 * @param MessageText: Complete text of the message
-	 * @param Severity: The severity level of the message
+	 * @param	MessageLogName	Name of the message log to add this message to. E.g. "PIE" for play-in-editor messages.
+	 * @param	MessageText		Complete text of the message
+	 * @param	Severity		The severity level of the message
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Message Log")
 	static void AddTextMessageLogMessage(
@@ -40,9 +40,10 @@ public:
 	/**
 	 * Add a tokenized message to the message log.
 	 * Tokens allow composition of text messages containing interactive content other than just plain text.
-	 * @param MessageLogName: Name of the message log to add this message to. E.g. "PIE" for play-in-editor messages.
-	 * @param MessageTokens: All tokens the message consists of
-	 * @param Severity: The severity level of the message
+	 * @param	MessageLogName		Name of the message log to add this message to. E.g. "PIE" for play-in-editor
+	 * messages.
+	 * @param	MessageTokens		All tokens the message consists of
+	 * @param	Severity			The severity level of the message
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Message Log")
 	static void AddTokenizedMessageLogMessage(
@@ -52,9 +53,11 @@ public:
 
 	/**
 	 * Opens the message log window with the provided tab focused.
-	 * @param InMinSeverity: Minimum severity of the messages being displayed. (e.g. Info displays all messages, Warning
-	 * only Warnings and Errors)
-	 * @param bOpenEvenIfEmpty: Force to open the message log even if it does not contain any messages
+	 * @param	MessageLogName		Name of the message log to add this message to. E.g. "PIE" for play-in-editor
+	 *								messages.
+	 * @param	InMinSeverity		Minimum severity of the messages being displayed. (e.g. Info displays all messages,
+	 *								Warning only Warnings and Errors)
+	 * @param	bOpenEvenIfEmpty	Force to open the message log even if it does not contain any messages
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Message Log")
 	static void OpenMessageLog(
@@ -65,6 +68,8 @@ public:
 	/**
 	 * Notify the user with a message if there are messages present.
 	 * This call will cause a flush so that the logs state is properly reflected.
+	 * @param	MessageLogName		Name of the message log to add this message to. E.g. "PIE" for play-in-editor
+	 *								messages.
 	 * @param	InMessage			The notification message.
 	 * @param	InMinSeverity		Only messages of higher severity than this filter will be considered when checking.
 	 * @param	bForce				Notify anyway, even if the filters gives us no messages.
@@ -78,9 +83,11 @@ public:
 
 	/**
 	 * Add a new page to the log.
-	 * Pages will not be created until messages are added to them, so we dont generate lots of empty pages.
+	 * Pages will not be created until messages are added to them to prevent creation of duplicate empty pages.
 	 * This call will cause a flush so that the logs state is properly reflected.
-	 * @param	InLabel		The label for the page.
+	 * @param	MessageLogName		Name of the message log to add this message to. E.g. "PIE" for play-in-editor
+	 *								messages.
+	 * @param	InLabel				The label for the page.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Message Log")
 	static void NewMessageLogPage(FName MessageLogName, const FText& InLabel);
@@ -91,18 +98,18 @@ public:
 
 	/**
 	 * Create a message log token that references an asset.
-	 * @param AssetName: Name/path of the asset to link to.
-	 * @param OptionalLabelOverride: If not empty, this text is displayed as clickable link instead of the asset name
-	 * itself
+	 * @param	AssetName					Name/path of the asset to link to.
+	 * @param	OptionalLabelOverride		If not empty, this text is displayed as clickable link instead of the asset
+	 *										name itself
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Message Log")
 	static FMessageLogToken CreateAssetNameMessageLogToken(FString AssetName, FText OptionalLabelOverride);
 
 	/**
 	 * Creates a message log token that references any UObject. Can be clicked to navigate to actors in the scene.
-	 * @param Object: Object to link to.
-	 * @param OptionalLabelOverride: If not empty, this text is displayed as clickable link instead of the object name
-	 * itself
+	 * @param	Object						Object to link to.
+	 * @param	OptionalLabelOverride		If not empty, this text is displayed as clickable link instead of the object
+	 *										name itself
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Message Log")
 	static FMessageLogToken CreateObjectMessageLogToken(UObject* Object, FText OptionalLabelOverride);
@@ -114,8 +121,8 @@ public:
 	/**
 	 * Creates a message log token from a hyperlink URL. Can be clicked to open a browser to navigate to the linked
 	 * webpage.
-	 * @param URL: URL to link to
-	 * @param OptionalLabelOverride: If not empty, this text is displayed as clickable link instead of the URL itself
+	 * @param	URL						URL to link to
+	 * @param	OptionalLabelOverride	If not empty, this text is displayed as clickable link instead of the URL itself
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Message Log")
 	static FMessageLogToken CreateURLMessageLogToken(FString URL, FText OptionalLabelOverride);

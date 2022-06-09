@@ -16,7 +16,7 @@ namespace OUU::Runtime::UMGUtils
 	 * Does not jump from one UserWidget into another.
 	 * Modeled after UWidgetTree::ForEachWidget, but the predicate returns a boolean break condition to stop the
 	 * iteration.
-	 * @returns if the exit condition was set / iteration was canceled
+	 * @returns		if the exit condition was set / iteration was canceled
 	 */
 	template <class WidgetClass>
 	bool ForEachWidget(WidgetClass* RootWidget, TFunctionRef<bool(WidgetClass*)> Predicate);
@@ -25,10 +25,10 @@ namespace OUU::Runtime::UMGUtils
 	 * Execute a predicate on the RootWidget and any widgets nested as Slot or Named Slot children.
 	 * Also goes into other UUserWidgets and their children (so this potentially goes a lot deeper than ForEachWidget).
 	 * Modeled after UWidgetTree::ForEachWidgetAndDescendants, but the predicate returns a boolean break condition
-	 * @param RootWidget: The widget of which children should be iterated over
-	 * @param bIncludeRootWidget: If the predicate should also be called on the root widget itself
-	 * @param Predicate: The predicate to execute for the widgets
-	 * @returns if the exit condition was set / iteration was canceled
+	 * @param	RootWidget			The widget of which children should be iterated over
+	 * @param	bIncludeRootWidget	If the predicate should also be called on the root widget itself
+	 * @param	Predicate			The predicate to execute for the widgets
+	 * @returns						if the exit condition was set / iteration was canceled
 	 */
 	template <class WidgetClass>
 	bool ForEachWidgetAndDescendants(
@@ -41,7 +41,7 @@ namespace OUU::Runtime::UMGUtils
 	 * Does not call the predicate on the RootWidget itself!
 	 * Modeled after UWidgetTree::ForWidgetAndChildren (that also only checks children contrary to the name)
 	 * but the predicate returns a boolean break condition
-	 * @returns if the exit condition was set / iteration was canceled
+	 * @returns		if the exit condition was set / iteration was canceled
 	 */
 	template <class WidgetClass>
 	bool ForChildWidgets(WidgetClass* Widget, TFunctionRef<bool(WidgetClass*)> Predicate);

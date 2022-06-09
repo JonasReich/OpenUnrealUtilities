@@ -30,13 +30,14 @@ public:
 	 * Remove bones without any skin weights from a skeletal mesh.
 	 * Only removes the bones matching to the supplied filter rules.
 	 *
-	 * @param SkeletalMesh: Target skeletal mesh
-	 * @param MinLOD: Minimum LOD level to remove bones from. All LOD levels below will also have the bone removed.
-	 * @param BoneNameIncludePattern: If not empty, only bones matching this regex pattern will be removed.
-	 * @param BoneNameExcludePattern: If not empty, bones matching this regex pattern will not be removed.
-	 * If a child bone matches this pattern, the parent bone is also skipped -> Exclude pattern has higher precedence
-	 * than IncludePattern.
-	 * @returns if any new entries were added to the "BonesToRemove" list
+	 * @param	SkeletalMesh			Target skeletal mesh
+	 * @param	MinLOD					Minimum LOD level to remove bones from. All LOD levels below will also have the
+	 *									bone removed.
+	 * @param	BoneNameIncludePattern	If not empty, only bones matching this regex pattern will be removed.
+	 * @param	BoneNameExcludePattern	If not empty, bones matching this regex pattern will not be removed.
+	 *									If a child bone matches this pattern, the parent bone is also skipped -> Exclude
+	 *									pattern has higher precedence than IncludePattern.
+	 * @returns							if any new entries were added to the "BonesToRemove" list
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Animation")
 	static int32 RemoveUnskinnedBonesFromMesh(

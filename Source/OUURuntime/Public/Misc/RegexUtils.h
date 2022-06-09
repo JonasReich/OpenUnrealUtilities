@@ -107,8 +107,10 @@ public:
 		int32 GroupCount,
 		const FString& TestString);
 
-	/** @returns the single regex match of the pattern in the test string together with all of the capture groups,
-	 * IF the match ranges from the beginning to the end of the test string (all characters included). */
+	/**
+	 *	@returns	the single regex match of the pattern in the test string together with all of the capture groups,
+	 *				IF the match ranges from the beginning to the end of the test string (all characters included).
+	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Regex")
 	static FRegexGroups GetRegexMatchAndGroupsExact(
 		const FString& RegexPattern,

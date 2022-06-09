@@ -21,7 +21,7 @@ public:
 	/**
 	 * Return the path to the currently running executable
 	 *
-	 * @returns 	Path of the currently running executable
+	 * @returns		Path of the currently running executable
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Generic Platform Process")
 	static FString ExecutablePath();
@@ -39,16 +39,16 @@ public:
 	 * Executes a process, returning the return code, stdout, and stderr.
 	 * This call blocks until the process has returned.
 	 *
-	 * @param URL						Path to the process to be launched
-	 * @param Params					Parameters separated by spaces to be passed to the process
-	 * @param OptionalWorkingDirectory	Use this directory path as working directory. Uses default working directory
-	 *									when left empty.
-	 * @param bWriteOutputToLog			If the output from the process should be written to the UE4 log
-	 * @param OutReturnCode				Return code from the process
-	 * @param OutStdOut					Standard output
-	 * @param OutStdErr					Error output
+	 * @param	URL							Path to the process to be launched
+	 * @param	Params						Parameters separated by spaces to be passed to the process
+	 * @param	OptionalWorkingDirectory	Use this directory path as working directory. Uses default working directory
+	 *										when left empty.
+	 * @param	bWriteOutputToLog			If the output from the process should be written to the UE4 log
+	 * @param	OutReturnCode				Return code from the process
+	 * @param	OutStdOut					Standard output
+	 * @param	OutStdErr					Error output
 	 *
-	 * @returns							if the process was successfully created
+	 * @returns								if the process was successfully created
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Generic Platform Process")
 	static bool ExecProcess(
@@ -64,11 +64,11 @@ public:
 	 * Executes a process as administrator, requesting elevation as necessary. This
 	 * call blocks until the process has returned.
 	 *
-	 * @param URL					Path to the process to be launched
-	 * @param Params				Parameters separated by spaces to be passed to the process
-	 * @param OutReturnCode			Return code from the process
+	 * @param	URL				Path to the process to be launched
+	 * @param	Params			Parameters separated by spaces to be passed to the process
+	 * @param	OutReturnCode	Return code from the process
 	 *
-	 * @returns						if the process was successfully created
+	 * @returns					if the process was successfully created
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Generic Platform Process")
 	static bool ExecElevatedProcess(const FString& URL, const FString& Params, int32& OutReturnCode);

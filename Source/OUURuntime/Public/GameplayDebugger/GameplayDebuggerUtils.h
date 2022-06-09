@@ -24,8 +24,8 @@ namespace OUU::Runtime::GameplayDebuggerUtils
 
 	/**
 	 * Returns a copy of the the InString that is wrapped to fit the TargetWidth when displayed on the CanvasContext.
-	 * @returns false if InString is short enough that it does not need to be wrapped and OutString is empty.
-	 *          This is an optimization which you can use if you want to avoid unnecessary string copies.
+	 * @returns		false if InString is short enough that it does not need to be wrapped and OutString is empty.
+	 *				This is an optimization which you can use if you want to avoid unnecessary string copies.
 	 */
 	bool OUURUNTIME_API TryWrapStringToWidth(
 		const FString& InString,
@@ -44,7 +44,6 @@ namespace OUU::Runtime::GameplayDebuggerUtils
 
 	/**
 	 * Utility for opening / closing categories, which is normally only possible by index, which is private
-	 *
 	 */
 	void OUURUNTIME_API SetCategoryEnabled(
 		AGameplayDebuggerCategoryReplicator& InCategoryReplicator,

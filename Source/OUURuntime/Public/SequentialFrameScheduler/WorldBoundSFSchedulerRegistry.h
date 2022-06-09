@@ -43,9 +43,9 @@ public:
 
 	/**
 	 * Get a scheduler from the world of the context object
-	 * @param WorldContextObject: World
-	 * @param SchedulerName: Name of the scheduler for debugging purposes
-	 * @param TickingGroup: Tick group that this scheduler will tick in
+	 * @param	WorldContextObject		World
+	 * @param	SchedulerName			Name of the scheduler for debugging purposes
+	 * @param	TickingGroup			Tick group that this scheduler will tick in
 	 */
 	static FSchedulerPtr GetNamedScheduler(
 		const UObject* WorldContextObject,

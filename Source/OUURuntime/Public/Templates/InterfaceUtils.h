@@ -11,9 +11,9 @@
  * Call a function on a blueprint implementable interface object.
  * The object can be any of [UObject*, TScriptInterface, IInterface*].
  * Only safe after validation of the InterfaceObject, e.g. via CanCallInterface()!
- * @param InterfaceType: The IInterface type
- * @param Function: The function member of the Interface you want to invoke
- * @param InterfaceObject: An object pointer, interface pointer or script interface of the matching interface
+ * @param	InterfaceType		The IInterface type
+ * @param	Function			The function member of the Interface you want to invoke
+ * @param	InterfaceObject		An object pointer, interface pointer or script interface of the matching interface
  */
 #define CALL_INTERFACE(InterfaceType, Function, InterfaceObject, ...)                                                  \
 	((OUU::Runtime::Private::Interface::Ignore(&InterfaceType::Function)),                                             \

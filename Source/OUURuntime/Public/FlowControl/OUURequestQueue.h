@@ -36,7 +36,7 @@ public:
 	 * Raise a new request. Adds a new element to the queue.
 	 * The request must be manually raised by the caller!
 	 * This allows setting payload data on the request before calling.
-	 * @returns newly created request
+	 * @returns		newly created request
 	 */
 	UFUNCTION(BlueprintCallable)
 	UOUURequest* CreateNewRequest();
@@ -45,7 +45,7 @@ public:
 	 * Raise a new request. Adds a new element to the queue.
 	 * Also immediately raises the request, which prevents payload data from being set before the request is raised.
 	 * Only use for request types that do not need any payload data!
-	 * @returns newly created request
+	 * @returns		newly created request
 	 */
 	UFUNCTION(BlueprintCallable)
 	UOUURequest* RaiseNewRequest();
@@ -54,8 +54,8 @@ public:
 	 * Raise a new request. Adds a new element to the queue.
 	 * Also immediately raises the request, which prevents payload data from being set before the request is raised.
 	 * Only use for request types that do not need any payload data!
-	 * @param CompletedCallback: Callback delegate that will be called when the request is completed
-	 * @returns newly created request
+	 * @param	CompletedCallback	Callback delegate that will be called when the request is completed
+	 * @returns						newly created request
 	 */
 	UFUNCTION(BlueprintCallable)
 	UOUURequest* RaiseNewRequestAndWait(FOnRequestStatusChangedDelegate CompletedCallback);

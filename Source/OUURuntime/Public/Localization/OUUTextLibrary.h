@@ -23,8 +23,9 @@ public:
 	 * - ["foo", "bar", "foobar"] -> "foo, bar and foobar"
 	 * Supports an arbitrary number of items.
 	 *
-	 * @param bFormatWithFinalAndSeparator If true, the last two items in the list are combined with a special word
-	 * ("and" if untranslated). If false, the final two items also use the generic separator ("," if untranslated).
+	 * @param	bFormatWithFinalAndSeparator	If true, the last two items in the list are combined with a special word
+	 *											("and" if untranslated). If false, the final two items also use the
+	 *											generic separator ("," if untranslated).
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Text")
 	static FText FormatListText(const TArray<FText>& Texts, bool bFormatWithFinalAndSeparator);

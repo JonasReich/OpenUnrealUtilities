@@ -95,19 +95,18 @@ public:
 	 * Draw an expanded tree list of arbitrary data items to the debug canvas, similar to the animation-graph view
 	 * drawn by the "showdebug animation" command.
 	 *
-	 * @param RootNode: Root data item
-	 * @param Indent: Horizontal indent from left in pixels
-	 * @param OnGetNumChildren: Delegate to get the number of child items beneath a
-	 * node
-	 * @param OnGetChildByIndex: Delegate to retrieve a child node from its parent node and
-	 * child index
-	 * @param OnGetDebugString: Delegate to get the debug string that is drawn for a node
+	 * @param	RootNode				Root data item
+	 * @param	Indent					Horizontal indent from left in pixels
+	 * @param	OnGetNumChildren		Delegate to get the number of child items beneath a node
+	 * @param	OnGetChildByIndex		Delegate to retrieve a child node from its parent node and
+	 *									child index
+	 * @param	OnGetDebugString		Delegate to get the debug string that is drawn for a node
 	 *
-	 * @tparam NodeType: Node object that should be drawn to screen.
-	 * Must be sufficient to resolve child items and display text (see delegates)
-	 * @tparam OnGetNumChildrenType: int32(NodeType*)
-	 * @tparam OnGetChildType: NodeType*(NodeType*, int32)
-	 * @tparam OnGetDebugStringType: FString(NodeType*)
+	 * @tparam	NodeType				Node object that should be drawn to screen.
+	 *									Must be sufficient to resolve child items and display text (see delegates)
+	 * @tparam	OnGetNumChildrenType	int32(NodeType*)
+	 * @tparam	OnGetChildType			NodeType*(NodeType*, int32)
+	 * @tparam	OnGetDebugStringType	FString(NodeType*)
 	 */
 	template <typename NodeType, typename OnGetNumChildrenType, typename OnGetChildType, typename OnGetDebugStringType>
 	void DrawTree(

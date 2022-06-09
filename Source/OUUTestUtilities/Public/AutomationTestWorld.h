@@ -60,8 +60,8 @@ public:
 	 * Initialize and spawn the most important game framework classes for tests that require gamemode, player
 	 * controller, etc. Requires prior world creation via CreateWorld(). You do not have to call BeginPlay() before
 	 * this, as it will be called internally.
-	 * @returns if everything went ok. This should always be the case, but you should use it as early exit condition for
-	 * tests anyways to prevent crashes during test runs.
+	 * @returns		if everything went ok. This should always be the case, but you should use it as early exit condition
+	 *				for tests anyways to prevent crashes during test runs.
 	 */
 	bool InitializeGame();
 
