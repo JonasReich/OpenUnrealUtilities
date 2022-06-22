@@ -9,7 +9,7 @@
 #include "JsonLibrary.generated.h"
 
 USTRUCT(BlueprintType)
-struct FOUUJsonLibraryObjectFilter
+struct OUURUNTIME_API FOUUJsonLibraryObjectFilter
 {
 	GENERATED_BODY()
 public:
@@ -25,7 +25,7 @@ public:
 };
 
 UCLASS()
-class UOUUJsonLibrary : public UBlueprintFunctionLibrary
+class OUURUNTIME_API UOUUJsonLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
