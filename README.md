@@ -130,7 +130,9 @@ Some plugin specific conventions:
 
 ## Licensing
 
-Both Open Unreal Utilities plugin and [sample project](https://github.com/JonasReich/OpenUnrealUtilitiesSampleProject) are licensed under the MIT license.
+Both Open Unreal Utilities plugin and [sample project](https://github.com/JonasReich/OpenUnrealSampleProject) are licensed under the MIT license.
+
+See [LICENSE.md](LICENSE.md)
 
 ## Contributing
 
