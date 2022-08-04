@@ -8,11 +8,7 @@
 
 class FOUUDeveloperModule : public IModuleInterface
 {
-	virtual void StartupModule() override
-	{
-		OUU::Developer::ActorMapWindow::RegisterNomadTabSpawner();
-		UOUUMapsToCookSettings::TryInjectMapIniSectionCommandlineForCook();
-	}
+	virtual void StartupModule() override { OUU::Developer::ActorMapWindow::RegisterNomadTabSpawner(); }
 
 	virtual void ShutdownModule() override { OUU::Developer::ActorMapWindow::UnregisterNomadTabSpawner(); }
 };

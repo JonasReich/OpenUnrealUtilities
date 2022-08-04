@@ -10,7 +10,6 @@
 #include "MaterialAnalyzer/OUUMaterialAnalyzer.h"
 #include "Modules/ModuleManager.h"
 #include "OUUContentBrowserExtensions.h"
-#include "OUUMapsToCookSettingsDetails.h"
 
 namespace OUU::Editor
 {
@@ -31,14 +30,12 @@ namespace OUU::Editor
 			}
 
 			MaterialAnalyzer::RegisterNomadTabSpawner();
-			FOUUMapsToCookSettingsDetails::Register();
 			ContentBrowserExtensions::RegisterHooks();
 		}
 
 		virtual void ShutdownModule() override
 		{
 			MaterialAnalyzer::UnregisterNomadTabSpawner();
-			FOUUMapsToCookSettingsDetails::Unregister();
 			ContentBrowserExtensions::UnregisterHooks();
 		}
 

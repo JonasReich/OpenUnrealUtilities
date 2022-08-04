@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022 Jonas Reich
+// Copyright (c) 2022 Jonas Reich
 
 #include "OUUMapsToCookSettings.h"
 
@@ -45,24 +45,14 @@ namespace OUU::Developer::Private
 	}
 } // namespace OUU::Developer::Private
 
-void FOUUMapsToCookList::ReloadConfig()
+void FOUUMapsToCookList::ReloadConfig(const FString& ConfigPath)
 {
-	FString GameDefaultMapValue;
-	if (GConfig->GetString(
-			*OwningConfigSection,
-			GET_MEMBER_NAME_STRING_CHECKED(FOUUMapsToCookList, GameDefaultMap),
-			GameDefaultMapValue,
-			GGameIni))
-	{
-		GameDefaultMap = GameDefaultMapValue;
-	}
-
 	TArray<FString> MapsToCookStrings;
 	if (GConfig->GetArray(
 			*OwningConfigSection,
 			TEXT("Map"), // Use hardcoded key name "Map" as required by the cooker
 			MapsToCookStrings,
-			GGameIni))
+			ConfigPath))
 	{
 		MapsToCook.Empty();
 		for (auto& Map : MapsToCookStrings)
@@ -72,24 +62,8 @@ void FOUUMapsToCookList::ReloadConfig()
 	}
 }
 
-void FOUUMapsToCookList::UpdateDefaultConfigFile(FString ConfigPath)
+void FOUUMapsToCookList::UpdateDefaultConfigFile(const FString& ConfigPath)
 {
-	if (GameDefaultMap.IsValid())
-	{
-		GConfig->SetString(
-			*OwningConfigSection,
-			GET_MEMBER_NAME_STRING_CHECKED(FOUUMapsToCookList, GameDefaultMap),
-			*GameDefaultMap.ToString(),
-			ConfigPath);
-	}
-	else
-	{
-		GConfig->RemoveKey(
-			*OwningConfigSection,
-			GET_MEMBER_NAME_STRING_CHECKED(FOUUMapsToCookList, GameDefaultMap),
-			ConfigPath);
-	}
-
 	// Default ini's require the array syntax to be applied to the property name
 	// We also use the hardcoded name "Map", because that's required by the cooker.
 	const FString CompleteKey = TEXT("+Map");
@@ -117,6 +91,12 @@ void FOUUMapsToCookList::UpdateDefaultConfigFile(FString ConfigPath)
 	{
 		Sec->Remove(*CompleteKey);
 	}
+}
+
+UOUUMapsToCookSettings::UOUUMapsToCookSettings()
+{
+	AllMaps.OwningConfigSection = TEXT("AllMaps");
+	AlwaysCookMaps.OwningConfigSection = TEXT("AlwaysCookMaps");
 }
 
 void UOUUMapsToCookSettings::PostReloadConfig(FProperty* PropertyThatWasLoaded)
@@ -191,11 +171,15 @@ void UOUUMapsToCookSettings::PostEditChangeProperty(FPropertyChangedEvent& Prope
 		{
 			NestedSetting.UpdateDefaultConfigFile(ConfigPath);
 		}
+		AllMaps.UpdateDefaultConfigFile(ConfigPath);
+		AlwaysCookMaps.UpdateDefaultConfigFile(ConfigPath);
+#if WITH_EDITORONLY_DATA
+		bEnableAllMaps = AlwaysCookMaps.MapsToCook.Num() == 0;
+#endif
 	}
 
 	OUU::Developer::Private::CheckoutConfigFile(ConfigPath);
 	GConfig->Flush(false, ConfigPath);
-	TryApplyGameDefaultMap();
 }
 #endif
 
@@ -210,139 +194,22 @@ FName UOUUMapsToCookSettings::GetCategoryName() const
 	return TEXT("Project");
 }
 
-void UOUUMapsToCookSettings::TryInjectMapIniSectionCommandlineForCook()
-{
-	UE_LOG(LogOpenUnrealUtilities, Log, TEXT("Checking for cook..."));
-
-	if (!IsRunningCommandlet())
-	{
-		UE_LOG(LogOpenUnrealUtilities, Log, TEXT("No cook command detected (not running commandlet)."));
-		return;
-	}
-
-	FString CommandLine = FCommandLine::Get();
-
-	const bool bFoundCommandletName =
-		CommandLine.Contains(TEXT("cookcommandlet")) || CommandLine.Contains(TEXT("run=cook"));
-	if (!bFoundCommandletName)
-	{
-		UE_LOG(LogOpenUnrealUtilities, Log, TEXT("No cook command detected (running different commandlet)."));
-		return;
-	}
-
-	UE_LOG(
-		LogOpenUnrealUtilities,
-		Log,
-		TEXT("Cook command detected. "
-			 "Attempting to modify command line based on UOUUMapsToCookSettings..."));
-
-	auto* MapsToCookSettings = GetMutableDefault<UOUUMapsToCookSettings>();
-	if (!IsValid(MapsToCookSettings))
-		return;
-
-	// do not modify the commandline if MAPINISECTION parameter was set
-	FString CombinedSectionStr;
-	const bool bHasNativeIniSectionCliArg = FParse::Value(*CommandLine, TEXT("MAPINISECTION="), OUT CombinedSectionStr);
-	if (!bHasNativeIniSectionCliArg)
-	{
-		CombinedSectionStr = MapsToCookSettings->DefaultConfigSection;
-	}
-
-	TArray<FString> MapIniSections;
-	if (CombinedSectionStr.Contains(TEXT("+")))
-	{
-		TArray<FString> Sections;
-		CombinedSectionStr.ParseIntoArray(Sections, TEXT("+"), true);
-		for (int32 Index = 0; Index < Sections.Num(); Index++)
-		{
-			MapIniSections.Add(Sections[Index]);
-		}
-	}
-	else
-	{
-		MapIniSections.Add(CombinedSectionStr);
-	}
-
-	if (MapIniSections.Num() <= 0)
-	{
-		UE_LOG(LogOpenUnrealUtilities, Log, TEXT("No map ini sections found. Cooking with default map settings."));
-		return;
-	}
-
-	const auto& FirstMapSection = MapIniSections[0];
-	if (!GConfig->DoesSectionExist(*FirstMapSection, GGameIni))
-	{
-		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("Map ini section '%s' does not exist"), *FirstMapSection);
-	}
-
-	GetMutableDefault<UOUUMapsToCookSettings>()->SetDefaultConfigSection(FirstMapSection);
-	auto* GameMapSettings = GetDefault<UGameMapsSettings>();
-	if (GameMapSettings->GetGameDefaultMap().IsEmpty())
-	{
-		UE_LOG(LogOpenUnrealUtilities, Fatal, TEXT("Game default map is not set"));
-		FPlatformMisc::RequestExitWithStatus(false, 1);
-	}
-
-	if (!bHasNativeIniSectionCliArg)
-	{
-		// append custom MAPINISECTION parameter at the end of original commandline
-		const FString NewArgument = FString::Printf(TEXT("-MAPINISECTION=%s"), *CombinedSectionStr);
-		FCommandLine::Set(*FString::Printf(TEXT("%s %s"), *CommandLine, *NewArgument));
-
-		UE_LOG(
-			LogOpenUnrealUtilities,
-			Log,
-			TEXT("Appended '%s' to the command line. "
-				 "This should cause the cooker to use all '+Map=' entries "
-				 "in section [%s] from DefaultGame.ini as map list."),
-			*NewArgument,
-			*MapsToCookSettings->DefaultConfigSection);
-	}
-}
-
-void UOUUMapsToCookSettings::SetDefaultConfigSection(FString ConfigSectionString)
-{
-	DefaultConfigSection = ConfigSectionString;
-
-	// Write out the changed DefaultConfigSection
-	OUU::Developer::Private::CheckoutConfigFile(GetDefaultConfigFilename());
-	TryUpdateDefaultConfigFile();
-
-	TryApplyGameDefaultMap();
-}
-
 void UOUUMapsToCookSettings::RefreshMapListsFromConfig()
 {
+	AllMaps.ReloadConfig(GEditorIni);
+	AlwaysCookMaps.ReloadConfig(GEditorIni);
+
 	MapLists.Empty();
 	for (auto& ConfigSectionName : ConfigSections)
 	{
 		auto& MapsToCookWrapperObj = MapLists.AddDefaulted_GetRef();
 		MapsToCookWrapperObj.OwningConfigSection = ConfigSectionName;
-		MapsToCookWrapperObj.ReloadConfig();
+
+		// For some reason this needs the Saved/ config path and cannot handle the Default config path
+		MapsToCookWrapperObj.ReloadConfig(GEditorIni);
 	}
-}
 
-void UOUUMapsToCookSettings::TryApplyGameDefaultMap() const
-{
-	auto* GameMapSettings = GetMutableDefault<UGameMapsSettings>();
-	FString GameDefaultMap;
-	if (GConfig->GetString(
-			*DefaultConfigSection,
-			*FString(GET_MEMBER_NAME_STRING_CHECKED(FOUUMapsToCookList, GameDefaultMap)),
-			OUT GameDefaultMap,
-			GGameIni))
-	{
-		UE_LOG(
-			LogOpenUnrealUtilities,
-			Log,
-			TEXT("Chaning game default map to %s because it's set in ini section [%s] for MapsToCook."),
-			*GameDefaultMap,
-			*DefaultConfigSection);
-
-		GameMapSettings->SetGameDefaultMap(GameDefaultMap);
-
-		// Write out the changed default game map, so it's applied for the build.
-		OUU::Developer::Private::CheckoutConfigFile(GameMapSettings->GetDefaultConfigFilename());
-		GameMapSettings->TryUpdateDefaultConfigFile();
-	}
+#if WITH_EDITORONLY_DATA
+	bEnableAllMaps = AlwaysCookMaps.MapsToCook.Num() == 0;
+#endif
 }
