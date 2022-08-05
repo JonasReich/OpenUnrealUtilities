@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022 Jonas Reich
+// Copyright (c) 2022 Jonas Reich
 
 #pragma once
 
@@ -16,10 +16,15 @@ struct OUURUNTIME_API FSplitterColumnSizeData : public TSharedFromThis<FSplitter
 	TAttribute<float> RightColumnWidth;
 	SSplitter::FOnSlotResized OnWidthChanged;
 
+	TSharedRef<SWidget> MakeSimpleSplitter(
+		TSharedRef<SWidget> LeftWidget,
+		TSharedRef<SWidget> RightWidget,
+		const EOrientation Orientation = EOrientation::Orient_Horizontal) const;
 	TSharedRef<SWidget> MakeSimpleDetailsSplitter(
 		const FText& Label,
 		const FText& Tooltip,
-		TSharedRef<SWidget> RightWidget) const;
+		TSharedRef<SWidget> RightWidget,
+		const EOrientation Orientation = EOrientation::Orient_Horizontal) const;
 
 private:
 	float ColumnWidth = 0.3f;

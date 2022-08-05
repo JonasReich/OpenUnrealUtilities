@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022 Jonas Reich
+// Copyright (c) 2022 Jonas Reich
 
 #include "Slate/SplitterColumnSizeData.h"
 
@@ -17,13 +17,40 @@ FSplitterColumnSizeData::FSplitterColumnSizeData(float InColumnWidth) : ColumnWi
 	OnWidthChanged = SSplitter::FOnSlotResized::CreateRaw(this, &FSplitterColumnSizeData::OnSetColumnWidth);
 }
 
-TSharedRef<SWidget> FSplitterColumnSizeData::MakeSimpleDetailsSplitter(
-	const FText& Label,
-	const FText& Tooltip,
-	TSharedRef<SWidget> RightWidget) const
+TSharedRef<SWidget> FSplitterColumnSizeData::MakeSimpleSplitter(
+	TSharedRef<SWidget> LeftWidget,
+	TSharedRef<SWidget> RightWidget,
+	const EOrientation Orientation) const
 {
 	// clang-format off
 	return SNew(SSplitter)
+		.Orientation(Orientation)
+		+ SSplitter::Slot()
+		.SizeRule(SSplitter::ESizeRule::FractionOfParent)
+		.Value(LeftColumnWidth)
+		.OnSlotResized(OnWidthChanged)
+		[
+			LeftWidget
+		]
+		+ SSplitter::Slot()
+		.SizeRule(SSplitter::ESizeRule::FractionOfParent)
+		.Value(RightColumnWidth)
+		.OnSlotResized(OnWidthChanged)
+		[
+			RightWidget
+		];
+	// clang-format on
+}
+
+TSharedRef<SWidget> FSplitterColumnSizeData::MakeSimpleDetailsSplitter(
+	const FText& Label,
+	const FText& Tooltip,
+	TSharedRef<SWidget> RightWidget,
+	const EOrientation Orientation) const
+{
+	// clang-format off
+	return SNew(SSplitter)
+		.Orientation(Orientation)
 		+ SSplitter::Slot()
 		.SizeRule(SSplitter::ESizeRule::FractionOfParent)
 		.Value(LeftColumnWidth)
