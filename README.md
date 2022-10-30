@@ -28,7 +28,7 @@ If you want to know how a type is meant to be used, it can be useful to check th
 
 Plugin versions are flagged with tags. Check the [GitHub Releases](https://github.com/JonasReich/OpenUnrealUtilities/releases) for a brief summary of changes between versions. [master](https://github.com/JonasReich/OpenUnrealUtilities/tree/master) always points to the latest release.
 
-> Latest plugin release: [v1.0.0](https://github.com/JonasReich/OpenUnrealUtilities/tree/v1.0.0) on [master](https://github.com/JonasReich/OpenUnrealUtilities/tree/master)
+> Latest plugin release: [v1.1.0](https://github.com/JonasReich/OpenUnrealUtilities/tree/v1.1.0) on [master](https://github.com/JonasReich/OpenUnrealUtilities/tree/master)
 
 If you want stable versions, you should stick to the labeled release commits on the master branch.
 
