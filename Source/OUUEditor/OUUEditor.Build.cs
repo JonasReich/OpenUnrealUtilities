@@ -36,6 +36,10 @@ public class OUUEditor : OUUModuleRules
 			"SkeletalMeshEditor",
 			"SkeletalMeshUtilitiesCommon",
 			"EditorFramework",
+			"LevelEditor",
+			"ImageWriteQueue",
+			"RenderCore",
+			"PropertyEditor",
 
 			// OUU
 			"OUUDeveloper"
