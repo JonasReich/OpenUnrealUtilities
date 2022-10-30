@@ -72,7 +72,7 @@ namespace OUU::Runtime::ArrayUtils
 	static ElementType GetRandomElement(const TArray<ElementType, AllocatorType>& Array)
 	{
 		check(Array.Num() > 0);
-		return Array[FMath::RandRange(0, Array.Num() - 1)];
+		return Array[FMath::RandHelper(Array.Num())];
 	}
 
 	/**
@@ -127,7 +127,7 @@ namespace OUU::Runtime::ArrayUtils
 	static ElementType TakeRandomElementSwap(TArray<ElementType, AllocatorType>& Array)
 	{
 		check(Array.Num() > 0);
-		const int32 Index = FMath::RandRange(0, Array.Num() - 1);
+		const int32 Index = FMath::RandHelper(Array.Num());
 		return TakeAtSwap(Array, Index);
 	}
 
