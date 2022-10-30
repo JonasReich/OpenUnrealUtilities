@@ -39,12 +39,12 @@ Active development happens on branches named by supported engine version (patter
 Multiple version branches may receive updates at the same time, e.g. even after the UE 5.0 release, I keep adding features to ue4.27 that are infrequently cross-merged to the ue5.0. This is because I'm still actively using the plugin on projects that do not always upgrade to the latest UE version.
 
 > **active development:**
-> - [ue4.26](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue4.26)
-> - [ue4.27](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue4.27)
 > - [ue5.0](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue5.0)
 > 
 > old versions (not supported anymore):
 > - [ue4.25](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue4.25)
+> - [ue4.26](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue4.26)
+> - [ue4.27](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue4.27)
 
 Features should never be merged back from higher engine versions to lower versions to guarantee asset compatibility. I'm generally trying to adopt a fast-forward merge philosophy, but as soon as version branches diverge, I have to resort to regular merges.
 
