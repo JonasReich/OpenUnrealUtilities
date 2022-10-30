@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022 Jonas Reich
+// Copyright (c) 2022 Jonas Reich
 
 #include "OUUContentBrowserExtensions.h"
 
@@ -38,14 +38,14 @@ namespace OUU::Editor::ContentBrowserExtensions
 			TSharedRef<FExtender> Extender(new FExtender());
 
 			if (Algo::AllOf(SelectedAssets, [](const FAssetData& Asset) -> bool {
-					return Asset.GetClass()->IsChildOf(USkeletalMesh::StaticClass()) == false;
+					return Asset.GetClass()->IsChildOf(USkeletalMesh::StaticClass());
 				}))
 			{
 				Extender->AddMenuExtension(
 					"ImportedAssetActions",
 					EExtensionHook::Before,
 					nullptr,
-					FMenuExtensionDelegate::CreateLambda([&](FMenuBuilder& MenuBuilder) {
+					FMenuExtensionDelegate::CreateLambda([SelectedAssets](FMenuBuilder& MenuBuilder) {
 						MenuBuilder.BeginSection("OUUSkeletalMeshActions", INVTEXT("Open Unreal Utilities"));
 						MenuBuilder.AddMenuEntry(
 							INVTEXT("Remove Unskinned Bones"),
