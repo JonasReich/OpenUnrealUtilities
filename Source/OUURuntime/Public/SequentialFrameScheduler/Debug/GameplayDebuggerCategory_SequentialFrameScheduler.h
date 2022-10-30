@@ -7,7 +7,7 @@
 	#include "GameplayDebugger/GameplayDebuggerCategory_OUUBase.h"
 	#include "SequentialFrameScheduler/WorldBoundSFSchedulerRegistry.h"
 
-class OUURUNTIME_API FGameplayDebuggerCategory_SequentialFrameScheduler : public FGameplayDebuggerCategory_OUUBase
+class OUURUNTIME_API FGameplayDebuggerCategory_SequentialFrameScheduler : public FOUUGameplayDebuggerCategory_Base
 {
 public:
 	FGameplayDebuggerCategory_SequentialFrameScheduler();

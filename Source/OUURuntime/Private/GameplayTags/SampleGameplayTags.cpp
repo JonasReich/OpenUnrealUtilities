@@ -2,5 +2,6 @@
 
 #include "GameplayTags/SampleGameplayTags.h"
 
-DEFINE_OUU_GAMEPLAY_TAGS(FSampleGameplayTags);
-DEFINE_OUU_GAMEPLAY_TAGS(FSampleGameplayTags_NotRegsitered);
+OUU_DEFINE_GAMEPLAY_TAGS(FSampleGameplayTags);
+OUU_DEFINE_GAMEPLAY_TAGS(FSampleGameplayTags_Nested);
+OUU_DEFINE_GAMEPLAY_TAGS(FSampleGameplayTags_NotRegsitered);

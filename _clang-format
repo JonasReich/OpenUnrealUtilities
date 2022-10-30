@@ -1,4 +1,4 @@
-﻿---
+---
 AccessModifierOffset: '-4'
 AlignAfterOpenBracket: AlwaysBreak
 AlignConsecutiveAssignments: 'false'
@@ -74,8 +74,8 @@ StatementMacros:
   - UPROPERTY
   - GENERATED_BODY
   - GENERATED_UCLASS_BODY
-MacroBlockBegin: "^SLATE_BEGIN_ARGS(.*)|BEGIN_DEFINE_SPEC|DECLARE_OUU_GAMEPLAY_TAGS(.*)|OUU_GTAG_GROUP_START(.*)$"
-MacroBlockEnd: "^SLATE_END_ARGS(.*)|END_DEFINE_SPEC|OUU_GTAG_GROUP_END(.*)$"
+MacroBlockBegin: "^SLATE_BEGIN_ARGS(.*)|BEGIN_DEFINE_SPEC|OUU_DECLARE_GAMEPLAY_TAGS_START|OUU_GTAG_GROUP_START$"
+MacroBlockEnd: "^SLATE_END_ARGS(.*)|END_DEFINE_SPEC|OUU_GTAG_GROUP_END|OUU_DECLARE_GAMEPLAY_TAGS_END$"
 IncludeBlocks:  Regroup
 IncludeCategories:
   - Regex:           '^".+\.generated\.h"$'
