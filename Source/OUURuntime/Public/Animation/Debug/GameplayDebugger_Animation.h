@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022 Jonas Reich
+// Copyright (c) 2022 Jonas Reich
 
 #pragma once
 
@@ -20,7 +20,7 @@ struct FGameplayDebugger_DisplayDebugManager;
  * Gameplay debugger for animation system.
  * Extracted/extended functionality from "ShowDebug Animation" command.
  */
-class OUURUNTIME_API FGameplayDebuggerCategory_Animation : public FGameplayDebuggerCategory_OUUBase
+class OUURUNTIME_API FGameplayDebuggerCategory_Animation : public FOUUGameplayDebuggerCategory_Base
 {
 public:
 	FGameplayDebuggerCategory_Animation();
