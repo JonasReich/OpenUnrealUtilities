@@ -146,6 +146,16 @@ namespace OUU::Runtime::ArrayUtils
 	}
 
 	/**
+	 * Converts a slice index into a regular index.
+	 * (see Slice functions below).
+	 */
+	template <typename ElementType, typename AllocatorType>
+	static int32 SliceIndex(const TArray<ElementType, AllocatorType>& Array, int32 Index)
+	{
+		return Index >= 0 ? Index : Array.Num() + Index;
+	}
+
+	/**
 	 * Gives access to a single array element using slice index (negative numbers accesses elements from the end).
 	 */
 	template <typename ElementType, typename AllocatorType>
@@ -186,15 +196,6 @@ namespace OUU::Runtime::ArrayUtils
 				"Dynamic reversal of ranges is not support at the moment! Please use ReverseRange() for those cases."));
 
 		return TArray<ElementType, AllocatorType>(&SourceArray[StartIndex], EndIndex - StartIndex + 1);
-	}
-
-	/**
-	 * Converts a slice index into a regular index.
-	 */
-	template <typename ElementType, typename AllocatorType>
-	static int32 SliceIndex(const TArray<ElementType, AllocatorType>& Array, int32 Index)
-	{
-		return Index >= 0 ? Index : Array.Num() + Index;
 	}
 }; // namespace OUU::Runtime::ArrayUtils
 
