@@ -20,6 +20,13 @@ namespace OUU::Runtime::Animation
 		Stop
 	};
 
+	namespace Private
+	{
+		// Forward declaration. See below...
+		template <typename PredicateType>
+		ETraverseBoneTreeAction TraverseBoneTreeImpl(USkeleton* Skeleton, int32 BoneIndex, PredicateType Predicate);
+	}
+
 	/**
 	 * Traverse through all bone indices in a skeleton root to leaf starting from a given root bone index.
 	 * @param	Skeleton			The skeleton through which to iterate
