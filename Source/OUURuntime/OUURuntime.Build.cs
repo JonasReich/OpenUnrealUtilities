@@ -2,6 +2,22 @@
 
 using UnrealBuildTool;
 
+public class OUUModuleRuleHelpers
+{
+	public static void AddGameplayDebuggerDependency(ModuleRules Rules, ReadOnlyTargetRules Target)
+	{
+		if (Target.bBuildDeveloperTools || (Target.Configuration != UnrealTargetConfiguration.Shipping && Target.Configuration != UnrealTargetConfiguration.Test))
+		{
+			Rules.PrivateDependencyModuleNames.Add("GameplayDebugger");
+			Rules.PublicDefinitions.Add("WITH_GAMEPLAY_DEBUGGER=1");
+		}
+		else
+		{
+			Rules.PublicDefinitions.Add("WITH_GAMEPLAY_DEBUGGER=0");
+		}
+	}
+}
+
 public class OUUModuleRules : ModuleRules
 {
 	public OUUModuleRules(ReadOnlyTargetRules Target) : base(Target)
@@ -16,6 +32,8 @@ public class OUUModuleRules : ModuleRules
 		// Also disable unity builds.
 		// Unfortunately even this is needed to ensure that all includes are correct when building the plugin by itself.
 		bUseUnity = false;
+
+		OUUModuleRuleHelpers.AddGameplayDebuggerDependency(this, Target);
 	}
 }
 
@@ -57,18 +75,5 @@ public class OUURuntime : OUUModuleRules
 			});
 		}
 		// --
-
-		if (Target.bBuildDeveloperTools
-			|| (Target.Configuration != UnrealTargetConfiguration.Shipping
-				&& Target.Configuration != UnrealTargetConfiguration.Test))
-		{
-			PublicDependencyModuleNames.Add("GameplayDebugger");
-			PublicDefinitions.Add("WITH_GAMEPLAY_DEBUGGER=1");
-		}
-		else
-
-		{
-			PublicDefinitions.Add("WITH_GAMEPLAY_DEBUGGER=0");
-		}
 	}
 }

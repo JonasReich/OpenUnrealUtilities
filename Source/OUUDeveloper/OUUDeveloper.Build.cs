@@ -46,17 +46,7 @@ public class OUUDeveloper : OUUModuleRules
 		}
 		// --
 
-		// #TODO-OUU Figure out if it makes sense to move the gameplay debugger stuff into this module as well!
-		if (Target.bBuildDeveloperTools
-			|| (Target.Configuration != UnrealTargetConfiguration.Shipping
-				&& Target.Configuration != UnrealTargetConfiguration.Test))
-		{
-			PublicDependencyModuleNames.Add("GameplayDebugger");
-			PublicDefinitions.Add("WITH_GAMEPLAY_DEBUGGER=1");
-		}
-		else
-		{
-			PublicDefinitions.Add("WITH_GAMEPLAY_DEBUGGER=0");
-		}
+		// #TODO-OUU Figure out if it makes sense to move the other gameplay debugger stuff into this module as well!
+		OUUModuleRuleHelpers.AddGameplayDebuggerDependency(this, Target);
 	}
 }
