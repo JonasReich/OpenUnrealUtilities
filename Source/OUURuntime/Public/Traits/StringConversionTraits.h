@@ -4,19 +4,8 @@
 
 #include "CoreMinimal.h"
 
-/** Concept for a class that supports string conversion via LexToString() */
-struct CLexToStringConvertible
-{
-	template <typename ElementType>
-	auto Requires(ElementType It) -> decltype(LexToString(DeclVal<ElementType>()));
-};
-
-/** Concept for a class that supports string conversion via ToString() member */
-struct CMemberToStringConvertable
-{
-	template <typename ElementType>
-	auto Requires(ElementType It) -> decltype(DeclVal<ElementType>().ToString());
-};
+// CMemberToStringConvertable and CLexToStringConvertible were moved to Templates/StringUtils.h
+// Because clang requires the LexToString() template overloads to be defined before the conecept template.
 
 /** Concept for a class that supports parsing from FString/TCHAR* via LexTryParseString() */
 struct CLexTryParseString_Parseable

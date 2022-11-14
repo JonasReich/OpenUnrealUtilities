@@ -9,7 +9,7 @@
 	#include "LogOpenUnrealUtilities.h"
 	#include "Templates/IsEnumClass.h"
 	#include "Templates/UnrealTypeTraits.h"
-	#include "Traits/StringConversionTraits.h"
+	#include "Templates/StringUtils.h"
 
 namespace OUU::TestUtilities::Private
 {

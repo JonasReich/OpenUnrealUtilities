@@ -5,8 +5,11 @@
 #include "CoreMinimal.h"
 
 #include "InterfaceUtils.h"
+#include "Templates/IsArithmetic.h"
 #include "Traits/IsStringType.h"
 #include "Traits/StringConversionTraits.h"
+
+//----------------------------------------------------------------------------------------------------------------------
 
 /** LexToString overload for UObject pointers */
 FORCEINLINE FString LexToString(const UObject* O)
@@ -21,37 +24,42 @@ FORCEINLINE FString LexToString(TScriptInterface<T> Interface)
 	return IsValidInterface(Interface) ? Interface.GetObject()->GetName() : "None";
 }
 
+/** Concept for a class that supports string conversion via ToString() member */
+struct CMemberToStringConvertable
+{
+	template <typename ElementType>
+	auto Requires(const ElementType& Val) -> decltype(Val.ToString());
+};
+
 /** LexToString overload for pointers to objects that are themselves string convertable with LexToString() */
-template <
-	typename T,
-	typename = typename TEnableIf<
-		TIsPointer<T>::Value == true
-		&& TPointerIsConvertibleFromTo<typename TRemovePointer<T>::Type, const UObject>::Value == false
-		&& TModels<CMemberToStringConvertable, typename TRemovePointer<T>::Type>::Value == false>::Type>
-FString LexToString(T Object)
+template <typename T>
+typename TEnableIf<
+	TPointerIsConvertibleFromTo<T, UObject>::Value == false && TIsCharType<T>::Value == false
+		&& TModels<CMemberToStringConvertable, T>::Value == false,
+	FString>::Type
+	LexToString(const T* Object)
 {
 	return (Object != nullptr) ? LexToString(*Object) : TEXT("nullptr");
 }
 
-/** LexToString overload for pointers to objects that have a ToString member */
-template <
-	typename T,
-	typename = typename TEnableIf<
-		TIsPointer<T>::Value == true
-		&& TPointerIsConvertibleFromTo<typename TRemovePointer<T>::Type, const UObject>::Value == false
-		&& TModels<CMemberToStringConvertable, typename TRemovePointer<T>::Type>::Value == true>::Type>
-FString LexToString(T Object, int32 iOverloadArg = 0)
+/** LexToString overload for pointers to objects that have a ToString member - copy for const T* */
+template <typename T>
+typename TEnableIf<
+	TPointerIsConvertibleFromTo<T, UObject>::Value == false && TIsArithmetic<T>::Value == false
+		&& TIsCharType<T>::Value == false && TModels<CMemberToStringConvertable, T>::Value == true,
+	FString>::Type
+	LexToString(const T* Object)
 {
 	return (Object != nullptr) ? Object->ToString() : TEXT("nullptr");
 }
 
-/** LexToString overload for references to objects that have a ToString member */
-template <
-	typename T,
-	typename = typename TEnableIf<
-		TIsPointer<T>::Value == false && TIsArithmetic<T>::Value == false
-		&& TModels<CMemberToStringConvertable, T>::Value>::Type>
-FString LexToString(const T& Object)
+/** LexToString overload for references to objects that have a ToString member - copy for const T& */
+template <typename T>
+typename TEnableIf<
+	TIsArithmetic<T>::Value == false && TIsCharType<T>::Value == false
+		&& TModels<CMemberToStringConvertable, T>::Value == true,
+	FString>::Type
+	LexToString(const T& Object)
 {
 	return Object.ToString();
 }
@@ -62,6 +70,18 @@ FString LexToString(TSharedPtr<T> Object)
 {
 	return Object.IsValid() ? LexToString(Object.Get()) : TEXT("nullptr");
 }
+
+/**
+ * Concept for a class that supports string conversion via LexToString() 
+ * Declared here, because clang requires the LexToString() template overloads to be defined before the concept template.
+ */
+struct CLexToStringConvertible
+{
+	template <typename ElementType>
+	auto Requires(const ElementType& Val) -> decltype(LexToString(Val));
+};
+
+//----------------------------------------------------------------------------------------------------------------------
 
 template <typename T>
 FString LexToString_QuotedIfString(const T& Value)
@@ -75,6 +95,8 @@ FString LexToString_QuotedIfString(const T& Value)
 		return LexToString(Value);
 	}
 }
+
+//----------------------------------------------------------------------------------------------------------------------
 
 /**
  * Interprets all elements of an array as LexToString-convertible objects and joins them
@@ -91,6 +113,8 @@ FString ArrayToString(const TArray<ElementType, AllocatorType>& Array, const TCH
 							   return LexToString_QuotedIfString<ElementType>(Element);
 						   }));
 }
+
+//----------------------------------------------------------------------------------------------------------------------
 
 /**
  * Interprets all elements of a map as LexToString-convertible objects and joins them
