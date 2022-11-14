@@ -255,6 +255,7 @@ namespace OUU::Runtime::Private::BitmaskUtils
  */
 #define DECLARE_BITMASK_OPERATORS(EnumType)                                                                            \
 	static_assert(TIsEnumClass<EnumType>::Value, "DECLARE_BITMASK_OPERATORS() must only be used with enum classes");   \
+	DECLARE_ENUM_SEQUENCE(EnumType, EEnumSequenceType::Pow2)                                                           \
                                                                                                                        \
 	inline constexpr OUU::Runtime::Private::BitmaskUtils::TBitmaskWrapper<EnumType> operator&(EnumType x, EnumType y)  \
 	{                                                                                                                  \
@@ -289,5 +290,4 @@ namespace OUU::Runtime::Private::BitmaskUtils
 	{                                                                                                                  \
 		x = x ^ y;                                                                                                     \
 		return x;                                                                                                      \
-	}                                                                                                                  \
-	DECLARE_ENUM_SEQUENCE(EnumType, EEnumSequenceType::Pow2)
+	}

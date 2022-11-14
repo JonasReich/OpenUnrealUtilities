@@ -103,7 +103,7 @@ FORCEINLINE FString OUUTESTUTILITIES_API EscapeTestName(FString InTestName)
 
 	#define OUU_STRINGIFY_TESTCASE_PRETTY_NAME(PrettyName) PREPROCESSOR_TO_STRING(PrettyName)
 	#define OUU_EXPAND_TESTCASE_PRETTY_NAME(Category, TestType, TestCase)                                              \
-		OUU_STRINGIFY_TESTCASE_PRETTY_NAME(Category##.##TestType##.##TestCase)
+		OUU_STRINGIFY_TESTCASE_PRETTY_NAME(Category.TestType.TestCase)
 	#define OUU_TESTCASE_PRETTY_NAME(TestCase)                                                                         \
 		OUU_EXPAND_TESTCASE_PRETTY_NAME(OUU_TEST_CATEGORY, OUU_TEST_TYPE, TestCase)
 
