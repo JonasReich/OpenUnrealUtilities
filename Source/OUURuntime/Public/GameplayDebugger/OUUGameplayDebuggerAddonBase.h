@@ -13,8 +13,7 @@
 namespace OUU::Runtime::Private
 {
 	template <class UserClass>
-	using TOUUKeyBindFunctionType =
-		typename FGameplayDebuggerInputHandler::FHandler::TRawMethodDelegate<UserClass>::FMethodPtr;
+	using TOUUKeyBindFunctionType = typename FGameplayDebuggerInputHandler::FHandler::TMethodPtr<UserClass>;
 
 	/**
 	 * Templated base class for gameplay debugger extensions to support advanced key bindings.
@@ -25,7 +24,7 @@ namespace OUU::Runtime::Private
 	{
 	public:
 		using Super = SuperType;
-		using SelfType = typename TOUUGameplayDebuggerAddonBase<Super>;
+		using SelfType = TOUUGameplayDebuggerAddonBase<Super>;
 
 		static_assert(
 			TOr<TIsSame<SuperType, FGameplayDebuggerAddonBase>,
@@ -49,7 +48,7 @@ namespace OUU::Runtime::Private
 		{
 			RegisterKeyBind(ConfigName, false, false);
 
-			return Super::BindKeyPress<UserClass>(
+			return Super::template BindKeyPress<UserClass>(
 				FGameplayDebuggerInputHandlerConfig{ConfigName, DefaultKeyName, DefaultModifier},
 				KeyHandlerObject,
 				KeyHandlerFunc,
@@ -66,7 +65,7 @@ namespace OUU::Runtime::Private
 			int32 SwitchId = BoolSwitchValues.Num();
 			RegisterKeyBind(ConfigName, true, bBoolSwitchDefaultValue);
 
-			return Super::BindKeyPress<SelfType>(
+			return Super::template BindKeyPress<SelfType>(
 				FGameplayDebuggerInputHandlerConfig{ConfigName, DefaultKeyName, DefaultModifier},
 				this,
 				GetBoolSwitchKeyHandlerFunc(SwitchId),

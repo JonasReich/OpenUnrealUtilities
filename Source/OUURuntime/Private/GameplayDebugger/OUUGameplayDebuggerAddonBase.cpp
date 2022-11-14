@@ -58,7 +58,7 @@ namespace OUU::Runtime::Private
 
 		return FString::Printf(
 			TEXT("{white}[{yellow}%s{white}]: %s%s"),
-			*GetInputHandlerDescription(KeyBindIndex),
+			*FGameplayDebuggerAddonBase::GetInputHandlerDescription(KeyBindIndex),
 			*InputName.ToString(),
 			*BoolSwitchStatus);
 	}
@@ -93,7 +93,7 @@ namespace OUU::Runtime::Private
 		switch (SwitchNum)
 		{
 	#define BOOL_SWITCH_CASE(Num)                                                                                      \
-	case Num: return &HelperFunction_ToggleSwitch<Num>
+	case Num: return &TOUUGameplayDebuggerAddonBase<SuperType>::HelperFunction_ToggleSwitch<Num>
 			BOOL_SWITCH_CASE(0);
 			BOOL_SWITCH_CASE(1);
 			BOOL_SWITCH_CASE(2);
@@ -128,9 +128,9 @@ namespace OUU::Runtime::Private
 
 } // namespace OUU::Runtime::Private
 
-#endif
-
 FString FOUUGameplayDebuggerExtension_Base::GetDescription() const
 {
 	return GetKeyBindsString_SingleLine();
 }
+
+#endif

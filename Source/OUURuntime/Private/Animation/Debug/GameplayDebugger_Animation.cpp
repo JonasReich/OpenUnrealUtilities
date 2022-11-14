@@ -104,7 +104,7 @@ void FGameplayDebuggerCategory_Animation::DrawData(
 		TEXT("Target Mesh [%i / %i]: %s (%s)"),
 		DebugMeshComponentIndex,
 		NumSkeletalMeshComponents,
-		*LexToString(DebugMeshComponent->SkeletalMesh),
+		*LexToString(DebugMeshComponent->GetSkeletalMeshAsset()),
 		*LexToString(DebugMeshComponent));
 
 	// cast to const USkeletalMeshComponent* is required so the right (public) overload of GetLinkedAnimInstances is
@@ -184,7 +184,7 @@ void FGameplayDebuggerCategory_Animation::DrawSceneComponentTree(
 			}
 			else if (auto* SkelMeshComp = Cast<USkeletalMeshComponent>(SceneComponent))
 			{
-				OptionalMeshString = FString::Printf(TEXT("(%s)"), *LexToString(SkelMeshComp->SkeletalMesh));
+				OptionalMeshString = FString::Printf(TEXT("(%s)"), *LexToString(SkelMeshComp->GetSkeletalMeshAsset()));
 			}
 
 			return FString::Printf(
@@ -234,6 +234,8 @@ void FGameplayDebuggerCategory_Animation::DisplayDebug(
 	{
 		FIndenter CustomDebugIndent(Indent);
 		DisplayDebugInstance(DisplayDebugManager, SkeletalMeshComponent, AnimInstance, Indent);
+
+		AnimInstance->AddGameplayDebuggerInfo(CanvasContext);
 	}
 
 	if (bShowGraph && Proxy.HasRootNode())

@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022 Jonas Reich
+// Copyright (c) 2022 Jonas Reich
 
 #pragma once
 
@@ -9,12 +9,20 @@
 
 #include "DebuggableAnimInstance.generated.h"
 
+#if WITH_GAMEPLAY_DEBUGGER
+class FGameplayDebuggerCanvasContext;
+#endif
+
 UCLASS(abstract)
 class OUURUNTIME_API UOUUDebuggableAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 public:
 	friend class FGameplayDebuggerCategory_Animation;
+
+#if WITH_GAMEPLAY_DEBUGGER
+	virtual void AddGameplayDebuggerInfo(FGameplayDebuggerCanvasContext& CanvasContext) {}
+#endif
 };
 
 USTRUCT()
@@ -22,7 +30,6 @@ struct OUURUNTIME_API FOUUDebuggableAnimInstanceProxy : public FAnimInstanceProx
 {
 	GENERATED_BODY()
 public:
-	using Super = FAnimInstanceProxy;
 	friend class FGameplayDebuggerCategory_Animation;
 
 	FOUUDebuggableAnimInstanceProxy() = default;
