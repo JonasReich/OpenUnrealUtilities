@@ -73,6 +73,18 @@ public:
 		return CreateObjectMessageLogToken(Object, FText());
 	}
 
+	template<typename ObjectType>
+	static FORCEINLINE FMessageLogToken Create(const TSoftObjectPtr<ObjectType>& Object)
+	{
+		return CreateObjectMessageLogToken(Object.LoadSynchronous(), FText());
+	}
+
+	template <typename ObjectType>
+	static FORCEINLINE FMessageLogToken Create(const TSoftClassPtr<ObjectType>& Class)
+	{
+		return CreateObjectMessageLogToken(Class.LoadSynchronous(), FText());
+	}
+
 	static FORCEINLINE FMessageLogToken Create(FMessageLogToken Token) { return Token; }
 
 	static FText ListAsText(const TArray<FMessageLogToken>& MessageTokenList);
