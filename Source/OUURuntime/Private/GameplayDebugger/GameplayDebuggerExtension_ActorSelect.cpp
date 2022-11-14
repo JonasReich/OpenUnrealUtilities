@@ -2,6 +2,8 @@
 
 #include "GameplayDebugger/GameplayDebuggerExtension_ActorSelect.h"
 
+#if WITH_GAMEPLAY_DEBUGGER
+
 #include "EngineUtils.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
@@ -9,8 +11,6 @@
 #include "GameplayDebuggerCategoryReplicator.h"
 #include "InputCoreTypes.h"
 #include "Kismet/GameplayStatics.h"
-
-#if WITH_GAMEPLAY_DEBUGGER
 
 FGameplayDebuggerExtension_ActorSelect::FGameplayDebuggerExtension_ActorSelect()
 {
