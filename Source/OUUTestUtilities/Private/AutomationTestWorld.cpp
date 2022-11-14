@@ -1,7 +1,5 @@
 // Copyright (c) 2022 Jonas Reich
 
-#pragma once
-
 #include "AutomationTestWorld.h"
 
 #if WITH_AUTOMATION_WORKER
