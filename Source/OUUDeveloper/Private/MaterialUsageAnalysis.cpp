@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022 Jonas Reich
+// Copyright (c) 2022 Jonas Reich
 
 #include "CoreMinimal.h"
 
@@ -146,15 +146,19 @@ FMaterialAnalysisResults AnalyzeMaterialUsage(UWorld* TargetWorld)
 				Results.UnsupportedPrimCounts.FindOrAdd(PrimitiveComponent->GetClass(), 0) += 1;
 				return;
 			}
+			// Exclude b/c it wasn't recently rendered?
 			if (
-				// Exclude b/c it wasn't recently rendered?
-				(bOnlyRecentlyRendered && (!PrimitiveComponent->WasRecentlyRendered())
-				 || !PrimitiveComponent->IsVisible() || PrimitiveComponent->bHiddenInGame)
-				// Exclude b/c of Virtual Texture?
-				|| (bExcludeVTOnlyMeshes
+				bOnlyRecentlyRendered && (!PrimitiveComponent->WasRecentlyRendered()
+				 || !PrimitiveComponent->IsVisible() || PrimitiveComponent->bHiddenInGame))
+			{
+				Results.NumIgnoredPrimitivesNotRendered += 1;
+				return;
+			}
+			// Exclude b/c of Virtual Texture?
+			if (bExcludeVTOnlyMeshes
 					&& PrimitiveComponent->GetVirtualTextureRenderPassType()
 						!= ERuntimeVirtualTextureMainPassType::Always
-					&& PrimitiveComponent->GetRuntimeVirtualTextures().Num() > 0))
+					&& PrimitiveComponent->GetRuntimeVirtualTextures().Num() > 0)
 			{
 				Results.NumIgnoredPrimitivesNotRendered += 1;
 				return;
