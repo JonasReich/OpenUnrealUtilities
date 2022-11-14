@@ -8,6 +8,10 @@
 #include "Templates/RWLockedVariable.h"
 #include "Traits/ConditionalType.h"
 
+// Forward declaration
+template <typename...>
+class TScopedMultiRWLock;
+
 /** Implementation details for TScopedMultiRWLock */
 namespace OUU::Runtime::Private::ScopedMultiRWLock
 {
@@ -19,7 +23,7 @@ namespace OUU::Runtime::Private::ScopedMultiRWLock
 	{
 	public:
 		template <typename...>
-		friend class TScopedMultiRWLock;
+		friend class ::TScopedMultiRWLock;
 
 		FScopedMultiRWLockRef_Base(FRWLockedVariable_Base& InRWLockVariable_Base_Ref, bool bInIsWriteLock) :
 			RWLockVariable_Base_Ref(InRWLockVariable_Base_Ref), bIsWriteLock(bInIsWriteLock)
@@ -50,7 +54,7 @@ namespace OUU::Runtime::Private::ScopedMultiRWLock
 		using RWLockedVariableType = TRWLockedVariable<VariableType>;
 
 		template <typename...>
-		friend class TScopedMultiRWLock;
+		friend class ::TScopedMultiRWLock;
 
 		/**
 		 * Static type info that denotes whether the lock is a write lock.
@@ -174,7 +178,8 @@ public:
 			typename TConditionalType<LockRefType::IsWriteLock, VariableType, const VariableType>::Type>
 	ResultType& GetByIdx() const
 	{
-		return LockReferences.template Get<Idx>().RWLockedVariable_Ref.GetRefWithoutLocking_USE_WITH_CAUTION();
+		const LockRefType& LockRef = LockReferences.template Get<Idx>();
+		return LockRef.RWLockedVariable_Ref.GetRefWithoutLocking_USE_WITH_CAUTION();
 	}
 
 	/**
@@ -186,6 +191,9 @@ public:
 	template <typename IntegerSequence>
 	struct TTransformTuple_Impl;
 
+	template <typename>
+	friend struct TTransformTuple_Impl;
+
 	template <uint32... Indices>
 	struct TTransformTuple_Impl<TIntegerSequence<uint32, Indices...>>
 	{
@@ -195,7 +203,7 @@ public:
 #if UE_VERSION_OLDER_THAN(5, 0, 0)
 			return UE4Tuple_Private::MakeTupleImpl(&TypedThis.GetByIdx<Indices>()...);
 #else
-			return UE::Core::Private::Tuple::MakeTupleImpl(&TypedThis.GetByIdx<Indices>()...);
+			return MakeTuple(&TypedThis.template GetByIdx<Indices>()...);
 #endif
 		}
 	};

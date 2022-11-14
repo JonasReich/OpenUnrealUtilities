@@ -20,6 +20,10 @@ protected:
 	mutable FRWLock Lock;
 };
 
+// Forward declaration
+template <typename VariableType, bool bInIsWriteLock>
+class TScopedRWLockedVariableRef;
+
 /**
  * Container for a variable that has a read/write lock.
  * Only allows access to the variable via methods that acquire the corresponding scoped lock.
