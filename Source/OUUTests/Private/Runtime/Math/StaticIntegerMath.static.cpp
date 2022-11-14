@@ -6,11 +6,11 @@
 
 // Static tests for IntPow()
 
-template <SIZE_T Base, SIZE_T Power, SIZE_T ExpectedResult>
+template <uint64 Base, uint64 Power, uint64 ExpectedResult>
 struct TAssertIntPowEquals
 {
-	static const SIZE_T TestResult = IntPow<SIZE_T>(Base, Power);
-	static const bool Value = TAssertValuesEqual<SIZE_T, TestResult, ExpectedResult>::Value;
+	static const uint64 TestResult = IntPow<uint64>(Base, Power);
+	static const bool Value = TAssertValuesEqual<uint64, TestResult, ExpectedResult>::Value;
 };
 
 static_assert(TAssertIntPowEquals<10, 0, 1>::Value, "10^0 = 1");
@@ -21,14 +21,14 @@ static_assert(TAssertIntPowEquals<2, 10, 1024>::Value, "2^10 = 1024");
 
 // Static tests for ConvertDecimalToFakeBinary()
 
-static_assert(TAssertValuesEqual<SIZE_T, ConvertDecimalToFakeBinary(0), 0>::Value, "0 as binary");
-static_assert(TAssertValuesEqual<SIZE_T, ConvertDecimalToFakeBinary(1), 1>::Value, "1 as binary");
-static_assert(TAssertValuesEqual<SIZE_T, ConvertDecimalToFakeBinary(2), 10>::Value, "2 as binary");
-static_assert(TAssertValuesEqual<SIZE_T, ConvertDecimalToFakeBinary(3), 11>::Value, "3 as binary");
-static_assert(TAssertValuesEqual<SIZE_T, ConvertDecimalToFakeBinary(4), 100>::Value, "4 as binary");
-static_assert(TAssertValuesEqual<SIZE_T, ConvertDecimalToFakeBinary(5), 101>::Value, "5 as binary");
-static_assert(TAssertValuesEqual<SIZE_T, ConvertDecimalToFakeBinary(6), 110>::Value, "6 as binary");
-static_assert(TAssertValuesEqual<SIZE_T, ConvertDecimalToFakeBinary(7), 111>::Value, "7 as binary");
+static_assert(TAssertValuesEqual<uint64, ConvertDecimalToFakeBinary(0), 0>::Value, "0 as binary");
+static_assert(TAssertValuesEqual<uint64, ConvertDecimalToFakeBinary(1), 1>::Value, "1 as binary");
+static_assert(TAssertValuesEqual<uint64, ConvertDecimalToFakeBinary(2), 10>::Value, "2 as binary");
+static_assert(TAssertValuesEqual<uint64, ConvertDecimalToFakeBinary(3), 11>::Value, "3 as binary");
+static_assert(TAssertValuesEqual<uint64, ConvertDecimalToFakeBinary(4), 100>::Value, "4 as binary");
+static_assert(TAssertValuesEqual<uint64, ConvertDecimalToFakeBinary(5), 101>::Value, "5 as binary");
+static_assert(TAssertValuesEqual<uint64, ConvertDecimalToFakeBinary(6), 110>::Value, "6 as binary");
+static_assert(TAssertValuesEqual<uint64, ConvertDecimalToFakeBinary(7), 111>::Value, "7 as binary");
 
 static_assert(TAssertValuesEqual<int64, ConvertDecimalToFakeBinary<int8>(-1), 11111111>::Value, "-1 as binary");
 static_assert(TAssertValuesEqual<int64, ConvertDecimalToFakeBinary<int8>(-2), 11111110>::Value, "-2 as binary");
@@ -69,11 +69,11 @@ static_assert(TAssertValuesEqual<int32, NumDigits<int32>(1111), 4>::Value, "1111
 static_assert(TAssertValuesEqual<int32, NumDigits<int32>(2000), 4>::Value, "2000 has 4 digits");
 static_assert(TAssertValuesEqual<int32, NumDigits<int32>(9999), 4>::Value, "9999 has 4 digits");
 
-static_assert(TAssertValuesEqual<SIZE_T, NumDigits<int32>(0, 2), 1>::Value, "0 in base 2 has 1 digit");
-static_assert(TAssertValuesEqual<SIZE_T, NumDigits<int32>(1, 2), 1>::Value, "1 in base 2 has 1 digit");
-static_assert(TAssertValuesEqual<SIZE_T, NumDigits<int32>(2, 2), 2>::Value, "2 in base 2 has 2 digits");
-static_assert(TAssertValuesEqual<SIZE_T, NumDigits<int32>(7, 2), 3>::Value, "7 in base 2 has 3 digits");
-static_assert(TAssertValuesEqual<SIZE_T, NumDigits<int32>(1024, 2), 11>::Value, "1024 in base 2 has 11 digits");
+static_assert(TAssertValuesEqual<uint64, NumDigits<int32>(0, 2), 1>::Value, "0 in base 2 has 1 digit");
+static_assert(TAssertValuesEqual<uint64, NumDigits<int32>(1, 2), 1>::Value, "1 in base 2 has 1 digit");
+static_assert(TAssertValuesEqual<uint64, NumDigits<int32>(2, 2), 2>::Value, "2 in base 2 has 2 digits");
+static_assert(TAssertValuesEqual<uint64, NumDigits<int32>(7, 2), 3>::Value, "7 in base 2 has 3 digits");
+static_assert(TAssertValuesEqual<uint64, NumDigits<int32>(1024, 2), 11>::Value, "1024 in base 2 has 11 digits");
 
 // Static tests for GetMinBitSize
 
