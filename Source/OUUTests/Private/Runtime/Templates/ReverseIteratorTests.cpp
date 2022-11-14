@@ -93,9 +93,12 @@ namespace OUU::Tests::ReverseIteratorTests
 			ExpectedResult);
 	}
 
-	static_assert(TModels<CMemberToStringConvertable, FFoo>::Value, "Sanity check: FFoo has ToString() member");
 	static_assert(
-		TModels<CLexToStringConvertible, FFoo>::Value,
+		TModels<CMemberToStringConvertable, OUU::Tests::ReverseIteratorTests::FFoo>::Value,
+		"Sanity check: FFoo has ToString() member");
+
+	static_assert(
+		TModels<CLexToStringConvertible, OUU::Tests::ReverseIteratorTests::FFoo>::Value,
 		"Sanity check: Because FFoo has ToString() member it should be ToStringConvertable()!");
 } // namespace OUU::Tests::ReverseIteratorTests
 
@@ -105,8 +108,8 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(CArray_Int, DEFAULT_OUU_TEST_FLAGS)
 {
 	using namespace OUU::Tests::ReverseIteratorTests;
 	int32 OriginalCArray[5]{1, 2, 3, 4, 5};
-	TestReverseIterator<int32[5], int32>(*this, OriginalCArray, {5, 4, 3, 2, 1}, "int32[]");
-	TestConstReverseIterator<int32[5], int32>(*this, OriginalCArray, {5, 4, 3, 2, 1}, "int32[]");
+	TestReverseIterator<int32[5], int32>(*this, OriginalCArray, TArray<int32>{5, 4, 3, 2, 1}, "int32[]");
+	TestConstReverseIterator<int32[5], int32>(*this, OriginalCArray, TArray<int32>{5, 4, 3, 2, 1}, "int32[]");
 	return true;
 }
 
@@ -116,8 +119,8 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(TArray_Int, DEFAULT_OUU_TEST_FLAGS)
 {
 	using namespace OUU::Tests::ReverseIteratorTests;
 	TArray<int32> OriginArray = {1, 2, 3, 4, 5};
-	TestReverseIterator<TArray<int32>, int32>(*this, OriginArray, {5, 4, 3, 2, 1}, "TArray<int32>");
-	TestConstReverseIterator<TArray<int32>, int32>(*this, OriginArray, {5, 4, 3, 2, 1}, "TArray<int32>");
+	TestReverseIterator<TArray<int32>, int32>(*this, OriginArray, TArray<int32>{5, 4, 3, 2, 1}, "TArray<int32>");
+	TestConstReverseIterator<TArray<int32>, int32>(*this, OriginArray, TArray<int32>{5, 4, 3, 2, 1}, "TArray<int32>");
 	return true;
 }
 
@@ -127,8 +130,8 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(CArray_FFoo, DEFAULT_OUU_TEST_FLAGS)
 {
 	using namespace OUU::Tests::ReverseIteratorTests;
 	FFoo OriginCArray[5] = {1, 2, 3, 4, 5};
-	TestReverseIterator<FFoo[5], FFoo>(*this, OriginCArray, {5, 4, 3, 2, 1}, "FFoo[]");
-	TestConstReverseIterator<FFoo[5], FFoo>(*this, OriginCArray, {5, 4, 3, 2, 1}, "FFoo[]");
+	TestReverseIterator<FFoo[5], FFoo>(*this, OriginCArray, TArray<FFoo>{5, 4, 3, 2, 1}, "FFoo[]");
+	TestConstReverseIterator<FFoo[5], FFoo>(*this, OriginCArray, TArray<FFoo>{5, 4, 3, 2, 1}, "FFoo[]");
 	return true;
 }
 
@@ -138,8 +141,8 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(TArray_FFoo, DEFAULT_OUU_TEST_FLAGS)
 {
 	using namespace OUU::Tests::ReverseIteratorTests;
 	TArray<FFoo> OriginArray = {1, 2, 3, 4, 5};
-	TestReverseIterator<TArray<FFoo>, FFoo>(*this, OriginArray, {5, 4, 3, 2, 1}, "TArray<FFoo>");
-	TestConstReverseIterator<TArray<FFoo>, FFoo>(*this, OriginArray, {5, 4, 3, 2, 1}, "TArray<FFoo>");
+	TestReverseIterator<TArray<FFoo>, FFoo>(*this, OriginArray, TArray<FFoo>{5, 4, 3, 2, 1}, "TArray<FFoo>");
+	TestConstReverseIterator<TArray<FFoo>, FFoo>(*this, OriginArray, TArray<FFoo>{5, 4, 3, 2, 1}, "TArray<FFoo>");
 	return true;
 }
 
