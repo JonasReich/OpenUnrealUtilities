@@ -107,7 +107,7 @@ UObject* GetMeshFromPrimitiveComponent(const UPrimitiveComponent* PrimitiveCompo
 	}
 	if (auto* SkinnedMeshComponent = Cast<USkinnedMeshComponent>(PrimitiveComponent))
 	{
-		return SkinnedMeshComponent->SkeletalMesh;
+		return SkinnedMeshComponent->GetSkinnedAsset();
 	}
 	return nullptr;
 }

@@ -1,9 +1,11 @@
 ﻿// Copyright (c) 2022 Jonas Reich
 
 #ifndef OUU_DECLARE_CLASS_FLAGS
-COMPILE_ERROR("OUU_DECLARE_CLASS_FLAGS was not defined. Please do not include this file outside of OUUBlueprintClassFlags.cpp");
+COMPILE_ERROR(
+	"OUU_DECLARE_CLASS_FLAGS was not defined. Please do not include this file outside of OUUBlueprintClassFlags.cpp");
 #endif
 
+// clang-format off
 OUU_DECLARE_CLASS_FLAGS(None),
 OUU_DECLARE_CLASS_FLAGS(Abstract),
 OUU_DECLARE_CLASS_FLAGS(DefaultConfig),
@@ -13,14 +15,12 @@ OUU_DECLARE_CLASS_FLAGS(Optional),
 OUU_DECLARE_CLASS_FLAGS(MatchedSerializers),
 OUU_DECLARE_CLASS_FLAGS(ProjectUserConfig),
 OUU_DECLARE_CLASS_FLAGS(Native),
-OUU_DECLARE_CLASS_FLAGS(NoExport),
 OUU_DECLARE_CLASS_FLAGS(NotPlaceable),
 OUU_DECLARE_CLASS_FLAGS(PerObjectConfig),
 OUU_DECLARE_CLASS_FLAGS(ReplicationDataIsSetUp),
 OUU_DECLARE_CLASS_FLAGS(EditInlineNew),
 OUU_DECLARE_CLASS_FLAGS(CollapseCategories),
 OUU_DECLARE_CLASS_FLAGS(Interface),
-OUU_DECLARE_CLASS_FLAGS(CustomConstructor),
 OUU_DECLARE_CLASS_FLAGS(Const),
 OUU_DECLARE_CLASS_FLAGS(NeedsDeferredDependencyLoading),
 OUU_DECLARE_CLASS_FLAGS(CompiledFromBlueprint),
@@ -43,3 +43,4 @@ OUU_DECLARE_CLASS_FLAGS(ShouldNeverBeLoaded),
 OUU_DECLARE_CLASS_FLAGS(ScriptInherit),
 OUU_DECLARE_CLASS_FLAGS(SaveInCompiledInClasses),
 OUU_DECLARE_CLASS_FLAGS(AllFlags)
+	// clang-format on

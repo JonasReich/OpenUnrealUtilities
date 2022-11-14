@@ -1,9 +1,10 @@
-﻿// Copyright (c) 2022 Jonas Reich
+// Copyright (c) 2022 Jonas Reich
 
 #include "MaterialAnalyzer/OUUMaterialAnalyzer.h"
 
 #include "Curves/CurveLinearColor.h"
 #include "EdGraph/EdGraph.h"
+#include "EditorStyleSet.h"
 #include "IContentBrowserSingleton.h"
 #include "IDetailTreeNode.h"
 #include "IMaterialEditor.h"
@@ -27,9 +28,9 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 {
 	namespace Font
 	{
-		auto GetCategory() { return FEditorStyle::GetFontStyle(TEXT("DetailsView.CategoryFontStyle")); }
-		auto GetNormal() { return FEditorStyle::GetFontStyle(TEXT("PropertyWindow.NormalFont")); }
-		auto GetBold() { return FEditorStyle::GetFontStyle(TEXT("PropertyWindow.BoldFont")); }
+		auto GetCategory() { return FAppStyle::GetFontStyle(TEXT("DetailsView.CategoryFontStyle")); }
+		auto GetNormal() { return FAppStyle::GetFontStyle(TEXT("PropertyWindow.NormalFont")); }
+		auto GetBold() { return FAppStyle::GetFontStyle(TEXT("PropertyWindow.BoldFont")); }
 	} // namespace Font
 
 	namespace Parameter
@@ -41,7 +42,7 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 			auto* EditorObject = GetMutableDefault<UOUUMaterialAnalyzer_EditorObject>();
 			EditorObject->TargetMaterial->GetAllExpressionsInMaterialAndFunctionsOfType<ExpressionType>(
 				OUT Expressions);
-			for (const auto Parameter : EditorObject->Parameters)
+			for (const auto& Parameter : EditorObject->Parameters)
 			{
 				const FName NameToFind = Parameter->Info.Name;
 				ExpressionType** ExpressionPtr = Expressions.FindByPredicate(
@@ -118,7 +119,7 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 		{
 			// clang-format off
 			return SNew(SSplitter)
-				.Style(FEditorStyle::Get(), "DetailsView.Splitter")
+				.Style(FAppStyle::Get(), "DetailsView.Splitter")
 				.PhysicalSplitterHandleSize(1.0f)
 				.HitDetectionSplitterHandleSize(5.0f)
 				+ SSplitter::Slot()
@@ -145,7 +146,7 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 		{
 			// clang-format off
 			return SNew(SBorder)
-				.BorderImage(FEditorStyle::GetBrush("DetailsView.CategoryTop_Hovered"))
+				.BorderImage(FAppStyle::GetBrush("DetailsView.CategoryTop_Hovered"))
 				.Padding(FMargin(4.0f))
 				[
 					SNew(SVerticalBox)
@@ -170,7 +171,7 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 					.Padding(FMargin(3.0f, 2.0f, 3.0f, 3.0f))
 					[
 						SNew(SBorder)
-						.BorderImage(FEditorStyle::GetBrush("DetailsView.CategoryTop"))
+						.BorderImage(FAppStyle::GetBrush("DetailsView.CategoryTop"))
 						[
 							SNew(SHorizontalBox)
 							+ SHorizontalBox::Slot().HAlign(HAlign_Fill)
@@ -279,7 +280,7 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 			{
 				ParameterListRoot->SetContent(
 					SNew(SBorder)
-						.BorderImage(FEditorStyle::GetBrush("MaterialInstanceEditor.StackBody"))
+						.BorderImage(FAppStyle::GetBrush("MaterialInstanceEditor.StackBody"))
 						.Padding(FMargin(4.0f))[SNew(STextBlock).Text(INVTEXT("Connect a parameter to see it here."))]);
 				return;
 			}
@@ -314,7 +315,7 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 		void SOUUMaterialAnalyzer::HandleAssetSelected(const FAssetData& InAssetData)
 		{
 			auto* EditorObject = GetMutableDefault<UOUUMaterialAnalyzer_EditorObject>();
-			SelectedAssetPath = InAssetData.ObjectPath.ToString();
+			SelectedAssetPath = InAssetData.GetSoftObjectPath().ToString();
 			if (auto* Material = Cast<UMaterial>(InAssetData.GetAsset()))
 			{
 				EditorObject->TargetMaterial = Material;
@@ -352,7 +353,7 @@ namespace OUU::Editor::MaterialAnalyzer
 			.SetDisplayName(INVTEXT("Material Analyzer (OUU)"))
 			.SetTooltipText(INVTEXT("Search and navigate through material expressions and parameters"))
 			.SetGroup(WorkspaceMenu::GetMenuStructure().GetDeveloperToolsMiscCategory())
-			.SetIcon(FSlateIcon(FEditorStyle::GetStyleSetName(), "LevelEditor.Tabs.Details"));
+			.SetIcon(FSlateIcon(FAppStyle::GetAppStyleSetName(), "LevelEditor.Tabs.Details"));
 	}
 
 	void UnregisterNomadTabSpawner() { FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(GTabName); }

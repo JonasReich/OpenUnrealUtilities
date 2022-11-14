@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022 Jonas Reich
+// Copyright (c) 2022 Jonas Reich
 
 #pragma once
 
@@ -42,8 +42,6 @@ enum class EOUUBlueprintClassFlags : uint8
 	ProjectUserConfig,
 	/** Class is a native class - native interfaces will have Native set, but not RF_MarkAsNative */
 	Native,
-	/** Don't export to C++ header. */
-	NoExport,
 	/** Do not allow users to create in the editor. */
 	NotPlaceable,
 	/** Handle object configuration on a per-object basis, rather than per-class. */
@@ -58,8 +56,6 @@ enum class EOUUBlueprintClassFlags : uint8
 	CollapseCategories,
 	/** Class is an interface **/
 	Interface,
-	/**  Do not export a constructor for this class, assuming it is in the cpptext **/
-	CustomConstructor,
 	/** all properties and functions in this class are const and should be exported as const */
 	Const,
 

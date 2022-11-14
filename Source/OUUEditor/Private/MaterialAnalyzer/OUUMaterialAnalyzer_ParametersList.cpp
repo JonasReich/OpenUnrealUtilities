@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022 Jonas Reich
+// Copyright (c) 2022 Jonas Reich
 
 #include "MaterialAnalyzer/OUUMaterialAnalyzer_ParametersList.h"
 
@@ -51,14 +51,14 @@ namespace OUU::Editor::Private::MaterialAnalyzer::Widgets
 		// clang-format on
 
 		STableRow<TSharedPtr<FOUUMaterialAnalyzer_ParameterData>>::ConstructInternal(
-			STableRow::FArguments().Style(FEditorStyle::Get(), "DetailsView.TreeView.TableRow").ShowSelection(false),
+			STableRow::FArguments().Style(FAppStyle::Get(), "DetailsView.TreeView.TableRow").ShowSelection(false),
 			OwnerTableView);
 	}
 
 	const FSlateBrush* SOUUMaterialAnalyzer_ParametersListItem::GetBorderImage() const
 	{
-		return IsHovered() ? FEditorStyle::GetBrush("DetailsView.CategoryMiddle_Hovered")
-						   : FEditorStyle::GetBrush("DetailsView.CategoryMiddle");
+		return IsHovered() ? FAppStyle::GetBrush("DetailsView.CategoryMiddle_Hovered")
+						   : FAppStyle::GetBrush("DetailsView.CategoryMiddle");
 	}
 
 	FReply SOUUMaterialAnalyzer_ParametersListItem::OnParameterButtonClicked() const

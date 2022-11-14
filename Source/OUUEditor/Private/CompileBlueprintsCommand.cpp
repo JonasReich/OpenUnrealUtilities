@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022 Jonas Reich
+// Copyright (c) 2022 Jonas Reich
 
 #include "CoreMinimal.h"
 
@@ -34,7 +34,7 @@ namespace OUU::Editor::CompileBlueprints
 		TArray<FString> WhitelistFiles;
 		TArray<TPair<FString, TArray<FString>>> RequireAssetTags;
 		TArray<TPair<FString, TArray<FString>>> ExcludeAssetTags;
-		FName BlueprintBaseClassName = UBlueprint::StaticClass()->GetFName();
+		FTopLevelAssetPath BlueprintBaseClassName = UBlueprint::StaticClass()->GetClassPathName();
 
 		// Variables to store overall results
 		int32 TotalNumFailedLoads = 0;
@@ -258,7 +258,7 @@ namespace OUU::Editor::CompileBlueprints
 			return;
 
 		const int32 NumAssets = BlueprintAssetList.Num();
-		FString const AssetPath = Asset.ObjectPath.ToString();
+		FString const AssetPath = Asset.GetSoftObjectPath().ToString();
 		UE_LOG(
 			LogOpenUnrealUtilities,
 			Display,
@@ -301,7 +301,7 @@ namespace OUU::Editor::CompileBlueprints
 
 		if (bCookedOnly && Asset.GetClass() && !Asset.GetClass()->bCooked)
 		{
-			FString const AssetPath = Asset.ObjectPath.ToString();
+			FString const AssetPath = Asset.GetSoftObjectPath().ToString();
 			UE_LOG(LogOpenUnrealUtilities, Verbose, TEXT("Skipping Building %s: As is not cooked"), *AssetPath);
 			bShouldBuild = false;
 		}
@@ -309,11 +309,11 @@ namespace OUU::Editor::CompileBlueprints
 		if (bShouldBuild && IncludeFolders.Num() > 0)
 		{
 			bShouldBuild = IncludeFolders.ContainsByPredicate([Asset](const FString& IncludeFolder) -> bool {
-				return Asset.ObjectPath.ToString().StartsWith(IncludeFolder);
+				return Asset.GetSoftObjectPath().ToString().StartsWith(IncludeFolder);
 			});
 			if (!bShouldBuild)
 			{
-				FString const AssetPath = Asset.ObjectPath.ToString();
+				FString const AssetPath = Asset.GetSoftObjectPath().ToString();
 				UE_LOG(
 					LogOpenUnrealUtilities,
 					Verbose,
@@ -326,9 +326,9 @@ namespace OUU::Editor::CompileBlueprints
 		{
 			for (const FString& IgnoreFolder : IgnoreFolders)
 			{
-				if (Asset.ObjectPath.ToString().StartsWith(IgnoreFolder))
+				if (Asset.GetSoftObjectPath().ToString().StartsWith(IgnoreFolder))
 				{
-					FString const AssetPath = Asset.ObjectPath.ToString();
+					FString const AssetPath = Asset.GetSoftObjectPath().ToString();
 					UE_LOG(
 						LogOpenUnrealUtilities,
 						Verbose,
@@ -341,14 +341,14 @@ namespace OUU::Editor::CompileBlueprints
 
 		if ((ExcludeAssetTags.Num() > 0) && (CheckHasTagInList(Asset, ExcludeAssetTags)))
 		{
-			FString const AssetPath = Asset.ObjectPath.ToString();
+			FString const AssetPath = Asset.GetSoftObjectPath().ToString();
 			UE_LOG(LogOpenUnrealUtilities, Verbose, TEXT("Skipping Building %s: As has an excluded tag"), *AssetPath);
 			bShouldBuild = false;
 		}
 
 		if ((RequireAssetTags.Num() > 0) && (!CheckHasTagInList(Asset, RequireAssetTags)))
 		{
-			FString const AssetPath = Asset.ObjectPath.ToString();
+			FString const AssetPath = Asset.GetSoftObjectPath().ToString();
 			UE_LOG(
 				LogOpenUnrealUtilities,
 				Verbose,
@@ -359,7 +359,7 @@ namespace OUU::Editor::CompileBlueprints
 
 		if ((WhitelistFiles.Num() > 0) && (!CheckInWhitelist(Asset)))
 		{
-			FString const AssetPath = Asset.ObjectPath.ToString();
+			FString const AssetPath = Asset.GetSoftObjectPath().ToString();
 			UE_LOG(
 				LogOpenUnrealUtilities,
 				Verbose,
@@ -373,7 +373,7 @@ namespace OUU::Editor::CompileBlueprints
 			const UPackage* AssetPackage = Asset.GetPackage();
 			if ((AssetPackage == nullptr) || !AssetPackage->IsDirty())
 			{
-				FString const AssetPath = Asset.ObjectPath.ToString();
+				FString const AssetPath = Asset.GetSoftObjectPath().ToString();
 				UE_LOG(
 					LogOpenUnrealUtilities,
 					Verbose,
@@ -425,7 +425,7 @@ namespace OUU::Editor::CompileBlueprints
 	{
 		bool bIsInWhitelist = false;
 
-		const FString& AssetFilePath = Asset.ObjectPath.ToString();
+		const FString& AssetFilePath = Asset.GetSoftObjectPath().ToString();
 		for (const FString& WhiteList : WhitelistFiles)
 		{
 			if (AssetFilePath == WhiteList)

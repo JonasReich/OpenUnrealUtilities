@@ -60,7 +60,7 @@ namespace OUU::Editor
 
 			TArray<FAssetData> BlueprintList;
 			FARFilter Filter;
-			Filter.ClassNames.Add(UEditorUtilityWidgetBlueprint::StaticClass()->GetFName());
+			Filter.ClassPaths.Add(UEditorUtilityWidgetBlueprint::StaticClass()->GetClassPathName());
 			Filter.bRecursiveClasses = true;
 			IAssetRegistry::GetChecked().GetAssets(Filter, BlueprintList);
 

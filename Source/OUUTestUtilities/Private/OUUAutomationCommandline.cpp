@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022 Jonas Reich
+// Copyright (c) 2022 Jonas Reich
 
 // NOTE: This file is in large parts copied from
 // Engine\UE4\Source\Developer\AutomationController\Private\AutomationCommandline.cpp Some types and functions were
@@ -8,7 +8,7 @@
 
 #include "CoreMinimal.h"
 
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "AutomationControllerSettings.h"
 #include "Containers/Ticker.h"
 #include "HAL/FileManager.h"

@@ -50,7 +50,7 @@ void FUMGUtilsSpec::Define()
 
 	Describe("ForEachWidget", [this]() {
 		It("should call the predicate on the topmost user widget and its root widget", [this]() {
-			OUU::Runtime::UMGUtils::ForEachWidget<UWidget>(Widget, [&](UWidget* Widget) -> bool {
+			OUU::Runtime::UMGUtils::ForEachWidget<UWidget>(Widget, [&](UWidget* LambdaWidget) -> bool {
 				PredicateCallCount++;
 				return false;
 			});
@@ -61,7 +61,7 @@ void FUMGUtilsSpec::Define()
 			It("should call the predicate once for every widget in the tree if the predicate always returns false",
 			   [this]() {
 				   CreateComplexUserWidget(*TestWorld, Widget, WidgetTree);
-				   OUU::Runtime::UMGUtils::ForEachWidget<UWidget>(Widget, [&](UWidget* Widget) -> bool {
+				   OUU::Runtime::UMGUtils::ForEachWidget<UWidget>(Widget, [&](UWidget* LambdaWidget) -> bool {
 					   PredicateCallCount++;
 					   return false;
 				   });
@@ -70,7 +70,7 @@ void FUMGUtilsSpec::Define()
 
 			It("should stop iterating the widgets as soon as one predicate returns true", [this]() {
 				CreateComplexUserWidget(*TestWorld, Widget, WidgetTree);
-				OUU::Runtime::UMGUtils::ForEachWidget<UWidget>(Widget, [&](UWidget* Widget) -> bool {
+				OUU::Runtime::UMGUtils::ForEachWidget<UWidget>(Widget, [&](UWidget* LambdaWidget) -> bool {
 					PredicateCallCount++;
 					return PredicateCallCount >= 2;
 				});
@@ -87,7 +87,7 @@ void FUMGUtilsSpec::Define()
 			   OUU::Runtime::UMGUtils::ForEachWidgetAndDescendants<UWidget>(
 				   Widget,
 				   false,
-				   [&](UWidget* Widget) -> bool {
+				   [&](UWidget* LambdaWidget) -> bool {
 					   PredicateCallCount++;
 					   return false;
 				   });
@@ -96,7 +96,7 @@ void FUMGUtilsSpec::Define()
 
 		It("should call the predicate on all widgets in the tree including nested user widgets", [this]() {
 			CreateComplexUserWidget(*TestWorld, Widget, WidgetTree);
-			OUU::Runtime::UMGUtils::ForEachWidgetAndDescendants<UWidget>(Widget, true, [&](UWidget* Widget) -> bool {
+			OUU::Runtime::UMGUtils::ForEachWidgetAndDescendants<UWidget>(Widget, true, [&](UWidget* LambdaWidget) -> bool {
 				PredicateCallCount++;
 				return false;
 			});
@@ -105,7 +105,7 @@ void FUMGUtilsSpec::Define()
 
 		It("should stop iterating the widgets as soon as one predicate returns true", [this]() {
 			CreateComplexUserWidget(*TestWorld, Widget, WidgetTree);
-			OUU::Runtime::UMGUtils::ForEachWidgetAndDescendants<UWidget>(Widget, true, [&](UWidget* Widget) -> bool {
+			OUU::Runtime::UMGUtils::ForEachWidgetAndDescendants<UWidget>(Widget, true, [&](UWidget* LambdaWidget) -> bool {
 				PredicateCallCount++;
 				return PredicateCallCount >= 4;
 			});
@@ -116,7 +116,7 @@ void FUMGUtilsSpec::Define()
 	Describe("ForChildWidgets", [this]() {
 		It("should not call the predicate on a user widget that does not have any named slots", [this]() {
 			CreateComplexUserWidget(*TestWorld, Widget, WidgetTree);
-			OUU::Runtime::UMGUtils::ForChildWidgets<UWidget>(Widget, [&](UWidget* Widget) -> bool {
+			OUU::Runtime::UMGUtils::ForChildWidgets<UWidget>(Widget, [&](UWidget* LambdaWidget) -> bool {
 				PredicateCallCount++;
 				return false;
 			});
@@ -174,7 +174,7 @@ void FUMGUtilsSpec::Define()
 
 			It("should return true when disabled but still hit test visible", [this]() {
 				UButton* Button = NewObject<UButton>();
-				Button->bIsEnabled = false;
+				Button->SetIsEnabled(false);
 				Button->SetVisibility(ESlateVisibility::Visible);
 				auto SlateWidget = Button->TakeWidget();
 				SPEC_TEST_TRUE(OUU::Runtime::UMGUtils::IsInputVisible(Button));
@@ -182,7 +182,7 @@ void FUMGUtilsSpec::Define()
 
 			It("should return true when hit test invisible but still enabled", [this]() {
 				UButton* Button = NewObject<UButton>();
-				Button->bIsEnabled = true;
+				Button->SetIsEnabled(true);
 				Button->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 				auto SlateWidget = Button->TakeWidget();
 				SPEC_TEST_TRUE(OUU::Runtime::UMGUtils::IsInputVisible(Button));
@@ -190,7 +190,7 @@ void FUMGUtilsSpec::Define()
 
 			It("should return false if the button is disabled and SelfHitTestVisible", [this]() {
 				UButton* Button = NewObject<UButton>();
-				Button->bIsEnabled = false;
+				Button->SetIsEnabled(false);
 				Button->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 				auto SlateWidget = Button->TakeWidget();
 				SPEC_TEST_FALSE(OUU::Runtime::UMGUtils::IsInputVisible(Button));
@@ -256,7 +256,7 @@ void FUMGUtilsSpec::Define()
 
 			It("should return true when disabled but still hit test visible", [this]() {
 				UButton* Button = NewObject<UButton>();
-				Button->bIsEnabled = false;
+				Button->SetIsEnabled(false);
 				Button->SetVisibility(ESlateVisibility::Visible);
 				auto SlateWidget = Button->TakeWidget();
 				SPEC_TEST_TRUE(OUU::Runtime::UMGUtils::HasInputVisibleDescendantsIncludingSelf(Button));
@@ -264,7 +264,7 @@ void FUMGUtilsSpec::Define()
 
 			It("should return true when hit test invisible but still enabled", [this]() {
 				UButton* Button = NewObject<UButton>();
-				Button->bIsEnabled = true;
+				Button->SetIsEnabled(true);
 				Button->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 				auto SlateWidget = Button->TakeWidget();
 				SPEC_TEST_TRUE(OUU::Runtime::UMGUtils::HasInputVisibleDescendantsIncludingSelf(Button));
@@ -272,7 +272,7 @@ void FUMGUtilsSpec::Define()
 
 			It("should return false if the button is disabled and SelfHitTestVisible", [this]() {
 				UButton* Button = NewObject<UButton>();
-				Button->bIsEnabled = false;
+				Button->SetIsEnabled(false);
 				Button->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 				auto SlateWidget = Button->TakeWidget();
 				SPEC_TEST_FALSE(OUU::Runtime::UMGUtils::HasInputVisibleDescendantsIncludingSelf(Button));

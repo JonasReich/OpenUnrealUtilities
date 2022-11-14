@@ -664,7 +664,7 @@ namespace OUU::Developer::ActorMapWindow
 #if WITH_EDITOR
 			.SetGroup(WorkspaceMenu::GetMenuStructure().GetDeveloperToolsMiscCategory())
 			// #TODO-OUU Find better suited icon for actor map
-			.SetIcon(FSlateIcon(FEditorStyle::GetStyleSetName(), "LevelEditor.Tabs.Details"))
+			.SetIcon(FSlateIcon(FAppStyle::GetAppStyleSetName(), "LevelEditor.Tabs.Details"))
 #endif
 			;
 	}

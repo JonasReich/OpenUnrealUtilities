@@ -161,9 +161,6 @@ void FOUUAutomationTestWorld::DestroyWorldImplementation()
 		{
 			World->GetGameInstance()->Shutdown();
 		}
-
-		World->FlushLevelStreaming(EFlushLevelStreamingType::Visibility);
-		World->CleanupWorld();
 	}
 
 	World->DestroyWorld(true);

@@ -478,7 +478,7 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 			}
 
 			const FString AbilitySourceName =
-				OUU::Runtime::GameplayDebuggerUtils::CleanupName(GetNameSafe(AbilitySpec.SourceObject));
+				OUU::Runtime::GameplayDebuggerUtils::CleanupName(GetNameSafe(AbilitySpec.SourceObject.Get()));
 
 			DebugLine(
 				Info,
