@@ -7,13 +7,11 @@
 	#include "Runtime/Templates/InterfaceUtilsTests_Implementations.h"
 	#include "Templates/InterfaceUtils.h"
 
-class FInterfaceUtilsSpec;
-
-template <typename TestInterface>
+template <typename TestInterface, typename InterfaceUtilsSpecType>
 class TInterfaceUtilsSpec
 {
 public:
-	static void Define(FInterfaceUtilsSpec& Test)
+	static void Define(InterfaceUtilsSpecType& Test)
 	{
 		Test.It("should return false if called on a valid object that doesn't implement the interface", [&]() {
 			UOUUTestObject* Object = NewObject<UOUUTestObject>();
@@ -81,7 +79,7 @@ void FInterfaceUtilsSpec::Define()
 				InterfacePtr = CppImplObject;
 			});
 
-			TInterfaceUtilsSpec<IInterfaceUtilsTests_CppInterface>::Define(*this);
+			TInterfaceUtilsSpec<IInterfaceUtilsTests_CppInterface, FInterfaceUtilsSpec>::Define(*this);
 
 			It("should return true if the underlying object pointer is valid", [this]() {
 				SPEC_TEST_TRUE(IsValid(TargetObject));
@@ -115,7 +113,7 @@ void FInterfaceUtilsSpec::Define()
 		Describe("when operating on hybrid interfaces that are implemented in C++", [this]() {
 			BeforeEach([this]() { TargetObject = NewObject<UInterfaceUtilsTests_BpInterface_CppImpl>(); });
 
-			TInterfaceUtilsSpec<IInterfaceUtilsTests_BpInterface>::Define(*this);
+			TInterfaceUtilsSpec<IInterfaceUtilsTests_BpInterface, FInterfaceUtilsSpec>::Define(*this);
 		});
 
 		Describe("when operating on hybrid interfaces that are implemented in Blueprint", [this]() {
@@ -130,7 +128,7 @@ void FInterfaceUtilsSpec::Define()
 				TargetObject = NewObject<UObject>(GetTransientPackage(), BlueprintClass);
 			});
 
-			TInterfaceUtilsSpec<IInterfaceUtilsTests_BpInterface>::Define(*this);
+			TInterfaceUtilsSpec<IInterfaceUtilsTests_BpInterface, FInterfaceUtilsSpec>::Define(*this);
 		});
 	});
 

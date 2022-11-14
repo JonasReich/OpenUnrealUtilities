@@ -19,7 +19,7 @@ void FSemVerStringUtilsSpec::Define()
 				{
 					It(EscapeTestName(FString::Printf(TEXT("should return true for semver '%s'"), *SemVer)),
 					   [this, Strictness, SemVer]() {
-						   SPEC_TEST_TRUE(FSemVerStringUtils::IsValidSemanticVersion(SemVer, Strictness));
+						   SPEC_TEST_TRUE(OUU::Runtime::SemVerStringUtils::IsValidSemanticVersion(SemVer, Strictness));
 					   });
 				}
 			});
@@ -31,7 +31,7 @@ void FSemVerStringUtilsSpec::Define()
 				It(EscapeTestName(FString::Printf(TEXT("should return false for semver '%s'"), *SemVer)),
 				   [this, SemVer]() {
 					   SPEC_TEST_FALSE(
-						   FSemVerStringUtils::IsValidSemanticVersion(SemVer, ESemVerParsingStrictness::Strict));
+						   OUU::Runtime::SemVerStringUtils::IsValidSemanticVersion(SemVer, ESemVerParsingStrictness::Strict));
 				   });
 			}
 		});
