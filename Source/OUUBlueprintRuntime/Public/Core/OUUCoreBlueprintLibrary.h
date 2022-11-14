@@ -54,10 +54,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static void ModifyObject(UObject* Object);
 
-	/**
-	 * Reruns the construction scripts of an actor.
-	 * Be careful when calling this, as it can have various unexpected side effects and is pretty slow.
-	 */
-	UFUNCTION(BlueprintCallable)
-	static void RerunConstructionScripts(AActor* Actor);
+	/** Converts a TopLevelAssetPath to a string */
+	UFUNCTION(
+		BlueprintPure,
+		meta = (DisplayName = "To String (Top Level Asset Path)", CompactNodeTitle = "->", BlueprintAutocast),
+		Category = "Utilities|String")
+	static FString Conv_TopLevelAssetPathToString(FTopLevelAssetPath InPath);
 };

@@ -32,10 +32,7 @@ void UOUUCoreBlueprintLibrary::ModifyObject(UObject* Object)
 	}
 }
 
-void UOUUCoreBlueprintLibrary::RerunConstructionScripts(AActor* Actor)
+FString UOUUCoreBlueprintLibrary::Conv_TopLevelAssetPathToString(FTopLevelAssetPath InPath)
 {
-	if (IsValid(Actor))
-	{
-		Actor->RerunConstructionScripts();
-	}
+	return InPath.ToString();
 }
