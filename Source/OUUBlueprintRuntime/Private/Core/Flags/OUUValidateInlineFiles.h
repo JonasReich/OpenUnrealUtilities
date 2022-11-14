@@ -42,13 +42,13 @@ namespace OUU::BlueprintRuntime::Private::Flags
 	template <typename T>
 	constexpr int32 NumUniqueValues(const std::initializer_list<T>& FlagsList)
 	{
-		SIZE_T CheckBitmask = 0;
+		uint64 CheckBitmask = 0;
 		int32 NumUniqueElements = 0;
 		for (int32 i = 0; i < FlagsList.size(); ++i)
 		{
 			auto Entry = *(FlagsList.begin() + i);
-			const SIZE_T BitmaskBefore = CheckBitmask;
-			OUU::Runtime::BitmaskUtils::SetBit<T, EEnumSequenceType::Natural, SIZE_T>(CheckBitmask, Entry);
+			const uint64 BitmaskBefore = CheckBitmask;
+			OUU::Runtime::BitmaskUtils::SetBit<T, EEnumSequenceType::Natural, uint64>(CheckBitmask, Entry);
 			if (CheckBitmask != BitmaskBefore)
 			{
 				NumUniqueElements++;
@@ -61,12 +61,12 @@ namespace OUU::BlueprintRuntime::Private::Flags
 	template <typename T>
 	constexpr T GetFirstNonUniqueValue(const std::initializer_list<T>& FlagsList)
 	{
-		SIZE_T CheckBitmask = 0;
+		uint64 CheckBitmask = 0;
 		for (int32 i = 0; i < FlagsList.size(); ++i)
 		{
 			auto Entry = *(FlagsList.begin() + i);
-			const SIZE_T BitmaskBefore = CheckBitmask;
-			OUU::Runtime::BitmaskUtils::SetBit<T, EEnumSequenceType::Natural, SIZE_T>(CheckBitmask, Entry);
+			const uint64 BitmaskBefore = CheckBitmask;
+			OUU::Runtime::BitmaskUtils::SetBit<T, EEnumSequenceType::Natural, uint64>(CheckBitmask, Entry);
 			if (CheckBitmask == BitmaskBefore)
 			{
 				return Entry;
