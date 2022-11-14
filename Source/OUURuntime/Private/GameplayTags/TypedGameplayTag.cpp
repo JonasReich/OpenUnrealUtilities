@@ -1,6 +1,6 @@
 // Copyright (c) 2022 Jonas Reich
 
-#include "GameplayTags/LiteralGameplayTag.h"
+#include "GameplayTags/TypedGameplayTag.h"
 
 #if WITH_EDITOR
 #include "Modules/ModuleManager.h"

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameplayTags/LiteralGameplayTag.h"
+#include "GameplayTags/TypedGameplayTag.h"
 
 #include "SampleGameplayTags.generated.h"
 
