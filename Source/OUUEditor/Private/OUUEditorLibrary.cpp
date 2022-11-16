@@ -2,6 +2,7 @@
 
 #include "OUUEditorLibrary.h"
 
+#include "GameFramework/Actor.h"
 #include "ISessionFrontendModule.h"
 #include "Modules/ModuleManager.h"
 

@@ -7,9 +7,10 @@
 	#include "BufferVisualizationData.h"
 	#include "Engine/DebugCameraControllerSettings.h"
 	#include "Engine/Font.h"
+	#include "Engine/GameViewportClient.h"
 	#include "EngineUtils.h"
-	#include "LogOpenUnrealUtilities.h"
 	#include "GameFramework/PlayerController.h"
+	#include "LogOpenUnrealUtilities.h"
 
 namespace OUU::Runtime::Private
 {
@@ -300,8 +301,7 @@ void FGameplayDebuggerCategory_ViewModes::GetNextBuffer(const TArray<FString>& O
 				Max += Incr;
 			}
 
-			auto Wrap = [&](int32 Index)
-			{
+			auto Wrap = [&](int32 Index) {
 				if (Index < Min)
 				{
 					Index = Max;
