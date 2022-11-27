@@ -21,7 +21,7 @@ public:
 	friend class FGameplayDebuggerCategory_Animation;
 
 #if WITH_GAMEPLAY_DEBUGGER
-	virtual void AddGameplayDebuggerInfo(FGameplayDebuggerCanvasContext& CanvasContext) {}
+	virtual void AddGameplayDebuggerInfo(FGameplayDebuggerCanvasContext& CanvasContext) const {}
 #endif
 };
 

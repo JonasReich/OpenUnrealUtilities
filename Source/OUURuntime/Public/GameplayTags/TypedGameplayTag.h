@@ -180,6 +180,8 @@ public:
 	using ReferenceContainerType = TTypedGameplayTagContainerReference<BlueprintTagType>;
 
 public:
+	FORCEINLINE const FGameplayTagContainer& Get() const { return GetRef(); }
+
 	static FGameplayTagContainer FilterRootTag(const FGameplayTagContainer& RegularGameplayTags)
 	{
 		return RegularGameplayTags.Filter(FGameplayTagContainer(LiteralGameplayTagType::Get()));
@@ -250,7 +252,7 @@ public:
 		return ValueContainerType::CreateChecked(GetRef().FilterExact(OtherContainer));
 	}
 	bool MatchesQuery(const struct FGameplayTagQuery& Query) const { return GetRef().MatchesQuery(Query); }
-	void AppendTags(const ReferenceContainerType& Other) { return GetRef().AppendTags(Other.GetRef()); }
+	void AppendTags(const ReferenceContainerType& Other) { return GetRef().AppendTags(Other.Get()); }
 	void AppendMatchingTags(ReferenceContainerType const& OtherA, ReferenceContainerType const& OtherB)
 	{
 		return GetRef().AppendMatchingTags(OtherA.GetRef(), OtherB.GetRef());
@@ -289,9 +291,7 @@ public:
 
 template <typename InBlueprintTagType>
 struct TTypedGameplayTagContainerReference :
-	public TTypedGameplayTagContainer_Base<
-		InBlueprintTagType,
-		TTypedGameplayTagContainerReference<InBlueprintTagType>>
+	public TTypedGameplayTagContainer_Base<InBlueprintTagType, TTypedGameplayTagContainerReference<InBlueprintTagType>>
 {
 	template <typename, typename>
 	friend struct TTypedGameplayTagContainer_Base;
@@ -320,9 +320,7 @@ private:
 
 template <typename InBlueprintTagType>
 struct TTypedGameplayTagContainerValue :
-	public TTypedGameplayTagContainer_Base<
-		InBlueprintTagType,
-		TTypedGameplayTagContainerValue<InBlueprintTagType>>
+	public TTypedGameplayTagContainer_Base<InBlueprintTagType, TTypedGameplayTagContainerValue<InBlueprintTagType>>
 {
 	template <typename, typename>
 	friend struct TTypedGameplayTagContainer_Base;
@@ -336,7 +334,7 @@ public:
 	TTypedGameplayTagContainerValue() = default;
 	// explicit conversion from ref type (so we don't create accidental copies)
 	explicit TTypedGameplayTagContainerValue(const TTypedGameplayTagContainerReference<BlueprintTagType>& Ref) :
-		GameplayTagContainerValue(Ref.GetRef())
+		GameplayTagContainerValue(Ref.Get())
 	{
 	}
 	// auto conversion to ref type

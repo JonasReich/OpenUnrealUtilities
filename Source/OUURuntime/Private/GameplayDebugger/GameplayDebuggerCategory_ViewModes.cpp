@@ -3,7 +3,6 @@
 #include "GameplayDebugger/GameplayDebuggerCategory_ViewModes.h"
 
 #if WITH_GAMEPLAY_DEBUGGER
-
 	#include "BufferVisualizationData.h"
 	#include "Engine/DebugCameraControllerSettings.h"
 	#include "Engine/Font.h"

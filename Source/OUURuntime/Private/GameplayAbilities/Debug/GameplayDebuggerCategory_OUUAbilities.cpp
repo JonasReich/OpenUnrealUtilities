@@ -8,6 +8,7 @@
 
 	#include "AbilitySystemComponent.h"
 	#include "AbilitySystemGlobals.h"
+	#include "AbilitySystemLog.h"
 	#include "Engine/Canvas.h"
 	#include "GameplayAbilities/OUUAbilitySystemComponent.h"
 	#include "GameplayAbilities/OUUGameplayAbility.h"
