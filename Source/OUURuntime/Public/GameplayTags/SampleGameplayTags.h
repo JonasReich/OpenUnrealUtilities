@@ -22,11 +22,15 @@ OUU_DECLARE_GAMEPLAY_TAGS_START(
 	true)
 	OUU_GTAG(Foo, "Foo is a leaf tag that has no children");
 	OUU_GTAG_GROUP_START(Bar, "Bar has children")
-		OUU_GTAG(Alpha, "Alpha is the greek letter equivalent of A")
+		OUU_GTAG_GROUP_START(Alpha, "Alpha is the greek letter equivalent of A")
+			OUU_GTAG(One, "Number One. Inside Alpha")
+			OUU_GTAG(Two, "Number Two. Inside Alpha")
+		OUU_GTAG_GROUP_END(Alpha)
 		OUU_GTAG(Beta, "Beta is the greek letter equivalent of B")
 		OUU_GTAG(Gamma, "Gamma is the greek letter equivalent of G, but comes at the place of C")
 		OUU_GTAG(Delta, "Delta is the greek letter equivalent of D")
 	OUU_GTAG_GROUP_END(Bar)
+	OUU_GTAG(Baz, "A third tag on this level")
 OUU_DECLARE_GAMEPLAY_TAGS_END(FSampleGameplayTags)
 
 OUU_DECLARE_GAMEPLAY_TAGS_START(
