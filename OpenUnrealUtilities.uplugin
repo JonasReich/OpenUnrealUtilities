@@ -37,12 +37,12 @@
 		},
 		{
 			"Name": "OUUTests",
-			"Type": "UncookedOnly",
+			"Type": "DeveloperTool",
 			"LoadingPhase": "Default"
 		},
 		{
 			"Name": "OUUTestUtilities",
-			"Type": "UncookedOnly",
+			"Type": "DeveloperTool",
 			"LoadingPhase": "Default"
 		},
 		{
