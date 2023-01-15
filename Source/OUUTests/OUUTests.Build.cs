@@ -6,30 +6,32 @@ public class OUUTests : OUUModuleRules
 {
 	public OUUTests(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PublicDependencyModuleNames.AddRange(new string[] {
+		// No public dependencies: This module does not have any public files.
+
+		PrivateDependencyModuleNames.AddRange(new string[] {
 
 			// Engine
 			"Core",
 			"CoreUObject",
 			"Engine",
-			"UMG",
-
-			// Plugin
-			"OUURuntime",
-			"GameplayTags"
-		});
-
-		PrivateDependencyModuleNames.AddRange(new string[] {
-
-			// Engine
 			"InputCore",
+			"UMG",
 			"SlateCore",
-			"EditorScriptingUtilities",
+			"Localization",
+			"GameplayTags",
 
-			// Plugin
+			// OUU Plugins
+			"OUURuntime",
 			"OUUBlueprintRuntime",
 			"OUUUMG",
 			"OUUTestUtilities"
 		});
+
+		if (Target.bBuildEditor)
+		{
+			PrivateDependencyModuleNames.AddRange(new string[] {
+				"EditorScriptingUtilities",
+			});
+		}
 	}
 }
