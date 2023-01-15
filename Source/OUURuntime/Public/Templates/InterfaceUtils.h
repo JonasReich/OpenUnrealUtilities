@@ -10,7 +10,7 @@
 /**
  * Call a function on a blueprint implementable interface object.
  * The object can be any of [UObject*, TScriptInterface, IInterface*].
- * Only safe after validation of the InterfaceObject, e.g. via CanCallInterface()!
+ * Only safe after validation of the InterfaceObject, e.g. via IsValidInterface()!
  * @param	InterfaceType		The IInterface type
  * @param	Function			The function member of the Interface you want to invoke
  * @param	InterfaceObject		An object pointer, interface pointer or script interface of the matching interface
@@ -18,6 +18,38 @@
 #define CALL_INTERFACE(InterfaceType, Function, InterfaceObject, ...)                                                  \
 	((OUU::Runtime::Private::Interface::Ignore(&InterfaceType::Function)),                                             \
 	 (InterfaceType::Execute_##Function(GetInterfaceObject(InterfaceObject), ##__VA_ARGS__)))
+
+/**
+ * Try to call a function on a blueprint implementable interface object if it is valid.
+ * The object can be any of [UObject*, TScriptInterface, IInterface*].
+ */
+#define TRY_CALL_INTERFACE(InterfaceType, Function, InterfaceObject, ...)                                              \
+	if (IsValidInterface<InterfaceType>(InterfaceObject))                                                              \
+	{                                                                                                                  \
+		CALL_INTERFACE(InterfaceType, Function, InterfaceObject, ##__VA_ARGS__);                                       \
+	}
+
+/**
+ * Try to assign a variable from a function on a blueprint implementable interface object if it is valid.
+ * The object can be any of [UObject*, TScriptInterface, IInterface*].
+ * @param AssignTarget The property that will be assigned if the function is called.
+ */
+#define TRY_ASSIGN_INTERFACE(AssignTarget, InterfaceType, Function, InterfaceObject, ...)                              \
+	if (IsValidInterface<InterfaceType>(InterfaceObject))                                                              \
+	{                                                                                                                  \
+		AssignTarget = CALL_INTERFACE(InterfaceType, Function, InterfaceObject, ##__VA_ARGS__);                        \
+	}
+
+/**
+ * Assign a variable from a function on a blueprint implementable interface object if it is valid.
+ * If it is invalid, assign the fallback value.
+ * The object can be any of [UObject*, TScriptInterface, IInterface*].
+ * @param AssignTarget The property that will be assigned if the function is called.
+ * @param FallbackValue The fallback value that will be used if InterfaceObject is invalid.
+ */
+#define ASSIGN_INTERFACE(AssignTarget, FallbackValue, InterfaceType, Function, InterfaceObject, ...)                   \
+	TRY_ASSIGN_INTERFACE(AssignTarget, InterfaceType, Function, InterfaceObject, ##__VA_ARGS__)                        \
+	else { AssignTarget = FallbackValue; }
 
 template <typename T>
 using TIsIInterface_T = typename TEnableIf<TIsIInterface<T>::Value>::Type;
