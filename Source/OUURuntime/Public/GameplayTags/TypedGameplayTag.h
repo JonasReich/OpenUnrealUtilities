@@ -204,7 +204,7 @@ public:
 #endif
 	}
 
-private:
+protected:
 	FORCEINLINE FGameplayTagContainer& GetRef()
 	{
 		return static_cast<DerivedImplementationType*>(this)->DerivedImplementationType::GetRef_Impl();
@@ -283,6 +283,9 @@ public:
 	BlueprintTagType First() const { return GetRef().First(); }
 	BlueprintTagType Last() const { return GetRef().Last(); }
 	void FillParentTags() { return GetRef().FillParentTags(); }
+
+	bool operator==(ReferenceContainerType const& Other) const { return GetRef() == Other.GetRef(); }
+	bool operator!=(ReferenceContainerType const& Other) const { return GetRef() != Other.GetRef(); }
 #pragma endregion GameplayTagContainerAPI
 	// -- end of functions mirroring the FGameplayTagContainer API
 };
