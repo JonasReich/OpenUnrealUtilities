@@ -3,11 +3,13 @@
 #include "CoreMinimal.h"
 
 #include "AssetRegistry/IAssetRegistry.h"
+#include "DetailsCustomizations/JsonDataAssetPathDetailsCustomization.h"
 #include "Editor.h"
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidget.h"
 #include "EditorUtilityWidgetBlueprint.h"
 #include "GameplayTags/TypedGameplayTag.h"
+#include "JsonDataAsset/JsonDataAsset.h"
 #include "MaterialAnalyzer/OUUMaterialAnalyzer.h"
 #include "Modules/ModuleManager.h"
 #include "OUUContentBrowserExtensions.h"
@@ -36,12 +38,16 @@ namespace OUU::Editor
 
 			FCoreDelegates::OnAllModuleLoadingPhasesComplete.AddLambda(
 				[]() { FTypedGameplayTag_Base::RegisterAllDerivedPropertyTypeLayouts(); });
+			OUU::Editor::PropertyEditorUtils::
+				RegisterCustomPropertyTypeLayout<FJsonDataAssetPath, FJsonDataAssetPathCustomization>();
 		}
 
 		virtual void ShutdownModule() override
 		{
 			MaterialAnalyzer::UnregisterNomadTabSpawner();
 			ContentBrowserExtensions::UnregisterHooks();
+
+			OUU::Editor::PropertyEditorUtils::UnregisterCustomPropertyTypeLayout<FJsonDataAssetPath>();
 
 			FTypedGameplayTag_Base::UnregisterAllDerivedPropertyTypeLayouts();
 		}
