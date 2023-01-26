@@ -38,13 +38,19 @@
 //---------------------------------------------------------------------------------------------------------------------
 
 template <typename Child, typename TestParent>
-struct TIsChildTagOf
+struct TIsChildTagOf_Single
 {
 	static constexpr bool Value =
 		TOr<TIsSame<typename Child::SelfTagType, TestParent>,
 			TAnd<
 				TNot<TIsSame<typename Child::SelfTagType, typename Child::ParentTagType>>,
 				TIsChildTagOf<typename Child::ParentTagType, TestParent>>>::Value;
+};
+
+template <typename Child, typename... TestParents>
+struct TIsChildTagOf
+{
+	static constexpr bool Value = TOr<TIsChildTagOf_Single<Child, TestParents>...>::Value;
 };
 
 /**
@@ -93,7 +99,8 @@ private:
 	template <typename T>
 	static void AssertIsProperTagType()
 	{
-		using TemplateType = TLiteralGameplayTag<typename T::SelfTagType, typename T::ParentTagType, typename T::RootTagType>;
+		using TemplateType =
+			TLiteralGameplayTag<typename T::SelfTagType, typename T::ParentTagType, typename T::RootTagType>;
 		static_assert(
 			TIsDerivedFrom<T, TemplateType>::Value && !TIsSame<T, TemplateType>::Value,
 			"Type must be a struct type derived from TLiteralGameplayTag, but not TLiteralGameplayTag "
