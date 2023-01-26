@@ -17,7 +17,7 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 	 * Required property buttons will be automatically created (e.g. array delete/duplicate)
 	 * @returns new widget
 	 */
-	TSharedRef<SWidget> OUUEDITOR_API MakeFilteredObjectPropertyWidget(
+	OUUEDITOR_API TSharedRef<SWidget> MakeFilteredObjectPropertyWidget(
 		TSharedRef<IPropertyHandle> PropertyHandle,
 		FObjectPropertyBase* ObjectProperty,
 		TSharedPtr<FAssetThumbnailPool> ThumbnailPool,
@@ -27,7 +27,7 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 	 * Try to make a widget that filters objects in dropdown based on passed filter delegate.
 	 * @returns new widget or nullptr, if the passed property is not an object property
 	 */
-	TSharedPtr<SWidget> OUUEDITOR_API TryMakeFilteredObjectPropertyWidget(
+	OUUEDITOR_API TSharedPtr<SWidget> TryMakeFilteredObjectPropertyWidget(
 		TSharedRef<IPropertyHandle> PropertyHandle,
 		TSharedPtr<FAssetThumbnailPool> ThumbnailPool,
 		FOnShouldFilterAsset OnShouldFilterAsset);
@@ -37,7 +37,7 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 	 * Creates filtered object dropdown or default editor for non-object properties.
 	 * @returns true if a filter widget was created, false if default
 	 */
-	bool OUUEDITOR_API MakeFilteredObjectPropertyOrDefault(
+	OUUEDITOR_API bool MakeFilteredObjectPropertyOrDefault(
 		TSharedRef<IPropertyHandle> PropertyHandle,
 		IDetailChildrenBuilder& ChildrenBuilder,
 		TSharedPtr<FAssetThumbnailPool> ThumbnailPool,
@@ -48,7 +48,7 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 	 * Makes a filtered object widget and hides default widget OR does nothing (i.e. leaves default as is).
 	 * @returns if a filter widget was created, false if default
 	 */
-	bool OUUEDITOR_API TryOverrideFilteredObjectPropertyWidget(
+	OUUEDITOR_API bool TryOverrideFilteredObjectPropertyWidget(
 		TSharedRef<IPropertyHandle> PropertyHandle,
 		IDetailLayoutBuilder& DetailBuilder,
 		const FOnShouldFilterAsset& OnShouldFilterAsset);
@@ -58,7 +58,7 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 	 * Call in CustomizeChildren() to filter all object properties.
 	 * Disadvantage: No customization of non-object properties in recursed arrays/structs after-the-fact.
 	 */
-	void OUUEDITOR_API CustomizeChildren_FilterObjectProperties(
+	OUUEDITOR_API void CustomizeChildren_FilterObjectProperties(
 		TSharedRef<IPropertyHandle> PropertyHandle,
 		IDetailChildrenBuilder& ChildBuilder,
 		IPropertyTypeCustomizationUtils& CustomizationUtils,
@@ -69,9 +69,17 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 	 * Call in CustomizeDetails() to filter all object properties.
 	 * Disadvantage: No customization of non-object properties possible after-the-fact.
 	 */
-	void OUUEDITOR_API CustomizeDetails_FilterObjectProperties(
+	OUUEDITOR_API void CustomizeDetails_FilterObjectProperties(
 		IDetailLayoutBuilder& DetailBuilder,
 		UClass* OwningClass,
 		const FOnShouldFilterAsset& OnShouldFilterAsset);
+
+	OUUEDITOR_API void GetClassFiltersFromPropertyMetadata(
+		const FProperty* Property,
+		const FProperty* MetadataProperty,
+		TArray<const UClass*>& OutAllowedClassFilters,
+		TArray<const UClass*>& OutDisallowedClassFilters);
+
+	OUUEDITOR_API UClass* GetObjectPropertyClass(const FProperty* Property);
 
 } // namespace OUU::Editor::PropertyCustomizationHelpers

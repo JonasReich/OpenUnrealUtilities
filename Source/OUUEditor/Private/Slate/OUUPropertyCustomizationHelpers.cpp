@@ -8,8 +8,10 @@
 #include "IDetailChildrenBuilder.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "Kismet2/SClassPickerDialog.h"
+#include "LogOpenUnrealUtilities.h"
 #include "ObjectEditorUtils.h"
 #include "PropertyCustomizationHelpers.h"
+#include "UObject/UObjectIterator.h"
 
 namespace OUU::Editor::PropertyCustomizationHelpers
 {
@@ -27,6 +29,47 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 				ChildrenBuilder,
 				ThumbnailPool,
 				OnShouldFilterAsset);
+		}
+
+		// Helper to retrieve the correct property that has the applicable metadata.
+		static const FProperty* GetActualMetadataProperty(const FProperty* Property)
+		{
+			if (FProperty* OuterProperty = Property->GetOwner<FProperty>())
+			{
+				if (OuterProperty->IsA<FArrayProperty>() || OuterProperty->IsA<FSetProperty>()
+					|| OuterProperty->IsA<FMapProperty>())
+				{
+					return OuterProperty;
+				}
+			}
+
+			return Property;
+		}
+
+		// Helper to support both meta=(TagName) and meta=(TagName=true) syntaxes
+		static bool GetTagOrBoolMetadata(const FProperty* Property, const TCHAR* TagName, bool bDefault)
+		{
+			bool bResult = bDefault;
+
+			if (Property->HasMetaData(TagName))
+			{
+				bResult = true;
+
+				const FString ValueString = Property->GetMetaData(TagName);
+				if (!ValueString.IsEmpty())
+				{
+					if (ValueString == TEXT("true"))
+					{
+						bResult = true;
+					}
+					else if (ValueString == TEXT("false"))
+					{
+						bResult = false;
+					}
+				}
+			}
+
+			return bResult;
 		}
 	} // namespace Private
 
@@ -278,4 +321,141 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 				OnShouldFilterAsset);
 		}
 	}
+
+	void GetClassFiltersFromPropertyMetadata(
+		const FProperty* Property,
+		const FProperty* MetadataProperty,
+		TArray<const UClass*>& OutAllowedClassFilters,
+		TArray<const UClass*>& OutDisallowedClassFilters)
+	{
+		auto* ObjectClass = GetObjectPropertyClass(Property);
+
+		// Copied from void SPropertyEditorAsset::InitializeClassFilters(const FProperty* Property)
+		if (Property == nullptr)
+		{
+			OutAllowedClassFilters.Add(ObjectClass);
+			return;
+		}
+
+		bool bExactClass = Private::GetTagOrBoolMetadata(MetadataProperty, TEXT("ExactClass"), false);
+
+		auto FindClass = [](const FString& InClassName) {
+			UClass* Class = UClass::TryFindTypeSlow<UClass>(InClassName, EFindFirstObjectOptions::EnsureIfAmbiguous);
+			if (!Class)
+			{
+				Class = LoadObject<UClass>(nullptr, *InClassName);
+			}
+			return Class;
+		};
+
+		const FString AllowedClassesFilterString = MetadataProperty->GetMetaData(TEXT("AllowedClasses"));
+		if (!AllowedClassesFilterString.IsEmpty())
+		{
+			TArray<FString> AllowedClassFilterNames;
+			AllowedClassesFilterString.ParseIntoArrayWS(AllowedClassFilterNames, TEXT(","), true);
+
+			for (const FString& ClassName : AllowedClassFilterNames)
+			{
+				UClass* Class = FindClass(ClassName);
+
+				if (Class)
+				{
+					// If the class is an interface, expand it to be all classes in memory that implement the class.
+					if (Class->HasAnyClassFlags(CLASS_Interface))
+					{
+						for (UClass* ClassWithInterface : TObjectRange<UClass>())
+						{
+							if (ClassWithInterface->ImplementsInterface(Class))
+							{
+								OutAllowedClassFilters.Add(ClassWithInterface);
+							}
+						}
+					}
+					else
+					{
+						OutAllowedClassFilters.Add(Class);
+					}
+				}
+			}
+		}
+
+		if (OutAllowedClassFilters.Num() == 0)
+		{
+			// always add the object class to the filters if it was not further filtered
+			OutAllowedClassFilters.Add(ObjectClass);
+		}
+
+		const FString DisallowedClassesFilterString = MetadataProperty->GetMetaData(TEXT("DisallowedClasses"));
+		if (!DisallowedClassesFilterString.IsEmpty())
+		{
+			TArray<FString> DisallowedClassFilterNames;
+			DisallowedClassesFilterString.ParseIntoArrayWS(DisallowedClassFilterNames, TEXT(","), true);
+
+			for (const FString& ClassName : DisallowedClassFilterNames)
+			{
+				UClass* Class = FindClass(ClassName);
+
+				if (Class)
+				{
+					// If the class is an interface, expand it to be all classes in memory that implement the class.
+					if (Class->HasAnyClassFlags(CLASS_Interface))
+					{
+						for (UClass* ClassWithInterface : TObjectRange<UClass>())
+						{
+							if (ClassWithInterface->ImplementsInterface(Class))
+							{
+								OutDisallowedClassFilters.Add(ClassWithInterface);
+							}
+						}
+					}
+					else
+					{
+						OutDisallowedClassFilters.Add(Class);
+					}
+				}
+			}
+		}
+	}
+
+	UClass* GetObjectPropertyClass(const FProperty* Property)
+	{
+		UClass* Class = nullptr;
+
+		if (CastField<const FObjectPropertyBase>(Property) != nullptr)
+		{
+			Class = CastField<const FObjectPropertyBase>(Property)->PropertyClass;
+			if (Class == nullptr)
+			{
+				UE_LOG(
+					LogOpenUnrealUtilities,
+					Warning,
+					TEXT("Object Property (%s) has a null class, falling back to UObject"),
+					*Property->GetFullName());
+				Class = UObject::StaticClass();
+			}
+		}
+		else if (CastField<const FInterfaceProperty>(Property) != nullptr)
+		{
+			Class = CastField<const FInterfaceProperty>(Property)->InterfaceClass;
+			if (Class == nullptr)
+			{
+				UE_LOG(
+					LogOpenUnrealUtilities,
+					Warning,
+					TEXT("Interface Property (%s) has a null class, falling back to UObject"),
+					*Property->GetFullName());
+				Class = UObject::StaticClass();
+			}
+		}
+		else
+		{
+			ensureMsgf(
+				Class != nullptr,
+				TEXT("Property (%s) is not an object or interface class"),
+				Property ? *Property->GetFullName() : TEXT("null"));
+			Class = UObject::StaticClass();
+		}
+		return Class;
+	}
+
 } // namespace OUU::Editor::PropertyCustomizationHelpers
