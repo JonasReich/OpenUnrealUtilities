@@ -4,25 +4,44 @@
 
 #include "CoreMinimal.h"
 
+#include "Engine/DeveloperSettings.h"
 #include "GameplayTags/LiteralGameplayTag.h"
+
+#include "TypedGameplayTag.generated.h"
 
 //---------------------------------------------------------------------------------------------------------------------
 
 namespace OUU::Runtime::Private
 {
-	struct OUURUNTIME_API FTypedGameplayTag_Base
+	template <typename... T>
+	struct TGetAllTypedTagRootTags_Recursive;
+
+	template <typename T, typename... Ts>
+	struct TGetAllTypedTagRootTags_Recursive<T, Ts...>
 	{
-#if WITH_EDITOR
-		static void RegisterPropertTypeLayout(const FString& TypeName);
-		static void UnregisterPropertTypeLayout(const FString& TypeName);
-#endif
+		static void Impl(FGameplayTagContainer& OutRootTags)
+		{
+			FGameplayTag RootTag = T::Get();
+			OutRootTags.AddTag(RootTag);
+			return TGetAllTypedTagRootTags_Recursive<Ts...>::Impl(OutRootTags);
+		}
 	};
+
+	template <>
+	struct TGetAllTypedTagRootTags_Recursive<>
+	{
+		static void Impl(FGameplayTagContainer& OutRootTags)
+		{
+			// do nothing
+		}
+	};
+
 } // namespace OUU::Runtime::Private
 
 /**
  * Base class for blueprint/property exposed typesafe tags.
- * Typesafe in the sense that you can only assign child tags of the root tag.
- * Supports assignment and comparison with literal gameplay tags.
+ * Typesafe in the sense that you can only assign child tags of the root tags.
+ * Supports assignment and comparison with matching literal gameplay tags.
  *
  * Inspired by TTypedTagStaticImpl / FUITag
  *
@@ -31,20 +50,14 @@ namespace OUU::Runtime::Private
  *    - Assign Categories meta specifier to matching tag
  *    - use DEFINE_TYPED_GAMEPLAY_TAG macro in body.
  * See FOUUSampleTag.
- *
- * Please note that for property editors to work correctly, you need to take care of property type layout customization
- * in your module startup/shutdown by calling
- * - FYourTagType::RegisterCustomProperyTypeLayout()
- * - FYourTagType::UnregisterCustomProperyTypeLayout()
- * respectively.
  */
-template <typename InBlueprintTagType, typename InRootLiteralTagType>
-struct TTypedGameplayTag : public OUU::Runtime::Private::FTypedGameplayTag_Base
+template <typename InBlueprintTagType, typename... InRootLiteralTagTypes>
+struct TTypedGameplayTag
 {
 public:
 	using BlueprintTagType = InBlueprintTagType;
-	using RootLiteralTagType = InRootLiteralTagType;
-	using TypedGameplayTagType = TTypedGameplayTag<BlueprintTagType, RootLiteralTagType>;
+	// using RootLiteralTagType = InRootLiteralTagType;
+	using TypedGameplayTagType = TTypedGameplayTag<BlueprintTagType, InRootLiteralTagTypes...>;
 
 	friend BlueprintTagType;
 
@@ -61,6 +74,26 @@ public:
 
 	TTypedGameplayTag& operator=(const TTypedGameplayTag&) = default;
 
+	/**
+	 * Get a list of the tags that are considered valid tag roots for this tag type.
+	 */
+	static FGameplayTagContainer GetNativeTagRootTags()
+	{
+		FGameplayTagContainer Result;
+		OUU::Runtime::Private::TGetAllTypedTagRootTags_Recursive<InRootLiteralTagTypes...>::Impl(OUT Result);
+		return Result;
+	}
+
+	static FGameplayTagContainer GetAllRootTags()
+	{
+		FGameplayTagContainer Result;
+		// Native tags
+		OUU::Runtime::Private::TGetAllTypedTagRootTags_Recursive<InRootLiteralTagTypes...>::Impl(OUT Result);
+		// Plus additional tags from settings
+		UTypedGameplayTagSettings::GetAdditionalRootTags(OUT Result, BlueprintTagType::StaticStruct());
+		return Result;
+	}
+
 private:
 	BlueprintTagType& OwningTag;
 
@@ -74,41 +107,84 @@ private:
 			"BlueprintStructType must be derived from FGameplayTag");
 
 		static_assert(
-			TIsChildTagOf<ParamTagType, RootLiteralTagType>::Value,
-			"Can only assign from a literal gameplay tag that is nested under RootTagType");
+			TOr<TIsChildTagOf<ParamTagType, InRootLiteralTagTypes>...>::Value,
+			"Can only assign from a literal gameplay tag that is nested under any of the InRootLiteralTagTypes");
 
 		return true;
 	}
 
 	static BlueprintTagType TryConvert(FGameplayTag VanillaTag, bool bChecked)
 	{
-		FGameplayTag RootTag = InRootLiteralTagType::Get();
-
-		if (VanillaTag.MatchesTag(RootTag))
+		FGameplayTagContainer RootTags = GetAllRootTags();
+		for (auto RootTag : RootTags)
 		{
-			return BlueprintTagType(VanillaTag);
+			if (VanillaTag.MatchesTag(RootTag))
+			{
+				return BlueprintTagType(VanillaTag);
+			}
 		}
-		else if (VanillaTag.IsValid() && bChecked)
+		if (VanillaTag.IsValid() && bChecked)
 		{
-			check(false);
+			checkf(
+				false,
+				TEXT("Tag %s is not part of the list of valid root tags %s"),
+				*VanillaTag.ToString(),
+				*RootTags.ToString());
 		}
 		return BlueprintTagType();
 	}
+};
+
+/** Base class for typed gameplay tags */
+USTRUCT()
+struct OUURUNTIME_API FTypedGameplayTag_Base : public FGameplayTag
+{
+	GENERATED_BODY()
+public:
+	template <typename, typename...>
+	friend struct TTypedGameplayTag;
+
+	template <typename, typename>
+	friend struct TTypedGameplayTagContainer_Base;
+
+#if WITH_EDITOR
+	static void RegisterAllDerivedPropertyTypeLayouts();
+	static void UnregisterAllDerivedPropertyTypeLayouts();
+#endif
+};
+
+UCLASS(DefaultConfig, Config = Game)
+class OUURUNTIME_API UTypedGameplayTagSettings : public UDeveloperSettings
+{
+	GENERATED_BODY()
+public:
+	static void GetAdditionalRootTags(FGameplayTagContainer& OutRootTags, UStruct* BlueprintStruct);
+	static void AddNativeRootTags(const FGameplayTagContainer& RootTags, UStruct* BlueprintStruct);
+	static void GetAllTags(FGameplayTagContainer& OutRootTags, UStruct* BlueprintStruct);
+
+private:
+	UPROPERTY(Config, EditAnywhere)
+	TMap<FName, FGameplayTagContainer> AdditionalRootTags;
+
+	UPROPERTY(VisibleAnywhere)
+	TMap<FName, FGameplayTagContainer> NativeRootTags;
 };
 
 /**
  * Use in derived types of TLiteralGameplayTagInstance to inherit the literal gameplay tag functionality.
  * Does not support usage together with custom constructors!
  */
-#define DEFINE_TYPED_GAMEPLAY_TAG(TagType, InLiteralGameplayTagType)                                                   \
-	PRIVATE_TYPED_GAMEPLAY_TAG_IMPL(TagType, InLiteralGameplayTagType)
+#define IMPLEMENT_TYPED_GAMEPLAY_TAG(TagType, ...) PRIVATE_TYPED_GAMEPLAY_TAG_IMPL(TagType, ##__VA_ARGS__)
 
 //---------------------------------------------------------------------------------------------------------------------
 
-#define PRIVATE_TYPED_GAMEPLAY_TAG_IMPL(TagType, InLiteralGameplayTagType)                                             \
+#define PRIVATE_TYPED_GAMEPLAY_TAG_IMPL(TagType, ...)                                                                  \
 public:                                                                                                                \
-	using LiteralGameplayTagType = InLiteralGameplayTagType;                                                           \
-	using TypedTagImplType = TTypedGameplayTag<TagType, LiteralGameplayTagType>;                                       \
+	static_assert(                                                                                                     \
+		TIsDerivedFrom<TagType, FTypedGameplayTag_Base>::Value,                                                        \
+		"Typed Gameplay Tags must be derived from FTypedGameplayTag_Base");                                            \
+                                                                                                                       \
+	using TypedTagImplType = TTypedGameplayTag<TagType, ##__VA_ARGS__>;                                                \
 	TagType() = default;                                                                                               \
                                                                                                                        \
 	template <typename T, typename U, typename V>                                                                      \
@@ -116,9 +192,9 @@ public:                                                                         
 	{                                                                                                                  \
 		using ParamTagType = TLiteralGameplayTag<T, U, V>;                                                             \
 		static_assert(                                                                                                 \
-			TIsChildTagOf<T, LiteralGameplayTagType>::Value,                                                           \
-			"Can only assign from a literal gameplay tag that is nested under " PREPROCESSOR_TO_STRING(                \
-				LiteralGameplayTagType));                                                                              \
+			TIsChildTagOf<T, ##__VA_ARGS__>::Value,                                                                    \
+			"Can only assign from a literal gameplay tag that is nested under any of " PREPROCESSOR_TO_STRING(         \
+				__VA_ARGS__));                                                                                         \
 		TypedTag_Impl = LiteralGameplayTag;                                                                            \
 	}                                                                                                                  \
 	TagType& operator=(const TagType& Other)                                                                           \
@@ -129,14 +205,25 @@ public:                                                                         
 	static TagType TryConvert(FGameplayTag FromTag) { return TypedTagImplType::TryConvert(FromTag, false); }           \
 	static TagType ConvertChecked(FGameplayTag FromTag) { return TypedTagImplType::TryConvert(FromTag, true); }        \
                                                                                                                        \
-	PRIVATE_TYPED_GAMEPLAY_TAG_EDITOR_IMPL(TagType)                                                                    \
+protected:                                                                                                             \
+	FName GetStructName() const { return *TagType::StaticStruct()->GetName().Mid(1); }                                 \
                                                                                                                        \
 private:                                                                                                               \
 	TypedTagImplType TypedTag_Impl{*this};                                                                             \
                                                                                                                        \
 	TagType(FGameplayTag Tag) { TagName = Tag.GetTagName(); }                                                          \
-	template <typename, typename>                                                                                      \
-	friend struct TTypedGameplayTag;
+                                                                                                                       \
+	template <typename, typename...>                                                                                   \
+	friend struct TTypedGameplayTag;                                                                                   \
+                                                                                                                       \
+private:                                                                                                               \
+	/* This helper is used for settings registration */                                                                \
+	struct FAutoRegistrationHelper                                                                                     \
+	{                                                                                                                  \
+		FAutoRegistrationHelper();                                                                                     \
+		~FAutoRegistrationHelper();                                                                                    \
+	};                                                                                                                 \
+	static FAutoRegistrationHelper Instance;
 
 #if WITH_EDITOR
 	#define PRIVATE_TYPED_GAMEPLAY_TAG_EDITOR_IMPL(TagType)                                                            \
@@ -151,6 +238,18 @@ private:                                                                        
 #else
 	#define PRIVATE_TYPED_GAMEPLAY_TAG_EDITOR_IMPL(TagName) PREPROCESSOR_NOTHING
 #endif
+
+#define DEFINE_TYPED_GAMEPLAY_TAG(TagType)                                                                             \
+	TagType::FAutoRegistrationHelper::FAutoRegistrationHelper()                                                        \
+	{                                                                                                                  \
+		FCoreDelegates::OnAllModuleLoadingPhasesComplete.AddLambda([]() {                                              \
+			UTypedGameplayTagSettings::AddNativeRootTags(                                                              \
+				TypedTagImplType::GetNativeTagRootTags(),                                                              \
+				TagType::StaticStruct());                                                                              \
+		});                                                                                                            \
+	}                                                                                                                  \
+	TagType::FAutoRegistrationHelper::~FAutoRegistrationHelper() {}                                                    \
+	TagType::FAutoRegistrationHelper TagType::Instance;
 
 //---------------------------------------------------------------------------------------------------------------------
 
@@ -174,7 +273,7 @@ struct TTypedGameplayTagContainer_Base
 {
 public:
 	using BlueprintTagType = InBlueprintTagType;
-	using LiteralGameplayTagType = typename BlueprintTagType::LiteralGameplayTagType;
+	using TypedTagImplType = typename BlueprintTagType::TypedTagImplType;
 
 	using ValueContainerType = TTypedGameplayTagContainerValue<BlueprintTagType>;
 	using ReferenceContainerType = TTypedGameplayTagContainerReference<BlueprintTagType>;
@@ -184,22 +283,23 @@ public:
 
 	static FGameplayTagContainer FilterRootTag(const FGameplayTagContainer& RegularGameplayTags)
 	{
-		return RegularGameplayTags.Filter(FGameplayTagContainer(LiteralGameplayTagType::Get()));
+		return RegularGameplayTags.Filter(TypedTagImplType::GetAllRootTags());
 	}
 
 	// Call this in derived constructors / conversion functions.
 	void EnsureValidRootTag() const
 	{
 #if DO_CHECK
-		FGameplayTag RootTag = LiteralGameplayTagType::Get();
+		FGameplayTagContainer RootTags = TypedTagImplType::GetAllRootTags();
 		const FGameplayTagContainer& ContainerRef = GetRef();
 		for (const FGameplayTag& Tag : ContainerRef)
 		{
 			ensureMsgf(
-				Tag.MatchesTag(RootTag),
-				TEXT("Typed gameplay tag container contains tag '%s' that does not match the required root tag %s"),
+				Tag.MatchesAny(RootTags),
+				TEXT("Typed gameplay tag container contains tag '%s' that does not match any of the required root tags "
+					 "%s"),
 				*Tag.ToString(),
-				*RootTag.ToString());
+				*RootTags.ToString());
 		}
 #endif
 	}
@@ -300,7 +400,6 @@ struct TTypedGameplayTagContainerReference :
 	friend struct TTypedGameplayTagContainer_Base;
 
 	using BlueprintTagType = InBlueprintTagType;
-	using LiteralGameplayTagType = typename BlueprintTagType::LiteralGameplayTagType;
 	using SelfType = TTypedGameplayTagContainerReference<BlueprintTagType>;
 	using Super = TTypedGameplayTagContainer_Base<BlueprintTagType, SelfType>;
 
@@ -329,7 +428,6 @@ struct TTypedGameplayTagContainerValue :
 	friend struct TTypedGameplayTagContainer_Base;
 
 	using BlueprintTagType = InBlueprintTagType;
-	using LiteralGameplayTagType = typename BlueprintTagType::LiteralGameplayTagType;
 	using SelfType = TTypedGameplayTagContainerValue<BlueprintTagType>;
 	using Super = TTypedGameplayTagContainer_Base<BlueprintTagType, SelfType>;
 

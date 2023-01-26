@@ -52,7 +52,8 @@ public class OUURuntime : OUUModuleRules
 			"SlateCore",
 			"GameplayAbilities",
 			"GameplayTags",
-			"GameplayTasks"
+			"GameplayTasks",
+			"DeveloperSettings"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {
@@ -71,7 +72,9 @@ public class OUURuntime : OUUModuleRules
 			PrivateDependencyModuleNames.AddRange(new string[] {
 				"UnrealEd",
 				"GameplayTagsEditor",
-				"PropertyEditor"
+				"PropertyEditor",
+				"SourceControl",
+				"AssetTools"
 			});
 		}
 		// --

@@ -7,9 +7,11 @@
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidget.h"
 #include "EditorUtilityWidgetBlueprint.h"
+#include "GameplayTags/TypedGameplayTag.h"
 #include "MaterialAnalyzer/OUUMaterialAnalyzer.h"
 #include "Modules/ModuleManager.h"
 #include "OUUContentBrowserExtensions.h"
+#include "PropertyEditorUtils.h"
 
 namespace OUU::Editor
 {
@@ -31,12 +33,17 @@ namespace OUU::Editor
 
 			MaterialAnalyzer::RegisterNomadTabSpawner();
 			ContentBrowserExtensions::RegisterHooks();
+
+			FCoreDelegates::OnAllModuleLoadingPhasesComplete.AddLambda(
+				[]() { FTypedGameplayTag_Base::RegisterAllDerivedPropertyTypeLayouts(); });
 		}
 
 		virtual void ShutdownModule() override
 		{
 			MaterialAnalyzer::UnregisterNomadTabSpawner();
 			ContentBrowserExtensions::UnregisterHooks();
+
+			FTypedGameplayTag_Base::UnregisterAllDerivedPropertyTypeLayouts();
 		}
 
 	private:

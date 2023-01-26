@@ -42,16 +42,6 @@ OUU_DECLARE_GAMEPLAY_TAGS_START(
 OUU_DECLARE_GAMEPLAY_TAGS_END(FSampleGameplayTags_Nested)
 
 /**
- * Subclassed gameplay tag that only accepts child tags of OUUTestTags.
- */
-USTRUCT(BlueprintType, meta = (Categories = "OUUTestTags.Bar"))
-struct OUURUNTIME_API FOUUSampleBarTag : public FGameplayTag
-{
-	GENERATED_BODY()
-	DEFINE_TYPED_GAMEPLAY_TAG(FOUUSampleBarTag, FSampleGameplayTags::Bar)
-};
-
-/**
  * This literal tag does NOT auto-registered as native tags.
  * Used to check that the bAutoAddNativeTag parameter actually makes a difference.
  */
@@ -62,3 +52,13 @@ OUU_DECLARE_GAMEPLAY_TAGS_START(
 	"This tag should never be registered",
 	false)
 OUU_DECLARE_GAMEPLAY_TAGS_END(FSampleGameplayTags_NotRegsitered)
+
+/**
+ * Subclassed gameplay tag that only accepts child tags of OUUTestTags.Bar and OUUTestTags.Baz.
+ */
+USTRUCT(BlueprintType)
+struct OUURUNTIME_API FOUUSampleBarTag : public FTypedGameplayTag_Base
+{
+	GENERATED_BODY()
+	IMPLEMENT_TYPED_GAMEPLAY_TAG(FOUUSampleBarTag, FSampleGameplayTags::Bar, FSampleGameplayTags::Baz)
+};
