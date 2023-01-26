@@ -1,9 +1,10 @@
-﻿// Copyright (c) 2022 Jonas Reich
+// Copyright (c) 2022 Jonas Reich
 
 #pragma once
 
 #include "CoreMinimal.h"
 
+#include "Dom/JsonObject.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "JsonLibrary.generated.h"
@@ -29,13 +30,19 @@ class OUURUNTIME_API UOUUJsonLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
+	static TSharedPtr<FJsonObject> UObjectToJsonObject(
+		const UObject* Object,
+		FOUUJsonLibraryObjectFilter SubObjectFilter,
+		int64 CheckFlags = 0,
+		int64 SkipFlags = 0);
+
 	/**
 	 * Create a json string from an objects properties.
 	 * Parses all properties down to the limit/filter settings provided in SubObjectFilter.
 	 */
 	UFUNCTION(BlueprintCallable)
 	static FString UObjectToJsonString(
-		UObject* Object,
+		const UObject* Object,
 		FOUUJsonLibraryObjectFilter SubObjectFilter,
 		int64 CheckFlags = 0,
 		int64 SkipFlags = 0);

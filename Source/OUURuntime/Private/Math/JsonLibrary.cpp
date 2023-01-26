@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022 Jonas Reich
+// Copyright (c) 2022 Jonas Reich
 
 #include "Misc/JsonLibrary.h"
 
@@ -87,7 +87,24 @@ struct FJsonLibraryExportHelper
 		return {};
 	};
 
-	FString ConvertObjectToString(UObject* Object)
+	TSharedPtr<FJsonObject> ConvertObjectToJsonObject(const UObject* Object)
+	{
+		FJsonObjectConverter::CustomExportCallback CustomCB = GetCustomCallback();
+		TSharedRef<FJsonObject> JsonObject = MakeShared<FJsonObject>();
+		if (FJsonObjectConverter::UStructToJsonObject(
+				Object->GetClass(),
+				Object,
+				OUT JsonObject,
+				CheckFlags,
+				SkipFlags,
+				&CustomCB))
+		{
+			return JsonObject;
+		}
+		return TSharedPtr<FJsonObject>();
+	}
+
+	FString ConvertObjectToString(const UObject* Object)
 	{
 		auto* Class = Object->GetClass();
 		FString Result;
@@ -105,11 +122,27 @@ struct FJsonLibraryExportHelper
 	}
 };
 
-FString UOUUJsonLibrary::UObjectToJsonString(
-	UObject* Object,
+TSharedPtr<FJsonObject> UOUUJsonLibrary::UObjectToJsonObject(
+	const UObject* Object,
 	FOUUJsonLibraryObjectFilter SubObjectFilter,
-	int64 CheckFlags,
-	int64 SkipFlags)
+	int64 CheckFlags /* = 0 */,
+	int64 SkipFlags /* = 0 */)
+{
+	if (!IsValid(Object))
+	{
+		UE_LOG(LogOpenUnrealUtilities, Error, TEXT("Failed to convert invalid object TO Json object"));
+		return nullptr;
+	}
+
+	FJsonLibraryExportHelper Helper{CheckFlags, SkipFlags, SubObjectFilter};
+	return Helper.ConvertObjectToJsonObject(Object);
+}
+
+FString UOUUJsonLibrary::UObjectToJsonString(
+	const UObject* Object,
+	FOUUJsonLibraryObjectFilter SubObjectFilter,
+	int64 CheckFlags /* = 0 */,
+	int64 SkipFlags /* = 0 */)
 {
 	if (!IsValid(Object))
 	{
@@ -121,7 +154,11 @@ FString UOUUJsonLibrary::UObjectToJsonString(
 	return Helper.ConvertObjectToString(Object);
 }
 
-bool UOUUJsonLibrary::JsonStringToUObject(UObject* Object, FString String, int64 CheckFlags, int64 SkipFlags)
+bool UOUUJsonLibrary::JsonStringToUObject(
+	UObject* Object,
+	FString String,
+	int64 CheckFlags /* = 0 */,
+	int64 SkipFlags /* = 0 */)
 {
 	if (!IsValid(Object))
 	{
