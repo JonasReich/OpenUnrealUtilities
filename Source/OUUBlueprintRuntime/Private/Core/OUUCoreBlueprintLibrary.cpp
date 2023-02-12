@@ -36,3 +36,13 @@ FString UOUUCoreBlueprintLibrary::Conv_TopLevelAssetPathToString(FTopLevelAssetP
 {
 	return InPath.ToString();
 }
+
+FTopLevelAssetPath UOUUCoreBlueprintLibrary::Conv_StringToTopLevelAssetPath(FString InPath)
+{
+	return FTopLevelAssetPath(InPath);
+}
+
+FTopLevelAssetPath UOUUCoreBlueprintLibrary::Conv_ClassToTopLevelAssetPath(UClass* InClass)
+{
+	return IsValid(InClass) ? FTopLevelAssetPath(InClass->GetClassPathName()) : FTopLevelAssetPath{};
+}

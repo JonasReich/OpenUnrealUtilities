@@ -58,6 +58,20 @@ public:
 	UFUNCTION(
 		BlueprintPure,
 		meta = (DisplayName = "To String (Top Level Asset Path)", CompactNodeTitle = "->", BlueprintAutocast),
-		Category = "Utilities|String")
+		Category = "Utilities|Top Level Asset Path")
 	static FString Conv_TopLevelAssetPathToString(FTopLevelAssetPath InPath);
+
+	/** Converts an FString to a TopLevelAssetPath */
+	UFUNCTION(
+		BlueprintPure,
+		meta = (DisplayName = "To Top Level Asset Path (String)", CompactNodeTitle = "->", BlueprintAutocast),
+		Category = "Utilities|Top Level Asset Path")
+	static FTopLevelAssetPath Conv_StringToTopLevelAssetPath(FString InPath);
+
+	/** Converts a UClass to a TopLevelAssetPath */
+	UFUNCTION(
+		BlueprintPure,
+		meta = (DisplayName = "To Top Level Asset Path (Class)", CompactNodeTitle = "->", BlueprintAutocast),
+		Category = "Utilities|Top Level Asset Path")
+	static FTopLevelAssetPath Conv_ClassToTopLevelAssetPath(UClass* InClass);
 };
