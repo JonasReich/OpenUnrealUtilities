@@ -6,6 +6,8 @@
 
 #include "Engine/DeveloperSettings.h"
 #include "GameplayTags/LiteralGameplayTag.h"
+#include "GameplayTags/TypedGameplayTagSettings.h"
+#include "Misc/CoreDelegates.h"
 
 #include "TypedGameplayTag.generated.h"
 
@@ -126,12 +128,12 @@ private:
 		if (VanillaTag.IsValid() && bChecked)
 		{
 			checkf(
-				false,
-				TEXT("Tag %s is not part of the list of valid root tags %s"),
+				VanillaTag == FGameplayTag::EmptyTag,
+				TEXT("Tag %s is not part of the list of valid root tags %s and also not a completely empty tag"),
 				*VanillaTag.ToString(),
 				*RootTags.ToString());
 		}
-		return BlueprintTagType();
+		return FGameplayTag::EmptyTag;
 	}
 };
 
@@ -151,23 +153,6 @@ public:
 	static void RegisterAllDerivedPropertyTypeLayouts();
 	static void UnregisterAllDerivedPropertyTypeLayouts();
 #endif
-};
-
-UCLASS(DefaultConfig, Config = Game)
-class OUURUNTIME_API UTypedGameplayTagSettings : public UDeveloperSettings
-{
-	GENERATED_BODY()
-public:
-	static void GetAdditionalRootTags(FGameplayTagContainer& OutRootTags, UStruct* BlueprintStruct);
-	static void AddNativeRootTags(const FGameplayTagContainer& RootTags, UStruct* BlueprintStruct);
-	static void GetAllTags(FGameplayTagContainer& OutRootTags, UStruct* BlueprintStruct);
-
-private:
-	UPROPERTY(Config, EditAnywhere)
-	TMap<FName, FGameplayTagContainer> AdditionalRootTags;
-
-	UPROPERTY(VisibleAnywhere)
-	TMap<FName, FGameplayTagContainer> NativeRootTags;
 };
 
 /**
@@ -193,8 +178,7 @@ public:                                                                         
 		using ParamTagType = TLiteralGameplayTag<T, U, V>;                                                             \
 		static_assert(                                                                                                 \
 			TIsChildTagOf<T, ##__VA_ARGS__>::Value,                                                                    \
-			"Can only assign from a literal gameplay tag that is nested under any of " PREPROCESSOR_TO_STRING(         \
-				__VA_ARGS__));                                                                                         \
+			"Can only assign from a literal gameplay tag that is nested under any of the declared root tags.");        \
 		TypedTag_Impl = LiteralGameplayTag;                                                                            \
 	}                                                                                                                  \
 	TagType& operator=(const TagType& Other)                                                                           \
