@@ -96,7 +96,7 @@ private:
 	// Get an interface POINTER.
 	// The public GetInterface<T>() member functions return T* or T& depending on bInIsPointer value.
 	template <class InterfaceClass>
-	typename InterfaceClass* GetInterfacePtr() const
+	InterfaceClass* GetInterfacePtr() const
 	{
 		static_assert(
 			TOr<TIsSame<InterfaceClass, InterfaceClasses>...>::Value,

@@ -44,7 +44,7 @@ struct TIsChildTagOf_Single
 		TOr<TIsSame<typename Child::SelfTagType, TestParent>,
 			TAnd<
 				TNot<TIsSame<typename Child::SelfTagType, typename Child::ParentTagType>>,
-				TIsChildTagOf<typename Child::ParentTagType, TestParent>>>::Value;
+				TIsChildTagOf_Single<typename Child::ParentTagType, TestParent>>>::Value;
 };
 
 template <typename Child, typename... TestParents>

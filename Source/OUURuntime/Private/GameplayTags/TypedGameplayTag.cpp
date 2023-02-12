@@ -2,13 +2,18 @@
 
 #include "GameplayTags/TypedGameplayTag.h"
 
+#include "GameplayTagsManager.h"
+#include "Misc/RegexUtils.h"
+#include "Modules/ModuleManager.h"
+#include "UObject/UObjectIterator.h"
+
 #if WITH_EDITOR
-	#include "Modules/ModuleManager.h"
 	#include "GameplayTagsEditorModule.h"
 	#include "PropertyEditorModule.h"
-	#include "GameplayTagsManager.h"
-	#include "Misc/RegexUtils.h"
+	#include "PropertyHandle.h"
+#endif
 
+#if WITH_EDITOR
 namespace OUU::Runtime::Private
 {
 	FPropertyEditorModule& GetPropertyEditorModule()
@@ -50,7 +55,6 @@ namespace OUU::Runtime::Private
 	}
 } // namespace OUU::Runtime::Private
 
-#endif
 void FTypedGameplayTag_Base::RegisterAllDerivedPropertyTypeLayouts()
 {
 	auto& TagsManager = UGameplayTagsManager::Get();
@@ -124,32 +128,4 @@ void FTypedGameplayTag_Base::UnregisterAllDerivedPropertyTypeLayouts()
 	OUU::Runtime::Private::ForEachTypedGameplayTagType(
 		[&](FName TypeName) { PropertyEditorModule.UnregisterCustomPropertyTypeLayout(TypeName); });
 }
-
-void UTypedGameplayTagSettings::GetAdditionalRootTags(FGameplayTagContainer& OutRootTags, UStruct* BlueprintStruct)
-{
-	auto& AdditionalRootTags = GetDefault<UTypedGameplayTagSettings>()->AdditionalRootTags;
-	if (auto* Tags = AdditionalRootTags.Find(*BlueprintStruct->GetName()))
-	{
-		OutRootTags.AppendTags(*Tags);
-	}
-}
-
-void UTypedGameplayTagSettings::AddNativeRootTags(const FGameplayTagContainer& RootTags, UStruct* BlueprintStruct)
-{
-	auto* Settings = GetMutableDefault<UTypedGameplayTagSettings>();
-	FName StructName = *BlueprintStruct->GetName();
-	Settings->NativeRootTags.Add(StructName, FGameplayTagContainer(RootTags));
-
-	// also add an entry for additional tags if not already present
-	Settings->AdditionalRootTags.FindOrAdd(StructName, FGameplayTagContainer::EmptyContainer);
-}
-
-void UTypedGameplayTagSettings::GetAllTags(FGameplayTagContainer& OutRootTags, UStruct* BlueprintStruct)
-{
-	auto& NativeRootTags = GetDefault<UTypedGameplayTagSettings>()->NativeRootTags;
-	if (auto* Tags = NativeRootTags.Find(*BlueprintStruct->GetName()))
-	{
-		OutRootTags.AppendTags(*Tags);
-	}
-	GetAdditionalRootTags(OutRootTags, BlueprintStruct);
-}
+#endif // WITH_EDITOR

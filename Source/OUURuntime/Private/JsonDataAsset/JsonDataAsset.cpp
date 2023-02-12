@@ -98,10 +98,12 @@ namespace OUU::Runtime::Private
 
 	void DeleteJsonAsset(const FString& PackagePath)
 	{
+#if WITH_EDITOR
 		// SourceControlHelpers::MarkFileForDelete
 
 		auto FullPath = OUU::Runtime::Private::JsonDataPath::PackageToFull(PackagePath);
 		USourceControlHelpers::MarkFileForDelete(FullPath);
+#endif
 	}
 
 } // namespace OUU::Runtime::Private
@@ -488,7 +490,7 @@ bool UJsonDataAsset::ExportJsonFile() const
 	if (!FJsonSerializer::Serialize(JsonObject, JsonWriter))
 	{
 		UE_MESSAGELOG(AssetTools, Error, this, "Failed to serialize json for object properties");
-		return nullptr;
+		return false;
 	}
 
 #if WITH_EDITOR
