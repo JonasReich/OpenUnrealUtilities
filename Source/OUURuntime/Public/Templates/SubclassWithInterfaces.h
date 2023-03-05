@@ -110,28 +110,22 @@ public:
 	/**
 	 * The DerivedClass can be any class that is derived from ObjectBaseClass and from all InterfaceClasses.
 	 */
-	template <typename DerivedClass>
+	template <
+		typename DerivedClass,
+		typename = typename TEnableIf<TAnd<
+			TIsDerivedFrom<DerivedClass, ObjectBaseClass>,
+			TIsDerivedFrom<DerivedClass, InterfaceClasses>...>::Value>::Type>
 	TSubclassWithInterfaces_Base(DerivedClass* InObject) : Object(InObject)
 	{
-		static_assert(
-			TIsDerivedFrom<DerivedClass, ObjectBaseClass>::Value,
-			"UObjectDerivedClass must be derived from ObjectBaseClass");
-
-		static_assert(
-			TAnd<TIsDerivedFrom<DerivedClass, InterfaceClasses>...>::Value,
-			"DerivedClass must be derived from all interface classes");
 	}
 
-	template <typename DerivedClass>
+	template <
+		typename DerivedClass,
+		typename = typename TEnableIf<TAnd<
+			TIsDerivedFrom<DerivedClass, ObjectBaseClass>,
+			TIsDerivedFrom<DerivedClass, InterfaceClasses>...>::Value>::Type>
 	TSubclassWithInterfaces_Base(DerivedClass& InObject) : Object(InObject)
 	{
-		static_assert(
-			TIsDerivedFrom<DerivedClass, ObjectBaseClass>::Value,
-			"UObjectDerivedClass must be derived from ObjectBaseClass");
-
-		static_assert(
-			TAnd<TIsDerivedFrom<DerivedClass, InterfaceClasses>...>::Value,
-			"DerivedClass must be derived from all interface classes");
 	}
 
 	// Get the object as ObjectBaseClass* or ObjectBaseClass& depending on bIsPointer value
