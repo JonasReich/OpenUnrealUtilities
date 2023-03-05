@@ -38,7 +38,7 @@ namespace OUU::Editor::ContentBrowserExtensions
 			TSharedRef<FExtender> Extender(new FExtender());
 
 			if (Algo::AllOf(SelectedAssets, [](const FAssetData& Asset) -> bool {
-					return Asset.GetClass()->IsChildOf(USkeletalMesh::StaticClass());
+					return (Asset.GetClass() != nullptr) && Asset.GetClass()->IsChildOf(USkeletalMesh::StaticClass());
 				}))
 			{
 				Extender->AddMenuExtension(
