@@ -105,6 +105,9 @@ class OUURUNTIME_API UJsonDataAsset : public UDataAsset
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintPure)
+	bool IsInJsonDataContentRoot() const;
+
 	// Import/export json objects
 	bool ImportJson(TSharedPtr<FJsonObject> JsonObject, bool bCheckClassMatches = true);
 	TSharedRef<FJsonObject> ExportJson() const;
@@ -128,6 +131,10 @@ public:
 	// Not called for newly created objects
 	void PostLoad() override;
 	void PostDuplicate(bool bDuplicateForPIE) override;
+
+#if WITH_EDITOR
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context);
+#endif
 };
 
 UCLASS(BlueprintType)

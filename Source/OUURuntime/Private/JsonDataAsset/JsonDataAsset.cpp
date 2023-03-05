@@ -21,12 +21,18 @@
 	#include "SourceControlHelpers.h"
 	#include "AssetViewUtils.h"
 	#include "AssetToolsModule.h"
+	#include "Misc/DataValidation.h"
 #endif
 
 // #TODO-jreich Add command to force reload all assets from json files after editor startup.
 
 namespace OUU::Runtime::Private
 {
+	TAutoConsoleVariable<bool> CVar_LoadAllJsonDataOnStartup(
+		TEXT("ouu.JsonData.LoadOnStartup"),
+		true,
+		TEXT("If true, all json files in the Data directory will be loaded on Editor startup."));
+
 	// We can't disable this atm, because resaving assets is only possible for the newly created assets, not with loaded
 	// assets. But with this disabled, we'll have a mix of new/loaded assets that we can't tell apart.
 	TAutoConsoleVariable<bool> CVar_PurgeJsonDataFilesOnStartup(
@@ -34,6 +40,11 @@ namespace OUU::Runtime::Private
 		true,
 		TEXT("If true, all generated uobject asset files for the json files will be forcefully deleted at engine "
 			 "startup. This can help with debugging the asset loading."));
+
+	TAutoConsoleVariable<bool> CVar_IgnoreInvalidExtensions(
+		TEXT("ouu.JsonData.IgnoreInvalidExtensions"),
+		false,
+		TEXT("If true, files with invalid extensions inside the Data/ folder will be ignored during startup."));
 
 	// Something like this might be needed for runtime package creation in non-editor builds
 	// where we cannot save packages.
@@ -141,7 +152,6 @@ void UJsonDataAssetSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 #if WITH_EDITOR
 	FEditorDelegates::OnPackageDeleted.AddUObject(this, &UJsonDataAssetSubsystem::HandlePackageDeleted);
 #endif
-
 	const FString MountDiskPath = OUU::Runtime::Private::GetJsonDataMountPoint_Disk();
 	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
 
@@ -154,7 +164,10 @@ void UJsonDataAssetSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 	FPackageName::RegisterMountPoint(OUU::Runtime::Private::GetJsonDataMountPoint_Root(), MountDiskPath);
 
-	ImportAllAssetsDuringStartup();
+	if (OUU::Runtime::Private::CVar_LoadAllJsonDataOnStartup.GetValueOnGameThread())
+	{
+		ImportAllAssetsDuringStartup();
+	}
 
 	bAutoExportJson = true;
 }
@@ -175,6 +188,8 @@ void UJsonDataAssetSubsystem::Deinitialize()
 
 bool UJsonDataAssetSubsystem::AutoExportJsonEnabled()
 {
+	if (IsRunningCookCommandlet())
+		return false;
 	return GEngine->GetEngineSubsystem<UJsonDataAssetSubsystem>()->bAutoExportJson;
 }
 
@@ -197,6 +212,39 @@ void UJsonDataAssetSubsystem::ImportAllAssetsDuringStartup()
 		[&AllPackages, &NumPackagesLoaded, &NumPackagesFailedToLoad](const TCHAR* FilePath, bool bIsDirectory) -> bool {
 		if (!bIsDirectory)
 		{
+			if (FPaths::GetExtension(FilePath) != TEXT("json"))
+			{
+				if (!OUU::Runtime::Private::CVar_IgnoreInvalidExtensions.GetValueOnAnyThread())
+				{
+					UE_MESSAGELOG(
+						LoadErrors,
+						Warning,
+						"File",
+						FilePath,
+						"in Data directory has an unexpected file extension.");
+					NumPackagesFailedToLoad++;
+				}
+				// Continue with other files anyways
+				return true;
+			}
+
+			if (FPaths::GetBaseFilename(FilePath).Contains("."))
+			{
+				if (!OUU::Runtime::Private::CVar_IgnoreInvalidExtensions.GetValueOnAnyThread())
+				{
+					UE_MESSAGELOG(
+						LoadErrors,
+						Warning,
+						"File",
+						FilePath,
+						"in Data directory has two '.' characters in it's filename. Only a simple '.json' extension is "
+						"allowed.");
+					NumPackagesFailedToLoad++;
+				}
+				// Continue with other files anyways
+				return true;
+			}
+
 			auto Path =
 				FJsonDataAssetPath::FromPackagePath(OUU::Runtime::Private::JsonDataPath::FullToPackage(FilePath));
 			auto* NewDataAsset = Path.Load();
@@ -214,11 +262,6 @@ void UJsonDataAssetSubsystem::ImportAllAssetsDuringStartup()
 			// The name of the package
 			const FString PackageName = NewPackage->GetName();
 
-			// Place were we should save the file, including the filename
-			FString FinalPackageSavePath;
-			// Just the filename
-			FString FinalPackageFilename;
-
 			FString PackageFilename;
 			const bool bPackageAlreadyExists = FPackageName::DoesPackageExist(PackageName, &PackageFilename);
 			if (!bPackageAlreadyExists)
@@ -233,10 +276,6 @@ void UJsonDataAssetSubsystem::ImportAllAssetsDuringStartup()
 			// Split the path to get the filename without the directory structure
 			FPaths::NormalizeFilename(PackageFilename);
 			FPaths::Split(PackageFilename, Directory, BaseFilename, Extension);
-			// The final save path is whatever the existing filename is
-			FinalPackageSavePath = PackageFilename;
-			// Format the filename we found from splitting the path
-			FinalPackageFilename = FString::Printf(TEXT("%s.%s"), *BaseFilename, *Extension);
 
 			FSavePackageArgs SaveArgs;
 			SaveArgs.TopLevelFlags = RF_Standalone;
@@ -263,18 +302,18 @@ void UJsonDataAssetSubsystem::ImportAllAssetsDuringStartup()
 		return true;
 	};
 
-	UE_LOG(LogOpenUnrealUtilities, Log, TEXT("Loaed %i json data assets"), NumPackagesLoaded);
+	IPlatformFile::FDirectoryVisitorFunc VisitorFunc = VisitorLambda;
+
+	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+	PlatformFile.IterateDirectoryRecursively(*JsonDir, VisitorFunc);
+
+	UE_LOG(LogOpenUnrealUtilities, Log, TEXT("Loaded %i json data assets"), NumPackagesLoaded);
 	UE_CLOG(
 		NumPackagesFailedToLoad > 0,
 		LogOpenUnrealUtilities,
 		Error,
 		TEXT("Failed to load %i json data assets"),
 		NumPackagesFailedToLoad);
-
-	IPlatformFile::FDirectoryVisitorFunc VisitorFunc = VisitorLambda;
-
-	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
-	PlatformFile.IterateDirectoryRecursively(*JsonDir, VisitorFunc);
 }
 
 void UJsonDataAssetSubsystem::HandlePackageDeleted(UPackage* Package)
@@ -416,6 +455,11 @@ UJsonDataAsset* UJsonDataAssetLibrary::LoadJsonDataAsset_Internal(
 	return GeneratedAsset;
 }
 
+bool UJsonDataAsset::IsInJsonDataContentRoot() const
+{
+	return OUU::Runtime::Private::JsonDataPath::PackageIsJsonData(GetPackage()->GetPathName());
+}
+
 bool UJsonDataAsset::ImportJson(TSharedPtr<FJsonObject> JsonObject, bool bCheckClassMatches)
 {
 	if (bCheckClassMatches)
@@ -519,6 +563,18 @@ bool UJsonDataAsset::ImportJsonFile()
 
 bool UJsonDataAsset::ExportJsonFile() const
 {
+	if (!IsInJsonDataContentRoot())
+	{
+		UE_MESSAGELOG(
+			AssetTools,
+			Error,
+			this,
+			"is a json data asset, but not located in",
+			OUU::Runtime::Private::GetJsonDataMountPoint_Root(),
+			"content directory. Failed to export json file.");
+		return false;
+	}
+
 	// Const cast is permissible here. We just want to reuse the path conversion.
 	const FString InPackagePath = FJsonDataAssetPath(const_cast<UJsonDataAsset*>(this)).GetPackagePath();
 	const FString SavePath = OUU::Runtime::Private::JsonDataPath::PackageToFull(InPackagePath);
@@ -629,3 +685,19 @@ void UJsonDataAsset::PostDuplicate(bool bDuplicateForPIE)
 	Super::PostDuplicate(bDuplicateForPIE);
 	ExportJsonFile();
 }
+
+#if WITH_EDITOR
+EDataValidationResult UJsonDataAsset::IsDataValid(class FDataValidationContext& Context)
+{
+	auto Result = Super::IsDataValid(Context);
+	if (!IsInJsonDataContentRoot())
+	{
+		Context.AddError(FText::FromString(FString::Printf(
+			TEXT("%s is a json data asset, but not located in %s content directory"),
+			*GetNameSafe(this),
+			*OUU::Runtime::Private::GetJsonDataMountPoint_Root())));
+		return EDataValidationResult::Invalid;
+	}
+	return Result;
+}
+#endif
