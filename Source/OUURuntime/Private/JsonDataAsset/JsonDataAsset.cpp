@@ -437,6 +437,42 @@ bool UJsonDataAsset::ImportJson(TSharedPtr<FJsonObject> JsonObject, bool bCheckC
 		}
 	}
 
+	if (JsonObject->HasField(TEXT("EngineVersion")))
+	{
+		const FString JsonVersionString = JsonObject->GetStringField(TEXT("EngineVersion"));
+		const bool bIsLicenseeVersion = JsonObject->GetBoolField(TEXT("IsLicenseeVersion"));
+		FEngineVersion JsonVersion;
+		if (!FEngineVersion::Parse(JsonVersionString, OUT JsonVersion))
+		{
+			UE_MESSAGELOG(LoadErrors, Error, "Json file for", this, "has an invalid 'EngineVersion' field value");
+			return false;
+		}
+
+		uint32 Changelist = JsonVersion.GetChangelist();
+		JsonVersion.Set(
+			JsonVersion.GetMajor(),
+			JsonVersion.GetMinor(),
+			JsonVersion.GetPatch(),
+			Changelist | (bIsLicenseeVersion ? (1U << 31) : 0),
+			JsonVersion.GetBranch());
+
+		if (!FEngineVersion::Current().IsCompatibleWith(JsonVersion))
+		{
+			UE_MESSAGELOG(
+				LoadErrors,
+				Error,
+				"Json file for",
+				this,
+				"has an invalid engine version:",
+				JsonVersionString,
+				"is not compatible with",
+				FEngineVersion::Current().ToString(),
+				". Last compatible version:",
+				FEngineVersion::CompatibleWith().ToString());
+			return false;
+		}
+	}
+
 	auto Data = JsonObject->GetObjectField(TEXT("Data"));
 	if (!Data.IsValid())
 	{
@@ -458,7 +494,10 @@ TSharedRef<FJsonObject> UJsonDataAsset::ExportJson() const
 	auto Result = MakeShared<FJsonObject>();
 	// #TODO Can we get the fully qualified class name without the Class prefix differently? Maybe
 	// FSoftClassPtr().ToString()?
-	Result->SetStringField(TEXT("Class"), *GetClass()->GetFullName().Replace(TEXT("Class "), TEXT("")));
+	Result->SetStringField(TEXT("Class"), GetClass()->GetFullName().Replace(TEXT("Class "), TEXT("")));
+
+	Result->SetStringField(TEXT("EngineVersion"), FEngineVersion::Current().ToString());
+	Result->SetBoolField(TEXT("IsLicenseeVersion"), FEngineVersion::Current().IsLicenseeVersion());
 
 	FOUUJsonLibraryObjectFilter Filter;
 	Filter.SubObjectDepthLimit = 0;
