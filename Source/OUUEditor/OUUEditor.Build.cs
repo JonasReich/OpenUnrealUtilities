@@ -29,7 +29,7 @@ public class OUUEditor : OUUModuleRules
 			"EditorStyle",
 			"Projects",
 			"SessionFrontend",
-			"Blutility", 
+			"Blutility",
 			"UMGEditor",
 			"WorkspaceMenuStructure",
 			"PropertyEditor",
@@ -40,6 +40,8 @@ public class OUUEditor : OUUModuleRules
 			"ImageWriteQueue",
 			"RenderCore",
 			"PropertyEditor",
+			"ContentBrowser",
+			"Kismet",
 
 			// OUU
 			"OUUDeveloper"

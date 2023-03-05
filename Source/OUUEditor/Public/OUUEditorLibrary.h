@@ -8,6 +8,24 @@
 
 #include "OUUEditorLibrary.generated.h"
 
+USTRUCT(BlueprintType)
+struct FOUUBlueprintEditorFocusContent
+{
+	GENERATED_BODY()
+public:
+	/* Tab on which to focus (e.g. 'My Blueprint' tab). */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString TabToFocusOrOpen;
+
+	/* The GUID of a blueprint node */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString NodeGUID;
+
+	/* Name of the outer object - should be the blueprint that 'owns' the node */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString ObjectName;
+};
+
 UCLASS()
 class OUUEDITOR_API UOUUEditorLibrary : public UBlueprintFunctionLibrary
 {
@@ -22,4 +40,12 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Editor")
 	static void RerunConstructionScripts(AActor* Actor);
+
+	/** Open a bluerpint and focus on content inside if possible. */
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Editor")
+	static void FocusOnBlueprintContent(const FOUUBlueprintEditorFocusContent& FocusContent);
+
+	/** Get the GUID for the currently selected blueprint node. Only works if a single node is selected in Editor. */
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Editor")
+	static FGuid GetCurrentlySelectedBlueprintNodeGuid();
 };
