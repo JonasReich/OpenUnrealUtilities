@@ -32,3 +32,16 @@ private:
 	float OnGetRightColumnWidth() const { return ColumnWidth; }
 	void OnSetColumnWidth(float InWidth) { ColumnWidth = InWidth; }
 };
+
+struct OUURUNTIME_API FSplitterMultiSizeData : public TSharedFromThis<FSplitterMultiSizeData>
+{
+	TSharedRef<SWidget> MakeSimpleSplitter(
+		const TArray<TSharedPtr<SWidget>>& Widgets,
+		TArray<float> InDefaultSizes = {},
+		const EOrientation Orientation = EOrientation::Orient_Horizontal);
+
+private:
+	TArray<float> EntrySizes;
+	float OnGetEntrySize(const int32 InIndex) const { return InIndex < EntrySizes.Num() ? EntrySizes[InIndex] : 0.0f; }
+	void OnSetEntrySize(const int32 InIndex, float InSize);
+};

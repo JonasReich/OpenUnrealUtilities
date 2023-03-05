@@ -69,3 +69,80 @@ TSharedRef<SWidget> FSplitterColumnSizeData::MakeSimpleDetailsSplitter(
 		];
 	// clang-format on
 }
+
+TSharedRef<SWidget> FSplitterMultiSizeData::MakeSimpleSplitter(
+	const TArray<TSharedPtr<SWidget>>& Widgets,
+	TArray<float> DefaultColumnSizes,
+	const EOrientation Orientation)
+{
+	if (Widgets.IsEmpty())
+	{
+		return SNullWidget::NullWidget;
+	}
+
+	if (Widgets.Num() == 1)
+	{
+		return Widgets[0].ToSharedRef();
+	}
+
+	using FGetter = TAttribute<float>::FGetter;
+
+	EntrySizes = MoveTemp(DefaultColumnSizes);
+	if (EntrySizes.Num() < Widgets.Num())
+	{
+		const int32 PrevNum = EntrySizes.Num();
+		EntrySizes.SetNum(Widgets.Num());
+		for (int32 i = PrevNum; i < EntrySizes.Num(); ++i)
+		{
+			EntrySizes[i] = 1.0f / EntrySizes.Num();
+		}
+	}
+
+	// Normalize entry sizes
+	float TotalSizes = 0.0f;
+	for (const auto Size : EntrySizes)
+	{
+		TotalSizes += Size;
+	}
+
+	if (TotalSizes > 0.0f)
+	{
+		for (auto& Size : EntrySizes)
+		{
+			Size /= TotalSizes;
+		}
+	}
+
+	auto Splitter = SNew(SSplitter).Orientation(Orientation);
+	for (int32 i = 0; i < Widgets.Num(); ++i)
+	{
+		Splitter->AddSlot()
+			.SizeRule(SSplitter::ESizeRule::FractionOfParent)
+			.Value_Lambda([this, i]() { return OnGetEntrySize(i); })
+			.OnSlotResized_Lambda([this, i](float InSize) { OnSetEntrySize(i, InSize); })[Widgets[i].ToSharedRef()];
+	}
+
+	return Splitter;
+}
+
+void FSplitterMultiSizeData::OnSetEntrySize(const int32 InIndex, float InSize)
+{
+	if (InIndex >= EntrySizes.Num())
+	{
+		return;
+	}
+
+	const float Delta = InSize - EntrySizes[InIndex];
+	EntrySizes[InIndex] = InSize;
+
+	if (EntrySizes.Num() > 1)
+	{
+		int32 ResizeIndex = InIndex + 1;
+		if (ResizeIndex == EntrySizes.Num())
+		{
+			ResizeIndex = InIndex - 1;
+		}
+
+		EntrySizes[ResizeIndex] -= Delta;
+	}
+}
