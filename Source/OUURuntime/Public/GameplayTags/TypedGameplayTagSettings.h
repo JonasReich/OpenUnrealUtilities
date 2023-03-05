@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 
+#include "Engine/DeveloperSettings.h"
 #include "GameplayTagContainer.h"
 
 #include "TypedGameplayTagSettings.generated.h"
