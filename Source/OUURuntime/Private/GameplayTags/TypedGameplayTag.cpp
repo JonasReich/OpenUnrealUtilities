@@ -69,7 +69,7 @@ void FTypedGameplayTag_Base::RegisterAllDerivedPropertyTypeLayouts()
 			if (Struct->IsChildOf(FTypedGameplayTag_Base::StaticStruct()))
 			{
 				FGameplayTagContainer AllRootTags;
-				UTypedGameplayTagSettings::GetAllTags(OUT AllRootTags, Struct);
+				UTypedGameplayTagSettings::GetAllRootTags(OUT AllRootTags, Struct);
 				OutFilterString = OUU::Runtime::Private::MakeFilterString(AllRootTags);
 				return;
 			}
@@ -98,7 +98,7 @@ void FTypedGameplayTag_Base::RegisterAllDerivedPropertyTypeLayouts()
 					&& Struct->GetName() == TypedTagStructName)
 				{
 					FGameplayTagContainer AllRootTags;
-					UTypedGameplayTagSettings::GetAllTags(OUT AllRootTags, Struct);
+					UTypedGameplayTagSettings::GetAllRootTags(OUT AllRootTags, Struct);
 					OutFilterString = OUU::Runtime::Private::MakeFilterString(AllRootTags);
 					return;
 				}
