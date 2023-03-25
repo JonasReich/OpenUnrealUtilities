@@ -6,6 +6,7 @@
 
 #include "Engine/DeveloperSettings.h"
 #include "GameplayTagContainer.h"
+#include "Engine/DeveloperSettings.h"
 
 #include "TypedGameplayTagSettings.generated.h"
 
