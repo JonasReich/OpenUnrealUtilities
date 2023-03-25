@@ -32,8 +32,9 @@ public:
 		return Result;
 	}
 
-	FORCEINLINE TSoftObjectPtr<UJsonDataAsset> Get() { return Path; }
 	UJsonDataAsset* Load();
+
+	FORCEINLINE bool IsNull() const { return Path.IsNull(); }
 
 	FORCEINLINE void SetPackagePath(FString InPackagePath) { Path = InPackagePath; }
 	FORCEINLINE FString GetPackagePath() { return Path.GetLongPackageName(); }
@@ -47,6 +48,8 @@ public:
 		UObject* ExportRootScope) const;
 
 private:
+	FORCEINLINE TSoftObjectPtr<UJsonDataAsset> Get() { return Path; }
+
 	UPROPERTY(EditAnywhere)
 	TSoftObjectPtr<UJsonDataAsset> Path;
 };
@@ -135,6 +138,9 @@ public:
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context);
 #endif
+
+private:
+	bool bIsInPostLoad = false;
 };
 
 UCLASS(BlueprintType)

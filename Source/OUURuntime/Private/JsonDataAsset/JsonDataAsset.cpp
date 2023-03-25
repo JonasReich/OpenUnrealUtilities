@@ -346,6 +346,11 @@ UJsonDataAsset* UJsonDataAssetLibrary::LoadJsonDataAsset_Internal(
 	FJsonDataAssetPath Path,
 	UJsonDataAsset* const ExistingDataAsset)
 {
+	if (Path.IsNull())
+	{
+		return nullptr;
+	}
+
 	const FString InPackagePath = Path.GetPackagePath();
 	const FString LoadPath = OUU::Runtime::Private::JsonDataPath::PackageToFull(InPackagePath);
 
@@ -396,8 +401,8 @@ UJsonDataAsset* UJsonDataAssetLibrary::LoadJsonDataAsset_Internal(
 	else
 	{
 		FString ClassName = JsonObject->GetStringField(TEXT("Class"));
-		auto* Class = FindObject<UClass>(nullptr, *ClassName);
-		if (!Class)
+		auto* pClass = Cast<UClass>(FSoftObjectPath(ClassName).ResolveObject());
+		if (!pClass)
 		{
 			UE_MESSAGELOG(
 				LoadErrors,
@@ -410,13 +415,13 @@ UJsonDataAsset* UJsonDataAssetLibrary::LoadJsonDataAsset_Internal(
 			return nullptr;
 		}
 
-		if (!Class->IsChildOf<UJsonDataAsset>())
+		if (!pClass->IsChildOf<UJsonDataAsset>())
 		{
 			UE_MESSAGELOG(
 				LoadErrors,
 				Error,
 				"Class",
-				Class,
+				pClass,
 				"is not a child of",
 				UJsonDataAsset::StaticClass(),
 				"- encountered while loading",
@@ -429,7 +434,8 @@ UJsonDataAsset* UJsonDataAssetLibrary::LoadJsonDataAsset_Internal(
 		GeneratedAsset = FindObject<UJsonDataAsset>(GeneratedPackage, *ObjectName);
 		if (GeneratedAsset == nullptr)
 		{
-			GeneratedAsset = NewObject<UJsonDataAsset>(GeneratedPackage, Class, *ObjectName, RF_Public | RF_Standalone);
+			GeneratedAsset =
+				NewObject<UJsonDataAsset>(GeneratedPackage, pClass, *ObjectName, RF_Public | RF_Standalone);
 		}
 		// No need to check the class. We already did
 		bCheckClassMatches = false;
@@ -466,8 +472,8 @@ bool UJsonDataAsset::ImportJson(TSharedPtr<FJsonObject> JsonObject, bool bCheckC
 	{
 		FString ClassName = JsonObject->GetStringField(TEXT("Class"));
 		// Better search for the class instead of mandating a perfect string match
-		auto* JsonClass = FindObject<UClass>(nullptr, *ClassName);
-		if (JsonClass != GetClass())
+		auto* JsonClass = Cast<UClass>(FSoftObjectPath(ClassName).ResolveObject());
+		if (GetClass()->IsChildOf(JsonClass) == false)
 		{
 			UE_MESSAGELOG(
 				LoadErrors,
@@ -677,7 +683,12 @@ void UJsonDataAsset::PostLoad()
 	Super::PostLoad();
 
 	// Not called for newly created objects, so we should not have to manually prevent duplicate importing.
-	ImportJsonFile();
+	if (bIsInPostLoad == false)
+	{
+		bIsInPostLoad = true;
+		ImportJsonFile();
+		bIsInPostLoad = false;
+	}
 }
 
 void UJsonDataAsset::PostDuplicate(bool bDuplicateForPIE)
