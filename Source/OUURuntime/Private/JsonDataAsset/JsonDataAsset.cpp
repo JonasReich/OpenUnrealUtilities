@@ -4,6 +4,7 @@
 
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine.h"
+#include "GameDelegates.h"
 #include "HAL/PlatformFile.h"
 #include "JsonObjectConverter.h"
 #include "LogOpenUnrealUtilities.h"
@@ -24,100 +25,143 @@
 	#include "Misc/DataValidation.h"
 #endif
 
-// #TODO-jreich Add command to force reload all assets from json files after editor startup.
+#define JSON_MOUNT_POINT	 TEXT("/JsonData/")
+#define JSON_SOURCE_UNCOOKED TEXT("Data/")
+#define JSON_SOURCE_COOKED	 TEXT("CookedData/")
 
-namespace OUU::Runtime::Private
+namespace OUU::Runtime::Private::JsonData
 {
-	TAutoConsoleVariable<bool> CVar_LoadAllJsonDataOnStartup(
-		TEXT("ouu.JsonData.LoadOnStartup"),
+	TAutoConsoleVariable<bool> CVar_ImportAllAssetsOnStartup(
+		TEXT("ouu.JsonData.ImportAllAssetsOnStartup"),
 		true,
 		TEXT("If true, all json files in the Data directory will be loaded on Editor startup."));
 
+	// #TODO-jreich
 	// We can't disable this atm, because resaving assets is only possible for the newly created assets, not with loaded
 	// assets. But with this disabled, we'll have a mix of new/loaded assets that we can't tell apart.
-	TAutoConsoleVariable<bool> CVar_PurgeJsonDataFilesOnStartup(
-		TEXT("ouu.JsonData.CleanOnStartup"),
+	TAutoConsoleVariable<bool> CVar_PurgeAssetCacheOnStartup(
+		TEXT("ouu.JsonData.PurgeAssetCacheOnStartup"),
 		true,
 		TEXT("If true, all generated uobject asset files for the json files will be forcefully deleted at engine "
-			 "startup. This can help with debugging the asset loading."));
+			 "startup. If enabled, this happens before the import of all assets. This can help with debugging the "
+			 "asset loading."));
 
 	TAutoConsoleVariable<bool> CVar_IgnoreInvalidExtensions(
 		TEXT("ouu.JsonData.IgnoreInvalidExtensions"),
 		false,
-		TEXT("If true, files with invalid extensions inside the Data/ folder will be ignored during startup."));
+		TEXT("If true, files with invalid extensions inside the Data/ folder will be ignored during 'import all "
+			 "assets' calls."));
 
-	// Something like this might be needed for runtime package creation in non-editor builds
-	// where we cannot save packages.
-	UPackage* OUU_CreatePackage(FString PackagePath)
+	FAutoConsoleCommand CCommand_ReimportAllAssets(
+		TEXT("ouu.JsonData.ReimportAllAssets"),
+		TEXT("Load all json data assets and save them as uassets. This performs the same input that occurs during "
+			 "editor startup."),
+		FConsoleCommandDelegate::CreateLambda([]() -> void {
+			// No difference between import and reimport.
+			GEngine->GetEngineSubsystem<UJsonDataAssetSubsystem>()->ImportAllAssets();
+		}));
+
+	bool ShouldWriteToCookedContent()
 	{
-		auto* GeneratedPackage = NewObject<UPackage>(nullptr, *PackagePath, RF_Public | RF_Standalone);
-		// reference viewer needs info that is generated on save, but this prevents saving
-		// Maybe we can somehow generate that data in code and embed it in the package w/e?
-		// GeneratedPackage->SetPackageFlags(PKG_CompiledIn);
-		GeneratedPackage->AddToRoot();
+#if WITH_EDITOR
+		// Are there other cases? E.g. when running "-game" with cooked content?
+		return IsRunningCookCommandlet();
+#else
+		return true;
+#endif
+	}
 
-		return GeneratedPackage;
+	bool ShouldReadFromCookedContent()
+	{
+#if WITH_EDITOR
+		// Are there cases where we want to read from cooked content in editor? E.g. when running "-game" with
+		// cooked content?
+		return false;
+#else
+		return true;
+#endif
+	}
+
+	FString GetSourceRoot_ProjectRelative(EJsonDataAccessMode AccessMode)
+	{
+		switch (AccessMode)
+		{
+		case EJsonDataAccessMode::Read:
+			return ShouldReadFromCookedContent() ? JSON_SOURCE_COOKED : JSON_SOURCE_UNCOOKED;
+		case EJsonDataAccessMode::Write:
+			return ShouldWriteToCookedContent() ? JSON_SOURCE_COOKED : JSON_SOURCE_UNCOOKED;
+		default: checkf(false, TEXT("Invalid access mode")); return "";
+		}
+	}
+
+	FString GetSourceRoot_Full(EJsonDataAccessMode AccessMode)
+	{
+		return FPaths::ConvertRelativePathToFull(FPaths::ProjectDir() / GetSourceRoot_ProjectRelative(AccessMode));
 	}
 
 	// Mount point for generated packages.
 	// Save into Save dir, so the packages are not versioned and can safely be deleted on engine startup.
-	FString GetJsonDataMountPoint_Root() { return TEXT("/JsonData/"); }
-	FString GetJsonDataMountPoint_Disk() { return FPaths::ProjectSavedDir() / TEXT("JsonData/"); }
-	FString GetJsonDataPath_Disk()
+	FString GetMountPointRoot_Package() { return JSON_MOUNT_POINT; }
+	FString GetMountPointRoot_DiskFull() { return FPaths::ProjectSavedDir() / TEXT("JsonData/"); }
+
+	bool PackageIsJsonData(const FString& Package) { return Package.StartsWith(GetMountPointRoot_Package()); }
+
+	FString PackageToDataRelative(const FString& Package)
 	{
-		return FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir() / TEXT("../Data/"));
+		return Package.Replace(JSON_MOUNT_POINT, TEXT("")).Append(TEXT(".json"));
 	}
 
-	namespace JsonDataPath
+	FString PackageToSourceFull(const FString& Package, EJsonDataAccessMode AccessMode)
 	{
-		bool PackageIsJsonData(const FString& Package) { return Package.StartsWith(GetJsonDataMountPoint_Root()); }
+		return FPaths::ConvertRelativePathToFull(
+			FPaths::ProjectDir() / GetSourceRoot_ProjectRelative(AccessMode) / PackageToDataRelative(Package));
+	}
 
-		FString PackageToDataRelative(const FString& Package)
-		{
-			return Package.Replace(TEXT("/JsonData/"), TEXT("")).Append(TEXT(".json"));
-		}
-
-		FString PackageToContentRelative(const FString& Package)
-		{
-			return FString(TEXT("../Data")) / PackageToDataRelative(Package);
-		}
-
-		FString PackageToFull(const FString& Package)
-		{
-			return FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir() / PackageToContentRelative(Package));
-		}
-
-		FString FullToPackage(const FString& Full)
-		{
-			return GetJsonDataMountPoint_Root()
-				/ Full.Replace(*GetJsonDataPath_Disk(), TEXT("")).Replace(TEXT(".json"), TEXT(""));
-		}
-
-		FString PackageToObjectName(const FString& Package)
-		{
-			int32 Idx = INDEX_NONE;
-			if (!Package.FindLastChar(TCHAR('/'), OUT Idx))
-				return "";
-			return Package.RightChop(Idx + 1);
-		}
-
-		FString PackageToFullObjectName(const FString& Package)
-		{
-			return FString(Package).Append(TEXT(".")).Append(PackageToObjectName(Package));
-		}
-	} // namespace JsonDataPath
-
-	void DeleteJsonAsset(const FString& PackagePath)
+	// Take a path that is relative to the project root and convert it into a package path.
+	FString SourceAbsToPackage(const FString& Full, EJsonDataAccessMode AccessMode)
 	{
+		return GetMountPointRoot_Package()
+			/ Full.Replace(*GetSourceRoot_Full(AccessMode), TEXT("")).Replace(TEXT(".json"), TEXT(""));
+	}
+
+	FString PackageToObjectName(const FString& Package)
+	{
+		int32 Idx = INDEX_NONE;
+		if (!Package.FindLastChar(TCHAR('/'), OUT Idx))
+			return "";
+		return Package.RightChop(Idx + 1);
+	}
+
+	void Delete(const FString& PackagePath)
+	{
+		auto FullPath = PackageToSourceFull(PackagePath, EJsonDataAccessMode::Write);
+		if (ShouldWriteToCookedContent())
+		{
+			IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+			PlatformFile.DeleteFile(*FullPath);
+		}
+		else
+		{
 #if WITH_EDITOR
-		// SourceControlHelpers::MarkFileForDelete
-
-		auto FullPath = OUU::Runtime::Private::JsonDataPath::PackageToFull(PackagePath);
-		USourceControlHelpers::MarkFileForDelete(FullPath);
+			USourceControlHelpers::MarkFileForDelete(FullPath);
+#else
+			UE_LOG(
+				LogOpenUnrealUtilities,
+				Warning,
+				TEXT("Can't delete file '%s' from uncooked content in non-editor context."),
+				*FullPath);
 #endif
+		}
 	}
+} // namespace OUU::Runtime::Private::JsonData
 
-} // namespace OUU::Runtime::Private
+using namespace OUU::Runtime;
+
+UJsonDataAsset* FJsonDataAssetPath::Resolve()
+{
+	const auto ResolvedObject = Path.Get();
+	return ResolvedObject ? ResolvedObject : Load();
+}
 
 UJsonDataAsset* FJsonDataAssetPath::Load()
 {
@@ -152,32 +196,39 @@ void UJsonDataAssetSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 #if WITH_EDITOR
 	FEditorDelegates::OnPackageDeleted.AddUObject(this, &UJsonDataAssetSubsystem::HandlePackageDeleted);
 #endif
-	const FString MountDiskPath = OUU::Runtime::Private::GetJsonDataMountPoint_Disk();
+	const FString MountDiskPath = Private::JsonData::GetMountPointRoot_DiskFull();
 	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
 
-	if (OUU::Runtime::Private::CVar_PurgeJsonDataFilesOnStartup.GetValueOnGameThread()
+	if (Private::JsonData::CVar_PurgeAssetCacheOnStartup.GetValueOnGameThread()
 		&& PlatformFile.DirectoryExists(*MountDiskPath))
 	{
 		// Delete the directory on-disk before mounting the directory to purge all generated uasset files.
 		PlatformFile.DeleteDirectoryRecursively(*MountDiskPath);
 	}
 
-	FPackageName::RegisterMountPoint(OUU::Runtime::Private::GetJsonDataMountPoint_Root(), MountDiskPath);
+	FPackageName::RegisterMountPoint(Private::JsonData::GetMountPointRoot_Package(), MountDiskPath);
 
-	if (OUU::Runtime::Private::CVar_LoadAllJsonDataOnStartup.GetValueOnGameThread())
+	if (Private::JsonData::CVar_ImportAllAssetsOnStartup.GetValueOnGameThread())
 	{
-		ImportAllAssetsDuringStartup();
+		ImportAllAssets();
 	}
 
 	bAutoExportJson = true;
+
+	PRAGMA_DISABLE_DEPRECATION_WARNINGS
+	// I know, disabling deprecation warnings is shit, but this is easy to fix when it eventually breaks.
+	// And having it delegate based is cleaner (and hopefully possible in 5.2) via ModifyCookDelegate,
+	// which seems to be accidentally left private in 5.0 / 5.1
+	FGameDelegates::Get().GetCookModificationDelegate().BindUObject(this, &UJsonDataAssetSubsystem::ModifyCook);
+	PRAGMA_ENABLE_DEPRECATION_WARNINGS
 }
 
 void UJsonDataAssetSubsystem::Deinitialize()
 {
 	Super::Deinitialize();
 	FPackageName::UnRegisterMountPoint(
-		OUU::Runtime::Private::GetJsonDataMountPoint_Root(),
-		OUU::Runtime::Private::GetJsonDataMountPoint_Disk());
+		Private::JsonData::GetMountPointRoot_Package(),
+		Private::JsonData::GetMountPointRoot_DiskFull());
 
 #if WITH_EDITOR
 	FEditorDelegates::OnPackageDeleted.RemoveAll(this);
@@ -193,9 +244,9 @@ bool UJsonDataAssetSubsystem::AutoExportJsonEnabled()
 	return GEngine->GetEngineSubsystem<UJsonDataAssetSubsystem>()->bAutoExportJson;
 }
 
-void UJsonDataAssetSubsystem::ImportAllAssetsDuringStartup()
+void UJsonDataAssetSubsystem::ImportAllAssets()
 {
-	const FString JsonDir = OUU::Runtime::Private::GetJsonDataPath_Disk();
+	const FString JsonDir = Private::JsonData::GetSourceRoot_Full(EJsonDataAccessMode::Read);
 	if (!FPaths::DirectoryExists(JsonDir))
 	{
 		// No need to import anything if there is no json source directory
@@ -210,94 +261,88 @@ void UJsonDataAssetSubsystem::ImportAllAssetsDuringStartup()
 	int32 NumPackagesFailedToLoad = 0;
 	auto VisitorLambda =
 		[&AllPackages, &NumPackagesLoaded, &NumPackagesFailedToLoad](const TCHAR* FilePath, bool bIsDirectory) -> bool {
-		if (!bIsDirectory)
+		if (bIsDirectory)
+			return true;
+
+		if (FPaths::GetExtension(FilePath) != TEXT("json"))
 		{
-			if (FPaths::GetExtension(FilePath) != TEXT("json"))
-			{
-				if (!OUU::Runtime::Private::CVar_IgnoreInvalidExtensions.GetValueOnAnyThread())
-				{
-					UE_MESSAGELOG(
-						LoadErrors,
-						Warning,
-						"File",
-						FilePath,
-						"in Data directory has an unexpected file extension.");
-					NumPackagesFailedToLoad++;
-				}
-				// Continue with other files anyways
-				return true;
-			}
-
-			if (FPaths::GetBaseFilename(FilePath).Contains("."))
-			{
-				if (!OUU::Runtime::Private::CVar_IgnoreInvalidExtensions.GetValueOnAnyThread())
-				{
-					UE_MESSAGELOG(
-						LoadErrors,
-						Warning,
-						"File",
-						FilePath,
-						"in Data directory has two '.' characters in it's filename. Only a simple '.json' extension is "
-						"allowed.");
-					NumPackagesFailedToLoad++;
-				}
-				// Continue with other files anyways
-				return true;
-			}
-
-			auto Path =
-				FJsonDataAssetPath::FromPackagePath(OUU::Runtime::Private::JsonDataPath::FullToPackage(FilePath));
-			auto* NewDataAsset = Path.Load();
-			if (!IsValid(NewDataAsset))
-			{
-				// Error messages in the load function itself should be sufficient. But it's nice to have a summary
-				// metric.
-				NumPackagesFailedToLoad++;
-				// Continue with other files anyways
-				return true;
-			}
-
-			UPackage* NewPackage = NewDataAsset->GetPackage();
-
-			// The name of the package
-			const FString PackageName = NewPackage->GetName();
-
-			FString PackageFilename;
-			const bool bPackageAlreadyExists = FPackageName::DoesPackageExist(PackageName, &PackageFilename);
-			if (!bPackageAlreadyExists)
-			{
-				// Construct a filename from long package name.
-				const FString& FileExtension = FPackageName::GetAssetPackageExtension();
-				PackageFilename = FPackageName::LongPackageNameToFilename(PackageName, FileExtension);
-			}
-
-			// The file already exists, no need to prompt for save as
-			FString BaseFilename, Extension, Directory;
-			// Split the path to get the filename without the directory structure
-			FPaths::NormalizeFilename(PackageFilename);
-			FPaths::Split(PackageFilename, Directory, BaseFilename, Extension);
-
-			FSavePackageArgs SaveArgs;
-			SaveArgs.TopLevelFlags = RF_Standalone;
-			SaveArgs.Error = GWarn;
-			auto SaveResult = UPackage::Save(NewPackage, NewDataAsset, *PackageFilename, SaveArgs);
-
-			if (SaveResult == ESavePackageResult::Success)
-			{
-				NumPackagesLoaded++;
-			}
-			else
+			if (!Private::JsonData::CVar_IgnoreInvalidExtensions.GetValueOnAnyThread())
 			{
 				UE_MESSAGELOG(
-					EditorErrors,
-					Error,
-					"Failed to save package",
-					NewPackage,
-					"for json data asset",
-					FilePath);
-
+					LoadErrors,
+					Warning,
+					"File",
+					FilePath,
+					"in Data directory has an unexpected file extension.");
 				NumPackagesFailedToLoad++;
 			}
+			// Continue with other files anyways
+			return true;
+		}
+
+		if (FPaths::GetBaseFilename(FilePath).Contains("."))
+		{
+			if (!Private::JsonData::CVar_IgnoreInvalidExtensions.GetValueOnAnyThread())
+			{
+				UE_MESSAGELOG(
+					LoadErrors,
+					Warning,
+					"File",
+					FilePath,
+					"in Data directory has two '.' characters in it's filename. Only a simple '.json' extension is "
+					"allowed.");
+				NumPackagesFailedToLoad++;
+			}
+			// Continue with other files anyways
+			return true;
+		}
+
+		auto Path = FJsonDataAssetPath::FromPackagePath(
+			Private::JsonData::SourceAbsToPackage(FilePath, EJsonDataAccessMode::Read));
+		auto* NewDataAsset = Path.Load();
+		if (!IsValid(NewDataAsset))
+		{
+			// Error messages in the load function itself should be sufficient. But it's nice to have a summary
+			// metric.
+			NumPackagesFailedToLoad++;
+			// Continue with other files anyways
+			return true;
+		}
+
+		UPackage* NewPackage = NewDataAsset->GetPackage();
+
+		// The name of the package
+		const FString PackageName = NewPackage->GetName();
+
+		FString PackageFilename;
+		const bool bPackageAlreadyExists = FPackageName::DoesPackageExist(PackageName, &PackageFilename);
+		if (!bPackageAlreadyExists)
+		{
+			// Construct a filename from long package name.
+			const FString& FileExtension = FPackageName::GetAssetPackageExtension();
+			PackageFilename = FPackageName::LongPackageNameToFilename(PackageName, FileExtension);
+		}
+
+		// The file already exists, no need to prompt for save as
+		FString BaseFilename, Extension, Directory;
+		// Split the path to get the filename without the directory structure
+		FPaths::NormalizeFilename(PackageFilename);
+		FPaths::Split(PackageFilename, Directory, BaseFilename, Extension);
+
+		FSavePackageArgs SaveArgs;
+		SaveArgs.TopLevelFlags = RF_Standalone;
+		SaveArgs.Error = GWarn;
+		auto SaveResult = UPackage::Save(NewPackage, NewDataAsset, *PackageFilename, SaveArgs);
+
+		if (SaveResult == ESavePackageResult::Success)
+		{
+			NumPackagesLoaded++;
+		}
+		else
+		{
+			UE_MESSAGELOG(EditorErrors, Error, "Failed to save package", NewPackage, "for json data asset", FilePath);
+
+			NumPackagesFailedToLoad++;
 		}
 		return true;
 	};
@@ -320,10 +365,53 @@ void UJsonDataAssetSubsystem::HandlePackageDeleted(UPackage* Package)
 {
 	auto PackagePath = Package->GetPathName();
 
-	if (!OUU::Runtime::Private::JsonDataPath::PackageIsJsonData(PackagePath))
+	if (!Private::JsonData::PackageIsJsonData(PackagePath))
 		return;
 
-	OUU::Runtime::Private::DeleteJsonAsset(PackagePath);
+	Private::JsonData::Delete(PackagePath);
+}
+
+void UJsonDataAssetSubsystem::ModifyCook(TArray<FString>& OutExtraPackagesToCook)
+{
+	const FString JsonDir_READ = Private::JsonData::GetSourceRoot_Full(EJsonDataAccessMode::Read);
+	if (!FPaths::DirectoryExists(JsonDir_READ))
+	{
+		UE_LOG(LogOpenUnrealUtilities, Display, TEXT("UJsonDataAssetLibrary::ModifyCook - No additional assets"));
+		return;
+	}
+
+	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+
+	const int32 NumPackagesBefore = OutExtraPackagesToCook.Num();
+	auto VisitorLambda = [&PlatformFile, &OutExtraPackagesToCook](const TCHAR* FilePath, bool bIsDirectory) -> bool {
+		if (bIsDirectory)
+			return true;
+
+		if (FPaths::GetExtension(FilePath) != TEXT("json"))
+			return true;
+
+		if (FPaths::GetBaseFilename(FilePath).Contains("."))
+			return true;
+
+		auto Path = FJsonDataAssetPath::FromPackagePath(
+			Private::JsonData::SourceAbsToPackage(FilePath, EJsonDataAccessMode::Read));
+		OutExtraPackagesToCook.Add(Path.GetPackagePath());
+
+		auto* LoadedJsonDataAsset = Path.Load();
+		LoadedJsonDataAsset->ExportJsonFile();
+
+		return true;
+	};
+
+	IPlatformFile::FDirectoryVisitorFunc VisitorFunc = VisitorLambda;
+	PlatformFile.IterateDirectoryRecursively(*JsonDir_READ, VisitorFunc);
+
+	const int32 NumPackagesNew = OutExtraPackagesToCook.Num() - NumPackagesBefore;
+	UE_LOG(
+		LogOpenUnrealUtilities,
+		Display,
+		TEXT("UJsonDataAssetLibrary::ModifyCook - Added %i additional assets to cook"),
+		NumPackagesNew);
 }
 
 UJsonDataAsset* UJsonDataAssetLibrary::LoadJsonDataAsset(FJsonDataAssetPath Path)
@@ -352,7 +440,7 @@ UJsonDataAsset* UJsonDataAssetLibrary::LoadJsonDataAsset_Internal(
 	}
 
 	const FString InPackagePath = Path.GetPackagePath();
-	const FString LoadPath = OUU::Runtime::Private::JsonDataPath::PackageToFull(InPackagePath);
+	const FString LoadPath = Private::JsonData::PackageToSourceFull(InPackagePath, EJsonDataAccessMode::Read);
 
 	if (!FPaths::FileExists(LoadPath))
 	{
@@ -430,7 +518,7 @@ UJsonDataAsset* UJsonDataAssetLibrary::LoadJsonDataAsset_Internal(
 		}
 
 		UPackage* GeneratedPackage = CreatePackage(*InPackagePath);
-		const FString ObjectName = OUU::Runtime::Private::JsonDataPath::PackageToObjectName(InPackagePath);
+		const FString ObjectName = Private::JsonData::PackageToObjectName(InPackagePath);
 		GeneratedAsset = FindObject<UJsonDataAsset>(GeneratedPackage, *ObjectName);
 		if (GeneratedAsset == nullptr)
 		{
@@ -449,7 +537,6 @@ UJsonDataAsset* UJsonDataAssetLibrary::LoadJsonDataAsset_Internal(
 
 	// Modify the asset so it gets dirtied for resave.
 	// Do not resave in here, so the same function can be used for un-doable editor imports.
-	// #TODO Check if this works as expected
 	GeneratedAsset->Modify();
 
 	if (!IsValid(ExistingDataAsset))
@@ -463,11 +550,14 @@ UJsonDataAsset* UJsonDataAssetLibrary::LoadJsonDataAsset_Internal(
 
 bool UJsonDataAsset::IsInJsonDataContentRoot() const
 {
-	return OUU::Runtime::Private::JsonDataPath::PackageIsJsonData(GetPackage()->GetPathName());
+	return Private::JsonData::PackageIsJsonData(GetPackage()->GetPathName());
 }
 
 bool UJsonDataAsset::ImportJson(TSharedPtr<FJsonObject> JsonObject, bool bCheckClassMatches)
 {
+	// ---
+	// Header information
+	// ---
 	if (bCheckClassMatches)
 	{
 		FString ClassName = JsonObject->GetStringField(TEXT("Class"));
@@ -523,6 +613,10 @@ bool UJsonDataAsset::ImportJson(TSharedPtr<FJsonObject> JsonObject, bool bCheckC
 		}
 	}
 
+	// ---
+	// Property data
+	// ---
+
 	auto Data = JsonObject->GetObjectField(TEXT("Data"));
 	if (!Data.IsValid())
 	{
@@ -542,13 +636,13 @@ bool UJsonDataAsset::ImportJson(TSharedPtr<FJsonObject> JsonObject, bool bCheckC
 TSharedRef<FJsonObject> UJsonDataAsset::ExportJson() const
 {
 	auto Result = MakeShared<FJsonObject>();
-	// #TODO Can we get the fully qualified class name without the Class prefix differently? Maybe
-	// FSoftClassPtr().ToString()?
-	Result->SetStringField(TEXT("Class"), GetClass()->GetFullName().Replace(TEXT("Class "), TEXT("")));
 
+	// Header information
+	Result->SetStringField(TEXT("Class"), GetClass()->GetFullName().Replace(TEXT("Class "), TEXT("")));
 	Result->SetStringField(TEXT("EngineVersion"), FEngineVersion::Current().ToString());
 	Result->SetBoolField(TEXT("IsLicenseeVersion"), FEngineVersion::Current().IsLicenseeVersion());
 
+	// Property data
 	FOUUJsonLibraryObjectFilter Filter;
 	Filter.SubObjectDepthLimit = 0;
 	const int64 CheckFlags = EPropertyFlags::CPF_Edit;
@@ -557,9 +651,9 @@ TSharedRef<FJsonObject> UJsonDataAsset::ExportJson() const
 	return Result;
 }
 
-FString UJsonDataAsset::GetJsonFilePathAbs() const
+FString UJsonDataAsset::GetJsonFilePathAbs(EJsonDataAccessMode AccessMode) const
 {
-	return OUU::Runtime::Private::JsonDataPath::PackageToFull(GetPackage()->GetPathName());
+	return Private::JsonData::PackageToSourceFull(GetPackage()->GetPathName(), AccessMode);
 }
 
 bool UJsonDataAsset::ImportJsonFile()
@@ -576,14 +670,12 @@ bool UJsonDataAsset::ExportJsonFile() const
 			Error,
 			this,
 			"is a json data asset, but not located in",
-			OUU::Runtime::Private::GetJsonDataMountPoint_Root(),
+			Private::JsonData::GetMountPointRoot_Package(),
 			"content directory. Failed to export json file.");
 		return false;
 	}
 
-	// Const cast is permissible here. We just want to reuse the path conversion.
-	const FString InPackagePath = FJsonDataAssetPath(const_cast<UJsonDataAsset*>(this)).GetPackagePath();
-	const FString SavePath = OUU::Runtime::Private::JsonDataPath::PackageToFull(InPackagePath);
+	const FString SavePath = GetJsonFilePathAbs(EJsonDataAccessMode::Write);
 
 	TSharedRef<FJsonObject> JsonObject = ExportJson();
 	FString JsonString;
@@ -595,7 +687,10 @@ bool UJsonDataAsset::ExportJsonFile() const
 	}
 
 #if WITH_EDITOR
-	USourceControlHelpers::CheckOutFile(SavePath, true);
+	if (Private::JsonData::ShouldWriteToCookedContent() == false)
+	{
+		USourceControlHelpers::CheckOutFile(SavePath, true);
+	}
 #endif
 
 	if (!FFileHelper::SaveStringToFile(JsonString, *SavePath))
@@ -606,7 +701,10 @@ bool UJsonDataAsset::ExportJsonFile() const
 	UE_LOG(LogOpenUnrealUtilities, Log, TEXT("ExportJsonFile - Saved %s"), *SavePath);
 
 #if WITH_EDITOR
-	ensureAlways(USourceControlHelpers::CheckOutOrAddFile(SavePath));
+	if (Private::JsonData::ShouldWriteToCookedContent() == false)
+	{
+		ensureAlways(USourceControlHelpers::CheckOutOrAddFile(SavePath));
+	}
 #endif
 	return true;
 }
@@ -636,7 +734,7 @@ void UJsonDataAsset::PostRename(UObject* OldOuter, const FName OldName)
 	Super::PostRename(OldOuter, OldName);
 
 	auto OldPackagePathName = OldOuter->GetPathName();
-	OUU::Runtime::Private::DeleteJsonAsset(OldPackagePathName);
+	Private::JsonData::Delete(OldPackagePathName);
 
 	{
 		if (UObjectRedirector* Redirector = FindObjectFast<UObjectRedirector>(OldOuter, OldName))
@@ -704,9 +802,10 @@ EDataValidationResult UJsonDataAsset::IsDataValid(class FDataValidationContext& 
 	if (!IsInJsonDataContentRoot())
 	{
 		Context.AddError(FText::FromString(FString::Printf(
-			TEXT("%s is a json data asset, but not located in %s content directory"),
+			TEXT("%s is a json data asset, but not located in %s content directory. This will prevent correct json "
+				 "data loading!"),
 			*GetNameSafe(this),
-			*OUU::Runtime::Private::GetJsonDataMountPoint_Root())));
+			*Private::JsonData::GetMountPointRoot_Package())));
 		return EDataValidationResult::Invalid;
 	}
 	return Result;

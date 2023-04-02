@@ -14,6 +14,13 @@
 
 class UJsonDataAsset;
 
+UENUM(BlueprintType)
+enum class EJsonDataAccessMode : uint8
+{
+	Read,
+	Write
+};
+
 USTRUCT(BlueprintType)
 struct OUURUNTIME_API FJsonDataAssetPath
 {
@@ -32,6 +39,13 @@ public:
 		return Result;
 	}
 
+	// Try to resolve the path in memory, load asset if not found.
+	UJsonDataAsset* Resolve();
+
+	/**
+	 * Find existing asset representation of the json file or load asset into memory.
+	 * Reloads all data members from json files.
+	 */
 	UJsonDataAsset* Load();
 
 	FORCEINLINE bool IsNull() const { return Path.IsNull(); }
@@ -77,11 +91,17 @@ public:
 	// If true, asset saves/moves will export to json
 	static bool AutoExportJsonEnabled();
 
-private:
-	void ImportAllAssetsDuringStartup();
+	// Import all .json into UJsonDataAssets.
+	// This does not delete stale UJsonDataAssets that don't have a matching .json file anymore.
+	// It does reload all property data of existing json assets.
+	void ImportAllAssets();
 
+private:
 	UFUNCTION()
 	void HandlePackageDeleted(UPackage* Package);
+
+	UFUNCTION()
+	void ModifyCook(TArray<FString>& OutExtraPackagesToCook);
 
 	bool bAutoExportJson = false;
 };
@@ -115,9 +135,8 @@ public:
 	bool ImportJson(TSharedPtr<FJsonObject> JsonObject, bool bCheckClassMatches = true);
 	TSharedRef<FJsonObject> ExportJson() const;
 
-	// Import/export to files on-disk
 	UFUNCTION(BlueprintCallable)
-	FString GetJsonFilePathAbs() const;
+	FString GetJsonFilePathAbs(EJsonDataAccessMode AccessMode) const;
 
 	UFUNCTION(BlueprintCallable)
 	bool ImportJsonFile();
@@ -141,28 +160,4 @@ public:
 
 private:
 	bool bIsInPostLoad = false;
-};
-
-UCLASS(BlueprintType)
-class UTestJsonDataAsset2 : public UJsonDataAsset
-{
-	GENERATED_BODY()
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString StringProperty;
-};
-
-UCLASS(BlueprintType)
-class UTestJsonDataAsset : public UJsonDataAsset
-{
-	GENERATED_BODY()
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowedClasses = "TestJsonDataAsset2"))
-	FJsonDataAssetPath LinkedJsonAsset;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<UObject> LinkedRegularAsset;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString StringProperty;
 };
