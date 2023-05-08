@@ -97,7 +97,6 @@ private:
 	void ModifyCook(const FName& RootName, TSet<FName>& OutDependencyPackages);
 #endif
 
-	bool bIsInitialAssetImportCompleted = false;
 	bool bAutoExportJson = false;
 
 	// Maps from plugin mount points (like /JsonData/Plugins/OpenUnrealUtilities/) to source disk paths (like

@@ -27,12 +27,6 @@ namespace OUU::Runtime::JsonData::Private
 			 "startup. If enabled, this happens before the import of all assets. This can help with debugging the "
 			 "asset loading."));
 
-	TAutoConsoleVariable<bool> CVar_IgnoreLoadErrorsDuringStartupImport(
-		TEXT("ouu.JsonData.IgnoreMissingAssetsDuringInitialImport"),
-		false,
-		TEXT("If true, all load errors relating to generated UAssets will be ignored during initial load. Warning: "
-			 "This might hide wrong asset references to json content!"));
-
 	FAutoConsoleCommand CCommand_ReimportAllAssets(
 		TEXT("ouu.JsonData.ReimportAllAssets"),
 		TEXT("Load all json data assets and save them as uassets. This performs the same input that occurs during "
@@ -150,11 +144,9 @@ namespace OUU::Runtime::JsonData
 	FString SourceFullToPackage(const FString& FullPath, EJsonDataAccessMode AccessMode)
 	{
 		auto RootName = UJsonDataAssetSubsystem::Get().GetRootNameForSourcePath(FullPath);
-
+		
 		auto RelativeToSource = FullPath;
-		ensure(FPaths::MakePathRelativeTo(
-			RelativeToSource,
-			*FString(GetSourceRoot_Full(RootName, AccessMode) + TEXT("/"))));
+		ensure(FPaths::MakePathRelativeTo(RelativeToSource, *FString(GetSourceRoot_Full(RootName, AccessMode) + TEXT("/"))));
 
 		return GetCacheMountPointRoot_Package(RootName) / RelativeToSource.Replace(TEXT(".json"), TEXT(""));
 	}
@@ -317,52 +309,10 @@ bool UJsonDataAssetSubsystem::AutoExportJsonEnabled()
 
 void UJsonDataAssetSubsystem::ImportAllAssets(bool bOnlyMissing)
 {
-	TArray<FString> AllPackageNames;
-	bool bIgnoreErrorsDuringImport =
-		OUU::Runtime::JsonData::Private::CVar_IgnoreLoadErrorsDuringStartupImport.GetValueOnAnyThread();
-
-	if (bIgnoreErrorsDuringImport)
-	{
-		IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
-		for (auto& RootName : AllRootNames)
-		{
-			auto SourceRoot = JsonData::GetSourceRoot_Full(RootName, EJsonDataAccessMode::Read);
-			PlatformFile.IterateDirectoryRecursively(
-				*SourceRoot,
-				[&AllPackageNames](const TCHAR* FilePath, bool bIsDirectory) -> bool {
-					if (bIsDirectory == false)
-					{
-						auto PackagePath = JsonData::SourceFullToPackage(FilePath, EJsonDataAccessMode::Read);
-						AllPackageNames.Add(PackagePath);
-					}
-					return true;
-				});
-		}
-
-		// We have to ignore references to generated json packages while doing the initial import.
-		// Json assets might reference each other.
-		for (auto& PackageName : AllPackageNames)
-		{
-			FLinkerLoad::AddKnownMissingPackage(*PackageName);
-		}
-	}
-
-	// Perform the actual import
 	for (auto& RootName : AllRootNames)
 	{
 		ImportAllAssets(RootName, bOnlyMissing);
 	}
-
-	if (bIgnoreErrorsDuringImport)
-	{
-		// Now any further package load errors are valid
-		for (auto& PackageName : AllPackageNames)
-		{
-			FLinkerLoad::RemoveKnownMissingPackage(*PackageName);
-		}
-	}
-
-	bIsInitialAssetImportCompleted = true;
 }
 
 void UJsonDataAssetSubsystem::ImportAllAssets(const FName& RootName, bool bOnlyMissing)
@@ -690,7 +640,7 @@ void UJsonDataAssetSubsystem::CleanupAssetCache(const FName& RootName)
 		}
 
 		FString RelativePath = FilePath;
-		bool bIsRelative = FPaths::MakePathRelativeTo(IN OUT RelativePath, *FString(MountDiskPath + TEXT("/")));
+		bool bIsRelative = FPaths::MakePathRelativeTo(IN OUT RelativePath, *MountDiskPath);
 		ensureMsgf(bIsRelative, TEXT("File path %s must be in subdirectory of %s"), *FilePath, *MountDiskPath);
 		ensureMsgf(
 			RelativePath.StartsWith(TEXT("./")) == false,
@@ -745,11 +695,6 @@ void UJsonDataAssetSubsystem::HandlePackageDeleted(UPackage* Package)
 
 void UJsonDataAssetSubsystem::ModifyCook(TArray<FString>& OutExtraPackagesToCook)
 {
-	IAssetRegistry& AssetRegistry = *IAssetRegistry::Get();
-	AssetRegistry.WaitForCompletion();
-
-	ensure(bIsInitialAssetImportCompleted);
-
 	TSet<FName> DependencyPackages;
 	for (auto& RootName : AllRootNames)
 	{
@@ -791,16 +736,13 @@ void UJsonDataAssetSubsystem::ModifyCook(const FName& RootName, TSet<FName>& Out
 		if (FPaths::GetExtension(FilePath) != TEXT("json"))
 			return true;
 
-		if (OUU::Runtime::JsonData::ShouldIgnoreInvalidExtensions() && FPaths::GetBaseFilename(FilePath).Contains("."))
+		if (FPaths::GetBaseFilename(FilePath).Contains("."))
 			return true;
 
 		auto PackagePath = JsonData::SourceFullToPackage(FilePath, EJsonDataAccessMode::Read);
 		auto Path = FJsonDataAssetPath::FromPackagePath(PackagePath);
 
-		auto* LoadedJsonDataAsset = Path.LoadSynchronous();
-		if (!ensure(LoadedJsonDataAsset))
-			return true;
-
+		auto* LoadedJsonDataAsset = Path.ResolveObject();
 		LoadedJsonDataAsset->ExportJsonFile();
 
 		auto ObjectName = OUU::Runtime::JsonData::PackageToObjectName(PackagePath);
