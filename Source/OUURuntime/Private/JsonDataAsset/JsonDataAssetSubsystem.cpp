@@ -11,8 +11,6 @@
 #include "Templates/ScopedAssign.h"
 #include "UObject/SavePackage.h"
 
-PRAGMA_DISABLE_OPTIMIZATION
-
 namespace OUU::Runtime::JsonData::Private
 {
 	TAutoConsoleVariable<bool> CVar_ImportAllAssetsOnStartup(
@@ -838,5 +836,3 @@ void UJsonDataAssetSubsystem::ModifyCook(const FName& RootName, TSet<FName>& Out
 		*RootName.ToString());
 }
 #endif
-
-PRAGMA_ENABLE_OPTIMIZATION

@@ -19,6 +19,7 @@ public class OUUTests : OUUModuleRules
 			"SlateCore",
 			"Localization",
 			"GameplayTags",
+			"Json",
 
 			// OUU Plugins
 			"OUURuntime",

@@ -1,0 +1,28 @@
+{
+	"Class": "/Script/OUUTests.TestJsonDataAsset",
+	"EngineVersion": "5.1.0",
+	"IsLicenseeVersion": false,
+	"Data":
+	{
+		"string": "Overridden String",
+		"object": "/Script/Engine.Material'/Engine/EngineMaterials/DefaultMaterial.DefaultMaterial'",
+		"struct":
+		{
+			"string": "Overridden String in Struct",
+			"object": "/Script/Engine.Texture2D'/Engine/EngineMaterials/DefaultNormal.DefaultNormal'",
+			"jsonPath": "/JsonData/Plugins/OpenUnrealUtilities/Tests/TestAsset_NoValuesSet"
+		},
+		"arrayOfStructs": [
+			{
+				"string": "Struct String 1",
+				"object": "/Script/Engine.Material'/Engine/EngineMaterials/DefaultMaterial.DefaultMaterial'",
+				"jsonPath": "/JsonData/Plugins/OpenUnrealUtilities/Tests/TestAsset_NoValuesSet"
+			},
+			{
+				"string": "Struct String 2",
+				"object": "/Script/Engine.Texture2D'/Engine/EngineMaterials/DefaultNormal.DefaultNormal'",
+				"jsonPath": "/JsonData/Plugins/OpenUnrealUtilities/Tests/TestAsset_NoValuesSet"
+			}
+		]
+	}
+}

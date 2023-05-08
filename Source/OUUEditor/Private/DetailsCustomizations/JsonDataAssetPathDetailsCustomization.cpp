@@ -23,7 +23,8 @@ namespace OUU::Editor::JsonData::Private
 		TSharedPtr<FContentBrowserDataDragDropOp> ContentDragDropOp)
 	{
 		auto Files = ContentDragDropOp->GetDraggedFiles();
-		auto Prefix = TEXT("/All/JsonData/");
+		auto Root = OUU::Runtime::JsonData::GetSourceMountPointRoot_Package(OUU::Runtime::JsonData::GameRootName);
+		auto Prefix = FString::Printf(TEXT("/All%s"), *Root);
 		for (auto File : Files)
 		{
 			if (auto* FileItem = File.GetPrimaryInternalItem())
