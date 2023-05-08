@@ -352,8 +352,8 @@ namespace OUU::Editor::MaterialAnalyzer
 				FOnSpawnTab::CreateStatic(&Private::MaterialAnalyzer::Widgets::SpawnTab))
 			.SetDisplayName(INVTEXT("Material Analyzer (OUU)"))
 			.SetTooltipText(INVTEXT("Search and navigate through material expressions and parameters"))
-			.SetGroup(WorkspaceMenu::GetMenuStructure().GetDeveloperToolsMiscCategory())
-			.SetIcon(FSlateIcon(FAppStyle::GetAppStyleSetName(), "LevelEditor.Tabs.Details"));
+			.SetGroup(WorkspaceMenu::GetMenuStructure().GetDeveloperToolsAuditCategory())
+			.SetIcon(FSlateIcon(FAppStyle::GetAppStyleSetName(), "MaterialEditor.ToggleMaterialStats"));
 	}
 
 	void UnregisterNomadTabSpawner() { FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(GTabName); }

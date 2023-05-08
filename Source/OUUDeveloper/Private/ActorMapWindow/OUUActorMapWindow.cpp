@@ -662,9 +662,8 @@ namespace OUU::Developer::ActorMapWindow
 			.SetTooltipText(
 				INVTEXT("View a top-down overview of actors in a level (editor or runtime) for debugging purposes."))
 #if WITH_EDITOR
-			.SetGroup(WorkspaceMenu::GetMenuStructure().GetDeveloperToolsMiscCategory())
-			// #TODO-OUU Find better suited icon for actor map
-			.SetIcon(FSlateIcon(FAppStyle::GetAppStyleSetName(), "LevelEditor.Tabs.Details"))
+			.SetGroup(WorkspaceMenu::GetMenuStructure().GetDeveloperToolsDebugCategory())
+			.SetIcon(FSlateIcon(FAppStyle::GetAppStyleSetName(), "ShowFlagsMenu.Grid"))
 #endif
 			;
 	}
