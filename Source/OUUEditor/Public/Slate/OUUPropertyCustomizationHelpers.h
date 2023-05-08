@@ -7,6 +7,7 @@
 #include "ContentBrowserDelegates.h"
 #include "IDetailCustomization.h"
 #include "IPropertyTypeCustomization.h"
+#include "PropertyCustomizationHelpers.h"
 
 // #TODO-jreich Add parameter if recurse into arrays/structs/maps/sets -> Default true
 
@@ -17,7 +18,7 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 	 * Required property buttons will be automatically created (e.g. array delete/duplicate)
 	 * @returns new widget
 	 */
-	OUUEDITOR_API TSharedRef<SWidget> MakeFilteredObjectPropertyWidget(
+	OUUEDITOR_API TSharedRef<SObjectPropertyEntryBox> MakeFilteredObjectPropertyWidget(
 		TSharedRef<IPropertyHandle> PropertyHandle,
 		FObjectPropertyBase* ObjectProperty,
 		TSharedPtr<FAssetThumbnailPool> ThumbnailPool,
@@ -27,7 +28,7 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 	 * Try to make a widget that filters objects in dropdown based on passed filter delegate.
 	 * @returns new widget or nullptr, if the passed property is not an object property
 	 */
-	OUUEDITOR_API TSharedPtr<SWidget> TryMakeFilteredObjectPropertyWidget(
+	OUUEDITOR_API TSharedPtr<SObjectPropertyEntryBox> TryMakeFilteredObjectPropertyWidget(
 		TSharedRef<IPropertyHandle> PropertyHandle,
 		TSharedPtr<FAssetThumbnailPool> ThumbnailPool,
 		FOnShouldFilterAsset OnShouldFilterAsset);

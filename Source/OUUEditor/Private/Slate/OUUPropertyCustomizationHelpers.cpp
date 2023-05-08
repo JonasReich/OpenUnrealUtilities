@@ -10,7 +10,6 @@
 #include "Kismet2/SClassPickerDialog.h"
 #include "LogOpenUnrealUtilities.h"
 #include "ObjectEditorUtils.h"
-#include "PropertyCustomizationHelpers.h"
 #include "UObject/UObjectIterator.h"
 
 namespace OUU::Editor::PropertyCustomizationHelpers
@@ -73,7 +72,7 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 		}
 	} // namespace Private
 
-	TSharedRef<SWidget> MakeFilteredObjectPropertyWidget(
+	TSharedRef<SObjectPropertyEntryBox> MakeFilteredObjectPropertyWidget(
 		TSharedRef<IPropertyHandle> PropertyHandle,
 		FObjectPropertyBase* ObjectProperty,
 		TSharedPtr<FAssetThumbnailPool> ThumbnailPool,
@@ -87,7 +86,7 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 			.OnShouldFilterAsset(OnShouldFilterAsset);
 	}
 
-	TSharedPtr<SWidget> TryMakeFilteredObjectPropertyWidget(
+	TSharedPtr<SObjectPropertyEntryBox> TryMakeFilteredObjectPropertyWidget(
 		TSharedRef<IPropertyHandle> PropertyHandle,
 		TSharedPtr<FAssetThumbnailPool> ThumbnailPool,
 		FOnShouldFilterAsset OnShouldFilterAsset)

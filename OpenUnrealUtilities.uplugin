@@ -63,6 +63,10 @@
 		{
 			"Name": "SignificanceManager",
 			"Enabled": true
+		},
+		{
+			"Name": "DataValidation",
+			"Enabled": true
 		}
 	]
 }

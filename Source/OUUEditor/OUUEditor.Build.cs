@@ -42,8 +42,19 @@ public class OUUEditor : OUUModuleRules
 			"PropertyEditor",
 			"ContentBrowser",
 			"Kismet",
+			"ContentBrowserFileDataSource",
+			"ContentBrowserData",
+			"ToolMenus",
+			"SourceControlWindows",
+			"AssetTools",
+			"SourceControl",
+			"AssetRegistry",
+			"Projects",
+			"DataValidation",
+			"EditorWidgets",
 
 			// OUU
+			"OUURuntime",
 			"OUUDeveloper"
 		});
 	}

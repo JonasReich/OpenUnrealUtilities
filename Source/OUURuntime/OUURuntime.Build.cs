@@ -74,7 +74,11 @@ public class OUURuntime : OUUModuleRules
 				"GameplayTagsEditor",
 				"PropertyEditor",
 				"SourceControl",
-				"AssetTools"
+				"AssetTools",
+
+				"ContentBrowser",
+				"ContentBrowserData",
+				"AssetRegistry"
 			});
 		}
 		// --
