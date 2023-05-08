@@ -63,15 +63,6 @@ namespace OUU::Editor
 				}
 				else
 				{
-					// #TODO Fix this filter. It would be amazing to have, but right now it if flaky at best,
-					// both filtering too much or too little, depending on context.
-					// We should probably prevent all asset refs at this stage and use the json file representation for
-					// a custom selection widget.
-
-					// That would require at least:
-					// - FAR filter based on uassets + converting results to json paths for dropdown entries
-					// - drag/drop for content browser items
-
 					GEditor->OnMakeAssetReferenceFilter().BindLambda(
 						[](const FAssetReferenceFilterContext& Context) -> TSharedPtr<IAssetReferenceFilter> {
 							return MakeShared<FJsonAssetReferenceFilter>(Context);

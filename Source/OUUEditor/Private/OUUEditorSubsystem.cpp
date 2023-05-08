@@ -1,10 +1,11 @@
-// Copyright (c) 2022 Jonas Reich
+// Copyright by Grimlore Games & THQ Nordic
 
 #include "OUUEditorSubsystem.h"
 
 #include "DetailsCustomizations/JsonDataAssetPathDetailsCustomization.h"
 #include "JsonDataAsset/JsonDataAsset.h"
 #include "PropertyEditorUtils.h"
+#include "UObject/UObjectIterator.h"
 
 void UOUUEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {

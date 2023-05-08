@@ -25,4 +25,5 @@ public:
 	// -- IAssetReferenceFilter
 private:
 	FAssetReferenceFilterContext Context;
+	TSet<FTopLevelAssetPath> JsonDataAssetClassPaths;
 };

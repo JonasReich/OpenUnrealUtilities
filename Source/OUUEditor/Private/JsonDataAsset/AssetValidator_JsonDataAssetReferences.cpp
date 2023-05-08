@@ -35,7 +35,9 @@ EDataValidationResult UAssetValidator_JsonDataAssetReferences::ValidateLoadedAss
 
 bool UAssetValidator_JsonDataAssetReferences::HasJsonDependency(UObject* InAsset)
 {
-	auto JsonContentRoot = OUU::Runtime::JsonData::GetCacheMountPointRoot_Package();
+	// The game root is also the virtual root of plugin content, so we don't have to iterate over plugin roots
+	// (this is rarely the case!)
+	auto JsonContentRoot = OUU::Runtime::JsonData::GetCacheMountPointRoot_Package(OUU::Runtime::JsonData::GameRootName);
 
 	TArray<FAssetIdentifier> Dependencies;
 	IAssetRegistry::Get()->GetDependencies(FAssetIdentifier(InAsset->GetOutermost()->GetFName()), OUT Dependencies);
@@ -64,25 +66,46 @@ EDataValidationResult UAssetValidator_JsonDataAssetReferences::ValidateLoadedAss
 	auto PathProperty =
 		FJsonDataAssetPath::StaticStruct()->FindPropertyByName(GET_MEMBER_NAME_CHECKED(FJsonDataAssetPath, Path));
 
+	// Again we only really care if it's in _any_ json content root, which are all underneath the game root.
+	auto JsonContentRoot = OUU::Runtime::JsonData::GetCacheMountPointRoot_Package(OUU::Runtime::JsonData::GameRootName);
+
 	for (auto& FieldAndValue : TPropertyValueRange<FObjectPropertyBase>(InAsset->GetClass(), InAsset))
 	{
 		auto& Field = FieldAndValue.Key;
 		auto& ValuePtr = FieldAndValue.Value;
 
-		if (Field == PathProperty)
+		if (Field == PathProperty || Field->HasAnyPropertyFlags(CPF_Transient)
+			|| Field->IsA(FWeakObjectProperty::StaticClass()))
 		{
-			// Ignore the json data path property
+			// Skip anything that either is a valid FJsonDataAssetPath property or that will not actually be saved
 			continue;
 		}
 
-		UObject* Object = Field->LoadObjectPropertyValue(ValuePtr);
-		if (!IsValid(Object))
+		if (Field->PropertyClass == nullptr
+			|| (Field->PropertyClass->IsChildOf<UJsonDataAsset>() == false
+				&& UJsonDataAsset::StaticClass()->IsChildOf(Field->PropertyClass) == false))
 		{
-			// Skip null object properties
+			// Skip fields that cannot contain json data assets
 			continue;
 		}
 
-		if (Object->IsA<UJsonDataAsset>())
+		UObject* Object = Field->GetObjectPropertyValue(ValuePtr);
+		bool bIsReferencingJsonAsset = false;
+		if (IsValid(Object))
+		{
+			bIsReferencingJsonAsset = Object->IsA<UJsonDataAsset>();
+		}
+		else
+		{
+			const auto SoftObjectPtrField = CastField<FSoftObjectProperty>(Field);
+			if (SoftObjectPtrField)
+			{
+				const auto& SoftObjectPtr = SoftObjectPtrField->GetPropertyValue(ValuePtr);
+				bIsReferencingJsonAsset = SoftObjectPtr.GetLongPackageName().Contains(JsonContentRoot);
+			}
+		}
+
+		if (bIsReferencingJsonAsset)
 		{
 			AssetFails(
 				InAsset,

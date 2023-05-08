@@ -6,6 +6,8 @@
 #include "AssetRegistry/AssetDependencyGatherer.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetViewUtils.h"
+#include "ClassViewerFilter.h"
+#include "ClassViewerModule.h"
 #include "ContentBrowserDataSource.h"
 #include "ContentBrowserFileDataCore.h"
 #include "ContentBrowserFileDataPayload.h"
@@ -19,10 +21,11 @@
 #include "HAL/PlatformFile.h"
 #include "IContentBrowserDataModule.h"
 #include "IContentBrowserSingleton.h"
-#include "JsonDataAsset/JsonDataAsset.h"
 #include "JsonDataAsset/JsonDataAssetEditor.h"
+#include "JsonDataAsset/JsonDataAssetSubsystem.h"
 #include "JsonDataAsset/JsonFileSourceControlContextMenu.h"
 #include "JsonObjectConverter.h"
+#include "Kismet2/SClassPickerDialog.h"
 #include "LogOpenUnrealUtilities.h"
 #include "Logging/MessageLogMacros.h"
 #include "Misc/DataValidation.h"
@@ -35,6 +38,35 @@
 #include "UObject/SavePackage.h"
 
 #define JSON_CBROWSER_SOURCE_NAME TEXT("JsonData")
+
+class FAssetClassParentFilter : public IClassViewerFilter
+{
+public:
+	/** All children of these classes will be included unless filtered out by another setting. */
+	TSet<const UClass*> AllowedChildrenOfClasses;
+
+	/** Disallowed class flags. */
+	EClassFlags DisallowedClassFlags;
+
+	virtual bool IsClassAllowed(
+		const FClassViewerInitializationOptions& InInitOptions,
+		const UClass* InClass,
+		TSharedRef<FClassViewerFilterFuncs> InFilterFuncs) override
+	{
+		return !InClass->HasAnyClassFlags(DisallowedClassFlags)
+			&& InFilterFuncs->IfInChildOfClassesSet(AllowedChildrenOfClasses, InClass) != EFilterReturn::Failed;
+	}
+
+	virtual bool IsUnloadedClassAllowed(
+		const FClassViewerInitializationOptions& InInitOptions,
+		const TSharedRef<const IUnloadedBlueprintData> InUnloadedClassData,
+		TSharedRef<FClassViewerFilterFuncs> InFilterFuncs) override
+	{
+		return !InUnloadedClassData->HasAnyClassFlags(DisallowedClassFlags)
+			&& InFilterFuncs->IfInChildOfClassesSet(AllowedChildrenOfClasses, InUnloadedClassData)
+			!= EFilterReturn::Failed;
+	}
+};
 
 FContentBrowserJsonDataSource::FContentBrowserJsonDataSource()
 {
@@ -131,15 +163,152 @@ FContentBrowserJsonDataSource::FContentBrowserJsonDataSource()
 	// What is this?
 	// JsonFileActions.Preview.BindLambda(ItemPreview);
 
-	// #TODO Implement proper creation screen.
-	// Disable creation for now. For the moment you have to create assets via the uasset "cache"
-	JsonFileActions.CanCreate = false;
+	// For now allow creation in all directories (default if not assigned)
+	/*
+	JsonFileActions.CanCreate.BindLambda(
+		[](const FName InDestFolderPath, const FString& InDestFolder, FText* OutErrorMsg) -> bool {
+			return true;
+		});
+	*/
+	JsonFileActions.ConfigureCreation.BindLambda(
+		[this](FString& OutFileBasename, FStructOnScope& OutCreationConfig) -> bool {
+			OutCreationConfig.Initialize(FOUUJsonDataCreateParams::StaticStruct());
+			auto& Config = *(FOUUJsonDataCreateParams*)OutCreationConfig.GetStructMemory();
+
+			// Load the classviewer module to display a class picker
+			FClassViewerModule& ClassViewerModule =
+				FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer");
+
+			// Fill in options
+			FClassViewerInitializationOptions Options;
+			Options.Mode = EClassViewerMode::ClassPicker;
+
+			TSharedRef<FAssetClassParentFilter> Filter = MakeShareable(new FAssetClassParentFilter);
+			Options.ClassFilters.Add(Filter);
+
+			Filter->DisallowedClassFlags =
+				CLASS_Abstract | CLASS_Deprecated | CLASS_NewerVersionExists | CLASS_HideDropDown;
+			Filter->AllowedChildrenOfClasses.Add(UJsonDataAsset::StaticClass());
+
+			const FText TitleText = INVTEXT("Pick a Json Data Asset Class");
+			UClass* NewChosenClass = nullptr;
+			if (SClassPickerDialog::PickClass(TitleText, Options, OUT NewChosenClass, UJsonDataAsset::StaticClass()))
+			{
+				Config.Class = NewChosenClass;
+				return true;
+			}
+
+			return false;
+		});
+
+	JsonFileActions.Create.BindLambda(
+		[this](const FName InFilePath, const FString& InFilenameWrong, const FStructOnScope& CreationConfig) -> bool {
+			auto& Config = *(FOUUJsonDataCreateParams*)CreationConfig.GetStructMemory();
+
+			if (IsValid(Config.Class.Get()) == false)
+			{
+				UE_LOG(
+					LogOpenUnrealUtilities,
+					Warning,
+					TEXT("Failed to create new json data asset %s (no class selected)"),
+					*InFilenameWrong);
+				return false;
+			}
+
+			// InFilenameWrong is wrong for plugin mounted files. It's correct after converting back and forth though.
+			auto PackagePath = OUU::Runtime::JsonData::SourceFullToPackage(InFilenameWrong, EJsonDataAccessMode::Read);
+			auto FileNameCorrected = OUU::Runtime::JsonData::PackageToSourceFull(PackagePath, EJsonDataAccessMode::Read);
+
+			auto ObjectName = OUU::Runtime::JsonData::PackageToObjectName(PackagePath);
+			UPackage* NewPackage = CreatePackage(*PackagePath);
+			auto NewDataAsset =
+				NewObject<UJsonDataAsset>(NewPackage, Config.Class, *ObjectName, RF_Public | RF_Standalone);
+
+			if (IsValid(NewDataAsset) == false || IsValid(NewPackage) == false)
+			{
+				UE_LOG(
+					LogOpenUnrealUtilities,
+					Error,
+					TEXT("Failed to create new object or package for json data asset %s"),
+					*PackagePath);
+				return false;
+			}
+
+			FAssetRegistryModule::AssetCreated(NewDataAsset);
+
+			// Construct a filename from long package name.
+			const FString& FileExtension = FPackageName::GetAssetPackageExtension();
+			auto PackageFilename = FPackageName::LongPackageNameToFilename(PackagePath, FileExtension);
+
+			// The file already exists, no need to prompt for save as
+			FString BaseFilename, Extension, Directory;
+			// Split the path to get the filename without the directory structure
+			FPaths::NormalizeFilename(PackageFilename);
+			FPaths::Split(PackageFilename, Directory, BaseFilename, Extension);
+
+			FSavePackageArgs SaveArgs;
+			SaveArgs.TopLevelFlags = RF_Standalone;
+			SaveArgs.Error = GWarn;
+			auto SaveResult = UPackage::Save(NewPackage, NewDataAsset, *PackageFilename, SaveArgs);
+			if (SaveResult.IsSuccessful() == false)
+			{
+				UE_LOG(
+					LogOpenUnrealUtilities,
+					Error,
+					TEXT("Failed to save new package for json data asset %s"),
+					*PackagePath);
+				return false;
+			}
+			if (FPaths::FileExists(FileNameCorrected) == false)
+			{
+				UE_LOG(
+					LogOpenUnrealUtilities,
+					Error,
+					TEXT("Failed to export json files for new json data asset %s"),
+					*PackagePath);
+				return false;
+			}
+			return true;
+		});
 
 	JsonFileActions.Edit.BindLambda([this](const FName InFilePath, const FString& InFilename) -> bool {
 		auto JsonPath = OUU::Editor::JsonData::ConvertMountedSourceFilenameToDataAssetPath(InFilePath.ToString());
 		OUU::Editor::JsonData::ContentBrowser_OpenUnrealEditor(JsonPath);
 		return true;
 	});
+
+	JsonFileActions.CanMove.BindLambda(
+		[](const FName InFilePath, const FString& InFilename, const FString& InDestFolder, FText* OutErrorMsg) -> bool {
+			if (OutErrorMsg)
+			{
+				*OutErrorMsg = INVTEXT("Moving json files is only supported via the generated uassets at the moment");
+			}
+			return false;
+		});
+
+	JsonFileActions.CanRename.BindLambda(
+		[](const FName InFilePath, const FString& InFilename, const FString* InNewName, FText* OutErrorMsg) -> bool {
+			if (FPaths::FileExists(InFilename) == false)
+			{
+				// Rename is also used during creation when duplicating
+				return true;
+			}
+			if (OutErrorMsg)
+			{
+				*OutErrorMsg = INVTEXT("Renaming json files is only supported via the generated uassets at the moment");
+			}
+			return false;
+		});
+
+	JsonFileActions.CanDelete.BindLambda(
+		[](const FName InFilePath, const FString& InFilename, FText* OutErrorMsg) -> bool {
+			if (OutErrorMsg)
+			{
+				*OutErrorMsg = INVTEXT("Deleting json files is only supported via the generated uassets at the moment");
+			}
+			return false;
+		});
+
 	JsonFileConfig.RegisterFileActions(JsonFileActions);
 
 	JsonFileDataSource.Reset(
@@ -148,24 +317,32 @@ FContentBrowserJsonDataSource::FContentBrowserJsonDataSource()
 
 	TArray<FString> RootPaths;
 	FPackageName::QueryRootContentPaths(RootPaths);
-	const FString JsonDir = OUU::Runtime::JsonData::GetSourceRoot_Full(EJsonDataAccessMode::Read);
 
-	// Add a file mount for the data source.
+	// Add file mounts for the data source.
 	{
-		// At the moment we only support a single external folder, but this would also allow folders nested inside of
-		// content roots (like it's done for the Python extension)
+		FCoreDelegates::OnAllModuleLoadingPhasesComplete.AddLambda([this]() {
+			auto AddMountLambda = [this](const FName& RootName) {
+				auto FileMountPath = OUU::Runtime::JsonData::GetSourceMountPointRoot_Package(RootName);
+				auto FileMountDiskPath = OUU::Runtime::JsonData::GetSourceMountPointRoot_DiskFull(RootName);
+				// Both of these paths have a trailing slash, but AddFileMount expects no trailing slash
+				FileMountPath.RemoveFromEnd(TEXT("/"));
+				FileMountDiskPath.RemoveFromEnd(TEXT("/"));
 
-		// #TODO use GetSourceMountPointRoot_Package and GetSourceMountPointRoot_DiskFull instead!
+				JsonFileDataSource->AddFileMount(*FileMountPath, *FileMountDiskPath);
+			};
 
-		auto FileMountPath = OUU::Runtime::JsonData::GetSourceRoot_ProjectRelative(EJsonDataAccessMode::Read);
-		auto FileMountDiskPath = OUU::Runtime::JsonData::GetSourceRoot_Full(EJsonDataAccessMode::Read);
-		// Both of these paths have a trailing slash, but AddFileMount expects no trailing slash
-		FileMountPath.RemoveFromEnd(TEXT("/"));
-		FileMountDiskPath.RemoveFromEnd(TEXT("/"));
-		// Add a leading slash, so it's a path root
-		FileMountPath.InsertAt(0, TEXT("/"));
+			// Always add a mount point for the game data folder
+			AddMountLambda(OUU::Runtime::JsonData::GameRootName);
 
-		JsonFileDataSource->AddFileMount(*FileMountPath, *FileMountDiskPath);
+			// Also add mount points for all plugins that are already registered...
+			for (auto& PluginRootName : UJsonDataAssetSubsystem::Get().GetAllPluginRootNames())
+			{
+				AddMountLambda(PluginRootName);
+			}
+
+			// ...and react to new plugin being registered after this file source was set-up.
+			UJsonDataAssetSubsystem::Get().OnNewPluginRootAdded.AddLambda(AddMountLambda);
+		});
 	}
 
 	FCoreDelegates::OnAllModuleLoadingPhasesComplete.AddLambda([this]() {
@@ -236,9 +413,9 @@ void FContentBrowserJsonDataSource::PopulateJsonFileContextMenu(UToolMenu* Conte
 
 			Section.AddMenuEntry(
 				"OpenInDefaultExternalApplication",
-				INVTEXT("Edit json..."),
-				INVTEXT("Edit the json text file in the default external application"),
-				FSlateIcon(),
+				INVTEXT("Edit .json Source"),
+				INVTEXT("Edit the json text file in the default external application (text editor)"),
+				FSlateIcon("EditorStyle", "Icons.Edit"),
 				FUIAction(OpenExternalAction));
 
 			const FExecuteAction ReloadAction = FExecuteAction::CreateLambda([this, SelectedJsonFiles]() {
@@ -255,27 +432,31 @@ void FContentBrowserJsonDataSource::PopulateJsonFileContextMenu(UToolMenu* Conte
 			Section.AddMenuEntry(
 				"ReloadJson",
 				INVTEXT("Reload"),
-				INVTEXT("Reload the data from the json file"),
-				FSlateIcon(),
+				INVTEXT("Reload all property data from the json file"),
+				FSlateIcon("EditorStyle", "Icons.Refresh"),
 				FUIAction(ReloadAction));
 
 			const FExecuteAction NavigateToUAssetAction = FExecuteAction::CreateLambda([this, SelectedJsonFiles]() {
 				if (SelectedJsonFiles.Num() > 0)
 				{
-					const TSharedRef<const FContentBrowserFileItemDataPayload>& SelectedJsonFile = SelectedJsonFiles[0];
-					auto JsonPath = FJsonDataAssetPath::FromPackagePath(OUU::Runtime::JsonData::SourceFullToPackage(
-						SelectedJsonFile->GetFilename(),
-						EJsonDataAccessMode::Read));
+					TArray<FJsonDataAssetPath> Paths;
+					for (auto& SelectedJsonFile : SelectedJsonFiles)
+					{
+						auto JsonPath = FJsonDataAssetPath::FromPackagePath(OUU::Runtime::JsonData::SourceFullToPackage(
+							SelectedJsonFile->GetFilename(),
+							EJsonDataAccessMode::Read));
+						Paths.Add(JsonPath);
+					}
 
-					OUU::Editor::JsonData::ContentBrowser_NavigateToUAsset(JsonPath);
+					OUU::Editor::JsonData::ContentBrowser_NavigateToUAssets(Paths);
 				}
 			});
 
 			Section.AddMenuEntry(
-				"NavigateToUAsset",
-				INVTEXT("Show generated asset"),
-				INVTEXT("Navigate to the generated uasset file in the content browser."),
-				FSlateIcon(),
+				"BrowseToGeneratedAsset",
+				INVTEXT("Browse to Generated Asset"),
+				INVTEXT("Browses to the generated asset file and selects it in the most recently used Content Browser"),
+				FSlateIcon("EditorStyle", "SystemWideCommands.FindInContentBrowser"),
 				FUIAction(NavigateToUAssetAction));
 		}
 	}

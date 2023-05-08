@@ -4,16 +4,26 @@
 
 #include "CoreMinimal.h"
 
+#include "JsonDataAsset/JsonDataAsset.h"
+#include "Templates/SubclassOf.h"
 #include "UObject/StrongObjectPtr.h"
+
+#include "ContentBrowserJsonDataSource.generated.h"
 
 class FContentBrowserFileItemDataPayload;
 class FJsonFileSourceControlContextMenu;
 class UContentBrowserFileDataSource;
 class UContentBrowserDataMenuContext_FileMenu;
-
 class UToolMenu;
 
-struct FJsonDataAssetPath;
+USTRUCT()
+struct FOUUJsonDataCreateParams
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY()
+	TSubclassOf<UJsonDataAsset> Class;
+};
 
 /**
  * Create once for the full json data integration.

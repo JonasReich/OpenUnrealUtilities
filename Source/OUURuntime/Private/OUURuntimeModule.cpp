@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 
 #include "Animation/Debug/GameplayDebugger_Animation.h"
+#include "JsonDataAsset/JsonDataAssetSubsystem.h"
 #include "Modules/ModuleManager.h"
 
 #if WITH_GAMEPLAY_DEBUGGER
@@ -21,10 +22,13 @@ using OUU_GameplayDebuggerCategories = TGameplayDebuggerCategoryTypeList<
 
 class FOUURuntimeModule : public IModuleInterface
 {
-#if WITH_GAMEPLAY_DEBUGGER
 	// - IModuleInterface
 	virtual void StartupModule() override
 	{
+		FCoreDelegates::OnAllModuleLoadingPhasesComplete.AddLambda(
+			[]() { UJsonDataAssetSubsystem::Get().AddPluginDataRoot(TEXT("OpenUnrealUtilities")); });
+
+#if WITH_GAMEPLAY_DEBUGGER
 		OUU_GameplayDebuggerCategories::RegisterCategories<EGameplayDebuggerCategoryState::Disabled>();
 
 		// #TODO-OUU Extract TGameplayDebuggerCategoryTypeList to template that is also usable for other extensions,
@@ -33,10 +37,16 @@ class FOUURuntimeModule : public IModuleInterface
 			.RegisterExtension("ActorSelect", IGameplayDebugger::FOnGetExtension::CreateLambda([]() {
 								   return MakeShared<FGameplayDebuggerExtension_ActorSelect>();
 							   }));
-	}
-	virtual void ShutdownModule() override { OUU_GameplayDebuggerCategories::UnregisterCategories(); }
-	// --
+
 #endif
+	}
+	virtual void ShutdownModule() override
+	{
+#if WITH_GAMEPLAY_DEBUGGER
+		OUU_GameplayDebuggerCategories::UnregisterCategories();
+#endif
+	}
+	// --
 };
 
 IMPLEMENT_MODULE(FOUURuntimeModule, OUURuntime)

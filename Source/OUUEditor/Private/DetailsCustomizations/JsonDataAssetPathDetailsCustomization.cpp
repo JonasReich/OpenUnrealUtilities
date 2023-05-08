@@ -23,7 +23,7 @@ namespace OUU::Editor::JsonData::Private
 		TSharedPtr<FContentBrowserDataDragDropOp> ContentDragDropOp)
 	{
 		auto Files = ContentDragDropOp->GetDraggedFiles();
-		auto Prefix = TEXT("/All") + OUU::Runtime::JsonData::GetSourceMountPointRoot_Package();
+		auto Prefix = TEXT("/All/JsonData/");
 		for (auto File : Files)
 		{
 			if (auto* FileItem = File.GetPrimaryInternalItem())
@@ -81,17 +81,6 @@ void FJsonDataAssetPathCustomization::CustomizeHeader(
 
 	TArray<UObject*> OuterObjects;
 	PropertyHandle->GetOuterObjects(OuterObjects);
-
-	OwningAssets.Empty();
-	auto& AssetManager = UAssetManager::Get();
-	for (auto* OuterObject : OuterObjects)
-	{
-		FAssetData Data;
-		if (AssetManager.GetAssetDataForPath(OuterObject->GetPathName(), OUT Data))
-		{
-			OwningAssets.Add(Data);
-		}
-	}
 
 	auto FilterDelegate = FOnShouldFilterAsset::CreateSP(this, &FJsonDataAssetPathCustomization::OnShouldFilterAsset);
 

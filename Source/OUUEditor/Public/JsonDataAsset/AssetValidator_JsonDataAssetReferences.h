@@ -9,7 +9,8 @@
 #include "AssetValidator_JsonDataAssetReferences.generated.h"
 
 /**
- * This validator checks that only the FJsonDataAssetPath is used to reference json content.
+ * This validator checks that only the FJsonDataAssetPath is used to reference json content (this includes the smart
+ * pointer types that are based on FJsonDataAssetPath).
  */
 UCLASS()
 class UAssetValidator_JsonDataAssetReferences : public UEditorValidatorBase

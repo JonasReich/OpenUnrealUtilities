@@ -63,7 +63,8 @@ public class OUURuntime : OUUModuleRules
 			"Slate",
 			"AIModule",
 			"JsonUtilities",
-			"Json"
+			"Json",
+			"Projects"
 		});
 
 		// - Editor only dependencies

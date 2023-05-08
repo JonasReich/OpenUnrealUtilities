@@ -7,6 +7,8 @@
 #include "ISourceControlModule.h"
 #include "JsonDataAsset/JsonDataAsset.h"
 #include "JsonDataAsset/JsonDataAssetEditor.h"
+#include "LogOpenUnrealUtilities.h"
+#include "Logging/MessageLogMacros.h"
 #include "SourceControlHelpers.h"
 #include "SourceControlOperations.h"
 #include "SourceControlWindows.h"
@@ -409,7 +411,63 @@ void FJsonFileSourceControlContextMenu::ExecuteSCCRevert()
 {
 	TArray<FString> PackageNames;
 	GetSelectedPackageNames(PackageNames);
-	FSourceControlWindows::PromptForRevert(PackageNames);
+
+	// This unfortunately only works properly for uassets. Still displays the file, but doesn't actually revert them.
+	// if (FSourceControlWindows::PromptForRevert(PackageNames))
+	// No idea why....
+	// ...so instead we do it manually (without any user selection of what to revert)
+	{
+		ISourceControlProvider& SourceControlProvider = ISourceControlModule::Get().GetProvider();
+
+		TArray<FString> FilesToDelete;
+		TArray<FString> FilesToRevert;
+		for (auto PackageName : PackageNames)
+		{
+			if (auto State = SourceControlProvider.GetState(PackageName, EStateCacheUsage::ForceUpdate))
+			{
+				auto& ListToAddFile = State->IsAdded() ? FilesToDelete : FilesToRevert;
+				ListToAddFile.Add(PackageName);
+			}
+		}
+
+		if (FilesToRevert.Num() > 0)
+		{
+			TSharedRef<FRevert, ESPMode::ThreadSafe> RevertOperation = ISourceControlOperation::Create<FRevert>();
+			SourceControlProvider.Execute(RevertOperation, FilesToRevert);
+
+			for (auto& File : FilesToRevert)
+			{
+				auto JsonPath = FJsonDataAssetPath::FromPackagePath(
+					OUU::Runtime::JsonData::SourceFullToPackage(File, EJsonDataAccessMode::Read));
+
+				OUU::Editor::JsonData::Reload(JsonPath);
+			}
+		}
+
+		if (FilesToDelete.Num() > 0)
+		{
+			TArray<UObject*> AssetsToDelete;
+			for (auto& File : FilesToDelete)
+			{
+				auto JsonPath = FJsonDataAssetPath::FromPackagePath(
+					OUU::Runtime::JsonData::SourceFullToPackage(File, EJsonDataAccessMode::Read));
+				if (auto* Asset = JsonPath.ResolveObject())
+				{
+					AssetsToDelete.Add(Asset);
+				}
+				else
+				{
+					UE_MESSAGELOG(
+						AssetTools,
+						Error,
+						"Failed to delete generated asset for json file",
+						File,
+						". Please delete the json file manually after closing Unreal editor");
+				}
+			}
+			AssetViewUtils::DeleteAssets(AssetsToDelete);
+		}
+	}
 }
 
 void FJsonFileSourceControlContextMenu::ExecuteSCCSync()

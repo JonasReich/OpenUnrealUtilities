@@ -2,12 +2,18 @@
 
 #include "JsonDataAsset/JsonAssetReferenceFilter.h"
 
+#include "AssetRegistry/IAssetRegistry.h"
 #include "JsonDataAsset/JsonDataAsset.h"
 #include "Templates/ArrayUtils.h"
 
 FJsonAssetReferenceFilter::FJsonAssetReferenceFilter(const FAssetReferenceFilterContext& Context)
 {
 	this->Context = Context;
+
+	IAssetRegistry::Get()->GetDerivedClassNames(
+		TArray<FTopLevelAssetPath>{FTopLevelAssetPath(TEXT("/Script/OUURuntime"), TEXT("JsonDataAsset"))},
+		TSet<FTopLevelAssetPath>{},
+		JsonDataAssetClassPaths);
 }
 
 FAssetData FJsonAssetReferenceFilter::PassFilterKey()
@@ -25,14 +31,8 @@ FAssetData FJsonAssetReferenceFilter::PassFilterKey()
 }
 
 bool FJsonAssetReferenceFilter::PassesFilter(const FAssetData& AssetData, FText* OutOptionalFailureReason) const
-{	
-	UClass* AssetClass = AssetData.GetClass();
-	if (AssetClass == nullptr)
-	{
-		AssetClass = FSoftClassPath(AssetData.AssetClassPath.ToString()).TryLoadClass<UObject>();
-	}
-
-	if (AssetClass && AssetClass->IsChildOf<UJsonDataAsset>())
+{
+	if (AssetData.AssetClassPath.IsValid() && JsonDataAssetClassPaths.Contains(AssetData.AssetClassPath))
 	{
 		if (Context.ReferencingAssets.Contains(PassFilterKey()))
 		{

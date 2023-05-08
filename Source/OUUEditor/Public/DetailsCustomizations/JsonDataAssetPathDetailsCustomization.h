@@ -23,7 +23,6 @@ public:
 private:
 	TArray<const UClass*> AllowedClassFilters;
 	TArray<const UClass*> DisallowedClassFilters;
-	TArray<FAssetData> OwningAssets;
 
 	bool OnShouldFilterAsset(const FAssetData& AssetData) const;
 };
