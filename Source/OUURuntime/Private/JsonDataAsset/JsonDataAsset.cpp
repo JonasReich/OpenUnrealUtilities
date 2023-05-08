@@ -552,6 +552,39 @@ EDataValidationResult UJsonDataAsset::IsDataValid(class FDataValidationContext& 
 		return EDataValidationResult::Invalid;
 	}
 
+	// Check if there are any hard package refs to either the package or object.
+	// Both are NEVER permitted, as we only allow referencing via json data asset path, which produces a soft object
+	// reference.
+	{
+		TArray<FAssetIdentifier> PackageReferencers;
+		IAssetRegistry::Get()->GetReferencers(
+			FAssetIdentifier(GetOutermost()->GetFName()),
+			OUT PackageReferencers,
+			UE::AssetRegistry::EDependencyCategory::Package,
+			UE::AssetRegistry::EDependencyQuery::Hard);
+		for (auto& Referencer : PackageReferencers)
+		{
+			Context.AddError(FText::FromString(FString::Printf(
+				TEXT("%s has hard reference to PACKAGE %s"),
+				*Referencer.ToString(),
+				*GetOutermost()->GetName())));
+		}
+
+		TArray<FAssetIdentifier> ObjectReferencers;
+		IAssetRegistry::Get()->GetReferencers(
+			FAssetIdentifier(GetFName()),
+			OUT ObjectReferencers,
+			UE::AssetRegistry::EDependencyCategory::Package,
+			UE::AssetRegistry::EDependencyQuery::Hard);
+		for (auto& Referencer : ObjectReferencers)
+		{
+			Context.AddError(FText::FromString(FString::Printf(
+				TEXT("%s has hard reference to OBJECT %s"),
+				*Referencer.ToString(),
+				*GetOutermost()->GetName())));
+		}
+	}
+
 	return Result;
 }
 #endif
