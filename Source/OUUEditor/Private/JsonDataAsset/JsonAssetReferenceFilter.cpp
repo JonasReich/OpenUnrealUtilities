@@ -18,11 +18,6 @@ FJsonAssetReferenceFilter::FJsonAssetReferenceFilter(const FAssetReferenceFilter
 
 FAssetData FJsonAssetReferenceFilter::PassFilterKey()
 {
-	// Maybe find something better than the CDO?
-	// (e.g. a completely fake object)
-
-	// UJsonDataAsset::StaticClass()->GetDefaultObject()
-
 	// Fake asset data to fullfil the requirements for context data.
 	return FAssetData(
 		TEXT("/Script/OUU"),
@@ -32,6 +27,15 @@ FAssetData FJsonAssetReferenceFilter::PassFilterKey()
 
 bool FJsonAssetReferenceFilter::PassesFilter(const FAssetData& AssetData, FText* OutOptionalFailureReason) const
 {
+	if (Context.ReferencingAssets.Num() == 0)
+	{
+		// Always pass if we don't know what is referencing the asset.
+		// This is specifically required for open asset window (Alt+Shift+O).
+		// In some cases this might be a bit to lax, but in those cases we trust on the global
+		// UAssetValidator_JsonDataAssetReferences.
+		return true;
+	}
+
 	if (AssetData.AssetClassPath.IsValid() && JsonDataAssetClassPaths.Contains(AssetData.AssetClassPath))
 	{
 		if (Context.ReferencingAssets.Contains(PassFilterKey()))
