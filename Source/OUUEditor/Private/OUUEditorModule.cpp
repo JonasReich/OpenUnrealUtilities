@@ -80,9 +80,6 @@ namespace OUU::Editor
 #endif
 			});
 
-			OUU::Editor::PropertyEditorUtils::
-				RegisterCustomPropertyTypeLayout<FJsonDataAssetPath, FJsonDataAssetPathCustomization>();
-
 			ContentBrowserJsonDataSource = MakeUnique<FContentBrowserJsonDataSource>();
 
 			IAssetTools::Get().RegisterAssetTypeActions(MakeShared<FAssetTypeActions_JsonDataAsset>());
@@ -94,8 +91,6 @@ namespace OUU::Editor
 
 			MaterialAnalyzer::UnregisterNomadTabSpawner();
 			ContentBrowserExtensions::UnregisterHooks();
-
-			OUU::Editor::PropertyEditorUtils::UnregisterCustomPropertyTypeLayout<FJsonDataAssetPath>();
 
 			FTypedGameplayTag_Base::UnregisterAllDerivedPropertyTypeLayouts();
 		}

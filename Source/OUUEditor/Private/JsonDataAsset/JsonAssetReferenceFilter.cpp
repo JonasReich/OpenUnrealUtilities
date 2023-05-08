@@ -25,16 +25,27 @@ FAssetData FJsonAssetReferenceFilter::PassFilterKey()
 }
 
 bool FJsonAssetReferenceFilter::PassesFilter(const FAssetData& AssetData, FText* OutOptionalFailureReason) const
-{
-	if (Context.ReferencingAssets.Contains(PassFilterKey()))
+{	
+	UClass* AssetClass = AssetData.GetClass();
+	if (AssetClass == nullptr)
 	{
-		return true;
+		AssetClass = FSoftClassPath(AssetData.AssetClassPath.ToString()).TryLoadClass<UObject>();
 	}
 
-	if (OutOptionalFailureReason)
+	if (AssetClass && AssetClass->IsChildOf<UJsonDataAsset>())
 	{
-		*OutOptionalFailureReason = INVTEXT("JsonDataAssets may not be referenced directly via object properties. "
-											"Use FJsonDataAssetPath instead.");
+		if (Context.ReferencingAssets.Contains(PassFilterKey()))
+		{
+			return true;
+		}
+
+		if (OutOptionalFailureReason)
+		{
+			*OutOptionalFailureReason = INVTEXT("JsonDataAssets may not be referenced directly via object properties. "
+												"Use FJsonDataAssetPath instead.");
+		}
+		return false;
 	}
-	return false;
+
+	return true;
 }

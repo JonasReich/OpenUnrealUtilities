@@ -52,6 +52,7 @@ public class OUUEditor : OUUModuleRules
 			"Projects",
 			"DataValidation",
 			"EditorWidgets",
+			"EditorSubsystem",
 
 			// OUU
 			"OUURuntime",

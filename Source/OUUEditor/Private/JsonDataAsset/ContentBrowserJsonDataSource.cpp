@@ -30,6 +30,7 @@
 #include "Misc/JsonLibrary.h"
 #include "Misc/Paths.h"
 #include "Templates/ScopedAssign.h"
+#include "ToolMenus.h"
 #include "UObject/ObjectSaveContext.h"
 #include "UObject/SavePackage.h"
 

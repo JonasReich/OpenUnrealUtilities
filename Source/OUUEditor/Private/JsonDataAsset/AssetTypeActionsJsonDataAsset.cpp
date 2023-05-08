@@ -3,6 +3,7 @@
 #include "JsonDataAsset/AssetTypeActionsJsonDataAsset.h"
 
 #include "JsonDataAsset/JsonDataAssetEditor.h"
+#include "ToolMenuSection.h"
 
 void FAssetTypeActions_JsonDataAsset::GetActions(const TArray<UObject*>& InObjects, FToolMenuSection& Section)
 {

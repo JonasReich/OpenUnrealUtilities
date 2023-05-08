@@ -3,6 +3,7 @@
 #include "JsonDataAsset/AssetValidator_JsonDataAssetReferences.h"
 
 #include "AssetRegistry/IAssetRegistry.h"
+#include "Engine/Blueprint.h"
 #include "JsonDataAsset/JsonDataAsset.h"
 
 bool UAssetValidator_JsonDataAssetReferences::CanValidateAsset_Implementation(UObject* InAsset) const

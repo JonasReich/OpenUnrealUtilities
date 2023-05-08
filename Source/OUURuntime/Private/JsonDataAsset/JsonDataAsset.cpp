@@ -74,7 +74,7 @@ namespace OUU::Runtime::JsonData::Private
 		ECVF_ReadOnly);
 
 	FString GDataSource_Cooked = TEXT("CookedJsonData/");
-	TAutoConsoleVariable<FString> CVar_DataSource_Cooked(
+	FAutoConsoleVariableRef CVar_DataSource_Cooked(
 		TEXT("ouu.JsonData.SourceCooked"),
 		GDataSource_Cooked,
 		TEXT("Root relative path for cooked json content. Must differ from uncooked root and end in a slash!"),
@@ -238,6 +238,11 @@ namespace OUU::Runtime::JsonData::Private
 
 using namespace OUU::Runtime;
 
+UJsonDataAsset* FJsonDataAssetPath::Get() const
+{
+	return Path.Get();
+}
+
 UJsonDataAsset* FJsonDataAssetPath::Resolve() const
 {
 	const auto ResolvedObject = Path.LoadSynchronous();
@@ -268,6 +273,124 @@ bool FJsonDataAssetPath::ExportTextItem(
 {
 	ValueStr = Path.ToString();
 	return true;
+}
+
+bool FJsonDataAssetPath::SerializeFromMismatchedTag(const FPropertyTag& Tag, FStructuredArchive::FSlot Slot)
+{
+	if (Tag.Type == NAME_ObjectProperty)
+	{
+		UObject* pOldTarget = nullptr;
+		Slot << pOldTarget;
+		Path = pOldTarget;
+		return true;
+	}
+	else if (Tag.Type == NAME_SoftObjectProperty)
+	{
+		FSoftObjectPath OldTarget;
+		Slot << OldTarget;
+		Path = OldTarget;
+		return true;
+	}
+
+	return false;
+}
+
+bool FJsonDataAssetPath::NetSerialize(FArchive& Ar, UPackageMap* PackageMap, bool& OutSuccess)
+{
+	Ar << Path;
+	return true;
+}
+
+FSoftJsonDataAssetPtr::FSoftJsonDataAssetPtr(FJsonDataAssetPath InPath) : Path(MoveTemp(InPath)) {}
+
+FSoftJsonDataAssetPtr::FSoftJsonDataAssetPtr(const UJsonDataAsset* Object) : Path(Object) {}
+
+UJsonDataAsset* FSoftJsonDataAssetPtr::LoadSynchronous() const
+{
+	return Path.Resolve();
+}
+
+bool FSoftJsonDataAssetPtr::ImportTextItem(
+	const TCHAR*& Buffer,
+	int32 PortFlags,
+	UObject* Parent,
+	FOutputDevice* ErrorText)
+{
+	return Path.ImportTextItem(Buffer, PortFlags, Parent, ErrorText);
+}
+
+bool FSoftJsonDataAssetPtr::ExportTextItem(
+	FString& ValueStr,
+	FSoftJsonDataAssetPtr const& DefaultValue,
+	UObject* Parent,
+	int32 PortFlags,
+	UObject* ExportRootScope) const
+{
+	return Path.ExportTextItem(ValueStr, DefaultValue.Path, Parent, PortFlags, ExportRootScope);
+}
+
+bool FSoftJsonDataAssetPtr::SerializeFromMismatchedTag(const FPropertyTag& Tag, FStructuredArchive::FSlot Slot)
+{
+	return Path.SerializeFromMismatchedTag(Tag, Slot);
+}
+
+bool FSoftJsonDataAssetPtr::NetSerialize(FArchive& Ar, UPackageMap* PackageMap, bool& OutSuccess)
+{
+	return Path.NetSerialize(Ar, PackageMap, OutSuccess);
+}
+
+FJsonDataAssetPtr::FJsonDataAssetPtr(FJsonDataAssetPath InPath) : Path(MoveTemp(InPath)), HardReference(Path.Resolve())
+{
+}
+
+FJsonDataAssetPtr::FJsonDataAssetPtr(const UJsonDataAsset* Object) :
+	Path(Object), HardReference(const_cast<UJsonDataAsset*>(Object))
+{
+}
+
+bool FJsonDataAssetPtr::ImportTextItem(const TCHAR*& Buffer, int32 PortFlags, UObject* Parent, FOutputDevice* ErrorText)
+{
+	if (Path.ImportTextItem(Buffer, PortFlags, Parent, ErrorText))
+	{
+		HardReference = Path.Resolve();
+		return true;
+	}
+
+	HardReference = nullptr;
+
+	return false;
+}
+
+bool FJsonDataAssetPtr::ExportTextItem(
+	FString& ValueStr,
+	FJsonDataAssetPtr const& DefaultValue,
+	UObject* Parent,
+	int32 PortFlags,
+	UObject* ExportRootScope) const
+{
+	return Path.ExportTextItem(ValueStr, DefaultValue.Path, Parent, PortFlags, ExportRootScope);
+}
+
+bool FJsonDataAssetPtr::SerializeFromMismatchedTag(const FPropertyTag& Tag, FStructuredArchive::FSlot Slot)
+{
+	if (Path.SerializeFromMismatchedTag(Tag, Slot))
+	{
+		HardReference = Path.Get();
+		return true;
+	}
+
+	return false;
+}
+
+bool FJsonDataAssetPtr::NetSerialize(FArchive& Ar, UPackageMap* PackageMap, bool& OutSuccess)
+{
+	if (Path.NetSerialize(Ar, PackageMap, OutSuccess))
+	{
+		HardReference = Path.Get();
+		return true;
+	}
+
+	return false;
 }
 
 void UJsonDataAssetSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -490,10 +613,13 @@ void UJsonDataAssetSubsystem::ModifyCook(TArray<FString>& OutExtraPackagesToCook
 	IAssetRegistry& AssetRegistry = *IAssetRegistry::Get();
 
 	int32 NumJsonDataAssetsAdded = 0;
+
+	TSet<FName> DependencyPackages;
 	auto VisitorLambda = [&PlatformFile,
 						  &AssetRegistry,
 						  &NumJsonDataAssetsAdded,
-						  &OutExtraPackagesToCook](const TCHAR* FilePath, bool bIsDirectory) -> bool {
+						  &OutExtraPackagesToCook,
+						  &DependencyPackages](const TCHAR* FilePath, bool bIsDirectory) -> bool {
 		if (bIsDirectory)
 			return true;
 
@@ -509,11 +635,30 @@ void UJsonDataAssetSubsystem::ModifyCook(TArray<FString>& OutExtraPackagesToCook
 		auto* LoadedJsonDataAsset = Path.Load();
 		LoadedJsonDataAsset->ExportJsonFile();
 
-		OutExtraPackagesToCook.Add(PackagePath);
+		// OutExtraPackagesToCook.Add(PackagePath);
+
+		auto ObjectName = OUU::Runtime::JsonData::PackageToObjectName(PackagePath);
+		FAssetIdentifier AssetIdentifier(*PackagePath, *ObjectName);
+
+		TArray<FAssetIdentifier> Dependencies;
+		IAssetRegistry::Get()->GetDependencies(AssetIdentifier, OUT Dependencies);
+
+		for (auto& Dependency : Dependencies)
+		{
+			if (Dependency.IsPackage())
+			{
+				DependencyPackages.Add(Dependency.PackageName);
+			}
+		}
 		NumJsonDataAssetsAdded += 1;
 
 		return true;
 	};
+
+	for (FName& PackageName : DependencyPackages)
+	{
+		OutExtraPackagesToCook.Add(PackageName.ToString());
+	}
 
 	IPlatformFile::FDirectoryVisitorFunc VisitorFunc = VisitorLambda;
 	PlatformFile.IterateDirectoryRecursively(*JsonDir_READ, VisitorFunc);
@@ -521,7 +666,8 @@ void UJsonDataAssetSubsystem::ModifyCook(TArray<FString>& OutExtraPackagesToCook
 	UE_LOG(
 		LogOpenUnrealUtilities,
 		Display,
-		TEXT("UJsonDataAssetLibrary::ModifyCook - Added %i json assets and to cook"),
+		TEXT("UJsonDataAssetLibrary::ModifyCook - Added %i dependency assets for %i json assets to cook"),
+		DependencyPackages.Num(),
 		NumJsonDataAssetsAdded);
 }
 
@@ -539,6 +685,63 @@ bool UJsonDataAssetLibrary::ReloadJsonDataAsset(UJsonDataAsset* DataAsset)
 	}
 	auto* Result = LoadJsonDataAsset_Internal(FJsonDataAssetPath(DataAsset), DataAsset);
 	return IsValid(Result);
+}
+
+UJsonDataAsset* UJsonDataAssetLibrary::GetSoftJsonDataAssetPtr(
+	const FSoftJsonDataAssetPtr& Ptr,
+	TSubclassOf<UJsonDataAsset> Class)
+{
+	const auto Object = Ptr.Get();
+	if (Object && Class && Object->IsA(Class) == false)
+	{
+		return nullptr;
+	}
+
+	return Object;
+}
+
+UJsonDataAsset* UJsonDataAssetLibrary::LoadJsonDataAssetPtrSyncronous(
+	const FSoftJsonDataAssetPtr& Ptr,
+	TSubclassOf<UJsonDataAsset> Class)
+{
+	const auto Object = Ptr.LoadSynchronous();
+	if (Object && Class && Object->IsA(Class) == false)
+	{
+		return nullptr;
+	}
+
+	return Object;
+}
+
+UJsonDataAsset* UJsonDataAssetLibrary::GetJsonDataAssetPtr(
+	const FJsonDataAssetPtr& Ptr,
+	TSubclassOf<UJsonDataAsset> Class)
+{
+	const auto Object = Ptr.Get();
+	if (Object && Class && Object->IsA(Class) == false)
+	{
+		return nullptr;
+	}
+
+	return Object;
+}
+
+UJsonDataAsset* UJsonDataAssetLibrary::Conv_SoftJsonDataAssetPtrToRawPtr(const FSoftJsonDataAssetPtr& InPtr)
+{
+	return InPtr.Get();
+}
+
+FSoftJsonDataAssetPtr UJsonDataAssetLibrary::Conv_RawPtrToSoftJsonDataAssetPtr(UJsonDataAsset* InPtr)
+{
+	return FSoftJsonDataAssetPtr(InPtr);
+}
+UJsonDataAsset* UJsonDataAssetLibrary::Conv_JsonDataAssetPtrToRawPtr(const FJsonDataAssetPtr& InPtr)
+{
+	return InPtr.Get();
+}
+FJsonDataAssetPtr UJsonDataAssetLibrary::Conv_RawPtrToJsonDataAssetPtr(UJsonDataAsset* InPtr)
+{
+	return FJsonDataAssetPtr(InPtr);
 }
 
 UJsonDataAsset* UJsonDataAssetLibrary::LoadJsonDataAsset_Internal(
@@ -759,7 +962,7 @@ TSharedRef<FJsonObject> UJsonDataAsset::ExportJson() const
 	auto Result = MakeShared<FJsonObject>();
 
 	// Header information
-	Result->SetStringField(TEXT("Class"), GetClass()->GetFullName().Replace(TEXT("Class "), TEXT("")));
+	Result->SetStringField(TEXT("Class"), GetClass()->GetPathName());
 	Result->SetStringField(TEXT("EngineVersion"), FEngineVersion::Current().ToString());
 	Result->SetBoolField(TEXT("IsLicenseeVersion"), FEngineVersion::Current().IsLicenseeVersion());
 
@@ -884,7 +1087,12 @@ void UJsonDataAsset::PostRename(UObject* OldOuter, const FName OldName)
 #if WITH_EDITOR
 	Super::PostRename(OldOuter, OldName);
 
-	if (IsFileBasedJsonAsset() == false)
+	// We only need to remove the old json file if our outer (the package) or its path has changed. Otherwise the file
+	// can stay where it is. When the package is renamed in the editor, we are (at least from my testing) always
+	// assigned a new outer.
+	const auto NewOuter = GetOuter();
+	if (IsFileBasedJsonAsset() == false || OldOuter == NewOuter
+		|| (OldOuter && NewOuter && OldOuter->GetPathName() == NewOuter->GetPathName()))
 	{
 		return;
 	}

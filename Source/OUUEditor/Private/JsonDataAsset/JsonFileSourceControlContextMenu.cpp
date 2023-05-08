@@ -10,6 +10,7 @@
 #include "SourceControlHelpers.h"
 #include "SourceControlOperations.h"
 #include "SourceControlWindows.h"
+#include "ToolMenu.h"
 
 #define LOCTEXT_NAMESPACE "OUU_Json_ContentBrowser"
 

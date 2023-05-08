@@ -47,8 +47,37 @@ void FJsonDataAssetPathCustomization::CustomizeHeader(
 	FDetailWidgetRow& HeaderRow,
 	IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
-	auto ChildHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FJsonDataAssetPath, Path)).ToSharedRef();
+	const auto EditedStruct = CastField<FStructProperty>(PropertyHandle->GetProperty())->Struct;
+
+	TSharedPtr<IPropertyHandle> PathPropertyHandle;
+	if (EditedStruct->IsChildOf(FSoftJsonDataAssetPtr::StaticStruct()))
+	{
+		PathPropertyHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FSoftJsonDataAssetPtr, Path));
+	}
+	else if (EditedStruct->IsChildOf(FJsonDataAssetPtr::StaticStruct()))
+	{
+		PathPropertyHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FJsonDataAssetPtr, Path));
+	}
+	else
+	{
+		PathPropertyHandle = PropertyHandle;
+	}
+
+	auto ChildHandle =
+		PathPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FJsonDataAssetPath, Path)).ToSharedRef();
 	FObjectPropertyBase* ChildProperty = CastField<FObjectPropertyBase>(ChildHandle->GetProperty());
+
+	bool HasClassFilters = false;
+	const FString* OptClassPath = EditedStruct->FindMetaData(TEXT("JsonDataAssetClass"));
+	if (OptClassPath)
+	{
+		auto pFilterClass = TSoftClassPtr<UJsonDataAsset>(FSoftObjectPath(*OptClassPath)).LoadSynchronous();
+		if (pFilterClass)
+		{
+			AllowedClassFilters.Add(pFilterClass);
+			HasClassFilters = true;
+		}
+	}
 
 	TArray<UObject*> OuterObjects;
 	PropertyHandle->GetOuterObjects(OuterObjects);
@@ -76,8 +105,9 @@ void FJsonDataAssetPathCustomization::CustomizeHeader(
 						  .OwnerAssetDataArray(ContextOwnerAssets);
 
 	auto IsRecognized = [](TSharedPtr<FDragDropOperation> DragDropOperation) -> bool {
-		if (auto ContentBrowserDragDropOp = StaticCastSharedPtr<FContentBrowserDataDragDropOp>(DragDropOperation))
+		if (DragDropOperation.IsValid() && DragDropOperation->IsOfType<FContentBrowserDataDragDropOp>())
 		{
+			auto ContentBrowserDragDropOp = StaticCastSharedPtr<FContentBrowserDataDragDropOp>(DragDropOperation);
 			auto OptJsonPath = OUU::Editor::JsonData::Private::GetFirstJsonPathFromDragDropOp(ContentBrowserDragDropOp);
 			return OptJsonPath.IsSet();
 		}
@@ -85,8 +115,9 @@ void FJsonDataAssetPathCustomization::CustomizeHeader(
 	};
 
 	auto AllowDrop = [this](TSharedPtr<FDragDropOperation> DragDropOperation) {
-		if (auto ContentBrowserDragDropOp = StaticCastSharedPtr<FContentBrowserDataDragDropOp>(DragDropOperation))
+		if (DragDropOperation.IsValid() && DragDropOperation->IsOfType<FContentBrowserDataDragDropOp>())
 		{
+			auto ContentBrowserDragDropOp = StaticCastSharedPtr<FContentBrowserDataDragDropOp>(DragDropOperation);
 			auto OptJsonPath = OUU::Editor::JsonData::Private::GetFirstJsonPathFromDragDropOp(ContentBrowserDragDropOp);
 
 			if (OptJsonPath.IsSet())
@@ -104,7 +135,7 @@ void FJsonDataAssetPathCustomization::CustomizeHeader(
 		return false;
 	};
 
-	auto OnDroppedLambda = [PropertyHandle](const FGeometry&, const FDragDropEvent& DragDropEvent) -> FReply {
+	auto OnDroppedLambda = [PathPropertyHandle](const FGeometry&, const FDragDropEvent& DragDropEvent) -> FReply {
 		if (TSharedPtr<FContentBrowserDataDragDropOp> ContentDragDropOp =
 				DragDropEvent.GetOperationAs<FContentBrowserDataDragDropOp>())
 		{
@@ -113,7 +144,7 @@ void FJsonDataAssetPathCustomization::CustomizeHeader(
 			{
 				auto JsonPackagePath = OptJsonPath->GetPackagePath();
 				auto ObjectName = OUU::Runtime::JsonData::PackageToObjectName(JsonPackagePath);
-				PropertyHandle->SetValueFromFormattedString(JsonPackagePath + TEXT(".") + ObjectName);
+				PathPropertyHandle->SetValueFromFormattedString(JsonPackagePath + TEXT(".") + ObjectName);
 				return FReply::Handled();
 			}
 		}
@@ -129,11 +160,14 @@ void FJsonDataAssetPathCustomization::CustomizeHeader(
 	HeaderRow.NameContent()[PropertyHandle->CreatePropertyNameWidget()];
 	HeaderRow.ValueContent()[CustomJsonDataDropTarget];
 
-	OUU::Editor::PropertyCustomizationHelpers::GetClassFiltersFromPropertyMetadata(
-		ChildProperty,
-		PropertyHandle->GetProperty(),
-		OUT AllowedClassFilters,
-		OUT DisallowedClassFilters);
+	if (HasClassFilters == false)
+	{
+		OUU::Editor::PropertyCustomizationHelpers::GetClassFiltersFromPropertyMetadata(
+			ChildProperty,
+			PropertyHandle->GetProperty(),
+			OUT AllowedClassFilters,
+			OUT DisallowedClassFilters);
+	}
 }
 
 void FJsonDataAssetPathCustomization::CustomizeChildren(

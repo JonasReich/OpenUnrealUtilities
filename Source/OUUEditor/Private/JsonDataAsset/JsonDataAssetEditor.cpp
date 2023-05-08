@@ -7,6 +7,8 @@
 #include "IContentBrowserSingleton.h"
 #include "JsonDataAsset/JsonDataAsset.h"
 #include "PackageTools.h"
+#include "Editor.h"
+#include "Settings/EditorLoadingSavingSettings.h"
 
 namespace OUU::Editor::JsonData
 {
