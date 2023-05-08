@@ -428,11 +428,15 @@ public:
 	void ImportAllAssets(bool bOnlyMissing);
 
 private:
+#if WITH_EDITOR
+	void CleanupAssetCache();
+
 	UFUNCTION()
 	void HandlePackageDeleted(UPackage* Package);
 
 	UFUNCTION()
 	void ModifyCook(TArray<FString>& OutExtraPackagesToCook);
+#endif
 
 	bool bAutoExportJson = false;
 };

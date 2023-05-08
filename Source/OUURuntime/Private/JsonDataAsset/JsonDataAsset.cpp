@@ -36,9 +36,6 @@ namespace OUU::Runtime::JsonData::Private
 		true,
 		TEXT("If true, all json files in the Data directory will be loaded on Editor startup."));
 
-	// #TODO-jreich
-	// We can't disable this atm, because resaving assets is only possible for the newly created assets, not with
-	// loaded assets. But with this disabled, we'll have a mix of new/loaded assets that we can't tell apart.
 	TAutoConsoleVariable<bool> CVar_PurgeAssetCacheOnStartup(
 		TEXT("ouu.JsonData.PurgeAssetCacheOnStartup"),
 		false,
@@ -401,23 +398,17 @@ void UJsonDataAssetSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 #if WITH_EDITOR
 	FEditorDelegates::OnPackageDeleted.AddUObject(this, &UJsonDataAssetSubsystem::HandlePackageDeleted);
-#endif
-	const FString MountDiskPath = JsonData::GetCacheMountPointRoot_DiskFull();
-	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
 
-	if (JsonData::Private::CVar_PurgeAssetCacheOnStartup.GetValueOnGameThread()
-		&& PlatformFile.DirectoryExists(*MountDiskPath))
-	{
-		// Delete the directory on-disk before mounting the directory to purge all generated uasset files.
-		PlatformFile.DeleteDirectoryRecursively(*MountDiskPath);
-	}
+	CleanupAssetCache();
 
-	FPackageName::RegisterMountPoint(JsonData::GetCacheMountPointRoot_Package(), MountDiskPath);
-#if WITH_EDITOR
 	FPackageName::RegisterMountPoint(
 		JsonData::GetSourceMountPointRoot_Package(),
 		JsonData::GetSourceMountPointRoot_DiskFull());
 #endif
+
+	FPackageName::RegisterMountPoint(
+		JsonData::GetCacheMountPointRoot_Package(),
+		JsonData::GetCacheMountPointRoot_DiskFull());
 
 	if (JsonData::Private::CVar_ImportAllAssetsOnStartup.GetValueOnGameThread())
 	{
@@ -434,12 +425,14 @@ void UJsonDataAssetSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 	bAutoExportJson = true;
 
+#if WITH_EDITOR
 	PRAGMA_DISABLE_DEPRECATION_WARNINGS
 	// I know, disabling deprecation warnings is shit, but this is easy to fix when it eventually breaks.
 	// And having it delegate based is cleaner (and hopefully possible in 5.2) via ModifyCookDelegate,
 	// which seems to be accidentally left private in 5.0 / 5.1
 	FGameDelegates::Get().GetCookModificationDelegate().BindUObject(this, &UJsonDataAssetSubsystem::ModifyCook);
 	PRAGMA_ENABLE_DEPRECATION_WARNINGS
+#endif
 }
 
 void UJsonDataAssetSubsystem::Deinitialize()
@@ -590,6 +583,70 @@ void UJsonDataAssetSubsystem::ImportAllAssets(bool bOnlyMissing)
 		NumPackagesFailedToLoad);
 }
 
+#if WITH_EDITOR
+void UJsonDataAssetSubsystem::CleanupAssetCache()
+{
+	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+	const FString MountDiskPath = JsonData::GetCacheMountPointRoot_DiskFull();
+	if (PlatformFile.DirectoryExists(*MountDiskPath) == false)
+	{
+		// No existing cache
+		return;
+	}
+
+	if (JsonData::Private::CVar_PurgeAssetCacheOnStartup.GetValueOnGameThread())
+	{
+		// Delete the directory on-disk before mounting the directory to purge all generated uasset files.
+		PlatformFile.DeleteDirectoryRecursively(*MountDiskPath);
+		return;
+	}
+
+	// If clearing the whole cache is disabled, at least stale assets that do not have a corresponding source file must
+	// be removed
+	auto VisitorLambda = [&PlatformFile, &MountDiskPath](const TCHAR* FilePath, bool bIsDirectory) -> bool {
+		if (bIsDirectory)
+		{
+			return true;
+		}
+
+		auto FilePathStr = FStringView(FilePath);
+		auto AssetExtension = FPackageName::GetAssetPackageExtension();
+		if (FilePathStr.EndsWith(AssetExtension) == false)
+		{
+			UE_LOG(
+				LogOpenUnrealUtilities,
+				Warning,
+				TEXT("%s is in json data cache directory, but has unexpected extension. Expected only .uasset "
+					 "files."),
+				FilePath);
+			return true;
+		}
+
+		FString RelativePath = FilePath;
+		bool bIsRelative = FPaths::MakePathRelativeTo(IN OUT RelativePath, *MountDiskPath);
+		ensureMsgf(bIsRelative, TEXT("File path %s must be in subdirectory of %s"), *FilePath, *MountDiskPath);
+		ensureMsgf(
+			RelativePath.StartsWith(TEXT("./")) == false,
+			TEXT("%s is expecteed to be a relative path but not with a './' prefix"),
+			*RelativePath);
+
+		RelativePath = RelativePath.Mid(0, RelativePath.Len() - AssetExtension.Len());
+
+		auto PackagePath = FString(JSON_MOUNT_POINT).Append(RelativePath);
+
+		auto SourcePath = JsonData::PackageToSourceFull(PackagePath, EJsonDataAccessMode::Read);
+		if (PlatformFile.FileExists(*SourcePath) == false)
+		{
+			PlatformFile.DeleteFile(FilePath);
+			UE_LOG(LogOpenUnrealUtilities, Log, TEXT("Deleted stale uasset from json data cache: %s"), FilePath);
+		}
+
+		return true;
+	};
+
+	PlatformFile.IterateDirectoryRecursively(*MountDiskPath, VisitorLambda);
+}
+
 void UJsonDataAssetSubsystem::HandlePackageDeleted(UPackage* Package)
 {
 	auto PackagePath = Package->GetPathName();
@@ -635,8 +692,6 @@ void UJsonDataAssetSubsystem::ModifyCook(TArray<FString>& OutExtraPackagesToCook
 		auto* LoadedJsonDataAsset = Path.Load();
 		LoadedJsonDataAsset->ExportJsonFile();
 
-		// OutExtraPackagesToCook.Add(PackagePath);
-
 		auto ObjectName = OUU::Runtime::JsonData::PackageToObjectName(PackagePath);
 		FAssetIdentifier AssetIdentifier(*PackagePath, *ObjectName);
 
@@ -647,7 +702,13 @@ void UJsonDataAssetSubsystem::ModifyCook(TArray<FString>& OutExtraPackagesToCook
 		{
 			if (Dependency.IsPackage())
 			{
-				DependencyPackages.Add(Dependency.PackageName);
+				auto PackageName = Dependency.PackageName;
+				if (JsonData::PackageIsJsonData(PackageName.ToString()) == false)
+				{
+					// We don't want to add json data assets directly to this list.
+					// As they are on the do not cook list, they will throw errors.
+					DependencyPackages.Add(PackageName);
+				}
 			}
 		}
 		NumJsonDataAssetsAdded += 1;
@@ -670,6 +731,7 @@ void UJsonDataAssetSubsystem::ModifyCook(TArray<FString>& OutExtraPackagesToCook
 		DependencyPackages.Num(),
 		NumJsonDataAssetsAdded);
 }
+#endif
 
 UJsonDataAsset* UJsonDataAssetLibrary::LoadJsonDataAsset(FJsonDataAssetPath Path)
 {
