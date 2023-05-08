@@ -34,7 +34,8 @@ public:
 		const UObject* Object,
 		FOUUJsonLibraryObjectFilter SubObjectFilter,
 		int64 CheckFlags = 0,
-		int64 SkipFlags = 0);
+		int64 SkipFlags = 0,
+		bool bOnlyModifiedProperties = false);
 
 	/**
 	 * Create a json string from an objects properties.
@@ -45,7 +46,8 @@ public:
 		const UObject* Object,
 		FOUUJsonLibraryObjectFilter SubObjectFilter,
 		int64 CheckFlags = 0,
-		int64 SkipFlags = 0);
+		int64 SkipFlags = 0,
+		bool bOnlyModifiedProperties = false);
 
 	UFUNCTION(BlueprintCallable)
 	static bool JsonStringToUObject(UObject* Object, FString String, int64 CheckFlags = 0, int64 SkipFlags = 0);
