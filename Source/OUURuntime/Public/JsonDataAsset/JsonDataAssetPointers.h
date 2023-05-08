@@ -242,6 +242,10 @@ public:
 
 	FORCEINLINE const FJsonDataAssetPath& ToJsonDataAssetPath() const { return Path; }
 
+#if WITH_EDITOR
+	void NotifyPathChanged();
+#endif
+
 	bool ImportTextItem(const TCHAR*& Buffer, int32 PortFlags, UObject* Parent, FOutputDevice* ErrorText);
 	bool ExportTextItem(
 		FString& ValueStr,

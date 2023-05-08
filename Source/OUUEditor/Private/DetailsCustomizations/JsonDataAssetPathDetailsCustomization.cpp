@@ -57,6 +57,21 @@ void FJsonDataAssetPathCustomization::CustomizeHeader(
 	else if (EditedStruct->IsChildOf(FJsonDataAssetPtr::StaticStruct()))
 	{
 		PathPropertyHandle = PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FJsonDataAssetPtr, Path));
+
+		PropertyHandle->SetOnChildPropertyValueChanged(FSimpleDelegate::CreateLambda([PropertyHandle]() {
+			if (PropertyHandle->IsValidHandle())
+			{
+				TArray<void*> RawData;
+				PropertyHandle->AccessRawData(RawData);
+				for (const auto RawPtr : RawData)
+				{
+					if (RawPtr)
+					{
+						static_cast<FJsonDataAssetPtr*>(RawPtr)->NotifyPathChanged();
+					}
+				}
+			}
+		}));
 	}
 	else
 	{

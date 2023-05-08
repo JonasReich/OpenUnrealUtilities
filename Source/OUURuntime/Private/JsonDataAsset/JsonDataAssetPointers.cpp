@@ -100,6 +100,13 @@ FJsonDataAssetPtr::FJsonDataAssetPtr(const UJsonDataAsset* Object) :
 {
 }
 
+#if WITH_EDITOR
+void FJsonDataAssetPtr::NotifyPathChanged()
+{
+	HardReference = Path.ResolveObject();
+}
+#endif
+
 bool FJsonDataAssetPtr::ImportTextItem(const TCHAR*& Buffer, int32 PortFlags, UObject* Parent, FOutputDevice* ErrorText)
 {
 	if (Path.ImportTextItem(Buffer, PortFlags, Parent, ErrorText))
