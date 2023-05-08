@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022 Jonas Reich
+﻿// Copyright (c) 2023 Jonas Reich & Contributors
 
 #ifndef OUU_DECLARE_PROPERTY_FLAGS
 COMPILE_ERROR("OUU_DECLARE_PROPERTY_FLAGS was not defined. Please do not include this file outside of OUUBlueprintPropertyFlags.cpp");

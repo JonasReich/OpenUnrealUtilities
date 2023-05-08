@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2022 Jonas Reich
+﻿// Copyright (c) 2023 Jonas Reich & Contributors
 
 #ifndef OUU_DECLARE_CLASS_FLAGS
 COMPILE_ERROR(

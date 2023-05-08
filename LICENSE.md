@@ -7,7 +7,7 @@ https://github.com/JonasReich/OpenUnrealUtilities
 
 MIT License
 
-Copyright (c) 2022 Jonas Reich
+Copyright (c) 2023 Jonas Reich & Contributors (see CREDITS.md)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

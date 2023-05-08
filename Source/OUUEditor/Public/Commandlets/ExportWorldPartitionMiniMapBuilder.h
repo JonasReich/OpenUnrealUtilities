@@ -1,4 +1,4 @@
-// Copyright by Grimlore Games & THQ Nordic
+// Copyright (c) 2023 Jonas Reich & Contributors
 
 #pragma once
 
@@ -21,6 +21,7 @@ public:
 	// - UWorldPartitionBuilder
 	virtual bool RequiresCommandletRendering() const override { return true; }
 	virtual ELoadingMode GetLoadingMode() const override { return ELoadingMode::Custom; }
+
 protected:
 	virtual bool PreRun(UWorld* World, FPackageSourceControlHelper& PackageHelper) override;
 	virtual bool RunInternal(UWorld* World, const FCellInfo& InCellInfo, FPackageSourceControlHelper& PackageHelper)

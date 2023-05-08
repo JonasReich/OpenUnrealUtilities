@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Jonas Reich
+// Copyright (c) 2023 Jonas Reich & Contributors
 
 #include "Slate/OUUPropertyCustomizationHelpers.h"
 
@@ -112,8 +112,7 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 		if (!PropWidget)
 		{
 			// Ideally we would recurse into array/struct properties here, but that's super hard.
-			// Instead we register FGrimAnimDataAsset_NestedStruct_PropertyTypeCustomization
-			// for every supported nested struct type.
+			// Instead we register customization using the children builder for every supported nested struct type.
 			ChildrenBuilder.AddProperty(PropertyHandle);
 			return false;
 		}

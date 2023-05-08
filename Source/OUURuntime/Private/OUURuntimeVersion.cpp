@@ -1,8 +1,6 @@
-// Copyright by Grimlore Games & THQ Nordic
+// Copyright (c) 2023 Jonas Reich & Contributors
 
 #include "OUURuntimeVersion.h"
-
-//---------------------------------------------------------------------------------------------------------------------
 
 // Unique OUURuntime version id
 const FGuid FOUURuntimeVersion::k_GUID("0E26539A-1A69-4EAE-81CE-70D356B69D52");

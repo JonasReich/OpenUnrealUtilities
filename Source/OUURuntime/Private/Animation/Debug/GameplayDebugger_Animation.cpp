@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Jonas Reich
+// Copyright (c) 2023 Jonas Reich & Contributors
 
 #include "Animation/Debug/GameplayDebugger_Animation.h"
 

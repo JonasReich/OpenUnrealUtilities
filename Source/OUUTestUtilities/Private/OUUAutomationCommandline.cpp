@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Jonas Reich
+// Copyright (c) 2023 Jonas Reich & Contributors
 
 // NOTE: This file is in large parts copied from
 // Engine\UE4\Source\Developer\AutomationController\Private\AutomationCommandline.cpp Some types and functions were
