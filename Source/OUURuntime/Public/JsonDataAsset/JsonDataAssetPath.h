@@ -85,7 +85,23 @@ public:
 
 	FORCEINLINE bool IsNull() const { return Path.IsNull(); }
 
+	/**
+	 * Set from a long package name string (e.g. "/JsonData/Folder/Asset").
+	 * Does not work with other string formats (e.g. object paths).
+	 */
 	void SetPackagePath(const FString& InPackagePath);
+
+	/**
+	 * Set from an object path (e.g. "/JsonData/Folder/Asset.Asset" or "ClassName '/JsonData/Folder/Asset.Asset'").
+	 * Does not work with package paths.
+	 */
+	void SetObjectPath(const FString& InObjectPath);
+
+	/**
+	 * Set from a string.
+	 * Supports multiple formats including package paths and object paths.
+	 */
+	void SetFromString(const FString& InString);
 
 	FORCEINLINE FString GetPackagePath() const { return Path.GetLongPackageName(); }
 

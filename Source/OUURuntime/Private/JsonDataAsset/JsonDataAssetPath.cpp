@@ -43,26 +43,32 @@ void FJsonDataAssetPath::SetPackagePath(const FString& InPackagePath)
 	Path = FSoftObjectPath(FString::Printf(TEXT("%s.%s"), *InPackagePath, *ObjectName));
 }
 
+void FJsonDataAssetPath::SetObjectPath(const FString& InObjectPath)
+{
+	Path = FSoftObjectPath(InObjectPath);
+}
+
+void FJsonDataAssetPath::SetFromString(const FString& InString)
+{
+	int32 Index = INDEX_NONE;
+	InString.FindLastChar(TCHAR('.'), OUT Index);
+	if (Index == INDEX_NONE)
+	{
+		SetPackagePath(InString);
+	}
+	else
+	{
+		SetObjectPath(InString);
+	}
+}
+
 bool FJsonDataAssetPath::ImportTextItem(
 	const TCHAR*& Buffer,
 	int32 PortFlags,
 	UObject* Parent,
 	FOutputDevice* ErrorText)
 {
-	FStringView BufferStr = Buffer;
-	int32 Index = INDEX_NONE;
-	BufferStr.FindLastChar(TCHAR('.'), OUT Index);
-	if (Index == INDEX_NONE)
-	{
-		// Support for package paths /JsonData/Folder/Asset
-		SetPackagePath(Buffer);
-	}
-	else
-	{
-		// Support for object paths /JsonData/Folder/Asset.Asset
-		// SetPackagePath(FString(BufferStr.Left(Index)));
-		Path = FSoftObjectPath(Buffer);
-	}
+	SetFromString(Buffer);
 
 	return true;
 }
