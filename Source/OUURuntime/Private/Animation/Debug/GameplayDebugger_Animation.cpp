@@ -91,6 +91,8 @@ void FGameplayDebuggerCategory_Animation::DrawData(
 		return;
 
 	auto* DebugActor = Cast<AActor>(FindLocalDebugActor());
+	if (!IsValid(DebugActor))
+		return;
 
 	TArray<USkeletalMeshComponent*> SkeletalMeshComponents;
 	DebugActor->GetComponents<USkeletalMeshComponent>(OUT SkeletalMeshComponents);
