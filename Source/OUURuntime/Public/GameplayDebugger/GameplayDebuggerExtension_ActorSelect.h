@@ -20,11 +20,15 @@ class FGameplayDebuggerExtension_ActorSelect : public FOUUGameplayDebuggerExtens
 public:
 	FGameplayDebuggerExtension_ActorSelect();
 
+	// - FGameplayDebuggerExtension
+	void OnActivated() override;
+	// --
+
 private:
 	void SelectLocalPlayerPawn();
 
 	void SelectClosestNPC();
-	
+
 	void SelectPlayerPawn_1();
 	void SelectPlayerPawn_2();
 	void SelectPlayerPawn_3();

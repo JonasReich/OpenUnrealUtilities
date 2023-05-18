@@ -4,13 +4,23 @@
 
 #if WITH_GAMEPLAY_DEBUGGER
 
-#include "EngineUtils.h"
-#include "GameFramework/Pawn.h"
-#include "GameFramework/PlayerController.h"
-#include "GameFramework/PlayerState.h"
-#include "GameplayDebuggerCategoryReplicator.h"
-#include "InputCoreTypes.h"
-#include "Kismet/GameplayStatics.h"
+	#include "EngineUtils.h"
+	#include "GameFramework/Pawn.h"
+	#include "GameFramework/PlayerController.h"
+	#include "GameFramework/PlayerState.h"
+	#include "GameplayDebuggerCategoryReplicator.h"
+	#include "InputCoreTypes.h"
+	#include "Kismet/GameplayStatics.h"
+
+namespace OUU::Runtime::GameplayDebugger::Private
+{
+	FConsoleCommandDelegate GOnSelectClosestNPC;
+
+	FAutoConsoleCommand CCommand_SelectClosestNPC(
+		TEXT("ouu.gdt.SelectClosestNPC"),
+		TEXT("Selects the closest NPC to the local player character in the gameplay debugger tool."),
+		FConsoleCommandDelegate::CreateLambda([]() { GOnSelectClosestNPC.ExecuteIfBound(); }));
+}; // namespace OUU::Runtime::GameplayDebugger::Private
 
 FGameplayDebuggerExtension_ActorSelect::FGameplayDebuggerExtension_ActorSelect()
 {
@@ -45,6 +55,14 @@ FGameplayDebuggerExtension_ActorSelect::FGameplayDebuggerExtension_ActorSelect()
 	BIND_SELECT_PLAYER_X(4, Four);
 
 	#undef BIND_SELECT_PLAYER_X
+}
+
+void FGameplayDebuggerExtension_ActorSelect::OnActivated()
+{
+	FOUUGameplayDebuggerExtension_Base::OnActivated();
+
+	OUU::Runtime::GameplayDebugger::Private::GOnSelectClosestNPC
+		.BindSP(this, &FGameplayDebuggerExtension_ActorSelect::SelectClosestNPC);
 }
 
 void FGameplayDebuggerExtension_ActorSelect::SelectLocalPlayerPawn()
