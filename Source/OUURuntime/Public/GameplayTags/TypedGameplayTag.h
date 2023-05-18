@@ -61,21 +61,6 @@ public:
 	// using RootLiteralTagType = InRootLiteralTagType;
 	using TypedGameplayTagType = TTypedGameplayTag<BlueprintTagType, InRootLiteralTagTypes...>;
 
-	friend BlueprintTagType;
-
-	TTypedGameplayTag(BlueprintTagType& InOwningTag) : OwningTag(InOwningTag) {}
-	TTypedGameplayTag(const TTypedGameplayTag&) = default;
-
-	template <typename T, typename U, typename V>
-	BlueprintTagType& operator=(const TLiteralGameplayTag<T, U, V>& LiteralGameplayTag)
-	{
-		AssertLiteralGameplayTag(LiteralGameplayTag);
-		OwningTag = LiteralGameplayTag.GetTag();
-		return OwningTag;
-	}
-
-	TTypedGameplayTag& operator=(const TTypedGameplayTag&) = default;
-
 	/**
 	 * Get a list of the tags that are considered valid tag roots for this tag type.
 	 */
@@ -96,11 +81,8 @@ public:
 		return Result;
 	}
 
-private:
-	BlueprintTagType& OwningTag;
-
 	template <typename T, typename U, typename V>
-	constexpr bool AssertLiteralGameplayTag(const TLiteralGameplayTag<T, U, V>& LiteralGameplayTag) const
+	static constexpr bool AssertLiteralGameplayTag(const TLiteralGameplayTag<T, U, V>& LiteralGameplayTag)
 	{
 		using ParamTagType = TLiteralGameplayTag<T, U, V>;
 
@@ -175,11 +157,8 @@ public:                                                                         
 	template <typename T, typename U, typename V>                                                                      \
 	TagType(const TLiteralGameplayTag<T, U, V>& LiteralGameplayTag)                                                    \
 	{                                                                                                                  \
-		using ParamTagType = TLiteralGameplayTag<T, U, V>;                                                             \
-		static_assert(                                                                                                 \
-			TIsChildTagOf<T, ##__VA_ARGS__>::Value,                                                                    \
-			"Can only assign from a literal gameplay tag that is nested under any of the declared root tags.");        \
-		TypedTag_Impl = LiteralGameplayTag;                                                                            \
+		TypedTagImplType::AssertLiteralGameplayTag(LiteralGameplayTag);                                                \
+		*this = LiteralGameplayTag.GetTag();                                                                           \
 	}                                                                                                                  \
 	TagType& operator=(const TagType& Other)                                                                           \
 	{                                                                                                                  \
@@ -193,8 +172,6 @@ protected:                                                                      
 	FName GetStructName() const { return *TagType::StaticStruct()->GetName().Mid(1); }                                 \
                                                                                                                        \
 private:                                                                                                               \
-	TypedTagImplType TypedTag_Impl{*this};                                                                             \
-                                                                                                                       \
 	TagType(FGameplayTag Tag) { TagName = Tag.GetTagName(); }                                                          \
                                                                                                                        \
 	template <typename, typename...>                                                                                   \
@@ -207,7 +184,25 @@ private:                                                                        
 		FAutoRegistrationHelper();                                                                                     \
 		~FAutoRegistrationHelper();                                                                                    \
 	};                                                                                                                 \
-	static FAutoRegistrationHelper Instance;
+	static FAutoRegistrationHelper Instance;                                                                           \
+                                                                                                                       \
+	/* sorry :'( */                                                                                                    \
+	}                                                                                                                  \
+	;                                                                                                                  \
+                                                                                                                       \
+	using TagType##s_Value = TTypedGameplayTagContainerValue<TagType>;                                                 \
+	using TagType##s_Ref = TTypedGameplayTagContainerReference<TagType>;                                               \
+	template <>                                                                                                        \
+	struct TStructOpsTypeTraits<TagType> : public TStructOpsTypeTraitsBase2<TagType>                                   \
+	{                                                                                                                  \
+		enum                                                                                                           \
+		{                                                                                                              \
+			WithNetSerializer = true,                                                                                  \
+			WithNetSharedSerialization = true,                                                                         \
+			WithPostSerialize = true,                                                                                  \
+			WithStructuredSerializeFromMismatchedTag = true,                                                           \
+			WithImportTextItem = true,                                                                                 \
+		};
 
 #if WITH_EDITOR
 	#define PRIVATE_TYPED_GAMEPLAY_TAG_EDITOR_IMPL(TagType)                                                            \

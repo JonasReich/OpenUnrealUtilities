@@ -103,9 +103,17 @@ END_DEFINE_SPEC(FTypedGameplayTagSpec)
 
 void FTypedGameplayTagSpec::Define()
 {
+	It("should be constructible from a literal gameplay tag", [this]() {
+		FOUUSampleBarTag InstanceTag{FSampleGameplayTags::Bar::Get()};
+		FGameplayTag RegularTag{FSampleGameplayTags::Bar::Get()};
+		SPEC_TEST_EQUAL(InstanceTag.ToString(), RegularTag.ToString());
+	});
+
 	It("should be assignable from a literal gameplay tag", [this]() {
-		FOUUSampleBarTag InstanceTag = FSampleGameplayTags::Bar::Get();
-		FGameplayTag RegularTag = FSampleGameplayTags::Bar::Get();
+		FOUUSampleBarTag InstanceTag;
+		FGameplayTag RegularTag;
+		InstanceTag = FSampleGameplayTags::Bar::Get();
+		RegularTag = FSampleGameplayTags::Bar::Get();
 		SPEC_TEST_EQUAL(InstanceTag.ToString(), RegularTag.ToString());
 	});
 
