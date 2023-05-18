@@ -255,25 +255,31 @@ void FJsonDataAssetSpec::Define()
 		It("should return empty data object for object with default values", [this]() {
 			auto LoadPath = UTestJsonDataAsset::GetTestPath_NoValuesSet();
 			auto TestAsset = Cast<UTestJsonDataAsset>(FJsonDataAssetPath::FromPackagePath(LoadPath).LoadSynchronous());
-			auto JsonObject = TestAsset->ExportJson();
-			const TSharedPtr<FJsonObject>* JsonDataObject = nullptr;
-			if (SPEC_TEST_TRUE(JsonObject->TryGetObjectField("Data", OUT JsonDataObject)))
+			if (SPEC_TEST_NOT_NULL(TestAsset))
 			{
-				auto EmptyJsonObject = MakeShared<FJsonValueObject>(nullptr);
-				auto JsonObjectValue = MakeShared<FJsonValueObject>(*EmptyJsonObject);
-				SPEC_TEST_TRUE(FJsonValue::CompareEqual(*JsonObjectValue, *EmptyJsonObject));
+				auto JsonObject = TestAsset->ExportJson();
+				const TSharedPtr<FJsonObject>* JsonDataObject = nullptr;
+				if (SPEC_TEST_TRUE(JsonObject->TryGetObjectField("Data", OUT JsonDataObject)))
+				{
+					auto EmptyJsonObject = MakeShared<FJsonValueObject>(nullptr);
+					auto JsonObjectValue = MakeShared<FJsonValueObject>(*EmptyJsonObject);
+					SPEC_TEST_TRUE(FJsonValue::CompareEqual(*JsonObjectValue, *EmptyJsonObject));
+				}
 			}
 		});
 		It("should return expected data object for object with all set values", [this]() {
 			auto LoadPath = UTestJsonDataAsset::GetTestPath_NoValuesSet();
 			auto TestAsset = Cast<UTestJsonDataAsset>(FJsonDataAssetPath::FromPackagePath(LoadPath).LoadSynchronous());
-			auto JsonObject = TestAsset->ExportJson();
-			const TSharedPtr<FJsonObject>* JsonDataObject = nullptr;
-			if (SPEC_TEST_TRUE(JsonObject->TryGetObjectField("Data", OUT JsonDataObject)))
+			if (SPEC_TEST_NOT_NULL(TestAsset))
 			{
-				auto EmptyJsonObject = MakeShared<FJsonValueObject>(MakeDataJsonObject_AllValues());
-				auto JsonObjectValue = MakeShared<FJsonValueObject>(*EmptyJsonObject);
-				SPEC_TEST_TRUE(FJsonValue::CompareEqual(*JsonObjectValue, *EmptyJsonObject));
+				auto JsonObject = TestAsset->ExportJson();
+				const TSharedPtr<FJsonObject>* JsonDataObject = nullptr;
+				if (SPEC_TEST_TRUE(JsonObject->TryGetObjectField("Data", OUT JsonDataObject)))
+				{
+					auto EmptyJsonObject = MakeShared<FJsonValueObject>(MakeDataJsonObject_AllValues());
+					auto JsonObjectValue = MakeShared<FJsonValueObject>(*EmptyJsonObject);
+					SPEC_TEST_TRUE(FJsonValue::CompareEqual(*JsonObjectValue, *EmptyJsonObject));
+				}
 			}
 		});
 	});

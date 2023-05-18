@@ -62,14 +62,14 @@ namespace OUU::Runtime::JsonData::Private
 		TEXT("If true, files with invalid extensions inside the Data/ folder will be ignored during 'import all "
 			 "assets' calls."));
 
-	FString GDataSource_Uncooked = TEXT("JsonDataSrc/");
+	FString GDataSource_Uncooked = TEXT("Data/");
 	FAutoConsoleVariableRef CVar_DataSource_Uncooked(
 		TEXT("ouu.JsonData.SourceUncooked"),
 		GDataSource_Uncooked,
 		TEXT("Root relative path for uncooked json content. Must differ from cooked root and end in a slash!"),
 		ECVF_ReadOnly);
 
-	FString GDataSource_Cooked = TEXT("CookedJsonData/");
+	FString GDataSource_Cooked = TEXT("CookedData/");
 	FAutoConsoleVariableRef CVar_DataSource_Cooked(
 		TEXT("ouu.JsonData.SourceCooked"),
 		GDataSource_Cooked,
