@@ -10,6 +10,8 @@
 
 #include "JsonDataAssetSubsystem.generated.h"
 
+struct FJsonDataAssetPath;
+
 UCLASS(BlueprintType)
 class OUURUNTIME_API UJsonDataAssetSubsystem : public UEngineSubsystem
 {
@@ -29,12 +31,22 @@ public:
 	static bool AutoExportJsonEnabled();
 
 	/**
+	 * Serialize the given path over the network.
+	 */
+	static void NetSerializePath(FJsonDataAssetPath& Path, FArchive& Ar);
+
+	/**
 	 * Import all .json into UJsonDataAssets.
 	 * This does not delete stale UJsonDataAssets that don't have a matching .json file anymore.
 	 * It does reload all property data of existing json assets, unless bOnlyMissing is true.
 	 */
 	UFUNCTION()
 	void ImportAllAssets(bool bOnlyMissing);
+
+	/**
+	 * Rescan all json data asset files on disk.
+	 */
+	void RescanAllAssets();
 
 private:
 	void ImportAllAssets(const FName& RootName, bool bOnlyMissing);
@@ -85,7 +97,11 @@ private:
 	void RegisterMountPoints(const FName& RootName);
 	void UnregisterMountPoints(const FName& RootName);
 
+	void HandleAssetRegistryInitialized();
+
 #if WITH_EDITOR
+	void HandlePreBeginPIE(const bool bIsSimulating);
+
 	void CleanupAssetCache();
 	void CleanupAssetCache(const FName& RootName);
 
@@ -99,6 +115,7 @@ private:
 
 	bool bIsInitialAssetImportCompleted = false;
 	bool bAutoExportJson = false;
+	bool bJsonDataAssetListBuilt = false;
 
 	// Maps from plugin mount points (like /JsonData/Plugins/OpenUnrealUtilities/) to source disk paths (like
 	// <ProjectRoot>/Plugins/OpenUnrealUtilities/Data/)
@@ -108,6 +125,13 @@ private:
 	// Quick list to look up all source directories.
 	TArray<FString> AllSourceDirectories_Uncooked;
 	TArray<FString> AllSourceDirectories_Cooked;
+
+	// Mapping of all json data asset files, used for fast net serialization
+	TArray<FName> AllJsonDataAssetsByIndex;
+	TMap<FName, int32> AllJsonDataAssetsByPath;
+	// Actual number of bits needed to fully serialize an index into AllJsonDataAssetsByIndex. Will be set to actual
+	// number of bits needed in UJsonDataAssetSubsystem::RescanAllAssets.
+	int64 PathIndexNetSerializeBits = 31;
 
 	TArray<FName> AllPluginRootNames;
 	TArray<FName> AllRootNames;

@@ -3,6 +3,7 @@
 #include "JsonDataAsset/JsonDataAssetPath.h"
 
 #include "JsonDataAsset/JsonDataAsset.h"
+#include "JsonDataAsset/JsonDataAssetSubsystem.h"
 #include "OUURuntimeVersion.h"
 
 FJsonDataAssetPath::FJsonDataAssetPath(const UJsonDataAsset* Object) : Path(Object) {}
@@ -106,7 +107,11 @@ bool FJsonDataAssetPath::SerializeFromMismatchedTag(const FPropertyTag& Tag, FSt
 
 bool FJsonDataAssetPath::NetSerialize(FArchive& Ar, UPackageMap* PackageMap, bool& OutSuccess)
 {
-	Ar << Path;
+	// We must write the soft object path instead of the pointer itself since our UJsonDataAsset is marked as not
+	// supported for networking. The serialization of FSoftObjectPtr will fail because of this if the object is
+	// currently loaded, but FSoftObjectPath does not perform this check.
+	UJsonDataAssetSubsystem::NetSerializePath(*this, Ar);
+
 	return true;
 }
 

@@ -31,6 +31,12 @@ namespace OUU::Runtime::JsonData::Private
 		TEXT("If true, all load errors relating to generated UAssets will be ignored during initial load. Warning: "
 			 "This might hide wrong asset references to json content!"));
 
+	TAutoConsoleVariable<bool> CVar_UseFastNetSerialization(
+		TEXT("ouu.JsonData.UseFastNetSerialization"),
+		true,
+		TEXT("If true, use fast net serialization for json data asset references. Drastically reduces network traffic, "
+			 "but requires the list of json data asset files to be identical on all clients."));
+
 	FAutoConsoleCommand CCommand_ReimportAllAssets(
 		TEXT("ouu.JsonData.ReimportAllAssets"),
 		TEXT("Load all json data assets and save them as uassets. This performs the same input that occurs during "
@@ -262,23 +268,21 @@ void UJsonDataAssetSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 #if WITH_EDITOR
 	FEditorDelegates::OnPackageDeleted.AddUObject(this, &UJsonDataAssetSubsystem::HandlePackageDeleted);
+	FEditorDelegates::PreBeginPIE.AddUObject(this, &UJsonDataAssetSubsystem::HandlePreBeginPIE);
 
 	CleanupAssetCache();
 #endif
 
 	RegisterMountPoints(OUU::Runtime::JsonData::GameRootName);
 
-	if (JsonData::Private::CVar_ImportAllAssetsOnStartup.GetValueOnGameThread())
+	auto& AssetRegistry = *IAssetRegistry::Get();
+	if (AssetRegistry.IsSearchAllAssets() == false || AssetRegistry.IsLoadingAssets())
 	{
-		auto& AssetRegistry = *IAssetRegistry::Get();
-		if (AssetRegistry.IsSearchAllAssets() == false || AssetRegistry.IsLoadingAssets())
-		{
-			AssetRegistry.OnFilesLoaded().AddUObject(this, &UJsonDataAssetSubsystem::ImportAllAssets, true);
-		}
-		else
-		{
-			ImportAllAssets(true);
-		}
+		AssetRegistry.OnFilesLoaded().AddUObject(this, &UJsonDataAssetSubsystem::HandleAssetRegistryInitialized);
+	}
+	else
+	{
+		HandleAssetRegistryInitialized();
 	}
 
 	bAutoExportJson = true;
@@ -301,6 +305,7 @@ void UJsonDataAssetSubsystem::Deinitialize()
 
 #if WITH_EDITOR
 	FEditorDelegates::OnPackageDeleted.RemoveAll(this);
+	FEditorDelegates::PreBeginPIE.RemoveAll(this);
 #endif
 
 	bAutoExportJson = false;
@@ -313,35 +318,148 @@ bool UJsonDataAssetSubsystem::AutoExportJsonEnabled()
 	return GEngine->GetEngineSubsystem<UJsonDataAssetSubsystem>()->bAutoExportJson;
 }
 
+void UJsonDataAssetSubsystem::NetSerializePath(FJsonDataAssetPath& Path, FArchive& Ar)
+{
+	UJsonDataAssetSubsystem* SubsystemInstance = nullptr;
+	if (GEngine && GEngine->IsInitialized())
+	{
+		SubsystemInstance = GEngine->GetEngineSubsystem<UJsonDataAssetSubsystem>();
+	}
+
+	auto SoftObjectPath = Path.Path.ToSoftObjectPath();
+
+	bool bHasPath = SoftObjectPath.IsNull() == false;
+	Ar.SerializeBits(&bHasPath, 1);
+
+	if (bHasPath)
+	{
+		bool bUsesFastSerialization = JsonData::Private::CVar_UseFastNetSerialization.GetValueOnGameThread()
+			&& SubsystemInstance && SubsystemInstance->bJsonDataAssetListBuilt;
+		int32 PathIndex = 0;
+		if (bUsesFastSerialization && Ar.IsSaving())
+		{
+			const int32* OptIndex =
+				SubsystemInstance->AllJsonDataAssetsByPath.Find(SoftObjectPath.GetLongPackageFName());
+			if (ensureMsgf(
+					OptIndex,
+					TEXT("Tried to NetSerialize json data asset path '%s' which does not appear to exist."),
+					*SoftObjectPath.ToString()))
+			{
+				PathIndex = *OptIndex;
+			}
+			else
+			{
+				bUsesFastSerialization = false;
+			}
+		}
+
+		Ar.SerializeBits(&bUsesFastSerialization, 1);
+
+		if (bUsesFastSerialization)
+		{
+			checkf(
+				(SubsystemInstance && SubsystemInstance->bJsonDataAssetListBuilt) || Ar.IsLoading() == false,
+				TEXT("Received json data asset path using fast net serialization, but our asset list has not been "
+					 "built!"));
+			Ar.SerializeBits(&PathIndex, SubsystemInstance->PathIndexNetSerializeBits);
+
+			const auto GetPackageNameFromPath = [](const FName& _Path) -> FName {
+				int32 NameStartIndex;
+				const auto& PathString = _Path.ToString();
+				if (PathString.FindLastChar(TEXT('/'), NameStartIndex))
+				{
+					return FName(PathString.RightChop(NameStartIndex + 1));
+				}
+
+				return NAME_None;
+			};
+
+			// Usually, the asset name matches the package name so we do not need to serialize it separately
+			bool bAssetNameMatchesPackage = false;
+			FName AssetName;
+			if (Ar.IsSaving())
+			{
+				AssetName = GetPackageNameFromPath(SoftObjectPath.GetLongPackageFName());
+				bAssetNameMatchesPackage = AssetName == SoftObjectPath.GetAssetFName();
+			}
+
+			Ar.SerializeBits(&bAssetNameMatchesPackage, 1);
+
+			if (bAssetNameMatchesPackage == false)
+			{
+				Ar << AssetName;
+			}
+
+			// Serialize subobject path if we have it. In most cases this will be empty.
+			bool bHasSubObjectPath = SoftObjectPath.GetSubPathString().IsEmpty() == false;
+			Ar.SerializeBits(&bHasSubObjectPath, 1);
+
+			FString SubObjectPath;
+			if (bHasSubObjectPath)
+			{
+				if (Ar.IsSaving())
+				{
+					SubObjectPath = SoftObjectPath.GetSubPathString();
+				}
+
+				Ar << SubObjectPath;
+			}
+
+			if (Ar.IsLoading())
+			{
+				if (ensureMsgf(
+						PathIndex < SubsystemInstance->AllJsonDataAssetsByIndex.Num(),
+						TEXT("Received out-of range json data asset path index %i!"),
+						PathIndex))
+				{
+					const auto& PackagePath = SubsystemInstance->AllJsonDataAssetsByIndex[PathIndex];
+					if (bAssetNameMatchesPackage)
+					{
+						AssetName = GetPackageNameFromPath(PackagePath);
+					}
+
+					// Construct path from the pieces we have gathered.
+					SoftObjectPath = FSoftObjectPath(PackagePath, AssetName, SubObjectPath);
+				}
+				else
+				{
+					SoftObjectPath.Reset();
+				}
+			}
+		}
+		else
+		{
+			Ar << SoftObjectPath;
+		}
+
+		if (Ar.IsLoading())
+		{
+			Path.Path = MoveTemp(SoftObjectPath);
+		}
+	}
+	else if (Ar.IsLoading())
+	{
+		Path.Path.Reset();
+	}
+}
+
 void UJsonDataAssetSubsystem::ImportAllAssets(bool bOnlyMissing)
 {
-	TArray<FString> AllPackageNames;
+	if (bJsonDataAssetListBuilt == false)
+	{
+		RescanAllAssets();
+	}
+
 	bool bIgnoreErrorsDuringImport =
 		OUU::Runtime::JsonData::Private::CVar_IgnoreLoadErrorsDuringStartupImport.GetValueOnAnyThread();
 
 	if (bIgnoreErrorsDuringImport)
 	{
-		IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
-		for (auto& RootName : AllRootNames)
-		{
-			auto SourceRoot = JsonData::GetSourceRoot_Full(RootName, EJsonDataAccessMode::Read);
-			PlatformFile.IterateDirectoryRecursively(
-				*SourceRoot,
-				[&AllPackageNames](const TCHAR* FilePath, bool bIsDirectory) -> bool {
-					if (bIsDirectory == false)
-					{
-						auto PackagePath = JsonData::SourceFullToPackage(FilePath, EJsonDataAccessMode::Read);
-						AllPackageNames.Add(PackagePath);
-					}
-					return true;
-				});
-		}
-
 		// We have to ignore references to generated json packages while doing the initial import.
 		// Json assets might reference each other.
-		for (auto& PackageName : AllPackageNames)
+		for (auto& PackageName : AllJsonDataAssetsByIndex)
 		{
-			FLinkerLoad::AddKnownMissingPackage(*PackageName);
+			FLinkerLoad::AddKnownMissingPackage(*PackageName.ToString());
 		}
 	}
 
@@ -354,13 +472,55 @@ void UJsonDataAssetSubsystem::ImportAllAssets(bool bOnlyMissing)
 	if (bIgnoreErrorsDuringImport)
 	{
 		// Now any further package load errors are valid
-		for (auto& PackageName : AllPackageNames)
+		for (auto& PackageName : AllJsonDataAssetsByIndex)
 		{
-			FLinkerLoad::RemoveKnownMissingPackage(*PackageName);
+			FLinkerLoad::RemoveKnownMissingPackage(*PackageName.ToString());
 		}
 	}
 
 	bIsInitialAssetImportCompleted = true;
+}
+
+void UJsonDataAssetSubsystem::RescanAllAssets()
+{
+	AllJsonDataAssetsByIndex.Empty();
+
+	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+	for (auto& RootName : AllRootNames)
+	{
+		auto SourceRoot = JsonData::GetSourceRoot_Full(RootName, EJsonDataAccessMode::Read);
+		PlatformFile.IterateDirectoryRecursively(*SourceRoot, [&](const TCHAR* FilePath, bool bIsDirectory) -> bool {
+			if (bIsDirectory == false)
+			{
+				auto PackagePath = JsonData::SourceFullToPackage(FilePath, EJsonDataAccessMode::Read);
+				AllJsonDataAssetsByIndex.Add(FName(PackagePath));
+			}
+			return true;
+		});
+	}
+
+	// Note: We sort using LexicalLess here instead of FastLess, because we need the resulting order to be deterministic
+	// across multiple clients.
+	AllJsonDataAssetsByIndex.Sort([](const FName& _A, const FName& _B) { return _A.LexicalLess(_B); });
+
+	const int32 NumPaths = AllJsonDataAssetsByIndex.Num();
+	AllJsonDataAssetsByPath.Empty(NumPaths);
+	for (int32 i = 0; i < NumPaths; ++i)
+	{
+		AllJsonDataAssetsByPath.Add(AllJsonDataAssetsByIndex[i], i);
+	}
+
+	PathIndexNetSerializeBits = 0;
+	const int32 MaxPathIndex = FMath::Max(0, NumPaths - 1);
+	for (int32 i = 0; i < 32; ++i)
+	{
+		if (MaxPathIndex & (1 << i))
+		{
+			PathIndexNetSerializeBits = i + 1ll;
+		}
+	}
+
+	bJsonDataAssetListBuilt = true;
 }
 
 void UJsonDataAssetSubsystem::ImportAllAssets(const FName& RootName, bool bOnlyMissing)
@@ -640,7 +800,23 @@ void UJsonDataAssetSubsystem::UnregisterMountPoints(const FName& RootName)
 #endif
 }
 
+void UJsonDataAssetSubsystem::HandleAssetRegistryInitialized()
+{
+	RescanAllAssets();
+
+	if (JsonData::Private::CVar_ImportAllAssetsOnStartup.GetValueOnGameThread())
+	{
+		ImportAllAssets(true);
+	}
+}
+
 #if WITH_EDITOR
+void UJsonDataAssetSubsystem::HandlePreBeginPIE(const bool bIsSimulating)
+{
+	// Make sure all asset paths are up to date in case we want to use fast net serialization.
+	RescanAllAssets();
+}
+
 void UJsonDataAssetSubsystem::CleanupAssetCache()
 {
 	for (auto& RootName : AllRootNames)

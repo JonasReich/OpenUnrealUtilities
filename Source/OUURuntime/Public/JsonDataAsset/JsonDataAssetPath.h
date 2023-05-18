@@ -31,6 +31,7 @@ struct OUURUNTIME_API FJsonDataAssetPath
 public:
 	friend class FJsonDataAssetPathCustomization;
 	friend class UAssetValidator_JsonDataAssetReferences;
+	friend class UJsonDataAssetSubsystem;
 
 public:
 	FJsonDataAssetPath() = default;
