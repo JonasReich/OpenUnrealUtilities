@@ -3,24 +3,83 @@
 
 ![OUU logo](./Resources/ouu_wide.png)
 
-The Open Unreal Utilities plugin is a general purpose utility plugin for Unreal Engine.
+The Open Unreal Utilities plugin is a collection of general purpose utilities in Unreal Engine developed by Jonas Reich and colleagues.
+
+I'm developing it during my day job(s) and squeeze all the small utilities in here that don't feel big enough for dedicated plugins and
+that are relatively generic and should prove useful for almost any game project.
+
+Some of those smaller utilities have since grown to the point where I'm considering moving them to dedicated plugins (esp. the json data assets),
+but for the time being, I want to keep everything in a single place,
+especially because most of those components still depend on smaller OUU components anyways.
 
 ## Contents
 
+### Modules
+
 The plugin is divided into several modules for different application purposes:
 
-| Module              | Description  |
-|---------------------|--------------|
-| OUUBlueprintRuntime | Blueprint exposed functionality that is already present in C++ UE4 off-the-shelf |
-| OUUDeveloper        | Developer tools, esp. debug commands that are available in editor and development builds |
-| OUUEditor           | Blueprint function libraries for editor utilities |
-| OUURuntime          | The core of the plugin. These are runtime utilities that are also available in shipping builds. These utilities should be useful in all kinds of different contexts ranging from container templates, execution flow helpers, etc |
-| OUUTests            | Automated tests that test the plugin functionality. Only contains private content. _You will never need to reference this from other modules!_ |
-| OUUUMG              | UMG Widgets and UI implementation helpers. <br> Many of these tools were deprecated in favor of UE5's CommonUI plugin. |
+| Module                  | Description  |
+|-------------------------|--------------|
+| **OUUBlueprintRuntime** | Blueprint exposed functionality that is already present in C++ UE4 off-the-shelf. e.g. build configuration info, direct ini settings access, world context resolution, class/object flags, lexical string operators, message log printing, platform process invocation, etc. |
+| OUUDeveloper            | Developer tools, esp. debug commands that are available in editor and development builds |
+| OUUEditor               | Blueprint function libraries for editor utilities |
+| **OUURuntime**          | The core of the plugin. These are runtime utilities that are also available in shipping builds. These utilities should be useful in all kinds of different contexts ranging from container templates, execution flow helpers, etc |
+| OUUTests                | Automated tests that test the plugin functionality. Only contains private content. _You will never need to reference this from other modules!_ |
+| OUUTestUtilities        | Test automation tools. Especially utils to manage worlds for automation tests and some macros to reduce boilerplate code.  |
+| OUUUMG                  | UMG Widgets and UI implementation helpers. <br> Most of these tools were deprecated in favor of UE5's CommonUI plugin. |
 
-For a more detailed overview of all utilities you should check out the plugin source code,
-as most of the documentation is provided in the form of source code comments.
-If you want to know how a type is meant to be used, it can be useful to check the automation tests in the ``OUUTests`` module.
+Most of the documentation of how the open unreal utilities are used are provided as source code comments and automation tests in the ``OUUTests`` module.
+
+### Runtime Features
+
+The **bold** features are the big ones that I most reccommend you to try the plugin for:
+
+- Animation
+	- Gameplay Debugger
+	- ``TraverseBoneTree()`` / ``TBoneChainRange``: Iterators for bone chains
+- Camera
+	- ``UOUUSceneProjectionLibrary``: (De)projection for scene capture and camera components
+	- ``UTextureRenderTargetLibrary``: Query and modify render targets
+- FlowControl
+	- Blueprint exposed lock and request types
+- GameplayAbilities
+	- Gameplay Debugger incl. gameplay event history
+- Gameplay Debugger
+	- Player/NPC Actor selection extension
+	- Category / extension registration helpers
+- **Gameplay Tags**
+	- ``FGameplayTagQueryParser``: Parse gameplay tag queries from strings
+	- ``LiteralGameplayTags``: Tempates for declarations of native gameplay tag trees
+	- ``TypedGameplayTags``: "Typesafe" gameplay tags for C++ and blueprints
+- **Json Data Asset**
+	- Data asset serialization to/from json files
+	- Includes content browser integration and dynamic runtime loading
+	- Can be used as foundation for data modding, etc
+- Localization: FText conversion functions, esp. for lists
+- **Logging**: One-line message log macros and Blueprint extension
+- Math
+	- ``USpiralIdUtilities`` Conversion to/from 2D grid coordinates to 1D index
+	- Small util functions
+- Misc
+	- Canvas graph plotting
+	- Easy to use regex wrappers
+- **SemVer**: Semantic Version parser and runtime
+- **Sequential Frame Scheduler**: Distribute frequent game tasks that only need to be ran every other tick over multiple frames
+- **Templates**
+	- Container/iterator templates to cast during iteration, reverse iterate, turn an array into a circular buffer, etc
+	- String conversion for many of the built-in types like arrays, maps, shared ptr, etc - mostly intended for debugging
+	- Macros/tempaltes for easier blueprintable interface usage
+	- Read/write locks
+	- and more...
+- Traits: Additional type traits for template implementations (e.g. conditional types, iterator traits, etc)
+- UMG: Iteration helpers for UMG widget chains
+
+### Editor/Development Features
+
+- UI for "MapIniSection" cook settings in project settings window
+- Topdown "Actor Map" debug window
+- Garbage collection dump/debug console commands
+- and more...
 
 ## Versions
 
@@ -39,12 +98,13 @@ Active development happens on branches named by supported engine version (patter
 Multiple version branches may receive updates at the same time, e.g. even after the UE 5.0 release, I keep adding features to ue4.27 that are infrequently cross-merged to the ue5.0. This is because I'm still actively using the plugin on projects that do not always upgrade to the latest UE version.
 
 > **active development:**
-> - [ue5.0](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue5.0)
-> 
+> **[ue5.1](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue5.1)**
+>
 > old versions (not supported anymore):
-> - [ue4.25](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue4.25)
-> - [ue4.26](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue4.26)
-> - [ue4.27](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue4.27)
+> [ue4.25](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue4.25),
+> [ue4.26](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue4.26),
+> [ue4.27](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue4.27),
+> [ue5.0](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue5.0)
 
 Features should never be merged back from higher engine versions to lower versions to guarantee asset compatibility. I'm generally trying to adopt a fast-forward merge philosophy, but as soon as version branches diverge, I have to resort to regular merges.
 
