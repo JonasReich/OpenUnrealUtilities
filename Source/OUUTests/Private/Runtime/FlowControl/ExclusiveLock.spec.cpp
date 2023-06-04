@@ -12,7 +12,7 @@ BEGIN_DEFINE_SPEC(FExclusiveLockSpec, "OpenUnrealUtilities.Runtime.FlowControl.E
 END_DEFINE_SPEC(FExclusiveLockSpec)
 void FExclusiveLockSpec::Define()
 {
-	BeforeEach([this]() { Env = MakeShared<FOUULockTestEnvironment<UExclusiveLock>>(); });
+	BeforeEach([this]() { Env = MakeShared<FOUULockTestEnvironment<UExclusiveLock>>(*this); });
 
 	Describe("TryLock", [this]() {
 		It("should fail to lock the lock if the key object is nullptr", [this]() {

@@ -12,7 +12,7 @@ BEGIN_DEFINE_SPEC(FSharedLockSpec, "OpenUnrealUtilities.Runtime.FlowControl.Shar
 END_DEFINE_SPEC(FSharedLockSpec)
 void FSharedLockSpec::Define()
 {
-	BeforeEach([this]() { Env = MakeShared<FOUULockTestEnvironment<USharedLock>>(); });
+	BeforeEach([this]() { Env = MakeShared<FOUULockTestEnvironment<USharedLock>>(*this); });
 
 	Describe("Lock", [this]() {
 		It("should fail to lock the lock if the key object is nullptr", [this]() {

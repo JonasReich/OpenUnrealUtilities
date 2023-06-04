@@ -60,8 +60,11 @@ struct FOUULockTestEnvironment
 
 	FOUUScopedAutomationTestWorld TestWorld{"FOUULockTestEnvironment"};
 
-	FOUULockTestEnvironment()
+	FOUULockTestEnvironment(FAutomationTestBase& _OwningAutomationTest)
 	{
+		// Ignore errors that appeared during world creation
+		_OwningAutomationTest.ClearExecutionInfo();
+
 		Lock = NewObject<LockType>(TestWorld.World);
 		Helper = NewObject<ULockTestsHelper>();
 		Key0 = NewObject<UOUUTestObject>();
