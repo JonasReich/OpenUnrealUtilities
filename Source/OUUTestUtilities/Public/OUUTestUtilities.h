@@ -15,6 +15,7 @@
 	#include "AutomationTestParameterParser.h"
 	#include "AutomationTestWorld.h"
 	#include "CollectionTestFunctions.h"
+	#include "LatentAutomationPIEWorldLoader.h"
 	#include "OUUTestMacros.h"
 	#include "OUUTestObject.h"
 
