@@ -30,12 +30,44 @@ class OUURUNTIME_API UOUUJsonLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
+	static TSharedPtr<FJsonObject> UStructToJsonObject(
+		const void* Data,
+		const void* DefaultData,
+		UStruct* Struct,
+		FOUUJsonLibraryObjectFilter SubObjectFilter,
+		int64 CheckFlags = 0,
+		int64 SkipFlags = 0,
+		bool bOnlyModifiedProperties = false);
+	template <typename StructT>
+	static TSharedPtr<FJsonObject> UStructToJsonObject(
+		const StructT* StructData,
+		FOUUJsonLibraryObjectFilter SubObjectFilter,
+		int64 CheckFlags = 0,
+		int64 SkipFlags = 0,
+		bool bOnlyModifiedProperties = false);
+
 	static TSharedPtr<FJsonObject> UObjectToJsonObject(
 		const UObject* Object,
 		FOUUJsonLibraryObjectFilter SubObjectFilter,
 		int64 CheckFlags = 0,
 		int64 SkipFlags = 0,
 		bool bOnlyModifiedProperties = false);
+
+	static TSharedPtr<FJsonValue> UPropertyToJsonValue(
+		const void* PropertyData,
+		const void* DefaultPropertyData,
+		FProperty* Property,
+		FOUUJsonLibraryObjectFilter SubObjectFilter,
+		int64 CheckFlags = 0,
+		int64 SkipFlags = 0,
+		bool bOnlyModifiedProperties = false);
+
+	static bool JsonValueToUProperty(
+		TSharedRef<FJsonValue> JsonValue,
+		void* PropertyData,
+		FProperty* Property,
+		int64 CheckFlags = 0,
+		int64 SkipFlags = 0);
 
 	/**
 	 * Create a json string from an objects properties.
@@ -52,3 +84,22 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static bool JsonStringToUObject(UObject* Object, FString String, int64 CheckFlags = 0, int64 SkipFlags = 0);
 };
+
+template <typename StructT>
+TSharedPtr<FJsonObject> UOUUJsonLibrary::UStructToJsonObject(
+	const StructT* StructData,
+	FOUUJsonLibraryObjectFilter SubObjectFilter,
+	int64 CheckFlags /* = 0 */,
+	int64 SkipFlags /* = 0 */,
+	bool bOnlyModifiedProperties /* = false */)
+{
+	const StructT Default;
+	return UStructToJsonObject(
+		StructData,
+		&Default,
+		StructT::StaticStruct(),
+		SubObjectFilter,
+		CheckFlags,
+		SkipFlags,
+		bOnlyModifiedProperties);
+}

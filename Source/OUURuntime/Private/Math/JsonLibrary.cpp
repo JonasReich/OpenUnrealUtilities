@@ -6,6 +6,7 @@
 #include "LogOpenUnrealUtilities.h"
 #include "Templates/ScopedAssign.h"
 #include "Traits/ConditionalType.h"
+#include "UObject/TextProperty.h"
 
 namespace OUU::Runtime::Private::JsonLibrary
 {
@@ -517,6 +518,26 @@ struct FJsonLibraryExportHelper
 			ExportCb);
 	}
 
+	TSharedPtr<FJsonObject> ConvertStructToJsonObject(const void* Data, const void* DefaultData, const UStruct* Struct)
+	{
+		FJsonObjectConverter::CustomExportCallback CustomCB = GetCustomCallback();
+		TSharedRef<FJsonObject> JsonObject = MakeShared<FJsonObject>();
+		bool MinimumOneValueSet = false;
+		if (UStructToJsonObject(
+				Struct,
+				Data,
+				DefaultData,
+				OUT JsonObject,
+				OUT MinimumOneValueSet,
+				DefaultCheckFlags,
+				DefaultSkipFlags,
+				&CustomCB))
+		{
+			return JsonObject;
+		}
+		return TSharedPtr<FJsonObject>();
+	}
+
 	TSharedPtr<FJsonObject> ConvertObjectToJsonObject(const UObject* Object)
 	{
 		FJsonObjectConverter::CustomExportCallback CustomCB = GetCustomCallback();
@@ -535,6 +556,17 @@ struct FJsonLibraryExportHelper
 			return JsonObject;
 		}
 		return TSharedPtr<FJsonObject>();
+	}
+
+	TSharedPtr<FJsonValue> ConvertPropertyToJsonValue(const void* Data, const void* DefaultData, FProperty* Property)
+	{
+		FJsonObjectConverter::CustomExportCallback CustomCB = GetCustomCallback();
+		auto Result = UPropertyToJsonValue(Property, Data, DefaultData, DefaultCheckFlags, DefaultSkipFlags, &CustomCB);
+		if (Result.Value)
+		{
+			return Result.Value;
+		}
+		return TSharedPtr<FJsonValueNull>();
 	}
 
 	template <
@@ -572,6 +604,25 @@ struct FJsonLibraryExportHelper
 	}
 };
 
+TSharedPtr<FJsonObject> UOUUJsonLibrary::UStructToJsonObject(
+	const void* Data,
+	const void* DefaultData,
+	UStruct* Struct,
+	FOUUJsonLibraryObjectFilter SubObjectFilter,
+	int64 CheckFlags /* = 0 */,
+	int64 SkipFlags /* = 0 */,
+	bool bOnlyModifiedProperties /* = false */)
+{
+	if (!Data || !IsValid(Struct))
+	{
+		UE_LOG(LogOpenUnrealUtilities, Error, TEXT("Failed to convert invalid struct TO Json object"));
+		return nullptr;
+	}
+
+	FJsonLibraryExportHelper Helper{CheckFlags, SkipFlags, SubObjectFilter, bOnlyModifiedProperties};
+	return Helper.ConvertStructToJsonObject(Data, DefaultData, Struct);
+}
+
 TSharedPtr<FJsonObject> UOUUJsonLibrary::UObjectToJsonObject(
 	const UObject* Object,
 	FOUUJsonLibraryObjectFilter SubObjectFilter,
@@ -587,6 +638,35 @@ TSharedPtr<FJsonObject> UOUUJsonLibrary::UObjectToJsonObject(
 
 	FJsonLibraryExportHelper Helper{CheckFlags, SkipFlags, SubObjectFilter, bOnlyModifiedProperties};
 	return Helper.ConvertObjectToJsonObject(Object);
+}
+
+TSharedPtr<FJsonValue> UOUUJsonLibrary::UPropertyToJsonValue(
+	const void* PropertyData,
+	const void* DefaultPropertyData,
+	FProperty* Property,
+	FOUUJsonLibraryObjectFilter SubObjectFilter,
+	int64 CheckFlags /* = 0 */,
+	int64 SkipFlags /* = 0 */,
+	bool bOnlyModifiedProperties /* = false */)
+{
+	if (!PropertyData || !Property)
+	{
+		UE_LOG(LogOpenUnrealUtilities, Error, TEXT("Failed to convert invalid property TO Json value"));
+		return nullptr;
+	}
+
+	FJsonLibraryExportHelper Helper{CheckFlags, SkipFlags, SubObjectFilter, bOnlyModifiedProperties};
+	return Helper.ConvertPropertyToJsonValue(PropertyData, DefaultPropertyData, Property);
+}
+
+bool UOUUJsonLibrary::JsonValueToUProperty(
+	TSharedRef<FJsonValue> JsonValue,
+	void* PropertyData,
+	FProperty* Property,
+	int64 CheckFlags /* = 0 */,
+	int64 SkipFlags /* = 0 */)
+{
+	return FJsonObjectConverter::JsonValueToUProperty(JsonValue, Property, PropertyData, CheckFlags, SkipFlags);
 }
 
 FString UOUUJsonLibrary::UObjectToJsonString(
