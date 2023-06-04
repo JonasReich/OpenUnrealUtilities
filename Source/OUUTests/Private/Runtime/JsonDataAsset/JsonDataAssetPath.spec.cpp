@@ -8,7 +8,9 @@
 #if WITH_AUTOMATION_WORKER
 
 	// This json path doesn't point to an actual test asset
-	#define FAKE_JSON_PATH TEXT("/JsonData/Folder/Asset")
+	#define FAKE_JSON_PATH		   TEXT("/JsonData/Folder/Asset")
+	#define FAKE_SHORT_OBJECT_PATH TEXT("/JsonData/Folder/Asset.Asset")
+	#define FAKE_SOFT_OBJECT_PATH  TEXT("Script.JsonDataType'/JsonData/Folder/Asset.Asset'")
 
 BEGIN_DEFINE_SPEC(FJsonDataAssetPathSpec, "OpenUnrealUtilities.Runtime.JsonDataAsset.Path", DEFAULT_OUU_TEST_FLAGS)
 	FString ImportText;
@@ -34,14 +36,45 @@ void FJsonDataAssetPathSpec::Define()
 		Path = FJsonDataAssetPath();
 	});
 
-	Describe("GetSetPath", [this]() {
+	Describe("FromPackagePath", [this]() {
 		It("should allow constructing from package path", [this]() {
 			Path = FJsonDataAssetPath::FromPackagePath(FAKE_JSON_PATH);
 			SPEC_TEST_EQUAL(Path.GetPackagePath(), FAKE_JSON_PATH);
 		});
+	});
 
+	Describe("SetPackagePath", [this]() {
 		It("should allow setting from package path", [this]() {
 			Path.SetPackagePath(FAKE_JSON_PATH);
+			SPEC_TEST_EQUAL(Path.GetPackagePath(), FAKE_JSON_PATH);
+		});
+	});
+
+	Describe("SetObjectPath", [this]() {
+		It("should allow setting from short object path", [this]() {
+			Path.SetObjectPath(FAKE_SHORT_OBJECT_PATH);
+			SPEC_TEST_EQUAL(Path.GetPackagePath(), FAKE_JSON_PATH);
+		});
+
+		It("should allow setting from soft object path", [this]() {
+			Path.SetObjectPath(FAKE_SOFT_OBJECT_PATH);
+			SPEC_TEST_EQUAL(Path.GetPackagePath(), FAKE_JSON_PATH);
+		});
+	});
+
+	Describe("SetFromString", [this]() {
+		It("should allow setting from package path", [this]() {
+			Path.SetFromString(FAKE_JSON_PATH);
+			SPEC_TEST_EQUAL(Path.GetPackagePath(), FAKE_JSON_PATH);
+		});
+
+		It("should allow setting from short object path", [this]() {
+			Path.SetFromString(FAKE_SHORT_OBJECT_PATH);
+			SPEC_TEST_EQUAL(Path.GetPackagePath(), FAKE_JSON_PATH);
+		});
+
+		It("should allow setting from soft object path", [this]() {
+			Path.SetFromString(FAKE_SOFT_OBJECT_PATH);
 			SPEC_TEST_EQUAL(Path.GetPackagePath(), FAKE_JSON_PATH);
 		});
 	});
@@ -52,13 +85,13 @@ void FJsonDataAssetPathSpec::Define()
 			ImportAndTestPathIsSetToTestAsset();
 		});
 
-		It("should allow setting from object path", [this]() {
-			ImportText = TEXT("/JsonData/Folder/Asset.Asset");
+		It("should allow setting from short object path", [this]() {
+			ImportText = FAKE_SHORT_OBJECT_PATH;
 			ImportAndTestPathIsSetToTestAsset();
 		});
 
 		It("should allow setting from soft object path", [this]() {
-			ImportText = TEXT("Script.JsonDataType'/JsonData/Folder/Asset.Asset'");
+			ImportText = FAKE_SOFT_OBJECT_PATH;
 			ImportAndTestPathIsSetToTestAsset();
 		});
 	});
@@ -68,9 +101,22 @@ void FJsonDataAssetPathSpec::Define()
 			Path = FJsonDataAssetPath();
 			SPEC_TEST_TRUE(Path.IsNull());
 		});
+
 		It("should return false for any syntactically valid path - even if the asset doesn't exist", [this]() {
 			Path.SetPackagePath(FAKE_JSON_PATH);
 			SPEC_TEST_FALSE(Path.IsNull());
+		});
+
+		It("should return true for a path that was Reset", [this]() {
+			Path.SetPackagePath(FAKE_JSON_PATH);
+			Path.Reset();
+			SPEC_TEST_TRUE(Path.IsNull());
+		});
+
+		It("should return true for a path that was assigned an empty string path", [this]() {
+			Path.SetPackagePath(FAKE_JSON_PATH);
+			Path.SetPackagePath("");
+			SPEC_TEST_TRUE(Path.IsNull());
 		});
 	});
 
@@ -80,13 +126,23 @@ void FJsonDataAssetPathSpec::Define()
 			UJsonDataAsset* LoadedObject = Path.LoadSynchronous();
 			SPEC_TEST_NULL(LoadedObject);
 		});
+
 		It("should return nullptr on invalid path", [this]() {
 			// invalid as in "asset does not exist"
 			// syntactically invalid paths may still result in errors.
+
+			{
+				// All of these are warnings that only appear on the first unsuccessful load.
+				// AddExpectedError("File .*Asset.json does not exist");
+				// AddExpectedError("Failed to load", EAutomationExpectedErrorFlags::Contains, 2);
+				// AddExpectedError("Failed to find object");
+			}
+
 			Path = FJsonDataAssetPath::FromPackagePath(FAKE_JSON_PATH);
 			UJsonDataAsset* LoadedObject = Path.LoadSynchronous();
 			SPEC_TEST_NULL(LoadedObject);
 		});
+
 		It("should return valid ptr on valid path", [this]() {
 			Path = FJsonDataAssetPath::FromPackagePath(UTestJsonDataAsset::GetTestPath());
 			UJsonDataAsset* LoadedObject = Path.LoadSynchronous();
@@ -100,6 +156,7 @@ void FJsonDataAssetPathSpec::Define()
 			UJsonDataAsset* LoadedObject = Path.ResolveObject();
 			SPEC_TEST_NULL(LoadedObject);
 		});
+
 		It("should return nullptr on invalid path", [this]() {
 			// invalid as in "asset does not exist"
 			// syntactically invalid paths may still result in errors.
@@ -107,6 +164,7 @@ void FJsonDataAssetPathSpec::Define()
 			UJsonDataAsset* LoadedObject = Path.ResolveObject();
 			SPEC_TEST_NULL(LoadedObject);
 		});
+
 		It("should return valid ptr on valid path if object is already in memory", [this]() {
 			// Load with a different path
 			auto OtherPathToLoad = FJsonDataAssetPath::FromPackagePath(UTestJsonDataAsset::GetTestPath());
@@ -121,5 +179,7 @@ void FJsonDataAssetPathSpec::Define()
 }
 
 	#undef FAKE_JSON_PATH
+	#undef FAKE_SHORT_OBJECT_PATH
+	#undef FAKE_SOFT_OBJECT_PATH
 
 #endif

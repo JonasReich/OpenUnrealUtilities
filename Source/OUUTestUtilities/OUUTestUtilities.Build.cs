@@ -15,9 +15,15 @@ public class OUUTestUtilities : OUUModuleRules
 			"UMG",
 			"SignificanceManager",
 			"AutomationController",
+			"EngineSettings",
 
 			// Plugin
 			"OUURuntime"
 		});
+
+		if (Target.bBuildEditor)
+		{
+			PublicDependencyModuleNames.Add("UnrealEd");
+		}
 	}
 }

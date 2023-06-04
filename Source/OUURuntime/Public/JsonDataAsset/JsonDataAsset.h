@@ -6,6 +6,7 @@
 
 #include "Dom/JsonObject.h"
 #include "Engine/DataAsset.h"
+#include "Misc/EngineVersion.h"
 
 // Include all the utility headers from here for backwards compatibility
 #include "JsonDataAsset/JsonDataAssetPath.h"
@@ -27,6 +28,27 @@ enum class EJsonDataAccessMode : uint8
 {
 	Read,
 	Write
+};
+
+USTRUCT()
+struct OUURUNTIME_API FJsonDataCustomVersions
+{
+	GENERATED_BODY()
+
+public:
+	FJsonDataCustomVersions() = default;
+	FJsonDataCustomVersions(const TSet<FGuid>& CustomVersionGuids);
+
+	int32 GetCustomVersion(const FGuid& CustomVersionGuid) const;
+
+	void EnsureExpectedVersions(const TSet<FGuid>& CustomVersionGuids);
+
+	TSharedPtr<FJsonObject> ToJsonObject() const;
+	void ReadFromJsonObject(const TSharedPtr<FJsonObject>& JsonObject);
+
+private:
+	UPROPERTY(EditDefaultsOnly)
+	TMap<FGuid, int32> VersionsByGuid;
 };
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -91,6 +113,8 @@ class OUURUNTIME_API UJsonDataAsset : public UDataAsset
 
 	friend FJsonDataAssetPath;
 
+	using FCustomVersionMap = TMap<FGuid, int32>;
+
 public:
 	/** @returns if the json asset is placed within the /JsonData/ root directory */
 	UFUNCTION(BlueprintPure)
@@ -136,10 +160,22 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool ExportJsonFile() const;
 
+	/**
+	 * Called after importing json data, can be used to fix up legacy data.
+	 * @returns if loading was successful.
+	 */
+	virtual bool PostLoadJsonData(
+		const FEngineVersion& EngineVersion,
+		const FJsonDataCustomVersions& CustomVersions,
+		TSharedRef<FJsonObject> JsonObject);
+
 protected:
 	// Check whether we need to handle the given PostRename event. This can return false e.g. if the object is only
 	// being reinstanced.
 	bool MustHandleRename(UObject* OldOuter, const FName OldName) const;
+
+	// Get a list of custom version identifiers used by this object
+	virtual TSet<FGuid> GetRelevantCustomVersions() const;
 
 private:
 	// The actual loading logic that takes care of creating UObjects. Call the json property load internally.

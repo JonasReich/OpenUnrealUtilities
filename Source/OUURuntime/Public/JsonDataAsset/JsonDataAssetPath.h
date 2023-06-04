@@ -86,6 +86,9 @@ public:
 
 	FORCEINLINE bool IsNull() const { return Path.IsNull(); }
 
+	/** Reset the path to null */
+	void Reset() { Path.Reset(); }
+
 	/**
 	 * Set from a long package name string (e.g. "/JsonData/Folder/Asset").
 	 * Does not work with other string formats (e.g. object paths).

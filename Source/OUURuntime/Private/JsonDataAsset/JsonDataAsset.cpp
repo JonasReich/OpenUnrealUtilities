@@ -53,6 +53,68 @@ namespace OUU::Runtime::JsonData::Private
 
 using namespace OUU::Runtime;
 
+FJsonDataCustomVersions::FJsonDataCustomVersions(const TSet<FGuid>& CustomVersionGuids)
+{
+	for (const auto& Guid : CustomVersionGuids)
+	{
+		auto OptVersion = FCurrentCustomVersions::Get(Guid);
+		if (ensureMsgf(
+				OptVersion.IsSet(),
+				TEXT("Version GUID '%s' provided for json data asset is not registered as a custom version."),
+				*Guid.ToString()))
+		{
+			VersionsByGuid.Add(Guid, OptVersion.GetValue().Version);
+		}
+	}
+}
+
+int32 FJsonDataCustomVersions::GetCustomVersion(const FGuid& CustomVersionGuid) const
+{
+	const auto Version = VersionsByGuid.Find(CustomVersionGuid);
+	if (ensureMsgf(
+			Version,
+			TEXT("Tried to access custom version '%s' from json data which was not registered via GetCustomVersions."),
+			*CustomVersionGuid.ToString()))
+	{
+		return *Version;
+	}
+
+	return -1;
+}
+
+void FJsonDataCustomVersions::EnsureExpectedVersions(const TSet<FGuid>& CustomVersionGuids)
+{
+	for (const auto& Guid : CustomVersionGuids)
+	{
+		VersionsByGuid.FindOrAdd(Guid, -1);
+	}
+}
+
+TSharedPtr<FJsonObject> FJsonDataCustomVersions::ToJsonObject() const
+{
+	auto JsonObject = MakeShared<FJsonObject>();
+
+	for (const auto& Entry : VersionsByGuid)
+	{
+		JsonObject->SetNumberField(Entry.Key.ToString(), Entry.Value);
+	}
+
+	return JsonObject;
+}
+
+void FJsonDataCustomVersions::ReadFromJsonObject(const TSharedPtr<FJsonObject>& JsonObject)
+{
+	VersionsByGuid.Reset();
+
+	if (JsonObject)
+	{
+		for (const auto& Entry : JsonObject->Values)
+		{
+			VersionsByGuid.Add(FGuid(Entry.Key), JsonObject->GetIntegerField(Entry.Key));
+		}
+	}
+}
+
 //---------------------------------------------------------------------------------------------------------------------
 
 bool UJsonDataAsset::IsInJsonDataContentRoot() const
@@ -98,26 +160,26 @@ bool UJsonDataAsset::ImportJson(TSharedPtr<FJsonObject> JsonObject, bool bCheckC
 		}
 	}
 
+	FEngineVersion EngineVersion;
 	if (JsonObject->HasField(TEXT("EngineVersion")))
 	{
 		const FString JsonVersionString = JsonObject->GetStringField(TEXT("EngineVersion"));
 		const bool bIsLicenseeVersion = JsonObject->GetBoolField(TEXT("IsLicenseeVersion"));
-		FEngineVersion JsonVersion;
-		if (!FEngineVersion::Parse(JsonVersionString, OUT JsonVersion))
+		if (!FEngineVersion::Parse(JsonVersionString, OUT EngineVersion))
 		{
 			UE_MESSAGELOG(LoadErrors, Error, "Json file for", this, "has an invalid 'EngineVersion' field value");
 			return false;
 		}
 
-		uint32 Changelist = JsonVersion.GetChangelist();
-		JsonVersion.Set(
-			JsonVersion.GetMajor(),
-			JsonVersion.GetMinor(),
-			JsonVersion.GetPatch(),
+		uint32 Changelist = EngineVersion.GetChangelist();
+		EngineVersion.Set(
+			EngineVersion.GetMajor(),
+			EngineVersion.GetMinor(),
+			EngineVersion.GetPatch(),
 			Changelist | (bIsLicenseeVersion ? (1U << 31) : 0),
-			JsonVersion.GetBranch());
+			EngineVersion.GetBranch());
 
-		if (!FEngineVersion::Current().IsCompatibleWith(JsonVersion))
+		if (!FEngineVersion::Current().IsCompatibleWith(EngineVersion))
 		{
 			UE_MESSAGELOG(
 				LoadErrors,
@@ -133,6 +195,15 @@ bool UJsonDataAsset::ImportJson(TSharedPtr<FJsonObject> JsonObject, bool bCheckC
 			return false;
 		}
 	}
+
+	FJsonDataCustomVersions CustomVersions;
+	const TSharedPtr<FJsonObject>* ppCustomVersionsObject = nullptr;
+	if (JsonObject->TryGetObjectField(TEXT("CustomVersions"), ppCustomVersionsObject))
+	{
+		CustomVersions.ReadFromJsonObject(*ppCustomVersionsObject);
+	}
+
+	CustomVersions.EnsureExpectedVersions(GetRelevantCustomVersions());
 
 	// ---
 	// Property data
@@ -178,7 +249,7 @@ bool UJsonDataAsset::ImportJson(TSharedPtr<FJsonObject> JsonObject, bool bCheckC
 		return false;
 	}
 
-	return true;
+	return PostLoadJsonData(EngineVersion, CustomVersions, Data.ToSharedRef());
 }
 
 TSharedRef<FJsonObject> UJsonDataAsset::ExportJson() const
@@ -190,6 +261,9 @@ TSharedRef<FJsonObject> UJsonDataAsset::ExportJson() const
 		Result->SetStringField(TEXT("Class"), GetClass()->GetPathName());
 		Result->SetStringField(TEXT("EngineVersion"), FEngineVersion::Current().ToString());
 		Result->SetBoolField(TEXT("IsLicenseeVersion"), FEngineVersion::Current().IsLicenseeVersion());
+
+		const FJsonDataCustomVersions CustomVersions(GetRelevantCustomVersions());
+		Result->SetObjectField(TEXT("CustomVersions"), CustomVersions.ToJsonObject());
 	}
 
 	// Property data
@@ -302,11 +376,24 @@ bool UJsonDataAsset::ExportJsonFile() const
 	return true;
 }
 
+bool UJsonDataAsset::PostLoadJsonData(
+	const FEngineVersion& EngineVersion,
+	const FJsonDataCustomVersions& CustomVersions,
+	TSharedRef<FJsonObject> JsonObject)
+{
+	return true;
+}
+
 bool UJsonDataAsset::MustHandleRename(UObject* OldOuter, const FName OldName) const
 {
 	const auto NewOuter = GetOuter();
 	return IsFileBasedJsonAsset() && OldOuter == NewOuter
 		&& (OldOuter == nullptr || NewOuter == nullptr || OldOuter->GetPathName() != NewOuter->GetPathName());
+}
+
+TSet<FGuid> UJsonDataAsset::GetRelevantCustomVersions() const
+{
+	return {};
 }
 
 UJsonDataAsset* UJsonDataAsset::LoadJsonDataAsset_Internal(FJsonDataAssetPath Path, UJsonDataAsset* ExistingDataAsset)

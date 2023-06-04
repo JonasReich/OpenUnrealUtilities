@@ -11,6 +11,10 @@
 #include "Templates/ScopedAssign.h"
 #include "UObject/SavePackage.h"
 
+#if WITH_EDITOR
+	#include "Editor.h"
+#endif
+
 namespace OUU::Runtime::JsonData::Private
 {
 	TAutoConsoleVariable<bool> CVar_ImportAllAssetsOnStartup(
@@ -147,7 +151,7 @@ namespace OUU::Runtime::JsonData
 		auto RootName = UJsonDataAssetSubsystem::Get().GetRootNameForPackagePath(PackagePath);
 		auto Path = FPaths::ProjectDir() / GetSourceRoot_ProjectRelative(RootName, AccessMode)
 			/ PackageToDataRelative(PackagePath);
-		return Path;
+		return FPaths::ConvertRelativePathToFull(Path);
 	}
 
 	// Take a path that is relative to the project root and convert it into a package path.
@@ -533,7 +537,7 @@ void UJsonDataAssetSubsystem::ImportAllAssets(const FName& RootName, bool bOnlyM
 	}
 
 	// Ensure that none of the asset saves during this call scope cause json exports.
-	TScopedAssign ScopedDisableAutoExport{this->bAutoExportJson, false};
+	TGuardValue ScopedDisableAutoExport{this->bAutoExportJson, false};
 
 	TArray<UPackage*> AllPackages;
 	int32 NumPackagesLoaded = 0;

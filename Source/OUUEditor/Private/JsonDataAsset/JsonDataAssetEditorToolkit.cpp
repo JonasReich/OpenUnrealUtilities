@@ -2,6 +2,7 @@
 
 #include "JsonDataAsset/JsonDataAssetEditorToolkit.h"
 
+#include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "JsonDataAsset/JsonDataAsset.h"
 #include "JsonDataAsset/JsonDataAssetEditor.h"
 

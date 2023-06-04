@@ -113,7 +113,7 @@ EDataValidationResult UAssetValidator_JsonDataAssetReferences::ValidateLoadedAss
 					TEXT("Property %s contains a direct reference to json data asset %s. Please only use "
 						 "FJsonDataAssetPath to reference json data assets!"),
 					*Field->GetFullName(),
-					*Object->GetName())),
+					*GetNameSafe(Object))),
 				OUT ValidationErrors);
 			return EDataValidationResult::Invalid;
 		}
