@@ -6,7 +6,9 @@
 
 void UTypedGameplayTagSettings::GetAdditionalRootTags(FGameplayTagContainer& OutRootTags, UStruct* BlueprintStruct)
 {
-	auto& AdditionalRootTags = GetDefault<UTypedGameplayTagSettings>()->AdditionalRootTags;
+	const auto* Settings = GetDefault<UTypedGameplayTagSettings>();
+	check(Settings);
+	auto& AdditionalRootTags = Settings->AdditionalRootTags;
 	if (auto* Tags = AdditionalRootTags.Find(*BlueprintStruct->GetName()))
 	{
 		OutRootTags.AppendTags(*Tags);
@@ -16,6 +18,7 @@ void UTypedGameplayTagSettings::GetAdditionalRootTags(FGameplayTagContainer& Out
 void UTypedGameplayTagSettings::AddNativeRootTags(const FGameplayTagContainer& RootTags, UStruct* BlueprintStruct)
 {
 	auto* Settings = GetMutableDefault<UTypedGameplayTagSettings>();
+	check(Settings);
 	FName StructName = *BlueprintStruct->GetName();
 	Settings->NativeRootTags.Add(StructName, FGameplayTagContainer(RootTags));
 
@@ -25,7 +28,9 @@ void UTypedGameplayTagSettings::AddNativeRootTags(const FGameplayTagContainer& R
 
 void UTypedGameplayTagSettings::GetAllRootTags(FGameplayTagContainer& OutRootTags, UStruct* BlueprintStruct)
 {
-	auto& NativeRootTags = GetDefault<UTypedGameplayTagSettings>()->NativeRootTags;
+	const auto* Settings = GetDefault<UTypedGameplayTagSettings>();
+	check(Settings);
+	auto& NativeRootTags = Settings->NativeRootTags;
 	if (auto* Tags = NativeRootTags.Find(*BlueprintStruct->GetName()))
 	{
 		OutRootTags.AppendTags(*Tags);
@@ -43,6 +48,8 @@ void UTypedGameplayTagSettings::GetAllLeafTags(FGameplayTagContainer& OutLeafTag
 	FGameplayTagContainer AllTags;
 	for (const auto& RootTag : RootTags)
 	{
+		// Root tags can also be leaf tags if they don't have any child tags.
+		AllTags.AddTag(RootTag);
 		AllTags.AppendTags(GameplayTagManager.RequestGameplayTagChildren(RootTag));
 	}
 

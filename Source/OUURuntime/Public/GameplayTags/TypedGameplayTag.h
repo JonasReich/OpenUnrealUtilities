@@ -40,6 +40,16 @@ namespace OUU::Runtime::Private
 
 } // namespace OUU::Runtime::Private
 
+// Forward declare the derived container types...
+
+// 1) The reference type points to an external gameplay tag container and should be preferred.
+template <typename BlueprintTagType>
+struct TTypedGameplayTagContainerReference;
+
+// 2) The value type contains the gameplay tag container as member and can e.g. be used for return values.
+template <typename BlueprintTagType>
+struct TTypedGameplayTagContainerValue;
+
 /**
  * Base class for blueprint/property exposed typesafe tags.
  * Typesafe in the sense that you can only assign child tags of the root tags.
@@ -61,24 +71,34 @@ public:
 	// using RootLiteralTagType = InRootLiteralTagType;
 	using TypedGameplayTagType = TTypedGameplayTag<BlueprintTagType, InRootLiteralTagTypes...>;
 
+	using ValueContainerType = TTypedGameplayTagContainerValue<BlueprintTagType>;
+	using ReferenceContainerType = TTypedGameplayTagContainerReference<BlueprintTagType>;
+
 	/**
 	 * Get a list of the tags that are considered valid tag roots for this tag type.
 	 */
-	static FGameplayTagContainer GetNativeTagRootTags()
+	static ValueContainerType GetNativeTagRootTags()
 	{
 		FGameplayTagContainer Result;
 		OUU::Runtime::Private::TGetAllTypedTagRootTags_Recursive<InRootLiteralTagTypes...>::Impl(OUT Result);
-		return Result;
+		return ValueContainerType::CreateUnchecked(Result);
 	}
 
-	static FGameplayTagContainer GetAllRootTags()
+	static ValueContainerType GetAllRootTags()
 	{
 		FGameplayTagContainer Result;
 		// Native tags
 		OUU::Runtime::Private::TGetAllTypedTagRootTags_Recursive<InRootLiteralTagTypes...>::Impl(OUT Result);
 		// Plus additional tags from settings
 		UTypedGameplayTagSettings::GetAdditionalRootTags(OUT Result, BlueprintTagType::StaticStruct());
-		return Result;
+		return ValueContainerType::CreateUnchecked(Result);
+	}
+
+	static ValueContainerType GetAllLeafTags()
+	{
+		FGameplayTagContainer Result;
+		UTypedGameplayTagSettings::GetAllLeafTags(OUT Result, BlueprintTagType::StaticStruct());
+		return ValueContainerType::CreateUnchecked(Result);
 	}
 
 	template <typename T, typename U, typename V>
@@ -99,7 +119,7 @@ public:
 
 	static BlueprintTagType TryConvert(FGameplayTag VanillaTag, bool bChecked)
 	{
-		FGameplayTagContainer RootTags = GetAllRootTags();
+		ValueContainerType RootTags = GetAllRootTags();
 		for (auto RootTag : RootTags)
 		{
 			if (VanillaTag.MatchesTag(RootTag))
@@ -167,6 +187,8 @@ public:                                                                         
 	}                                                                                                                  \
 	static TagType TryConvert(FGameplayTag FromTag) { return TypedTagImplType::TryConvert(FromTag, false); }           \
 	static TagType ConvertChecked(FGameplayTag FromTag) { return TypedTagImplType::TryConvert(FromTag, true); }        \
+	static TypedTagImplType::ValueContainerType GetAllRootTags() { return TypedTagImplType::GetAllRootTags(); }        \
+	static TypedTagImplType::ValueContainerType GetAllLeafTags() { return TypedTagImplType::GetAllLeafTags(); }        \
                                                                                                                        \
 protected:                                                                                                             \
 	FName GetStructName() const { return *TagType::StaticStruct()->GetName().Mid(1); }                                 \
@@ -176,6 +198,8 @@ private:                                                                        
                                                                                                                        \
 	template <typename, typename...>                                                                                   \
 	friend struct TTypedGameplayTag;                                                                                   \
+                                                                                                                       \
+	friend struct TTypedGameplayTagContainerIterator<TagType>;                                                         \
                                                                                                                        \
 private:                                                                                                               \
 	/* This helper is used for settings registration */                                                                \
@@ -223,7 +247,7 @@ private:                                                                        
 	{                                                                                                                  \
 		FCoreDelegates::OnAllModuleLoadingPhasesComplete.AddLambda([]() {                                              \
 			UTypedGameplayTagSettings::AddNativeRootTags(                                                              \
-				TypedTagImplType::GetNativeTagRootTags(),                                                              \
+				TypedTagImplType::GetNativeTagRootTags().Get(),                                                        \
 				TagType::StaticStruct());                                                                              \
 		});                                                                                                            \
 	}                                                                                                                  \
@@ -232,15 +256,79 @@ private:                                                                        
 
 //---------------------------------------------------------------------------------------------------------------------
 
-// Forward declare the derived types...
-
-// 1) The reference type points to an external gameplay tag container and should be preferred.
 template <typename BlueprintTagType>
-struct TTypedGameplayTagContainerReference;
+struct TTypedGameplayTagContainerIterator
+{
+public:
+	using WrappedIteratorType = TArray<FGameplayTag>::TConstIterator;
+	using SizeType = decltype(DeclVal<WrappedIteratorType>().GetIndex());
 
-// 2) The value type contains the gameplay tag container as member and can e.g. be used for return values.
-template <typename BlueprintTagType>
-struct TTypedGameplayTagContainerValue;
+	TTypedGameplayTagContainerIterator(WrappedIteratorType InWrappedIterator) : WrappedIterator(InWrappedIterator) {}
+
+	TTypedGameplayTagContainerIterator& operator++()
+	{
+		++WrappedIterator;
+		return *this;
+	}
+	TTypedGameplayTagContainerIterator& operator++(int)
+	{
+		TTypedGameplayTagContainerIterator Tmp(*this);
+		++WrappedIterator;
+		return Tmp;
+	}
+
+	TTypedGameplayTagContainerIterator& operator--()
+	{
+		--WrappedIterator;
+		return *this;
+	}
+	TTypedGameplayTagContainerIterator operator--(int)
+	{
+		TTypedGameplayTagContainerIterator Tmp(*this);
+		--WrappedIterator;
+		return Tmp;
+	}
+
+	TTypedGameplayTagContainerIterator& operator+=(SizeType Offset)
+	{
+		WrappedIterator += Offset;
+		return *this;
+	}
+
+	TTypedGameplayTagContainerIterator operator+(SizeType Offset) const
+	{
+		TTypedGameplayTagContainerIterator Tmp(*this);
+		return Tmp += Offset;
+	}
+
+	TTypedGameplayTagContainerIterator& operator-=(SizeType Offset) { return *this += -Offset; }
+
+	TTypedGameplayTagContainerIterator operator-(SizeType Offset) const
+	{
+		TTypedGameplayTagContainerIterator Tmp(*this);
+		return Tmp -= Offset;
+	}
+
+	FORCEINLINE BlueprintTagType operator*() const { return BlueprintTagType(*WrappedIterator); }
+
+	FORCEINLINE explicit operator bool() const { return (bool)WrappedIterator; }
+
+	FORCEINLINE friend bool operator==(
+		const TTypedGameplayTagContainerIterator& Lhs,
+		const TTypedGameplayTagContainerIterator& Rhs)
+	{
+		return Lhs.WrappedIterator == Rhs.WrappedIterator;
+	}
+	FORCEINLINE friend bool operator!=(
+		const TTypedGameplayTagContainerIterator& Lhs,
+		const TTypedGameplayTagContainerIterator& Rhs)
+	{
+		return Lhs.WrappedIterator != Rhs.WrappedIterator;
+	}
+
+private:
+	TArray<FGameplayTag>::TConstIterator WrappedIterator;
+};
 
 // #TODO-jreich Move to private namespace
 
@@ -257,21 +345,22 @@ public:
 	using ValueContainerType = TTypedGameplayTagContainerValue<BlueprintTagType>;
 	using ReferenceContainerType = TTypedGameplayTagContainerReference<BlueprintTagType>;
 
+	using IteratorType = TTypedGameplayTagContainerIterator<BlueprintTagType>;
+
 public:
 	FORCEINLINE const FGameplayTagContainer& Get() const { return GetRef(); }
 
 	static FGameplayTagContainer FilterRootTag(const FGameplayTagContainer& RegularGameplayTags)
 	{
-		return RegularGameplayTags.Filter(TypedTagImplType::GetAllRootTags());
+		return RegularGameplayTags.Filter(TypedTagImplType::GetAllRootTags().Get());
 	}
 
 	// Call this in derived constructors / conversion functions.
 	void EnsureValidRootTag() const
 	{
 #if DO_CHECK
-		FGameplayTagContainer RootTags = TypedTagImplType::GetAllRootTags();
-		const FGameplayTagContainer& ContainerRef = GetRef();
-		for (const FGameplayTag& Tag : ContainerRef)
+		const FGameplayTagContainer RootTags = TypedTagImplType::GetAllRootTags().Get();
+		for (auto& Tag : GetRef())
 		{
 			ensureMsgf(
 				Tag.MatchesAny(RootTags),
@@ -281,6 +370,15 @@ public:
 				*RootTags.ToString());
 		}
 #endif
+	}
+
+	// Support for ranged for loops
+	auto begin() const { return IteratorType(GetRef().CreateConstIterator()); }
+	auto end() const
+	{
+		auto Result = GetRef().CreateConstIterator();
+		Result.SetToEnd();
+		return IteratorType(Result);
 	}
 
 protected:
@@ -361,7 +459,9 @@ public:
 	BlueprintTagType GetByIndex(int32 Index) const { return GetRef().GetByIndex(Index); }
 	BlueprintTagType First() const { return GetRef().First(); }
 	BlueprintTagType Last() const { return GetRef().Last(); }
-	void FillParentTags() { return GetRef().FillParentTags(); }
+
+	// Can't be sure that these are still underneath the root tag, so just don't allow it
+	// void FillParentTags() { return GetRef().FillParentTags(); }
 
 	bool operator==(ReferenceContainerType const& Other) const { return GetRef() == Other.GetRef(); }
 	bool operator!=(ReferenceContainerType const& Other) const { return GetRef() != Other.GetRef(); }
@@ -406,6 +506,9 @@ struct TTypedGameplayTagContainerValue :
 	template <typename, typename>
 	friend struct TTypedGameplayTagContainer_Base;
 
+	template <typename, typename...>
+	friend struct TTypedGameplayTag;
+
 	using BlueprintTagType = InBlueprintTagType;
 	using SelfType = TTypedGameplayTagContainerValue<BlueprintTagType>;
 	using Super = TTypedGameplayTagContainer_Base<BlueprintTagType, SelfType>;
@@ -440,6 +543,17 @@ public:
 	}
 
 private:
+	/**
+	 * Create a contianer from another container that is assumed to be pre-filtered (faster) WITHOUT checking.
+	 * This is less safe, but sometimes necessary to avoid infinite recursion.
+	 */
+	static SelfType CreateUnchecked(const FGameplayTagContainer& RegularGameplayTags)
+	{
+		SelfType Result;
+		Result.GameplayTagContainerValue = RegularGameplayTags;
+		return Result;
+	}
+
 	FGameplayTagContainer& GetRef_Impl() { return GameplayTagContainerValue; }
 	const FGameplayTagContainer& GetRef_Impl() const { return GameplayTagContainerValue; }
 
