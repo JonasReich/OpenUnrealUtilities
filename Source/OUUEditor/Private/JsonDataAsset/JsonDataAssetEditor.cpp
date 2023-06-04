@@ -3,8 +3,10 @@
 #include "JsonDataAsset/JsonDataAssetEditor.h"
 
 #include "AssetViewUtils.h"
+#include "ContentBrowserModule.h"
 #include "Editor.h"
 #include "IAssetTools.h"
+#include "IContentBrowserDataModule.h"
 #include "IContentBrowserSingleton.h"
 #include "JsonDataAsset/JsonDataAsset.h"
 #include "JsonDataAsset/JsonDataAssetSubsystem.h"
@@ -41,6 +43,23 @@ namespace OUU::Editor::JsonData
 		FJsonDataAssetPath JsonPath;
 		JsonPath.SetPackagePath(PackagePath);
 		return JsonPath;
+	}
+
+	FContentBrowserItem GetGeneratedAssetContentBrowserItem(const FString& InSourceFilePath)
+	{
+		UContentBrowserDataSubsystem* ContentBrowserData = IContentBrowserDataModule::Get().GetSubsystem();
+		if (ensure(IsValid(ContentBrowserData)))
+		{
+			// Redirect to asset (e.g. format
+			// "/All/JsonData/Plugins/OpenUnrealUtilities/Tests/TestAsset_AllValuesSet.TestAsset_AllValuesSet")
+
+			FString ObjectName = OUU::Runtime::JsonData::PackageToObjectName(InSourceFilePath);
+			FString AssetPath = InSourceFilePath;
+			AssetPath.ReplaceInline(TEXT(".json"), *FString::Printf(TEXT(".%s"), *ObjectName));
+			auto AssetItem = ContentBrowserData->GetItemAtPath(*AssetPath, EContentBrowserItemTypeFilter::IncludeFiles);
+			return AssetItem;
+		}
+		return FContentBrowserItem();
 	}
 
 	void PerformDiff(const FJsonDataAssetPath& Old, const FJsonDataAssetPath& New)

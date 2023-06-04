@@ -7,11 +7,14 @@
 #include "IAssetTools.h"
 #include "JsonDataAsset/JsonDataAsset.h"
 
+struct FContentBrowserItem;
+
 namespace OUU::Editor::JsonData
 {
 	void SyncContentBrowserToItems(const TArray<FString>& ItemPaths);
 
 	FJsonDataAssetPath ConvertMountedSourceFilenameToDataAssetPath(const FString& InFilename);
+	FContentBrowserItem GetGeneratedAssetContentBrowserItem(const FString& InSourceFilePath);
 
 	void PerformDiff(const FJsonDataAssetPath& Old, const FJsonDataAssetPath& New);
 	void Reload(const FJsonDataAssetPath& Path);

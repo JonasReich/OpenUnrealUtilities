@@ -10,6 +10,9 @@ void FAssetTypeActions_JsonDataAsset::GetActions(const TArray<UObject*>& InObjec
 {
 	TArray<TWeakObjectPtr<UJsonDataAsset>> DataAssets = GetTypedWeakObjectPtrs<UJsonDataAsset>(InObjects);
 
+	// The source file should have all important context menu actions, so finding the source item is the only option we
+	// add.
+
 	Section.AddMenuEntry(
 		"JsonDataAsset_NavigateToSource",
 		INVTEXT("Browse to Source"),

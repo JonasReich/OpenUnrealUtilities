@@ -11,7 +11,7 @@
 #include "ContentBrowserDataSource.h"
 #include "ContentBrowserFileDataCore.h"
 #include "ContentBrowserFileDataPayload.h"
-#include "ContentBrowserFileDataSource.h"
+#include "ContentBrowserModule.h"
 #include "Editor.h"
 #include "Engine.h"
 #include "Engine/AssetManager.h"
@@ -32,12 +32,15 @@
 #include "Misc/FileHelper.h"
 #include "Misc/JsonLibrary.h"
 #include "Misc/Paths.h"
+#include "Modules/ModuleManager.h"
 #include "Templates/ScopedAssign.h"
 #include "ToolMenus.h"
 #include "UObject/ObjectSaveContext.h"
 #include "UObject/SavePackage.h"
 
 #define JSON_CBROWSER_SOURCE_NAME TEXT("JsonData")
+
+PRAGMA_DISABLE_OPTIMIZATION
 
 class FAssetClassParentFilter : public IClassViewerFilter
 {
@@ -67,6 +70,58 @@ public:
 			!= EFilterReturn::Failed;
 	}
 };
+
+IContentBrowserSingleton& GetContentBrowser()
+{
+	return FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser").Get();
+}
+
+bool UContentBrowserJsonFileDataSource::CanMoveItem(
+	const FContentBrowserItemData& InItem,
+	const FName InDestPath,
+	FText* OutErrorMsg)
+{
+	if (OutErrorMsg)
+	{
+		*OutErrorMsg = INVTEXT("Moving source files not implemented. You can move the generated assets.");
+	}
+	return false;
+	/*
+	bool bCanMove = true;
+
+	Config.EnumerateFileActions([&](TSharedRef<const ContentBrowserFileData::FFileActions> InFileActions) {
+		if (!InFileActions->CanMove.IsBound()
+			|| InFileActions->CanMove.Execute(InItem.GetInternalPath(), InItem.GetItemName().ToString(),
+	InDestPath.ToString(), OUT OutErrorMsg)
+				== false)
+		{
+			bCanMove = false;
+			// break loop
+			return false;
+		}
+
+		return true;
+	});
+
+	return bCanMove;
+	*/
+}
+
+bool UContentBrowserJsonFileDataSource::MoveItem(const FContentBrowserItemData& InItem, const FName InDestPath)
+{
+	ensureMsgf(false, TEXT("MoveItem should never be called, because moving is disabled"));
+	return Super::MoveItem(InItem, InDestPath);
+	// React to items being moved!
+}
+
+bool UContentBrowserJsonFileDataSource::BulkMoveItems(
+	TArrayView<const FContentBrowserItemData> InItems,
+	const FName InDestPath)
+{
+	ensureMsgf(false, TEXT("BulkMoveItems should never be called, because moving is disabled"));
+	return Super::BulkMoveItems(InItems, InDestPath);
+	// React to itmes being moved!
+}
 
 FContentBrowserJsonDataSource::FContentBrowserJsonDataSource()
 {
@@ -152,7 +207,7 @@ FContentBrowserJsonDataSource::FContentBrowserJsonDataSource()
 	JsonFileActions.TypeExtension = TEXT("json");
 	JsonFileActions.TypeName =
 		FTopLevelAssetPath(TEXT("/Script/OUU.JsonData")); // Fake path to satisfy FFileActions requirements
-	JsonFileActions.TypeDisplayName = INVTEXT("Json");
+	JsonFileActions.TypeDisplayName = INVTEXT("Json Source File");
 	JsonFileActions.TypeShortDescription = INVTEXT("Json file");
 	JsonFileActions.TypeFullDescription = INVTEXT("A json data file");
 	JsonFileActions.DefaultNewFileName = TEXT("new_json_asset");
@@ -217,7 +272,8 @@ FContentBrowserJsonDataSource::FContentBrowserJsonDataSource()
 
 			// InFilenameWrong is wrong for plugin mounted files. It's correct after converting back and forth though.
 			auto PackagePath = OUU::Runtime::JsonData::SourceFullToPackage(InFilenameWrong, EJsonDataAccessMode::Read);
-			auto FileNameCorrected = OUU::Runtime::JsonData::PackageToSourceFull(PackagePath, EJsonDataAccessMode::Read);
+			auto FileNameCorrected =
+				OUU::Runtime::JsonData::PackageToSourceFull(PackagePath, EJsonDataAccessMode::Read);
 
 			auto ObjectName = OUU::Runtime::JsonData::PackageToObjectName(PackagePath);
 			UPackage* NewPackage = CreatePackage(*PackagePath);
@@ -279,6 +335,17 @@ FContentBrowserJsonDataSource::FContentBrowserJsonDataSource()
 
 	JsonFileActions.CanMove.BindLambda(
 		[](const FName InFilePath, const FString& InFilename, const FString& InDestFolder, FText* OutErrorMsg) -> bool {
+			UContentBrowserDataSubsystem* ContentBrowserData = IContentBrowserDataModule::Get().GetSubsystem();
+			if (ensure(IsValid(ContentBrowserData)))
+			{
+				// Redirect to asset (e.g. format
+				// "/All/JsonData/Plugins/OpenUnrealUtilities/Tests/TestAsset_AllValuesSet.TestAsset_AllValuesSet")
+				auto AssetName = InFilePath;
+				auto AssetItem =
+					ContentBrowserData->GetItemAtPath(AssetName, EContentBrowserItemTypeFilter::IncludeFiles);
+				// return AssetItem.CanMove(*InDestFolder, OutErrorMsg);
+			}
+
 			if (OutErrorMsg)
 			{
 				*OutErrorMsg = INVTEXT("Moving json files is only supported via the generated uassets at the moment");
@@ -288,7 +355,7 @@ FContentBrowserJsonDataSource::FContentBrowserJsonDataSource()
 
 	JsonFileActions.CanRename.BindLambda(
 		[](const FName InFilePath, const FString& InFilename, const FString* InNewName, FText* OutErrorMsg) -> bool {
-			if (FPaths::FileExists(InFilename) == false)
+			if (FPaths::DirectoryExists(InFilename) == false && FPaths::FileExists(InFilename) == false)
 			{
 				// Rename is also used during creation when duplicating
 				return true;
@@ -312,7 +379,7 @@ FContentBrowserJsonDataSource::FContentBrowserJsonDataSource()
 	JsonFileConfig.RegisterFileActions(JsonFileActions);
 
 	JsonFileDataSource.Reset(
-		NewObject<UContentBrowserFileDataSource>(GetTransientPackage(), JSON_CBROWSER_SOURCE_NAME));
+		NewObject<UContentBrowserJsonFileDataSource>(GetTransientPackage(), JSON_CBROWSER_SOURCE_NAME));
 	JsonFileDataSource->Initialize(JsonFileConfig);
 
 	TArray<FString> RootPaths;
@@ -394,9 +461,7 @@ void FContentBrowserJsonDataSource::PopulateJsonFileContextMenu(UToolMenu* Conte
 	// Only add the file items if we have at least one file path selected
 	if (SelectedJsonFiles.Num() > 0)
 	{
-		SourceControlContextMenu->MakeContextMenu(ContextMenu, SelectedJsonFiles);
-
-		// Custom Action
+		// "Imported Asset" Actions
 		{
 			FToolMenuSection& Section = ContextMenu->AddSection("JsonData_CustomActions", INVTEXT("Json Data"));
 			Section.InsertPosition.Position = EToolMenuInsertType::First;
@@ -415,7 +480,7 @@ void FContentBrowserJsonDataSource::PopulateJsonFileContextMenu(UToolMenu* Conte
 				"OpenInDefaultExternalApplication",
 				INVTEXT("Edit .json Source"),
 				INVTEXT("Edit the json text file in the default external application (text editor)"),
-				FSlateIcon("EditorStyle", "Icons.Edit"),
+				FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Edit"),
 				FUIAction(OpenExternalAction));
 
 			const FExecuteAction ReloadAction = FExecuteAction::CreateLambda([this, SelectedJsonFiles]() {
@@ -433,7 +498,7 @@ void FContentBrowserJsonDataSource::PopulateJsonFileContextMenu(UToolMenu* Conte
 				"ReloadJson",
 				INVTEXT("Reload"),
 				INVTEXT("Reload all property data from the json file"),
-				FSlateIcon("EditorStyle", "Icons.Refresh"),
+				FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Refresh"),
 				FUIAction(ReloadAction));
 
 			const FExecuteAction NavigateToUAssetAction = FExecuteAction::CreateLambda([this, SelectedJsonFiles]() {
@@ -456,9 +521,25 @@ void FContentBrowserJsonDataSource::PopulateJsonFileContextMenu(UToolMenu* Conte
 				"BrowseToGeneratedAsset",
 				INVTEXT("Browse to Generated Asset"),
 				INVTEXT("Browses to the generated asset file and selects it in the most recently used Content Browser"),
-				FSlateIcon("EditorStyle", "SystemWideCommands.FindInContentBrowser"),
+				FSlateIcon(FAppStyle::GetAppStyleSetName(), "SystemWideCommands.FindInContentBrowser"),
 				FUIAction(NavigateToUAssetAction));
 		}
+
+		// Equivalent of "Common" options
+		{
+			// "Asset Actions"
+
+			// must haves:
+			// - Property Matrix
+			// - Asset Reference Viewer
+
+			// nice to haves:
+			// - Asset Localization
+			// - Replace References
+		}
+		// No Documentation options
+
+		SourceControlContextMenu->MakeContextMenu(ContextMenu, SelectedJsonFiles);
 	}
 }
 
@@ -484,3 +565,5 @@ TArray<TSharedRef<const FContentBrowserFileItemDataPayload>> FContentBrowserJson
 }
 
 #undef JSON_CBROWSER_SOURCE_NAME
+
+PRAGMA_ENABLE_OPTIMIZATION

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 
+#include "ContentBrowserFileDataSource.h"
 #include "JsonDataAsset/JsonDataAsset.h"
 #include "Templates/SubclassOf.h"
 #include "UObject/StrongObjectPtr.h"
@@ -23,6 +24,19 @@ struct FOUUJsonDataCreateParams
 public:
 	UPROPERTY()
 	TSubclassOf<UJsonDataAsset> Class;
+};
+
+UCLASS()
+class UContentBrowserJsonFileDataSource : public UContentBrowserFileDataSource
+{
+	GENERATED_BODY()
+public:
+	// - UContentBrowserDataSource
+	virtual bool CanMoveItem(const FContentBrowserItemData& InItem, const FName InDestPath, FText* OutErrorMsg)
+		override;
+	virtual bool MoveItem(const FContentBrowserItemData& InItem, const FName InDestPath) override;
+	virtual bool BulkMoveItems(TArrayView<const FContentBrowserItemData> InItems, const FName InDestPath) override;
+	// --
 };
 
 /**
