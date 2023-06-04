@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2023 Jonas Reich & Contributors
+// Copyright (c) 2023 Jonas Reich & Contributors
 
 #pragma once
 
@@ -7,7 +7,7 @@
  * The original value is restored after this object runs out of scope.
  */
 template <class T>
-struct TScopedAssign
+struct UE_DEPRECATED(5.1, "Use Unreal's built-in TGuardValue template instead of TScopedAssign") TScopedAssign
 {
 private:
 	T& Field;
