@@ -19,7 +19,7 @@
 struct OUUTESTUTILITIES_API FOUUAutomationTestWorld
 {
 public:
-	explicit FOUUAutomationTestWorld(FString InWorldName) : WorldName(InWorldName) {}
+	explicit FOUUAutomationTestWorld(FString InWorldName);
 	virtual ~FOUUAutomationTestWorld();
 
 	// Travel URL that will be used for game BeginPlay()
@@ -77,6 +77,7 @@ protected:
 	// Remember if we have a world that needs destruction
 	bool bHasWorld = false;
 	FString WorldName;
+	FString PreviousDefaultMap;
 
 	void CreateWorldImplementation(const FString& WorldSuffix);
 	void DestroyWorldImplementation();

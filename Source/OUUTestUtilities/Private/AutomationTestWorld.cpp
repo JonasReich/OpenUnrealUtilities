@@ -13,12 +13,18 @@
 	#include "GameFramework/PlayerState.h"
 	#include "LogOpenUnrealUtilities.h"
 	#include "Traits/IteratorTraits.h"
+	#include "GameMapsSettings.h"
 
 	#if UE_VERSION_OLDER_THAN(5, 0, 0)
 		#include "UObject/CoreOnline.h"
 	#else
 		#include "Online/CoreOnline.h"
 	#endif
+
+FOUUAutomationTestWorld::FOUUAutomationTestWorld(FString InWorldName) :
+	URL(TEXT("/OpenUnrealUtilities/Runtime/EmptyWorld")), WorldName(InWorldName)
+{
+}
 
 FOUUAutomationTestWorld::~FOUUAutomationTestWorld()
 {
@@ -125,6 +131,10 @@ void FOUUAutomationTestWorld::CreateWorldImplementation(const FString& WorldSuff
 
 	const FString NewWorldName = "OUUAutomationTestWorld_" + WorldName + WorldSuffix;
 
+	auto* GameMapSettings = GetMutableDefault<UGameMapsSettings>();
+	PreviousDefaultMap = GameMapSettings->GetGameDefaultMap();
+	GameMapSettings->SetGameDefaultMap(URL.Map);
+
 	// Create and initialize game instance
 	GameInstance = NewObject<UGameInstance>(GEngine);
 	GameInstance->InitializeStandalone(*NewWorldName); // -> indiretly calls GameInstance->Init();
@@ -165,6 +175,9 @@ void FOUUAutomationTestWorld::DestroyWorldImplementation()
 
 	World->DestroyWorld(true);
 	GEngine->DestroyWorldContext(World);
+
+	auto* GameMapSettings = GetMutableDefault<UGameMapsSettings>();
+	GameMapSettings->SetGameDefaultMap(PreviousDefaultMap);
 
 	World = nullptr;
 	GameInstance = nullptr;
