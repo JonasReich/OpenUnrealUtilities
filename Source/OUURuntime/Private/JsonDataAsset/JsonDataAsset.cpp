@@ -571,12 +571,26 @@ void UJsonDataAsset::PostRename(UObject* OldOuter, const FName OldName)
 			SlowTask.EnterProgressFrame(1, INVTEXT("Fixing up referencers..."));
 			// Load the asset tools module
 			FAssetToolsModule& AssetToolsModule = FAssetToolsModule::GetModule();
-			// Do not allow any user choice for this.
+
+			// Ideally, we wouldn't want to leave a choice for this, because we can't allow keeping around redirectors.
 			// If we allow a choice it should be before the rename starts in the first place.
-			// We can't allow keeping around redirector files.
 			bool bCheckoutAndPrompt = false;
 			AssetToolsModule.Get()
 				.FixupReferencers({Redirector}, bCheckoutAndPrompt, ERedirectFixupMode::DeleteFixedUpRedirectors);
+
+			// Not prompting sometimes leads to json assets referncing other json assets being ignored
+			if (UObjectRedirector* RedirectorStillThere = FindObjectFast<UObjectRedirector>(OldOuter, OldName))
+			{
+				if (IsValid(RedirectorStillThere))
+				{
+					UE_MESSAGELOG(
+						EditorErrors,
+						Warning,
+						Redirector,
+						"is a redirector to a json data asset, which can't be checked-in.");
+					UE_MESSAGELOG_NOTIFY(EditorErrors, Warning, "Data loss imminent if not immediately resolved!");
+				}
+			}
 		}
 		else
 		{
