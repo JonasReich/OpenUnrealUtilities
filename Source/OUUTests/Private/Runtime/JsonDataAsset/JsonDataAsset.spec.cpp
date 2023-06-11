@@ -2,6 +2,7 @@
 
 #include "JsonDataAsset/JsonDataAsset.h"
 
+#include "JsonDataAsset/JsonDataAssetGlobals.h"
 #include "OUUTestUtilities.h"
 #include "TestJsonDataAsset.h"
 

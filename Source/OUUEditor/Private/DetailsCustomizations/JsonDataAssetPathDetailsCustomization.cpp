@@ -12,6 +12,7 @@
 #include "JsonDataAsset/JsonAssetReferenceFilter.h"
 #include "JsonDataAsset/JsonDataAsset.h"
 #include "JsonDataAsset/JsonDataAssetEditor.h"
+#include "JsonDataAsset/JsonDataAssetGlobals.h"
 #include "PropertyCustomizationHelpers.h"
 #include "PropertyHandle.h"
 #include "SDropTarget.h"

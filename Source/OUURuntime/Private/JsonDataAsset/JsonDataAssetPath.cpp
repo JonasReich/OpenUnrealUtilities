@@ -3,6 +3,7 @@
 #include "JsonDataAsset/JsonDataAssetPath.h"
 
 #include "JsonDataAsset/JsonDataAsset.h"
+#include "JsonDataAsset/JsonDataAssetGlobals.h"
 #include "JsonDataAsset/JsonDataAssetSubsystem.h"
 #include "OUURuntimeVersion.h"
 #include "Templates/StructSerializationHelpers.h"

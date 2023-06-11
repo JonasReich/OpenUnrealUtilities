@@ -7,6 +7,7 @@
 #include "ISourceControlModule.h"
 #include "JsonDataAsset/JsonDataAsset.h"
 #include "JsonDataAsset/JsonDataAssetEditor.h"
+#include "JsonDataAsset/JsonDataAssetGlobals.h"
 #include "LogOpenUnrealUtilities.h"
 #include "Logging/MessageLogMacros.h"
 #include "SourceControlHelpers.h"
@@ -316,6 +317,11 @@ void FJsonFileSourceControlContextMenu::ExecuteSCCOpenForAdd()
 
 void FJsonFileSourceControlContextMenu::ExecuteSCCCheckIn()
 {
+	UE_MESSAGELOG(
+		EditorErrors,
+		Error,
+		TEXT("SourceControl check-in not fully implemented. Please use P4V to submit json source files."));
+	UE_MESSAGELOG_NOTIFY(EditorErrors, Error, "Check-In Not Implemented");
 	/*
 	// Prompt the user to ask if they would like to first save any dirty packages they are trying to check-in
 	const FEditorFileUtils::EPromptReturnCode UserResponse =

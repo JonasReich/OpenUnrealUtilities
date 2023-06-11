@@ -22,6 +22,7 @@
 #include "IContentBrowserDataModule.h"
 #include "IContentBrowserSingleton.h"
 #include "JsonDataAsset/JsonDataAssetEditor.h"
+#include "JsonDataAsset/JsonDataAssetGlobals.h"
 #include "JsonDataAsset/JsonDataAssetSubsystem.h"
 #include "JsonDataAsset/JsonFileSourceControlContextMenu.h"
 #include "JsonObjectConverter.h"

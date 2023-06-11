@@ -5,6 +5,7 @@
 #include "AssetRegistry/IAssetRegistry.h"
 #include "FrontendFilters.h"
 #include "JsonDataAsset/JsonDataAsset.h"
+#include "JsonDataAsset/JsonDataAssetGlobals.h"
 #include "LogOpenUnrealUtilities.h"
 
 // Modeled after FFrontendFilter_ShowRedirectors

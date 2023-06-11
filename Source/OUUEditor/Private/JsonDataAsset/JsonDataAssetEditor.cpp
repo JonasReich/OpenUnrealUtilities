@@ -9,6 +9,7 @@
 #include "IContentBrowserDataModule.h"
 #include "IContentBrowserSingleton.h"
 #include "JsonDataAsset/JsonDataAsset.h"
+#include "JsonDataAsset/JsonDataAssetGlobals.h"
 #include "JsonDataAsset/JsonDataAssetSubsystem.h"
 #include "Logging/MessageLogMacros.h"
 #include "PackageTools.h"
