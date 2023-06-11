@@ -14,7 +14,9 @@ namespace OUU::Editor::JsonData
 	void SyncContentBrowserToItems(const TArray<FString>& ItemPaths);
 
 	FJsonDataAssetPath ConvertMountedSourceFilenameToDataAssetPath(const FString& InFilename);
+	FString ConvertMountedSourceFilenameToMountedDataAssetFilename(const FString& InFilename);
 	FContentBrowserItem GetGeneratedAssetContentBrowserItem(const FString& InSourceFilePath);
+	FContentBrowserItem GetGeneratedAssetContentBrowserItem(const FContentBrowserItem& InSourceContentBrowserItem);
 
 	void PerformDiff(const FJsonDataAssetPath& Old, const FJsonDataAssetPath& New);
 	void Reload(const FJsonDataAssetPath& Path);

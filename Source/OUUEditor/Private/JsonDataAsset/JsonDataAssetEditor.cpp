@@ -45,6 +45,28 @@ namespace OUU::Editor::JsonData
 		return JsonPath;
 	}
 
+	FString ConvertMountedSourceFilenameToMountedDataAssetFilename(const FString& InSourceFilePath)
+	{
+		// Otherwise assume it's a folder
+		const bool bIsJsonFile = InSourceFilePath.EndsWith(TEXT(".json"));
+
+		auto JsonDataPackagePath = ConvertMountedSourceFilenameToDataAssetPath(InSourceFilePath).GetPackagePath();
+
+		FString MountedAssetPath = JsonDataPackagePath;
+
+		if (InSourceFilePath.StartsWith(TEXT("/All")) == false)
+		{
+			MountedAssetPath.InsertAt(0, TEXT("/All"));
+		}
+
+		if (bIsJsonFile)
+		{
+			MountedAssetPath.Append(TEXT(".")).Append(OUU::Runtime::JsonData::PackageToObjectName(JsonDataPackagePath));
+		}
+
+		return MountedAssetPath;
+	}
+
 	FContentBrowserItem GetGeneratedAssetContentBrowserItem(const FString& InSourceFilePath)
 	{
 		UContentBrowserDataSubsystem* ContentBrowserData = IContentBrowserDataModule::Get().GetSubsystem();
@@ -52,14 +74,18 @@ namespace OUU::Editor::JsonData
 		{
 			// Redirect to asset (e.g. format
 			// "/All/JsonData/Plugins/OpenUnrealUtilities/Tests/TestAsset_AllValuesSet.TestAsset_AllValuesSet")
+			auto MountedAssetPath = ConvertMountedSourceFilenameToMountedDataAssetFilename(InSourceFilePath);
 
-			FString ObjectName = OUU::Runtime::JsonData::PackageToObjectName(InSourceFilePath);
-			FString AssetPath = InSourceFilePath;
-			AssetPath.ReplaceInline(TEXT(".json"), *FString::Printf(TEXT(".%s"), *ObjectName));
-			auto AssetItem = ContentBrowserData->GetItemAtPath(*AssetPath, EContentBrowserItemTypeFilter::IncludeFiles);
+			auto AssetItem =
+				ContentBrowserData->GetItemAtPath(*MountedAssetPath, EContentBrowserItemTypeFilter::IncludeFiles);
 			return AssetItem;
 		}
 		return FContentBrowserItem();
+	}
+
+	FContentBrowserItem GetGeneratedAssetContentBrowserItem(const FContentBrowserItem& InSourceContentBrowserItem)
+	{
+		return GetGeneratedAssetContentBrowserItem(InSourceContentBrowserItem.GetInternalPath().ToString());
 	}
 
 	void PerformDiff(const FJsonDataAssetPath& Old, const FJsonDataAssetPath& New)

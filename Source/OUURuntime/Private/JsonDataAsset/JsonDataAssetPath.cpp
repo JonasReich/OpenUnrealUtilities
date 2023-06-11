@@ -5,6 +5,7 @@
 #include "JsonDataAsset/JsonDataAsset.h"
 #include "JsonDataAsset/JsonDataAssetSubsystem.h"
 #include "OUURuntimeVersion.h"
+#include "Templates/StructSerializationHelpers.h"
 
 FJsonDataAssetPath::FJsonDataAssetPath(const UJsonDataAsset* Object) : Path(Object) {}
 
@@ -119,9 +120,19 @@ bool FJsonDataAssetPath::Serialize(FArchive& Ar)
 {
 	Ar.UsingCustomVersion(FOUURuntimeVersion::k_GUID);
 
-	if (Ar.CustomVer(FOUURuntimeVersion::k_GUID) >= FOUURuntimeVersion::InitialVersion)
+	if (Ar.CustomVer(FOUURuntimeVersion::k_GUID) >= FOUURuntimeVersion::AddedJsonDataAssetPathSerialization)
 	{
 		FSoftObjectPath ActualPath = Path.ToSoftObjectPath();
+
+		if (Ar.IsSaving())
+		{
+			// To fixup redirectors - not ideal, but get's the job done
+			if (auto* ActualObject = Path.Get())
+			{
+				ActualPath = ActualObject;
+			}
+		}
+
 		Ar << ActualPath;
 
 		if (Ar.IsLoading())
@@ -131,14 +142,7 @@ bool FJsonDataAssetPath::Serialize(FArchive& Ar)
 	}
 	else
 	{
-		if (StaticStruct()->UseBinarySerialization(Ar))
-		{
-			StaticStruct()->SerializeBin(Ar, this);
-		}
-		else
-		{
-			StaticStruct()->SerializeTaggedProperties(Ar, reinterpret_cast<uint8*>(this), StaticStruct(), nullptr);
-		}
+		OUU::Runtime::DefaultStructSerialization(*this, Ar);
 	}
 
 	return true;
@@ -148,9 +152,20 @@ bool FJsonDataAssetPath::Serialize(FStructuredArchive::FSlot Slot)
 {
 	Slot.GetUnderlyingArchive().UsingCustomVersion(FOUURuntimeVersion::k_GUID);
 
-	if (Slot.GetUnderlyingArchive().CustomVer(FOUURuntimeVersion::k_GUID) >= FOUURuntimeVersion::InitialVersion)
+	if (Slot.GetUnderlyingArchive().CustomVer(FOUURuntimeVersion::k_GUID)
+		>= FOUURuntimeVersion::AddedJsonDataAssetPathSerialization)
 	{
 		FSoftObjectPath ActualPath = Path.ToSoftObjectPath();
+
+		if (Slot.GetUnderlyingArchive().IsSaving())
+		{
+			// To fixup redirectors - not ideal, but get's the job done
+			if (auto* ActualObject = Path.Get())
+			{
+				ActualPath = ActualObject;
+			}
+		}
+
 		Slot << ActualPath;
 
 		if (Slot.GetUnderlyingArchive().IsLoading())
@@ -160,14 +175,7 @@ bool FJsonDataAssetPath::Serialize(FStructuredArchive::FSlot Slot)
 	}
 	else
 	{
-		if (StaticStruct()->UseBinarySerialization(Slot.GetUnderlyingArchive()))
-		{
-			StaticStruct()->SerializeBin(Slot, this);
-		}
-		else
-		{
-			StaticStruct()->SerializeTaggedProperties(Slot, reinterpret_cast<uint8*>(this), StaticStruct(), nullptr);
-		}
+		OUU::Runtime::DefaultStructSerialization(*this, Slot);
 	}
 
 	return true;

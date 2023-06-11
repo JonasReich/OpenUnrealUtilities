@@ -102,7 +102,6 @@ private:
 #if WITH_EDITOR
 	void HandlePreBeginPIE(const bool bIsSimulating);
 
-	void CleanupAssetCache();
 	void CleanupAssetCache(const FName& RootName);
 
 	UFUNCTION()

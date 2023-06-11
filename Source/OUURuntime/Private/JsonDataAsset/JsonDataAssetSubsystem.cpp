@@ -17,6 +17,13 @@
 
 namespace OUU::Runtime::JsonData::Private
 {
+	TAutoConsoleVariable<bool> CVar_SeparateSourceMountRoot(
+		TEXT("ouu.JsonData.SeparateSourceMountRoot"),
+		false,
+		TEXT("If true, json data source files are placed in a separate packaged root directory compared to the "
+			 "generated files. This is a more accurate representation of the files on disk (which are always in a "
+			 "differently named directory), but is more cumbersome to navigate."));
+
 	TAutoConsoleVariable<bool> CVar_ImportAllAssetsOnStartup(
 		TEXT("ouu.JsonData.ImportAllAssetsOnStartup"),
 		true,
@@ -88,6 +95,8 @@ namespace OUU::Runtime::JsonData
 {
 	const FName GameRootName = TEXT("Game");
 
+	bool ShouldUseSeparateSourceMountRoot() { return Private::CVar_SeparateSourceMountRoot.GetValueOnAnyThread(); }
+
 	FString GetSourceRoot_ProjectRelative(
 		const FName& RootName,
 		EJsonDataAccessMode AccessMode,
@@ -116,8 +125,13 @@ namespace OUU::Runtime::JsonData
 	FString GetSourceMountPointRoot_Package(const FName& RootName)
 	{
 		FString VirtualRoot = UJsonDataAssetSubsystem::Get().GetVirtualRoot(RootName);
-		auto MountPoint = VirtualRoot.Replace(TEXT("/JsonData/"), *FString(TEXT("/") + Private::GDataSource_Uncooked));
-		return MountPoint;
+		if (ShouldUseSeparateSourceMountRoot())
+		{
+			auto MountPoint =
+				VirtualRoot.Replace(TEXT("/JsonData/"), *FString(TEXT("/") + Private::GDataSource_Uncooked));
+			return MountPoint;
+		}
+		return VirtualRoot;
 	}
 	FString GetSourceMountPointRoot_DiskFull(const FName& RootName)
 	{
@@ -273,8 +287,6 @@ void UJsonDataAssetSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 #if WITH_EDITOR
 	FEditorDelegates::OnPackageDeleted.AddUObject(this, &UJsonDataAssetSubsystem::HandlePackageDeleted);
 	FEditorDelegates::PreBeginPIE.AddUObject(this, &UJsonDataAssetSubsystem::HandlePreBeginPIE);
-
-	CleanupAssetCache();
 #endif
 
 	RegisterMountPoints(OUU::Runtime::JsonData::GameRootName);
@@ -781,9 +793,15 @@ bool UJsonDataAssetSubsystem::IsPathInSourceDirectoryOfNamedRoot(const FString& 
 void UJsonDataAssetSubsystem::RegisterMountPoints(const FName& RootName)
 {
 #if WITH_EDITOR
-	FPackageName::RegisterMountPoint(
-		JsonData::GetSourceMountPointRoot_Package(RootName),
-		JsonData::GetSourceMountPointRoot_DiskFull(RootName));
+	// Make sure that the asset cache is always cleared for new mount roots.
+	CleanupAssetCache(RootName);
+
+	if (JsonData::ShouldUseSeparateSourceMountRoot())
+	{
+		FPackageName::RegisterMountPoint(
+			JsonData::GetSourceMountPointRoot_Package(RootName),
+			JsonData::GetSourceMountPointRoot_DiskFull(RootName));
+	}
 #endif
 
 	FPackageName::RegisterMountPoint(
@@ -798,9 +816,12 @@ void UJsonDataAssetSubsystem::UnregisterMountPoints(const FName& RootName)
 		JsonData::GetCacheMountPointRoot_DiskFull(RootName));
 
 #if WITH_EDITOR
-	FPackageName::UnRegisterMountPoint(
-		JsonData::GetSourceMountPointRoot_Package(RootName),
-		JsonData::GetSourceMountPointRoot_DiskFull(RootName));
+	if (JsonData::ShouldUseSeparateSourceMountRoot())
+	{
+		FPackageName::UnRegisterMountPoint(
+			JsonData::GetSourceMountPointRoot_Package(RootName),
+			JsonData::GetSourceMountPointRoot_DiskFull(RootName));
+	}
 #endif
 }
 
@@ -819,14 +840,6 @@ void UJsonDataAssetSubsystem::HandlePreBeginPIE(const bool bIsSimulating)
 {
 	// Make sure all asset paths are up to date in case we want to use fast net serialization.
 	RescanAllAssets();
-}
-
-void UJsonDataAssetSubsystem::CleanupAssetCache()
-{
-	for (auto& RootName : AllRootNames)
-	{
-		CleanupAssetCache(RootName);
-	}
 }
 
 void UJsonDataAssetSubsystem::CleanupAssetCache(const FName& RootName)

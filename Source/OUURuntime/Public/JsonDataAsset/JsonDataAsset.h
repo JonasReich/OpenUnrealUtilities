@@ -56,6 +56,9 @@ private:
 // These will be moved to UJsonDataAssetSubsystem eventually.
 namespace OUU::Runtime::JsonData
 {
+	// If true, a separate package root is used for source files.
+	OUURUNTIME_API bool ShouldUseSeparateSourceMountRoot();
+
 	OUURUNTIME_API extern const FName GameRootName;
 
 	OUURUNTIME_API FString GetSourceRoot_Full(const FName& RootName, EJsonDataAccessMode AccessMode);

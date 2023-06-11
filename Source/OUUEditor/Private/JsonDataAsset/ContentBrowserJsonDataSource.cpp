@@ -40,8 +40,6 @@
 
 #define JSON_CBROWSER_SOURCE_NAME TEXT("JsonData")
 
-PRAGMA_DISABLE_OPTIMIZATION
-
 class FAssetClassParentFilter : public IClassViewerFilter
 {
 public:
@@ -71,9 +69,46 @@ public:
 	}
 };
 
-IContentBrowserSingleton& GetContentBrowser()
+FContentBrowserModule& GetContentBrowserModule()
 {
-	return FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser").Get();
+	return FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
+}
+
+bool UContentBrowserJsonFileDataSource::CanRenameItem(
+	const FContentBrowserItemData& InItem,
+	const FString* InNewName,
+	FText* OutErrorMsg)
+{
+	auto ContentBrowserItem =
+		OUU::Editor::JsonData::GetGeneratedAssetContentBrowserItem(InItem.GetInternalPath().ToString());
+	if (ContentBrowserItem.IsValid() == false)
+	{
+		// Assume this case is for asset creation
+		/*
+		if (OutErrorMsg)
+		{
+			*OutErrorMsg = INVTEXT("Can't rename json source without generated asset.");
+		}
+		*/
+		return true;
+	}
+
+	return ContentBrowserItem.CanRename(InNewName, OUT OutErrorMsg);
+}
+
+bool UContentBrowserJsonFileDataSource::RenameItem(
+	const FContentBrowserItemData& InItem,
+	const FString& InNewName,
+	FContentBrowserItemData& OutNewItem)
+{
+	auto ContentBrowserItem =
+		OUU::Editor::JsonData::GetGeneratedAssetContentBrowserItem(InItem.GetInternalPath().ToString());
+	if (ContentBrowserItem.IsValid() == false)
+	{
+		return false;
+	}
+
+	return ContentBrowserItem.Rename(InNewName);
 }
 
 bool UContentBrowserJsonFileDataSource::CanMoveItem(
@@ -81,46 +116,158 @@ bool UContentBrowserJsonFileDataSource::CanMoveItem(
 	const FName InDestPath,
 	FText* OutErrorMsg)
 {
-	if (OutErrorMsg)
+	auto ContentBrowserItem =
+		OUU::Editor::JsonData::GetGeneratedAssetContentBrowserItem(InItem.GetInternalPath().ToString());
+	if (ContentBrowserItem.IsValid() == false)
 	{
-		*OutErrorMsg = INVTEXT("Moving source files not implemented. You can move the generated assets.");
-	}
-	return false;
-	/*
-	bool bCanMove = true;
-
-	Config.EnumerateFileActions([&](TSharedRef<const ContentBrowserFileData::FFileActions> InFileActions) {
-		if (!InFileActions->CanMove.IsBound()
-			|| InFileActions->CanMove.Execute(InItem.GetInternalPath(), InItem.GetItemName().ToString(),
-	InDestPath.ToString(), OUT OutErrorMsg)
-				== false)
+		if (OutErrorMsg)
 		{
-			bCanMove = false;
-			// break loop
-			return false;
+			*OutErrorMsg = INVTEXT("Can't move json source without generated asset.");
 		}
+		return false;
+	}
 
-		return true;
-	});
+	auto GeneratedDestPath =
+		OUU::Editor::JsonData::ConvertMountedSourceFilenameToMountedDataAssetFilename(InDestPath.ToString());
 
-	return bCanMove;
-	*/
+	return ContentBrowserItem.CanMove(*GeneratedDestPath, OUT OutErrorMsg);
 }
 
 bool UContentBrowserJsonFileDataSource::MoveItem(const FContentBrowserItemData& InItem, const FName InDestPath)
 {
-	ensureMsgf(false, TEXT("MoveItem should never be called, because moving is disabled"));
-	return Super::MoveItem(InItem, InDestPath);
-	// React to items being moved!
+	auto ContentBrowserItem =
+		OUU::Editor::JsonData::GetGeneratedAssetContentBrowserItem(InItem.GetInternalPath().ToString());
+	if (ContentBrowserItem.IsValid() == false)
+	{
+		return false;
+	}
+
+	auto GeneratedDestPath =
+		OUU::Editor::JsonData::ConvertMountedSourceFilenameToMountedDataAssetFilename(InDestPath.ToString());
+
+	bool bMoved = ContentBrowserItem.Move(*GeneratedDestPath);
+
+	if (ensure(bMoved) && InItem.IsFile())
+	{
+		auto DestJsonAssetPath =
+			OUU::Editor::JsonData::ConvertMountedSourceFilenameToDataAssetPath(InDestPath.ToString());
+		ensure(IsValid(DestJsonAssetPath.ResolveObject()));
+	}
+
+	return bMoved;
 }
 
 bool UContentBrowserJsonFileDataSource::BulkMoveItems(
 	TArrayView<const FContentBrowserItemData> InItems,
 	const FName InDestPath)
 {
-	ensureMsgf(false, TEXT("BulkMoveItems should never be called, because moving is disabled"));
-	return Super::BulkMoveItems(InItems, InDestPath);
-	// React to itmes being moved!
+	bool bAllMoved = true;
+	for (auto& Item : InItems)
+	{
+		auto ContentBrowserItem =
+			OUU::Editor::JsonData::GetGeneratedAssetContentBrowserItem(Item.GetInternalPath().ToString());
+		if (ContentBrowserItem.IsValid() == false)
+		{
+			return false;
+		}
+
+		auto GeneratedDestPath =
+			OUU::Editor::JsonData::ConvertMountedSourceFilenameToMountedDataAssetFilename(InDestPath.ToString());
+
+		bool bMoved = ContentBrowserItem.Move(*GeneratedDestPath);
+		ensure(bMoved);
+		bAllMoved &= bMoved;
+	}
+	return bAllMoved;
+}
+
+bool UContentBrowserJsonFileDataSource::CanDeleteItem(const FContentBrowserItemData& InItem, FText* OutErrorMsg)
+{
+	auto ContentBrowserItem =
+		OUU::Editor::JsonData::GetGeneratedAssetContentBrowserItem(InItem.GetInternalPath().ToString());
+	if (ContentBrowserItem.IsValid() == false)
+	{
+		if (OutErrorMsg)
+		{
+			*OutErrorMsg = INVTEXT("Can't delete json source without generated asset.");
+		}
+		return false;
+	}
+
+	return ContentBrowserItem.CanDelete(OUT OutErrorMsg);
+}
+
+bool UContentBrowserJsonFileDataSource::DeleteItem(const FContentBrowserItemData& InItem)
+{
+	auto ContentBrowserItem =
+		OUU::Editor::JsonData::GetGeneratedAssetContentBrowserItem(InItem.GetInternalPath().ToString());
+	if (ContentBrowserItem.IsValid() == false)
+	{
+		return false;
+	}
+
+	return ContentBrowserItem.Delete();
+}
+
+bool UContentBrowserJsonFileDataSource::BulkDeleteItems(TArrayView<const FContentBrowserItemData> InItems)
+{
+	bool bAllDeleted = true;
+	for (auto& Item : InItems)
+	{
+		auto ContentBrowserItem =
+			OUU::Editor::JsonData::GetGeneratedAssetContentBrowserItem(Item.GetInternalPath().ToString());
+		if (ContentBrowserItem.IsValid() == false)
+		{
+			return false;
+		}
+
+		bool bDeleted = ContentBrowserItem.Delete();
+		ensure(bDeleted);
+		bAllDeleted &= bDeleted;
+	}
+	return bAllDeleted;
+}
+
+bool UContentBrowserJsonFileDataSource::Legacy_TryGetPackagePath(
+	const FContentBrowserItemData& InItem,
+	FName& OutPackagePath)
+{
+	auto ContentBrowserItem =
+		OUU::Editor::JsonData::GetGeneratedAssetContentBrowserItem(InItem.GetInternalPath().ToString());
+	if (ContentBrowserItem.IsValid() == false)
+	{
+		return false;
+	}
+
+	return ContentBrowserItem.Legacy_TryGetPackagePath(OUT OutPackagePath);
+}
+
+bool UContentBrowserJsonFileDataSource::Legacy_TryGetAssetData(
+	const FContentBrowserItemData& InItem,
+	FAssetData& OutAssetData)
+{
+	auto ContentBrowserItem =
+		OUU::Editor::JsonData::GetGeneratedAssetContentBrowserItem(InItem.GetInternalPath().ToString());
+	if (ContentBrowserItem.IsValid() == false)
+	{
+		return false;
+	}
+
+	return ContentBrowserItem.Legacy_TryGetAssetData(OUT OutAssetData);
+}
+
+bool UContentBrowserJsonFileDataSource::UpdateThumbnail(
+	const FContentBrowserItemData& InItem,
+	FAssetThumbnail& OutThumbnail)
+{
+	auto ContentBrowserItem =
+		OUU::Editor::JsonData::GetGeneratedAssetContentBrowserItem(InItem.GetInternalPath().ToString());
+	if (ContentBrowserItem.IsValid() == false)
+	{
+		return false;
+	}
+
+	return ContentBrowserItem.UpdateThumbnail(OUT OutThumbnail);
 }
 
 FContentBrowserJsonDataSource::FContentBrowserJsonDataSource()
@@ -219,12 +366,24 @@ FContentBrowserJsonDataSource::FContentBrowserJsonDataSource()
 	// JsonFileActions.Preview.BindLambda(ItemPreview);
 
 	// For now allow creation in all directories (default if not assigned)
-	/*
 	JsonFileActions.CanCreate.BindLambda(
 		[](const FName InDestFolderPath, const FString& InDestFolder, FText* OutErrorMsg) -> bool {
+			auto PluginsRoot =
+				OUU::Runtime::JsonData::GetSourceMountPointRoot_Package(OUU::Runtime::JsonData::GameRootName)
+				+ "Plugins";
+
+			if (PluginsRoot.Equals(*InDestFolderPath.ToString(), ESearchCase::IgnoreCase))
+			{
+				if (OutErrorMsg)
+				{
+					*OutErrorMsg = FText::FromString(
+						FString::Printf(TEXT("Can't create json assets in %s root folder"), *PluginsRoot));
+				}
+				return false;
+			}
+
 			return true;
 		});
-	*/
 	JsonFileActions.ConfigureCreation.BindLambda(
 		[this](FString& OutFileBasename, FStructOnScope& OutCreationConfig) -> bool {
 			OutCreationConfig.Initialize(FOUUJsonDataCreateParams::StaticStruct());
@@ -333,49 +492,6 @@ FContentBrowserJsonDataSource::FContentBrowserJsonDataSource()
 		return true;
 	});
 
-	JsonFileActions.CanMove.BindLambda(
-		[](const FName InFilePath, const FString& InFilename, const FString& InDestFolder, FText* OutErrorMsg) -> bool {
-			UContentBrowserDataSubsystem* ContentBrowserData = IContentBrowserDataModule::Get().GetSubsystem();
-			if (ensure(IsValid(ContentBrowserData)))
-			{
-				// Redirect to asset (e.g. format
-				// "/All/JsonData/Plugins/OpenUnrealUtilities/Tests/TestAsset_AllValuesSet.TestAsset_AllValuesSet")
-				auto AssetName = InFilePath;
-				auto AssetItem =
-					ContentBrowserData->GetItemAtPath(AssetName, EContentBrowserItemTypeFilter::IncludeFiles);
-				// return AssetItem.CanMove(*InDestFolder, OutErrorMsg);
-			}
-
-			if (OutErrorMsg)
-			{
-				*OutErrorMsg = INVTEXT("Moving json files is only supported via the generated uassets at the moment");
-			}
-			return false;
-		});
-
-	JsonFileActions.CanRename.BindLambda(
-		[](const FName InFilePath, const FString& InFilename, const FString* InNewName, FText* OutErrorMsg) -> bool {
-			if (FPaths::DirectoryExists(InFilename) == false && FPaths::FileExists(InFilename) == false)
-			{
-				// Rename is also used during creation when duplicating
-				return true;
-			}
-			if (OutErrorMsg)
-			{
-				*OutErrorMsg = INVTEXT("Renaming json files is only supported via the generated uassets at the moment");
-			}
-			return false;
-		});
-
-	JsonFileActions.CanDelete.BindLambda(
-		[](const FName InFilePath, const FString& InFilename, FText* OutErrorMsg) -> bool {
-			if (OutErrorMsg)
-			{
-				*OutErrorMsg = INVTEXT("Deleting json files is only supported via the generated uassets at the moment");
-			}
-			return false;
-		});
-
 	JsonFileConfig.RegisterFileActions(JsonFileActions);
 
 	JsonFileDataSource.Reset(
@@ -428,6 +544,27 @@ FContentBrowserJsonDataSource::FContentBrowserJsonDataSource()
 				TEXT("DynamicSection_JsonData"),
 				FNewToolMenuDelegate::CreateRaw(this, &FContentBrowserJsonDataSource::PopulateJsonFileContextMenu));
 		}
+	}
+
+	{
+		// This needs to be repeated for every json data asset type.
+		// Which probably also means, that for blueprint generated classes we have to add these dynamically during
+		// editor time?
+		FToolMenuOwnerScoped OwnerScoped(this);
+		if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("ContentBrowser.AssetContextMenu.JsonDataAsset"))
+		{
+			Menu->AddDynamicSection(
+				TEXT("DynamicSection_JsonData"),
+				FNewToolMenuDelegate::CreateRaw(this, &FContentBrowserJsonDataSource::PopulateJsonFileContextMenu));
+		}
+	}
+
+	{
+		/*
+		auto Customization = UToolMenus::Get()->AddMenuCustomization(TEXT("JsonContentSourceCustomization"));
+		auto Section = Customization->AddSection("ContentBrowserNewBasicAsset");
+		Section->Visibility =
+		*/
 	}
 }
 
@@ -564,6 +701,39 @@ TArray<TSharedRef<const FContentBrowserFileItemDataPayload>> FContentBrowserJson
 	return SelectedJsonFiles;
 }
 
-#undef JSON_CBROWSER_SOURCE_NAME
+TArray<FAssetIdentifier> FContentBrowserJsonDataSource::GetContentBrowserSelectedJsonAssets(
+	FOnContentBrowserGetSelection GetSelectionDelegate)
+{
+	TArray<FAssetIdentifier> OutAssetPackages;
+	TArray<FAssetData> SelectedAssets;
+	TArray<FString> SelectedPaths;
 
-PRAGMA_ENABLE_OPTIMIZATION
+	if (GetSelectionDelegate.IsBound())
+	{
+		TArray<FString> SelectedVirtualPaths;
+		GetSelectionDelegate.Execute(SelectedAssets, SelectedVirtualPaths);
+
+		for (const FString& VirtualPath : SelectedVirtualPaths)
+		{
+			FString InvariantPath;
+			if (IContentBrowserDataModule::Get().GetSubsystem()->TryConvertVirtualPath(VirtualPath, InvariantPath)
+				== EContentBrowserPathType::Internal)
+			{
+				SelectedPaths.Add(InvariantPath);
+			}
+		}
+	}
+
+	// GetAssetDataInPaths(SelectedPaths, SelectedAssets);
+	/*
+	TArray<FName> PackageNames;
+	for (const FAssetData& AssetData : SelectedAssets)
+	{
+		OutAssetPackages.AddUnique(AssetData.PackageName);
+	}
+	*/
+
+	return OutAssetPackages;
+}
+
+#undef JSON_CBROWSER_SOURCE_NAME

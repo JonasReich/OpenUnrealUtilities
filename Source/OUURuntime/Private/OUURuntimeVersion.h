@@ -15,6 +15,9 @@ public:
 		// Before any version changes were made
 		InitialVersion = 0,
 
+		// This change introduced custom FArchive serialization for json asset paths and smart pointers.
+		AddedJsonDataAssetPathSerialization = 0, // same number as initial version!
+
 		// -----<new versions can be added above this line>-------------------------------------------------
 		VersionPlusOne,
 		LatestVersion = VersionPlusOne - 1
