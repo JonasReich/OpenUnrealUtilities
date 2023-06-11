@@ -7,8 +7,6 @@
 	#include "GameplayTags/TypedGameplayTag.h"
 	#include "GameplayTags/SampleGameplayTags.h"
 
-PRAGMA_DISABLE_OPTIMIZATION
-
 static_assert(
 	!std::is_assignable<FOUUSampleBarTag, FGameplayTag>::value,
 	"Typed tags must never be assignable from a regular gameplay tag");
@@ -205,7 +203,5 @@ void FTypedGameplayTagSpec::Define()
 		});
 	});
 }
-
-PRAGMA_ENABLE_OPTIMIZATION
 
 #endif
