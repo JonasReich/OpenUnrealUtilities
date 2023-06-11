@@ -62,7 +62,6 @@ public:
  * Create once for the full json data integration.
  * The destructor takes care of all the teardown/cleanup.
  * It's expected to be used only from this editor module.
- * // #TODO-OUU Move to the Private/ folder
  */
 struct FContentBrowserJsonDataSource
 {
@@ -80,4 +79,19 @@ private:
 		const UContentBrowserDataMenuContext_FileMenu* ContextObject);
 
 	TArray<FAssetIdentifier> GetContentBrowserSelectedJsonAssets(FOnContentBrowserGetSelection GetSelectionDelegate);
+
+	bool ItemPassesFilter(
+		const FName InFilePath,
+		const FString& InFilename,
+		const FContentBrowserDataFilter& InFilter,
+		const bool bIsFile);
+
+	bool GetItemAttribute(
+		const FName InFilePath,
+		const FString& InFilename,
+		const bool InIncludeMetaData,
+		const FName InAttributeKey,
+		FContentBrowserItemDataAttributeValue& OutAttributeValue);
+
+	bool CreateNewJsonAssetWithClass(const FString& PackagePath, UClass* AssetClass);
 };
