@@ -101,13 +101,37 @@ void FJsonDataAssetPathCustomization::CustomizeHeader(
 	auto FilterDelegate = FOnShouldFilterAsset::CreateSP(this, &FJsonDataAssetPathCustomization::OnShouldFilterAsset);
 
 	TArray<FAssetData> ContextOwnerAssets{FJsonAssetReferenceFilter::PassFilterKey()};
-	auto EditWidget = SNew(SObjectPropertyEntryBox)
-						  .ThumbnailPool(CustomizationUtils.GetThumbnailPool())
-						  .PropertyHandle(ChildHandle)
-						  .AllowedClass(ChildProperty->PropertyClass)
-						  .AllowClear(true)
-						  .OnShouldFilterAsset(FilterDelegate)
-						  .OwnerAssetDataArray(ContextOwnerAssets);
+	auto EditWidget =
+		SNew(SObjectPropertyEntryBox)
+			.ThumbnailPool(CustomizationUtils.GetThumbnailPool())
+			.PropertyHandle(ChildHandle)
+			.AllowedClass(ChildProperty->PropertyClass)
+			.AllowClear(true)
+			.OnShouldFilterAsset(FilterDelegate)
+			.OwnerAssetDataArray(ContextOwnerAssets)
+			.CustomContentSlot()
+				[SNew(SBox)
+					 .HAlign(HAlign_Left)
+					 .VAlign(VAlign_Center)
+					 .WidthOverride(22)
+					 .HeightOverride(22)
+					 .ToolTipText(INVTEXT("Browse to Asset Source in Content Browser"))
+						 [SNew(SButton)
+							  .ButtonStyle(FAppStyle::Get(), "SimpleButton")
+							  .OnClicked_Lambda([PathPropertyHandle]() -> FReply {
+								  void* PathAdress = nullptr;
+								  if (PathPropertyHandle->GetValueData(OUT PathAdress)
+									  == FPropertyAccess::Result::Success)
+								  {
+									  FJsonDataAssetPath& Path = *(FJsonDataAssetPath*)PathAdress;
+									  OUU::Editor::JsonData::ContentBrowser_NavigateToSources({Path});
+								  }
+								  return FReply::Handled();
+							  })
+							  .ContentPadding(
+								  0)[SNew(SImage)
+										 .Image(FSlateIcon("EditorStyle", "Icons.OpenSourceLocation").GetSmallIcon())
+										 .ColorAndOpacity(FSlateColor::UseForeground())]]];
 
 	auto IsRecognized = [](TSharedPtr<FDragDropOperation> DragDropOperation) -> bool {
 		if (DragDropOperation.IsValid() && DragDropOperation->IsOfType<FContentBrowserDataDragDropOp>())
