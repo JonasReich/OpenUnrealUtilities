@@ -386,9 +386,19 @@ bool UJsonDataAsset::PostLoadJsonData(
 
 bool UJsonDataAsset::MustHandleRename(UObject* OldOuter, const FName OldName) const
 {
+	if (IsFileBasedJsonAsset() == false)
+	{
+		// Never need to handle renames of non-file json assets
+		return false;
+	}
 	const auto NewOuter = GetOuter();
-	return IsFileBasedJsonAsset() && OldOuter == NewOuter
-		&& (OldOuter == nullptr || NewOuter == nullptr || OldOuter->GetPathName() != NewOuter->GetPathName());
+	if (NewOuter == OldOuter)
+	{
+		// From our observation, every "real rename" is accompanied by a change in outer
+		return false;
+	}
+
+	return (OldOuter == nullptr || NewOuter == nullptr || OldOuter->GetPathName() != NewOuter->GetPathName());
 }
 
 TSet<FGuid> UJsonDataAsset::GetRelevantCustomVersions() const
