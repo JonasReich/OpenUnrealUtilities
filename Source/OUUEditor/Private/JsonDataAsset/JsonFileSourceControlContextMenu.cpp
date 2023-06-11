@@ -4,6 +4,7 @@
 
 #include "AssetViewUtils.h"
 #include "ContentBrowserFileDataPayload.h"
+#include "FileHelpers.h"
 #include "ISourceControlModule.h"
 #include "JsonDataAsset/JsonDataAsset.h"
 #include "JsonDataAsset/JsonDataAssetEditor.h"
@@ -284,48 +285,56 @@ void FJsonFileSourceControlContextMenu::ExecuteDiffSelected() const
 
 void FJsonFileSourceControlContextMenu::ExecuteSCCRefresh()
 {
-	TArray<FString> PackageNames;
-	GetSelectedPackageNames(PackageNames);
+	TArray<FString> FileNames;
+	GetSelectedFileNames(OUT FileNames);
 
 	ISourceControlModule::Get().GetProvider().Execute(
 		ISourceControlOperation::Create<FUpdateStatus>(),
-		SourceControlHelpers::PackageFilenames(PackageNames),
+		SourceControlHelpers::PackageFilenames(FileNames),
 		EConcurrency::Asynchronous);
 }
 
 void FJsonFileSourceControlContextMenu::ExecuteSCCCheckOut()
 {
-	TArray<FString> PackageNames;
-	GetSelectedPackageNames(PackageNames);
+	TArray<FString> FileNames;
+	GetSelectedFileNames(OUT FileNames);
 
-	if (PackageNames.Num() > 0)
+	if (FileNames.Num() > 0)
 	{
-		SourceControlHelpers::CheckOutFiles(PackageNames);
+		SourceControlHelpers::CheckOutFiles(FileNames);
 	}
 }
 
 void FJsonFileSourceControlContextMenu::ExecuteSCCOpenForAdd()
 {
-	TArray<FString> PackageNames;
-	GetSelectedPackageNames(PackageNames);
+	TArray<FString> FileNames;
+	GetSelectedFileNames(OUT FileNames);
 
-	if (PackageNames.Num() > 0)
+	if (FileNames.Num() > 0)
 	{
-		SourceControlHelpers::MarkFilesForAdd(PackageNames);
+		SourceControlHelpers::MarkFilesForAdd(FileNames);
 	}
 }
 
 void FJsonFileSourceControlContextMenu::ExecuteSCCCheckIn()
 {
-	UE_MESSAGELOG(
-		EditorErrors,
-		Error,
-		TEXT("SourceControl check-in not fully implemented. Please use P4V to submit json source files."));
-	UE_MESSAGELOG_NOTIFY(EditorErrors, Error, "Check-In Not Implemented");
-	/*
+	TArray<FString> FileNames;
+	GetSelectedFileNames(OUT FileNames);
+
+	TArray<UPackage*> Assets;
+	for (auto& FileName : FileNames)
+	{
+		auto JsonPath = FJsonDataAssetPath::FromPackagePath(
+			OUU::Runtime::JsonData::SourceFullToPackage(FileName, EJsonDataAccessMode::Read));
+		if (auto AssetObject = JsonPath.ResolveObject())
+		{
+			Assets.Add(AssetObject->GetOutermost());
+		}
+	}
+
 	// Prompt the user to ask if they would like to first save any dirty packages they are trying to check-in
 	const FEditorFileUtils::EPromptReturnCode UserResponse =
-		FEditorFileUtils::PromptForCheckoutAndSave(Packages, true, true);
+		FEditorFileUtils::PromptForCheckoutAndSave(Assets, true, true);
 
 	// If the user elected to save dirty packages, but one or more of the packages failed to save properly OR if the
 	// user canceled out of the prompt, don't follow through on the check-in process
@@ -334,15 +343,12 @@ void FJsonFileSourceControlContextMenu::ExecuteSCCCheckIn()
 		 || UserResponse == FEditorFileUtils::EPromptReturnCode::PR_Declined);
 	if (bShouldProceed)
 	{
-		TArray<FString> PackageNames;
-		GetSelectedPackageNames(PackageNames);
-
 		const bool bUseSourceControlStateCache = true;
 
 		FCheckinResultInfo ResultInfo;
 		FSourceControlWindows::PromptForCheckin(
 			ResultInfo,
-			PackageNames,
+			FileNames,
 			TArray<FString>(),
 			TArray<FString>(),
 			bUseSourceControlStateCache);
@@ -365,14 +371,13 @@ void FJsonFileSourceControlContextMenu::ExecuteSCCCheckIn()
 				NSLOCTEXT("UnrealEd", "SCC_Checkin_Aborted", "Check-in aborted as a result of save failure."));
 		}
 	}
-		*/
 }
 
 void FJsonFileSourceControlContextMenu::ExecuteSCCHistory()
 {
-	TArray<FString> PackageNames;
-	GetSelectedPackageNames(PackageNames);
-	FSourceControlWindows::DisplayRevisionHistory(SourceControlHelpers::PackageFilenames(PackageNames));
+	TArray<FString> FileNames;
+	GetSelectedFileNames(OUT FileNames);
+	FSourceControlWindows::DisplayRevisionHistory(SourceControlHelpers::PackageFilenames(FileNames));
 }
 
 void DiffAgainstDepot(const FString& Filename)
@@ -393,14 +398,11 @@ void DiffAgainstDepot(const FString& Filename)
 		TSharedPtr<ISourceControlRevision, ESPMode::ThreadSafe> Revision = SourceControlState->GetHistoryItem(0);
 		check(Revision.IsValid());
 
-		FString TempFilename;
-		if (Revision->Get(TempFilename))
+		FString TempOldTextFilename;
+		if (Revision->Get(TempOldTextFilename))
 		{
-			OUU::Editor::JsonData::PerformDiff(
-				FJsonDataAssetPath::FromPackagePath(
-					OUU::Runtime::JsonData::SourceFullToPackage(TempFilename, EJsonDataAccessMode::Read)),
-				FJsonDataAssetPath::FromPackagePath(
-					OUU::Runtime::JsonData::SourceFullToPackage(Filename, EJsonDataAccessMode::Read)));
+			FString DiffCommand = GetDefault<UEditorLoadingSavingSettings>()->TextDiffToolPath.FilePath;
+			IAssetTools::Get().CreateDiffProcess(DiffCommand, TempOldTextFilename, Filename);
 		}
 	}
 }
@@ -415,11 +417,11 @@ void FJsonFileSourceControlContextMenu::ExecuteSCCDiffAgainstDepot() const
 
 void FJsonFileSourceControlContextMenu::ExecuteSCCRevert()
 {
-	TArray<FString> PackageNames;
-	GetSelectedPackageNames(PackageNames);
+	TArray<FString> FileNames;
+	GetSelectedFileNames(OUT FileNames);
 
 	// This unfortunately only works properly for uassets. Still displays the file, but doesn't actually revert them.
-	// if (FSourceControlWindows::PromptForRevert(PackageNames))
+	// if (FSourceControlWindows::PromptForRevert(FileNames))
 	// No idea why....
 	// ...so instead we do it manually (without any user selection of what to revert)
 	{
@@ -427,12 +429,12 @@ void FJsonFileSourceControlContextMenu::ExecuteSCCRevert()
 
 		TArray<FString> FilesToDelete;
 		TArray<FString> FilesToRevert;
-		for (auto PackageName : PackageNames)
+		for (auto FileName : FileNames)
 		{
-			if (auto State = SourceControlProvider.GetState(PackageName, EStateCacheUsage::ForceUpdate))
+			if (auto State = SourceControlProvider.GetState(FileName, EStateCacheUsage::ForceUpdate))
 			{
 				auto& ListToAddFile = State->IsAdded() ? FilesToDelete : FilesToRevert;
-				ListToAddFile.Add(PackageName);
+				ListToAddFile.Add(FileName);
 			}
 		}
 
@@ -478,16 +480,16 @@ void FJsonFileSourceControlContextMenu::ExecuteSCCRevert()
 
 void FJsonFileSourceControlContextMenu::ExecuteSCCSync()
 {
-	TArray<FString> PackageNames;
-	GetSelectedPackageNames(PackageNames);
-	AssetViewUtils::SyncPackagesFromSourceControl(PackageNames);
+	TArray<FString> FileNames;
+	GetSelectedFileNames(OUT FileNames);
+	AssetViewUtils::SyncPackagesFromSourceControl(FileNames);
 }
 
-void FJsonFileSourceControlContextMenu::GetSelectedPackageNames(TArray<FString>& OutPackageNames) const
+void FJsonFileSourceControlContextMenu::GetSelectedFileNames(TArray<FString>& OutFileNames) const
 {
 	for (int32 AssetIdx = 0; AssetIdx < SelectedAssets.Num(); ++AssetIdx)
 	{
-		OutPackageNames.Add(SelectedAssets[AssetIdx]->GetFilename());
+		OutFileNames.Add(SelectedAssets[AssetIdx]->GetFilename());
 	}
 }
 

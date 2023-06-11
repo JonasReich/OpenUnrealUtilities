@@ -16,7 +16,7 @@ public:
 	/** Makes the context menu widget */
 	void MakeContextMenu(
 		UToolMenu* InMenu,
-		TArray<TSharedRef<const FContentBrowserFileItemDataPayload>>& InSelectedAssets);
+		TArray<TSharedRef<const FContentBrowserFileItemDataPayload>>& InSelectedFiles);
 
 private:
 	void AddMenuOptions(UToolMenu* Menu);
@@ -39,7 +39,7 @@ private:
 	void ExecuteSCCRevert();
 	void ExecuteSCCSync();
 
-	void GetSelectedPackageNames(TArray<FString>& OutPackageNames) const;
+	void GetSelectedFileNames(TArray<FString>& OutFileNames) const;
 
 private:
 	TArray<TSharedRef<const FContentBrowserFileItemDataPayload>> SelectedAssets;
