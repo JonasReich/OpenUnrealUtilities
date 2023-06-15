@@ -11,6 +11,8 @@
 #include "JsonDataAsset/JsonDataAssetGlobals.h"
 #include "LogOpenUnrealUtilities.h"
 #include "Logging/MessageLogMacros.h"
+#include "Misc/MessageDialog.h"
+#include "Settings/EditorLoadingSavingSettings.h"
 #include "SourceControlHelpers.h"
 #include "SourceControlOperations.h"
 #include "SourceControlWindows.h"

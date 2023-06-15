@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 
+#include "HAL/IConsoleManager.h"
+
 // Console variable declarations for json data asset runtime.
 // Not in Public/ folder, because they should only be used directly by the system internal code.
 // See cpp file for more detailed descriptions on each variable.

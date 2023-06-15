@@ -17,6 +17,7 @@
 #include "PropertyHandle.h"
 #include "SDropTarget.h"
 #include "Slate/OUUPropertyCustomizationHelpers.h"
+#include "Widgets/Input/SButton.h"
 
 namespace OUU::Editor::JsonData::Private
 {
