@@ -71,8 +71,13 @@ bool FJsonDataAssetPath::ImportTextItem(
 	UObject* Parent,
 	FOutputDevice* ErrorText)
 {
-	SetFromString(Buffer);
+	const auto BufferStart = Buffer;
+	while (*Buffer != TEXT(')') && *Buffer != TEXT('\0'))
+	{
+		++Buffer;
+	}
 
+	SetFromString(FString(std::distance(BufferStart, Buffer), BufferStart));
 	return true;
 }
 
