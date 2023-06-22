@@ -223,8 +223,18 @@ bool UContentBrowserJsonFileDataSource::DuplicateItem(
 		return false;
 	}
 
-	auto Result = ContentBrowserItem.Duplicate();
-	return Result.IsValid();
+	auto DuplicationContext = ContentBrowserItem.Duplicate();
+
+	FString DefaultAssetName;
+	FString PackageNameToUse;
+	IAssetTools::Get().CreateUniqueAssetName(
+		FPaths::ChangeExtension(_Item.GetInternalPath().ToString(), TEXT("")),
+		FString(),
+		PackageNameToUse,
+		DefaultAssetName);
+	DuplicationContext.FinalizeItem(DefaultAssetName);
+
+	return DuplicationContext.IsValid();
 }
 
 bool UContentBrowserJsonFileDataSource::BulkDuplicateItems(
@@ -321,6 +331,18 @@ bool UContentBrowserJsonFileDataSource::Legacy_TryGetAssetData(
 	}
 
 	return ContentBrowserItem.Legacy_TryGetAssetData(OUT OutAssetData);
+}
+
+bool UContentBrowserJsonFileDataSource::AppendItemReference(const FContentBrowserItemData& _Item, FString& _OutStr)
+{
+	auto ContentBrowserItem =
+		OUU::Editor::JsonData::GetGeneratedAssetContentBrowserItem(_Item.GetInternalPath().ToString());
+	if (ContentBrowserItem.IsValid() == false)
+	{
+		return false;
+	}
+
+	return ContentBrowserItem.AppendItemReference(_OutStr);
 }
 
 bool UContentBrowserJsonFileDataSource::UpdateThumbnail(

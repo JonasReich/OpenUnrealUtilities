@@ -64,8 +64,11 @@ public:
 	bool Legacy_TryGetPackagePath(const FContentBrowserItemData& _Item, FName& _OutPackagePath) override;
 	bool Legacy_TryGetAssetData(const FContentBrowserItemData& _Item, FAssetData& _OutAssetData) override;
 
+	// ... copy/paste asset reference
+	bool AppendItemReference(const FContentBrowserItemData& _Item, FString& _OutStr) override;
+	
 	// ... thumbnail
-	bool UpdateThumbnail(const FContentBrowserItemData& _Item, FAssetThumbnail& _OutThumbnail);
+	bool UpdateThumbnail(const FContentBrowserItemData& _Item, FAssetThumbnail& _OutThumbnail) override;
 	// --
 };
 
