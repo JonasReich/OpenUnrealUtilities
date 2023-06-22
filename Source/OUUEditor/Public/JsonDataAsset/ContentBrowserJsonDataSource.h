@@ -35,26 +35,37 @@ public:
 	// - UContentBrowserDataSource
 
 	// ... renaming
-	bool CanRenameItem(const FContentBrowserItemData& InItem, const FString* InNewName, FText* OutErrorMsg) override;
-	bool RenameItem(
-		const FContentBrowserItemData& InItem,
-		const FString& InNewName,
-		FContentBrowserItemData& OutNewItem) override;
+	bool CanRenameItem(const FContentBrowserItemData& _Item, const FString* _NewName, FText* _OutErrorMsg) override;
+	bool RenameItem(const FContentBrowserItemData& _Item, const FString& _NewName, FContentBrowserItemData& _OutNewItem)
+		override;
 	// ... moving
-	bool CanMoveItem(const FContentBrowserItemData& InItem, const FName InDestPath, FText* OutErrorMsg) override;
-	bool MoveItem(const FContentBrowserItemData& InItem, const FName InDestPath) override;
-	bool BulkMoveItems(TArrayView<const FContentBrowserItemData> InItems, const FName InDestPath) override;
+	bool CanMoveItem(const FContentBrowserItemData& _Item, const FName _DestPath, FText* _OutErrorMsg) override;
+	bool MoveItem(const FContentBrowserItemData& _Item, const FName _DestPath) override;
+	bool BulkMoveItems(TArrayView<const FContentBrowserItemData> _Items, const FName _DestPath) override;
+	// ... copying
+	bool CanCopyItem(const FContentBrowserItemData& _Item, const FName _DestPath, FText* _OutErrorMsg) override;
+	bool CopyItem(const FContentBrowserItemData& _Item, const FName _DestPath) override;
+	bool BulkCopyItems(TArrayView<const FContentBrowserItemData> _Items, const FName _DestPath) override;
+	// ... duplicating
+	bool CanDuplicateItem(const FContentBrowserItemData& _Item, FText* _OutErrorMsg) override;
+	bool DuplicateItem(
+		const FContentBrowserItemData& _Item,
+		FContentBrowserItemDataTemporaryContext& _OutPendingItem) override;
+	bool BulkDuplicateItems(
+		TArrayView<const FContentBrowserItemData> _Items,
+		TArray<FContentBrowserItemData>& _OutNewItems) override;
+
 	// ... deleting
-	bool CanDeleteItem(const FContentBrowserItemData& InItem, FText* OutErrorMsg) override;
-	bool DeleteItem(const FContentBrowserItemData& InItem) override;
-	bool BulkDeleteItems(TArrayView<const FContentBrowserItemData> InItems) override;
+	bool CanDeleteItem(const FContentBrowserItemData& _Item, FText* _OutErrorMsg) override;
+	bool DeleteItem(const FContentBrowserItemData& _Item) override;
+	bool BulkDeleteItems(TArrayView<const FContentBrowserItemData> _Items) override;
 
 	// ... legacy funcs to retrieve asset data and paths
-	bool Legacy_TryGetPackagePath(const FContentBrowserItemData& InItem, FName& OutPackagePath) override;
-	bool Legacy_TryGetAssetData(const FContentBrowserItemData& InItem, FAssetData& OutAssetData) override;
+	bool Legacy_TryGetPackagePath(const FContentBrowserItemData& _Item, FName& _OutPackagePath) override;
+	bool Legacy_TryGetAssetData(const FContentBrowserItemData& _Item, FAssetData& _OutAssetData) override;
 
 	// ... thumbnail
-	bool UpdateThumbnail(const FContentBrowserItemData& InItem, FAssetThumbnail& OutThumbnail);
+	bool UpdateThumbnail(const FContentBrowserItemData& _Item, FAssetThumbnail& _OutThumbnail);
 	// --
 };
 

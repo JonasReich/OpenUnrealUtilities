@@ -135,6 +135,118 @@ bool UContentBrowserJsonFileDataSource::BulkMoveItems(
 	return bAllMoved;
 }
 
+bool UContentBrowserJsonFileDataSource::CanCopyItem(
+	const FContentBrowserItemData& _Item,
+	const FName _DestPath,
+	FText* _OutErrorMsg)
+{
+	auto ContentBrowserItem =
+		OUU::Editor::JsonData::GetGeneratedAssetContentBrowserItem(_Item.GetInternalPath().ToString());
+	if (ContentBrowserItem.IsValid() == false)
+	{
+		if (_OutErrorMsg)
+		{
+			*_OutErrorMsg = INVTEXT("Can't copy json source without generated asset.");
+		}
+		return false;
+	}
+
+	auto GeneratedDestPath =
+		OUU::Editor::JsonData::ConvertMountedSourceFilenameToMountedDataAssetFilename(_DestPath.ToString());
+
+	return ContentBrowserItem.CanCopy(*GeneratedDestPath, OUT _OutErrorMsg);
+}
+
+bool UContentBrowserJsonFileDataSource::CopyItem(const FContentBrowserItemData& _Item, const FName _DestPath)
+{
+	auto ContentBrowserItem =
+		OUU::Editor::JsonData::GetGeneratedAssetContentBrowserItem(_Item.GetInternalPath().ToString());
+	if (ContentBrowserItem.IsValid() == false)
+	{
+		return false;
+	}
+
+	auto GeneratedDestPath =
+		OUU::Editor::JsonData::ConvertMountedSourceFilenameToMountedDataAssetFilename(_DestPath.ToString());
+
+	return ContentBrowserItem.Copy(*GeneratedDestPath);
+}
+
+bool UContentBrowserJsonFileDataSource::BulkCopyItems(
+	TArrayView<const FContentBrowserItemData> _Items,
+	const FName _DestPath)
+{
+	bool bAllCopied = true;
+	for (auto& Item : _Items)
+	{
+		auto ContentBrowserItem =
+			OUU::Editor::JsonData::GetGeneratedAssetContentBrowserItem(Item.GetInternalPath().ToString());
+		if (ContentBrowserItem.IsValid() == false)
+		{
+			return false;
+		}
+
+		auto GeneratedDestPath =
+			OUU::Editor::JsonData::ConvertMountedSourceFilenameToMountedDataAssetFilename(_DestPath.ToString());
+
+		bool bCopied = ContentBrowserItem.Copy(*GeneratedDestPath);
+		ensure(bCopied);
+		bAllCopied &= bCopied;
+	}
+	return bAllCopied;
+}
+
+bool UContentBrowserJsonFileDataSource::CanDuplicateItem(const FContentBrowserItemData& _Item, FText* _OutErrorMsg)
+{
+	auto ContentBrowserItem =
+		OUU::Editor::JsonData::GetGeneratedAssetContentBrowserItem(_Item.GetInternalPath().ToString());
+	if (ContentBrowserItem.IsValid() == false)
+	{
+		if (_OutErrorMsg)
+		{
+			*_OutErrorMsg = INVTEXT("Can't duplicate json source without generated asset.");
+		}
+		return false;
+	}
+
+	return ContentBrowserItem.CanDuplicate(OUT _OutErrorMsg);
+}
+
+bool UContentBrowserJsonFileDataSource::DuplicateItem(
+	const FContentBrowserItemData& _Item,
+	FContentBrowserItemDataTemporaryContext& _OutPendingItem)
+{
+	auto ContentBrowserItem =
+		OUU::Editor::JsonData::GetGeneratedAssetContentBrowserItem(_Item.GetInternalPath().ToString());
+	if (ContentBrowserItem.IsValid() == false)
+	{
+		return false;
+	}
+
+	auto Result = ContentBrowserItem.Duplicate();
+	return Result.IsValid();
+}
+
+bool UContentBrowserJsonFileDataSource::BulkDuplicateItems(
+	TArrayView<const FContentBrowserItemData> _Items,
+	TArray<FContentBrowserItemData>& _OutNewItems)
+{
+	bool bAllDuplicated = true;
+	for (auto& Item : _Items)
+	{
+		auto ContentBrowserItem =
+			OUU::Editor::JsonData::GetGeneratedAssetContentBrowserItem(Item.GetInternalPath().ToString());
+		if (ContentBrowserItem.IsValid() == false)
+		{
+			return false;
+		}
+
+		auto DuplicationContext = ContentBrowserItem.Duplicate();
+		bAllDuplicated &= DuplicationContext.IsValid();
+	}
+	return bAllDuplicated;
+}
+
 bool UContentBrowserJsonFileDataSource::CanDeleteItem(const FContentBrowserItemData& InItem, FText* OutErrorMsg)
 {
 	auto ContentBrowserItem =
@@ -176,7 +288,8 @@ bool UContentBrowserJsonFileDataSource::BulkDeleteItems(TArrayView<const FConten
 		}
 
 		bool bDeleted = ContentBrowserItem.Delete();
-		ensure(bDeleted);
+		// Deletion can be cancelled via dialog, so it's okay if it's false
+		// ensure(bDeleted);
 		bAllDeleted &= bDeleted;
 	}
 	return bAllDeleted;
