@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 
 #include "Traits/ConditionalType.h"
+#include "Traits/IsSameWrapper.h"
 
 namespace OUU::Runtime::Private::SubclassWithInterface
 {
@@ -86,7 +87,7 @@ public:
 
 	// Easiest check: Assume only InObjectBaseClass& is a reference and everything else are pointers.
 	// This needs to be refined if we ever support other non-nullable types.
-	const static bool bIsPointer = TIsSame<InStorageType, InObjectBaseClass*>::Value;
+	const static bool bIsPointer = std::is_same_v<InStorageType, InObjectBaseClass*>;
 
 private:
 	StorageType Object;
@@ -99,7 +100,7 @@ private:
 	InterfaceClass* GetInterfacePtr() const
 	{
 		static_assert(
-			TOr<TIsSame<InterfaceClass, InterfaceClasses>...>::Value,
+			TOr<TIsSameWrapper<InterfaceClass, InterfaceClasses>...>::Value,
 			"InterfaceClass is not part of TSubclassWithInterfaces InterfaceClasses");
 		return Cast<InterfaceClass>(GetObjectPtr());
 	}

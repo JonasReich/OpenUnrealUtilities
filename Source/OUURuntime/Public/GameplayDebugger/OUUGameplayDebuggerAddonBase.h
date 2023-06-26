@@ -27,9 +27,9 @@ namespace OUU::Runtime::Private
 		using SelfType = TOUUGameplayDebuggerAddonBase<Super>;
 
 		static_assert(
-			TOr<TIsSame<SuperType, FGameplayDebuggerAddonBase>,
-				TIsSame<SuperType, FGameplayDebuggerCategory>,
-				TIsSame<SuperType, FGameplayDebuggerExtension>>::Value,
+			std::is_same_v<
+				SuperType,
+				FGameplayDebuggerAddonBase> || std::is_same_v<SuperType, FGameplayDebuggerCategory> || std::is_same_v<SuperType, FGameplayDebuggerExtension>,
 			"SuperType must be derived from FGameplayDebuggerAddonBase (either FGameplayDebuggerCatgegory or "
 			"FGameplayDebuggerExtension)");
 

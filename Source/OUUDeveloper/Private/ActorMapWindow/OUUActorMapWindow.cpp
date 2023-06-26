@@ -187,21 +187,21 @@ namespace OUU::Developer::ActorMapWindow
 						RetLayerId++,
 						AllottedGeometry.ToPaintGeometry(
 							WidgetSpaceLocation - (MarkerSize / 2.f),
-							FVector2D(MarkerSize, MarkerSize)),
+							FSlateLayoutTransform(FVector2f(MarkerSize, MarkerSize))),
 						&Private::White,
 						DrawEffects,
 						Query->QueryColor);
 
 					FText LabelText = FText::FromString(Actor->GetActorNameOrLabel());
 
-					FVector2D LabelDimensions = FontMeasure->Measure(LabelText, FontInfo);
+					FVector2f LabelDimensions = FontMeasure->Measure(LabelText, FontInfo);
 
 					FSlateDrawElement::MakeBox(
 						OutDrawElements,
 						RetLayerId++,
 						AllottedGeometry.ToPaintGeometry(
 							WidgetSpaceLocation - (MarkerSize / 2.f) + FVector2D(0, MarkerSize),
-							LabelDimensions),
+							FSlateLayoutTransform(LabelDimensions)),
 						&Private::White,
 						DrawEffects,
 						Private::LabelBackgroundColor);
@@ -211,7 +211,7 @@ namespace OUU::Developer::ActorMapWindow
 						RetLayerId++,
 						AllottedGeometry.ToPaintGeometry(
 							WidgetSpaceLocation - (MarkerSize / 2.f) + FVector2D(0, MarkerSize),
-							FVector2D(MarkerSize, MarkerSize)),
+							FSlateLayoutTransform(FVector2f(MarkerSize, MarkerSize))),
 						LabelText,
 						FontInfo,
 						DrawEffects,

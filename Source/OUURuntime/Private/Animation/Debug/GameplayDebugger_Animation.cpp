@@ -22,6 +22,7 @@
 	#include "Animation/AnimNotifies/AnimNotifyState.h"
 	#include "Templates/StringUtils.h"
 	#include "Engine/StaticMesh.h"
+	#include "Animation/AnimMontage.h"
 
 	#if UE_VERSION_OLDER_THAN(5, 0, 0)
 		#include "Animation/BlendSpaceBase.h"

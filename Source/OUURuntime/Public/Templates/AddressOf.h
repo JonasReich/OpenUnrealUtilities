@@ -10,7 +10,7 @@ namespace OUUAddressOf_Private
 	template <typename T>
 	struct TIsReferencable
 	{
-		static const bool Value = TIsFunction<T>::Value || TIsReferenceType<T>::Value || TIsVoidType<T>::Value;
+		static const bool Value = TIsFunction<T>::Value || TIsReferenceType<T>::Value || std::is_void_v<T>;
 	};
 } // namespace OUUAddressOf_Private
 

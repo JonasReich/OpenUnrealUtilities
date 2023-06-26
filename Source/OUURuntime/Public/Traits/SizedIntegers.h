@@ -11,7 +11,7 @@
 template <typename T, SIZE_T NumBits>
 struct TAssertBitSizeEquality
 {
-	static const SIZE_T NumBitsInT = TIsSame<T, bool>::Value ? 1 : sizeof(T) * 8;
+	static const SIZE_T NumBitsInT = std::is_same_v<T, bool> ? 1 : sizeof(T) * 8;
 	static const bool Value = TAssertValuesEqual<SIZE_T, NumBitsInT, NumBits>::Value;
 	static_assert(Value, "Number of bits in T is not equal to NumBits");
 };

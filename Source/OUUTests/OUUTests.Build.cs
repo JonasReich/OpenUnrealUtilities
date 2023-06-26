@@ -20,6 +20,7 @@ public class OUUTests : OUUModuleRules
 			"Localization",
 			"GameplayTags",
 			"Json",
+			"PropertyPath",
 
 			// OUU Plugins
 			"OUURuntime",

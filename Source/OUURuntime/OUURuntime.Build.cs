@@ -27,7 +27,7 @@ public class OUUModuleRules : ModuleRules
 			? ModuleRules.PCHUsageMode.NoPCHs
 			: ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		bEnforceIWYU = true;
+		IWYUSupport = IWYUSupport.Full;
 
 		// Also disable unity builds.
 		// Unfortunately even this is needed to ensure that all includes are correct when building the plugin by itself.

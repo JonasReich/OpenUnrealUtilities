@@ -10,6 +10,7 @@
 	#include "Components/Image.h"
 	#include "Components/TextBlock.h"
 	#include "UMG/UMGUtils.h"
+	#include "PropertyPathHelpers.h"
 
 void CreateComplexUserWidget(FOUUAutomationTestWorld& TestWorld, UOUUTestWidget* Widget, UWidgetTree* WidgetTree)
 {
@@ -96,19 +97,25 @@ void FUMGUtilsSpec::Define()
 
 		It("should call the predicate on all widgets in the tree including nested user widgets", [this]() {
 			CreateComplexUserWidget(*TestWorld, Widget, WidgetTree);
-			OUU::Runtime::UMGUtils::ForEachWidgetAndDescendants<UWidget>(Widget, true, [&](UWidget* LambdaWidget) -> bool {
-				PredicateCallCount++;
-				return false;
-			});
+			OUU::Runtime::UMGUtils::ForEachWidgetAndDescendants<UWidget>(
+				Widget,
+				true,
+				[&](UWidget* LambdaWidget) -> bool {
+					PredicateCallCount++;
+					return false;
+				});
 			SPEC_TEST_EQUAL(PredicateCallCount, 7);
 		});
 
 		It("should stop iterating the widgets as soon as one predicate returns true", [this]() {
 			CreateComplexUserWidget(*TestWorld, Widget, WidgetTree);
-			OUU::Runtime::UMGUtils::ForEachWidgetAndDescendants<UWidget>(Widget, true, [&](UWidget* LambdaWidget) -> bool {
-				PredicateCallCount++;
-				return PredicateCallCount >= 4;
-			});
+			OUU::Runtime::UMGUtils::ForEachWidgetAndDescendants<UWidget>(
+				Widget,
+				true,
+				[&](UWidget* LambdaWidget) -> bool {
+					PredicateCallCount++;
+					return PredicateCallCount >= 4;
+				});
 			SPEC_TEST_EQUAL(PredicateCallCount, 4);
 		});
 	});
@@ -134,14 +141,14 @@ void FUMGUtilsSpec::Define()
 		Describe("called on a UButton", [this]() {
 			It("should return false if the button is marked as NOT focusable", [this]() {
 				UButton* Button = NewObject<UButton>();
-				Button->IsFocusable = false;
+				PropertyPathHelpers::SetPropertyValue<bool>(Button, TEXT("IsFocusable"), false);
 				auto SlateWidget = Button->TakeWidget();
 				SPEC_TEST_FALSE(OUU::Runtime::UMGUtils::IsFocusable(Button));
 			});
 
 			It("should return true if the button is marked as focusable", [this]() {
 				UButton* Button = NewObject<UButton>();
-				Button->IsFocusable = true;
+				PropertyPathHelpers::SetPropertyValue<bool>(Button, TEXT("IsFocusable"), true);
 				auto SlateWidget = Button->TakeWidget();
 				SPEC_TEST_TRUE(OUU::Runtime::UMGUtils::IsFocusable(Button));
 			});
@@ -150,14 +157,14 @@ void FUMGUtilsSpec::Define()
 		Describe("called on a UUserWidget", [this]() {
 			It("should return true if the user widget is marked as focusable", [this]() {
 				WidgetTree->RootWidget = WidgetTree->ConstructWidget<UButton>();
-				Widget->bIsFocusable = true;
+				Widget->SetIsFocusable(true);
 				auto SlateWidget = Widget->TakeWidget();
 				SPEC_TEST_TRUE(OUU::Runtime::UMGUtils::IsFocusable(Widget));
 			});
 
 			It("should return false if the user widget is NOT marked as focusable", [this]() {
 				WidgetTree->RootWidget = WidgetTree->ConstructWidget<UButton>();
-				Widget->bIsFocusable = false;
+				Widget->SetIsFocusable(false);
 				auto SlateWidget = Widget->TakeWidget();
 				SPEC_TEST_FALSE(OUU::Runtime::UMGUtils::IsFocusable(Widget));
 			});
@@ -204,7 +211,7 @@ void FUMGUtilsSpec::Define()
 			});
 
 			It("should return true when the widget is set to be focusable itself", [this]() {
-				Widget->bIsFocusable = true;
+				Widget->SetIsFocusable(true);
 				auto SlateWidget = Widget->TakeWidget();
 				SPEC_TEST_TRUE(OUU::Runtime::UMGUtils::IsInputVisible(Widget));
 			});
@@ -232,7 +239,7 @@ void FUMGUtilsSpec::Define()
 			});
 
 			It("should return false when the widget is set to be focusable itself", [this]() {
-				Widget->bIsFocusable = true;
+				Widget->SetIsFocusable(true);
 				auto SlateWidget = Widget->TakeWidget();
 				SPEC_TEST_FALSE(OUU::Runtime::UMGUtils::HasInputVisibleDescendantsExcludingSelf(Widget));
 			});
@@ -286,7 +293,7 @@ void FUMGUtilsSpec::Define()
 			});
 
 			It("should return true when the widget is set to be focusable itself", [this]() {
-				Widget->bIsFocusable = true;
+				Widget->SetIsFocusable(true);
 				auto SlateWidget = Widget->TakeWidget();
 				SPEC_TEST_TRUE(OUU::Runtime::UMGUtils::HasInputVisibleDescendantsIncludingSelf(Widget));
 			});
@@ -318,7 +325,7 @@ void FUMGUtilsSpec::Define()
 
 		It("should return the UUSerWidget itself if it's focusable itself", [this]() {
 			WidgetTree->RootWidget = WidgetTree->ConstructWidget<UButton>();
-			Widget->bIsFocusable = true;
+			Widget->SetIsFocusable(true);
 			auto SlateWidget = Widget->TakeWidget();
 			UWidget* FirstFocusableDescendant =
 				OUU::Runtime::UMGUtils::GetFirstFocusableDescendantIncludingSelf(Widget);

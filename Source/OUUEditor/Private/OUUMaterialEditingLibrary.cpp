@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2023 Jonas Reich & Contributors
+// Copyright (c) 2023 Jonas Reich & Contributors
 
 #include "OUUMaterialEditingLibrary.h"
 
@@ -179,6 +179,7 @@ void UOUUMaterialEditingLibrary::CopyMaterialAttributeConnections(
 	COPY_INPUT_CONNECTION_SIMPLE(PixelDepthOffset);
 	COPY_INPUT_CONNECTION_SIMPLE(ShadingModel);
 	// MP_FrontMaterial -> not exposed in material attributes
+	// MP_SurfaceThickness -> not exposed in material attributes
 	const int32 LineAfter = __LINE__;
 	// clang-format on
 
@@ -186,7 +187,7 @@ void UOUUMaterialEditingLibrary::CopyMaterialAttributeConnections(
 #undef COPY_INPUT_CONNECTION_CUSTOMUV
 
 	static_assert(
-		MP_EmissiveColor == 0 && MP_FrontMaterial == 30 && MP_MaterialAttributes == 31,
+		MP_EmissiveColor == 0 && MP_SurfaceThickness == 31 && MP_MaterialAttributes == 32,
 		"The material property enum has changed, so this conversion probably misses some material property. Please "
 		"check the engine source and fix this.");
 	static_assert(

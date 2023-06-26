@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2023 Jonas Reich & Contributors
+// Copyright (c) 2023 Jonas Reich & Contributors
 
 #pragma once
 
@@ -49,7 +49,7 @@ namespace OUU::Editor::Private::MaterialAnalyzer::Widgets
 
 		void Construct(const FArguments& InArgs);
 
-		bool HasAnyItems() const { return ItemsSource->Num() > 0; }
+		bool HasAnyItems() const { return GetItems().Num() > 0; }
 
 	private:
 		TSharedRef<ITableRow> GenerateRowWidget(

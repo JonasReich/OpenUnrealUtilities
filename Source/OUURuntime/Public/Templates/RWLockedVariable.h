@@ -68,7 +68,7 @@ private:
 /** Statically assert that a const reference obtained via TRWLockedVariable::Read() cannot be ... */
 #define ASSERT_CONST_REF_CANT(Operation)                                                                               \
 	static_assert(                                                                                                     \
-		TIsSame<ScopeLockType, FReadScopeLock>::Value == false,                                                        \
+		std::is_same_v<ScopeLockType, FReadScopeLock> == false,                                                        \
 		"TRWVarRef obtained via TRWLockedVariable::Read() is a constant reference to the underlying variable and "     \
 		"cannot " Operation);
 

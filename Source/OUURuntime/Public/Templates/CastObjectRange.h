@@ -25,7 +25,7 @@ private:
 	static_assert(TIsPointer<CastTargetType>::Value == false, "TargetType must not be a pointer type");
 	// static_assert(TIsCastable<typename TRemoveReference<ElementType>::Type>::Value, "ElementType must be a castable
 	// UObject type!");
-	static_assert(TIsCastable<CastTargetType>::Value, "TargetType must be a castable UObject type!");
+	static_assert(UECasts_Private::TIsCastable<CastTargetType>::Value, "TargetType must be a castable UObject type!");
 
 	IteratorType WrappedIterator;
 

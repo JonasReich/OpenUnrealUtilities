@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2023 Jonas Reich & Contributors
+// Copyright (c) 2023 Jonas Reich & Contributors
 
 #include "OUUAnimationEditorLibrary.h"
 
@@ -165,7 +165,7 @@ int32 UOUUAnimationEditorLibrary::RemoveUnskinnedBonesFromMesh(
 		return false;
 
 	FScopedSkeletalMeshPostEditChange ScopedPostEditChange(SkeletalMesh);
-	FScopedTransaction(TEXT(""), INVTEXT("Remove Unskinned Bones"), SkeletalMesh);
+	FScopedTransaction Transaction(TEXT(""), INVTEXT("Remove Unskinned Bones"), SkeletalMesh);
 	SkeletalMesh->Modify();
 
 	TArray<FName> BonesToRemove = BonesToRemove_FilteredNames.Array();

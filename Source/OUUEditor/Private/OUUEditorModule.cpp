@@ -44,9 +44,9 @@ namespace OUU::Editor
 			FCoreDelegates::OnAllModuleLoadingPhasesComplete.AddLambda([]() {
 				FTypedGameplayTag_Base::RegisterAllDerivedPropertyTypeLayouts();
 
-#if UE_VERSION_NEWER_THAN(5, 1, 9999)
+#if UE_VERSION_NEWER_THAN(5, 2, 999)
 				COMPILE_ERROR(
-					"Asset reference filter only implemented for 5.1. Please review this code and check if it's "
+					"Asset reference filter only implemented for 5.2. Please review this code and check if it's "
 					"now possible to bind an asset referencing filter without breaking previously registered "
 					"filters like FDomainAssetReferenceFilter.")
 #else

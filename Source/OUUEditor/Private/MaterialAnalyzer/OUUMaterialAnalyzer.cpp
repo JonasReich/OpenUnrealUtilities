@@ -13,6 +13,8 @@
 #include "MaterialEditorUtilities.h"
 #include "MaterialPropertyHelpers.h"
 #include "Materials/Material.h"
+#include "Materials/MaterialExpressionParameter.h"
+#include "Materials/MaterialExpressionTextureSampleParameter.h"
 #include "PropertyCustomizationHelpers.h"
 #include "Slate/SplitterColumnSizeData.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"

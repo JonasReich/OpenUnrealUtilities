@@ -11,6 +11,7 @@
 #include "Misc/EngineVersionComparison.h"
 #include "NativeGameplayTags.h"
 #include "Templates/UnrealTypeTraits.h"
+#include "Traits/IsSameWrapper.h"
 
 /**
  * --------------------------
@@ -41,9 +42,9 @@ template <typename Child, typename TestParent>
 struct TIsChildTagOf_Single
 {
 	static constexpr bool Value =
-		TOr<TIsSame<typename Child::SelfTagType, TestParent>,
+		TOr<TIsSameWrapper<typename Child::SelfTagType, TestParent>,
 			TAnd<
-				TNot<TIsSame<typename Child::SelfTagType, typename Child::ParentTagType>>,
+				TNot<TIsSameWrapper<typename Child::SelfTagType, typename Child::ParentTagType>>,
 				TIsChildTagOf_Single<typename Child::ParentTagType, TestParent>>>::Value;
 };
 
@@ -102,7 +103,7 @@ private:
 		using TemplateType =
 			TLiteralGameplayTag<typename T::SelfTagType, typename T::ParentTagType, typename T::RootTagType>;
 		static_assert(
-			TIsDerivedFrom<T, TemplateType>::Value && !TIsSame<T, TemplateType>::Value,
+			TIsDerivedFrom<T, TemplateType>::Value && !std::is_same_v<T, TemplateType>,
 			"Type must be a struct type derived from TLiteralGameplayTag, but not TLiteralGameplayTag "
 			"itself.\n"
 			"It's strongly recommended to only create these derived types via the GTAG and GTAG_GROUP macros.");
@@ -143,7 +144,6 @@ bool operator==(const FGameplayTag& LHS, const TLiteralGameplayTag<SelfTagType, 
 	public:                                                                                                            \
 		static const bool bAutoAddNativeTag = bInAutoAddNativeTag;                                                     \
 		static const TagType& GetInstance() { return TagType##_Instance; }                                             \
-                                                                                                                       \
 		PRIVATE_OUU_GTAG_COMMON_FUNCS_IMPL(RootTagName, Description)                                                   \
 		PRIVATE_OUU_GTAG_GETTER_IMPL(TagType, TagType, bInAutoAddNativeTag)                                            \
 	public:
