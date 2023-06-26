@@ -8,6 +8,8 @@
 #include "OUURuntimeVersion.h"
 #include "Templates/StructSerializationHelpers.h"
 
+#include <iterator>
+
 FJsonDataAssetPath::FJsonDataAssetPath(const UJsonDataAsset* Object) : Path(Object) {}
 
 UJsonDataAsset* FJsonDataAssetPath::ResolveObject() const
