@@ -12,11 +12,13 @@
 #include "Engine/StaticMesh.h"
 #include "GameFramework/HUD.h"
 #include "LogOpenUnrealUtilities.h"
+#include "Materials/MaterialInterface.h"
 #include "Misc/CanvasGraphPlottingUtils.h"
 #include "Templates/CastObjectRange.h"
 #include "Templates/RingAggregator.h"
 #include "Templates/StringUtils.h"
 #include "Tickable.h"
+#include "UnrealClient.h"
 
 #if WITH_EDITOR
 	#include "Editor.h"
@@ -147,18 +149,17 @@ FMaterialAnalysisResults AnalyzeMaterialUsage(UWorld* TargetWorld)
 				return;
 			}
 			// Exclude b/c it wasn't recently rendered?
-			if (
-				bOnlyRecentlyRendered && (!PrimitiveComponent->WasRecentlyRendered()
-				 || !PrimitiveComponent->IsVisible() || PrimitiveComponent->bHiddenInGame))
+			if (bOnlyRecentlyRendered
+				&& (!PrimitiveComponent->WasRecentlyRendered() || !PrimitiveComponent->IsVisible()
+					|| PrimitiveComponent->bHiddenInGame))
 			{
 				Results.NumIgnoredPrimitivesNotRendered += 1;
 				return;
 			}
 			// Exclude b/c of Virtual Texture?
 			if (bExcludeVTOnlyMeshes
-					&& PrimitiveComponent->GetVirtualTextureRenderPassType()
-						!= ERuntimeVirtualTextureMainPassType::Always
-					&& PrimitiveComponent->GetRuntimeVirtualTextures().Num() > 0)
+				&& PrimitiveComponent->GetVirtualTextureRenderPassType() != ERuntimeVirtualTextureMainPassType::Always
+				&& PrimitiveComponent->GetRuntimeVirtualTextures().Num() > 0)
 			{
 				Results.NumIgnoredPrimitivesNotRendered += 1;
 				return;

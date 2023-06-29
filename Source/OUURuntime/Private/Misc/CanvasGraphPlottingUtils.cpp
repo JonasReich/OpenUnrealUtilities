@@ -1,7 +1,8 @@
-﻿// Copyright (c) 2023 Jonas Reich & Contributors
+// Copyright (c) 2023 Jonas Reich & Contributors
 
 #include "Misc/CanvasGraphPlottingUtils.h"
 
+#include "BatchedElements.h"
 #include "CanvasItem.h"
 #include "CanvasTypes.h"
 #include "Engine/Engine.h"

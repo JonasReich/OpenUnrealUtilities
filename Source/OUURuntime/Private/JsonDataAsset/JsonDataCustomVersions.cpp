@@ -3,6 +3,7 @@
 #include "JsonDataAsset/JsonDataCustomVersions.h"
 
 #include "Dom/JsonObject.h"
+#include "Serialization/CustomVersion.h"
 
 FJsonDataCustomVersions::FJsonDataCustomVersions(const TSet<FGuid>& CustomVersionGuids)
 {

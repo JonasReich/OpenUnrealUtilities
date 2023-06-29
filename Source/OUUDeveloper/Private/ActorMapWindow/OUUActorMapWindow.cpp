@@ -19,6 +19,7 @@
 #include "LogOpenUnrealUtilities.h"
 #include "Misc/EngineVersionComparison.h"
 #include "Misc/RegexUtils.h"
+#include "TextureResource.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SCheckBox.h"

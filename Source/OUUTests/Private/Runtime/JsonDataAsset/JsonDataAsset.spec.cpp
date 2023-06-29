@@ -5,6 +5,7 @@
 #include "JsonDataAsset/JsonDataAssetGlobals.h"
 #include "OUUTestUtilities.h"
 #include "TestJsonDataAsset.h"
+#include "UObject/Package.h"
 
 #if WITH_AUTOMATION_WORKER
 

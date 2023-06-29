@@ -5,6 +5,7 @@
 #if WITH_AUTOMATION_WORKER
 
 	#include "AutomationTestWorld.h"
+	#include "Engine/GameInstance.h"
 	#include "GameFramework/GameModeBase.h"
 
 	#define SPEC_BASE_NAME "OpenUnrealUtilities.TestUtilities.AutomationTestWorld"
