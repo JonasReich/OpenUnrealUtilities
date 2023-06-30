@@ -158,28 +158,8 @@ bool UJsonDataAsset::ImportJson(TSharedPtr<FJsonObject> JsonObject, bool bCheckC
 	// Reset object properties to class defaults
 	{
 		auto* CDO = GetClass()->GetDefaultObject();
-
-		for (auto Property : TFieldRange<FProperty>(GetClass(), EFieldIterationFlags::IncludeAll))
-		{
-			void* SelfPropertyPtr = Property->ContainerPtrToValuePtr<void>(this);
-			const void* CDOPropertyPtr = Property->ContainerPtrToValuePtr<void>(CDO);
-
-			if (SelfPropertyPtr && CDOPropertyPtr)
-			{
-				Property->CopyCompleteValue(SelfPropertyPtr, CDOPropertyPtr);
-			}
-			else
-			{
-				UE_LOG(
-					LogOpenUnrealUtilities,
-					Error,
-					TEXT("Property %s in class %s could not be resolved to value pointers on object %s or CDO %s"),
-					*Property->GetName(),
-					*GetClass()->GetName(),
-					*GetName(),
-					*CDO->GetName());
-			}
-		}
+		UEngine::FCopyPropertiesForUnrelatedObjectsParams Options;
+		UEngine::CopyPropertiesForUnrelatedObjects(CDO, this, Options);
 	}
 
 	if (!FJsonObjectConverter::JsonObjectToUStruct(Data.ToSharedRef(), GetClass(), this, 0, 0))
@@ -209,7 +189,10 @@ TSharedRef<FJsonObject> UJsonDataAsset::ExportJson() const
 	{
 		FOUUJsonLibraryObjectFilter Filter;
 		Filter.SubObjectDepthLimit = 0;
-		const int64 CheckFlags = EPropertyFlags::CPF_Edit;
+
+		// No requirements. We had Edit here before which prevented hidden properties that aren't eitable in UI
+		const int64 CheckFlags = 0;
+		const int64 SkipFlags = CPF_Transient;
 
 		// Data going into the cooked content directory should write all properties into the files to have a baseline
 		// for modders. Data going into the regular editor saves should perform delta serialization to support
@@ -218,7 +201,7 @@ TSharedRef<FJsonObject> UJsonDataAsset::ExportJson() const
 
 		Result->SetObjectField(
 			TEXT("Data"),
-			UOUUJsonLibrary::UObjectToJsonObject(this, Filter, CheckFlags, 0, bOnlyModifiedProperties));
+			UOUUJsonLibrary::UObjectToJsonObject(this, Filter, CheckFlags, SkipFlags, bOnlyModifiedProperties));
 	}
 
 	return Result;
@@ -309,7 +292,10 @@ bool UJsonDataAsset::ExportJsonFile() const
 #if WITH_EDITOR
 	if (JsonData::ShouldWriteToCookedContent() == false)
 	{
-		ensureAlways(USourceControlHelpers::CheckOutOrAddFile(SavePath));
+		if (USourceControlHelpers::CheckOutOrAddFile(SavePath) == false)
+		{
+			UE_MESSAGELOG(AssetTools, Error, this, "failed to check out or add file");
+		}
 	}
 #endif
 	return true;
