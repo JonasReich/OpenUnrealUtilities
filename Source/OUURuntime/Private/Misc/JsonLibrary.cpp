@@ -180,7 +180,8 @@ struct FJsonLibraryExportHelper
 					SkipFlags,
 					ExportCb,
 					ArrayProperty);
-				if (Elem.bSkip == false && Elem.Value.IsValid())
+
+				if (Elem.Value.IsValid())
 				{
 					// add to the array
 					Out.Push(Elem.Value);
@@ -208,7 +209,8 @@ struct FJsonLibraryExportHelper
 						SkipFlags,
 						ExportCb,
 						SetProperty);
-					if (Elem.bSkip == false && Elem.Value.IsValid())
+
+					if (Elem.Value.IsValid())
 					{
 						// add to the array
 						Out.Push(Elem.Value);
@@ -250,37 +252,30 @@ struct FJsonLibraryExportHelper
 						SkipFlags,
 						ExportCb,
 						MapProperty);
-					if (KeyElement.bSkip && ValueElement.bSkip)
+
+					FString KeyString;
+					if (!KeyElement.Value->TryGetString(KeyString))
 					{
-						continue;
+						MapProperty->KeyProp
+							->ExportTextItem_Direct(KeyString, Helper.GetKeyPtr(i), nullptr, nullptr, 0);
+						if (KeyString.IsEmpty())
+						{
+							UE_LOG(
+								LogOpenUnrealUtilities,
+								Error,
+								TEXT("Unable to convert key to string for property %s."),
+								*MapProperty->GetAuthoredName())
+							KeyString = FString::Printf(TEXT("Unparsed Key %d"), i);
+						}
 					}
 
-					if (KeyElement.Value.IsValid() && ValueElement.Value.IsValid())
+					// Coerce camelCase map keys for Enum/FName properties
+					if (CastField<FEnumProperty>(MapProperty->KeyProp)
+						|| CastField<FNameProperty>(MapProperty->KeyProp))
 					{
-						FString KeyString;
-						if (!KeyElement.Value->TryGetString(KeyString))
-						{
-							MapProperty->KeyProp
-								->ExportTextItem_Direct(KeyString, Helper.GetKeyPtr(i), nullptr, nullptr, 0);
-							if (KeyString.IsEmpty())
-							{
-								UE_LOG(
-									LogOpenUnrealUtilities,
-									Error,
-									TEXT("Unable to convert key to string for property %s."),
-									*MapProperty->GetAuthoredName())
-								KeyString = FString::Printf(TEXT("Unparsed Key %d"), i);
-							}
-						}
-
-						// Coerce camelCase map keys for Enum/FName properties
-						if (CastField<FEnumProperty>(MapProperty->KeyProp)
-							|| CastField<FNameProperty>(MapProperty->KeyProp))
-						{
-							KeyString = FJsonObjectConverter::StandardizeCase(KeyString);
-						}
-						Out->SetField(KeyString, ValueElement.Value);
+						KeyString = FJsonObjectConverter::StandardizeCase(KeyString);
 					}
+					Out->SetField(KeyString, ValueElement.Value);
 
 					--n;
 				}
@@ -341,9 +336,14 @@ struct FJsonLibraryExportHelper
 						SkipFlags,
 						ExportCb))
 				{
+					UObject* DefaultObject = DefaultValue ? ObjectProperty->GetObjectPropertyValue(DefaultValue) : nullptr;
+					// No class or different class
+					const bool bDifferentClass =
+						DefaultObject == nullptr || Object->GetClass() != DefaultObject->GetClass();
+
 					TSharedRef<FJsonValueObject> JsonObject = MakeShared<FJsonValueObject>(Out);
 					JsonObject->Type = EJson::Object;
-					return (MinimumOneValueSet || bOnlyModifiedProperties == false)
+					return (MinimumOneValueSet || bOnlyModifiedProperties == false || bDifferentClass)
 						? FOUUPropertyJsonResult::Json(JsonObject)
 						: FOUUPropertyJsonResult::Skip();
 				}

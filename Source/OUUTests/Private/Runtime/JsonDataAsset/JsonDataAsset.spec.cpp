@@ -54,6 +54,26 @@ BEGIN_DEFINE_SPEC(FJsonDataAssetSpec, "OpenUnrealUtilities.Runtime.JsonDataAsset
 			TArray<TSharedPtr<FJsonValue>>{
 				MakeShared<FJsonValueObject>(ArrayStruct_Elem0),
 				MakeShared<FJsonValueObject>(ArrayStruct_Elem1)});
+
+		auto CreateInstancedObject = [](int32 i) {
+			auto InstancedObject = MakeShared<FJsonObject>();
+			InstancedObject->SetStringField("_ClassName", "/Script/OUUTests.TestJsonDataAsset_InstancedObject");
+			if (i > 0)
+			{
+				InstancedObject->SetNumberField("integer", i);
+			}
+			return InstancedObject;
+		};
+		DataObject->SetObjectField("instancedObject", CreateInstancedObject(0));
+
+		DataObject->SetArrayField(
+			"arrayOfInstancedObjects",
+			TArray<TSharedPtr<FJsonValue>>{
+				MakeShared<FJsonValueString>("None"),
+				MakeShared<FJsonValueObject>(CreateInstancedObject(0)),
+				MakeShared<FJsonValueObject>(CreateInstancedObject(10))
+
+			});
 		return DataObject;
 	}
 
@@ -72,6 +92,9 @@ BEGIN_DEFINE_SPEC(FJsonDataAssetSpec, "OpenUnrealUtilities.Runtime.JsonDataAsset
 			{
 				SPEC_TEST_EQUAL(TestAsset->ArrayOfStructs[0].String, "Original String (Array Idx 0)");
 			}
+
+			SPEC_TEST_NULL(TestAsset->InstancedObject);
+			SPEC_TEST_EQUAL(TestAsset->ArrayOfInstancedObjects.Num(), 0);
 		}
 	}
 
@@ -122,6 +145,26 @@ BEGIN_DEFINE_SPEC(FJsonDataAssetSpec, "OpenUnrealUtilities.Runtime.JsonDataAsset
 					"Struct String 2",
 					"/Script/Engine.Texture2D'/Engine/EngineMaterials/DefaultNormal.DefaultNormal'",
 					"/JsonData/Plugins/OpenUnrealUtilities/Tests/TestAsset_NoValuesSet");
+			}
+
+			if (SPEC_TEST_NOT_NULL(TestAsset->InstancedObject))
+			{
+				SPEC_TEST_EQUAL(TestAsset->InstancedObject->Integer, 0);
+			}
+
+			if (SPEC_TEST_EQUAL(TestAsset->ArrayOfInstancedObjects.Num(), 3))
+			{
+				SPEC_TEST_NULL(TestAsset->ArrayOfInstancedObjects[0]);
+
+				if (SPEC_TEST_NOT_NULL(TestAsset->ArrayOfInstancedObjects[1]))
+				{
+					SPEC_TEST_EQUAL(TestAsset->ArrayOfInstancedObjects[1]->Integer, 0);
+				}
+
+				if (SPEC_TEST_NOT_NULL(TestAsset->ArrayOfInstancedObjects[2]))
+				{
+					SPEC_TEST_EQUAL(TestAsset->ArrayOfInstancedObjects[2]->Integer, 10);
+				}
 			}
 		}
 	}

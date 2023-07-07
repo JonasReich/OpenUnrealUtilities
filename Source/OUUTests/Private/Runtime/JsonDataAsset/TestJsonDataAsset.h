@@ -33,6 +33,15 @@ FORCEINLINE bool operator!=(const FTestJsonDataAssetStruct& A, const FTestJsonDa
 	return !(A == B);
 }
 
+UCLASS(DefaultToInstanced, EditInlineNew)
+class UTestJsonDataAsset_InstancedObject : public UObject
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere)
+	int32 Integer;
+};
+
 UCLASS(Hidden)
 class UTestJsonDataAsset : public UJsonDataAsset
 {
@@ -56,6 +65,12 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TArray<FTestJsonDataAssetStruct> ArrayOfStructs;
+
+	UPROPERTY(EditAnywhere, Instanced)
+	UTestJsonDataAsset_InstancedObject* InstancedObject;
+
+	UPROPERTY(EditAnywhere, Instanced)
+	TArray<UTestJsonDataAsset_InstancedObject*> ArrayOfInstancedObjects;
 
 	// Get path to any test asset (no requirements to contained data)
 	static FString GetTestPath() { return GetTestPath_NoValuesSet(); }
