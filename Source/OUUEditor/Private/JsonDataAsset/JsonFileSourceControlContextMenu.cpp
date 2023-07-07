@@ -34,13 +34,13 @@ void FJsonFileSourceControlContextMenu::MakeContextMenu(
 
 void FJsonFileSourceControlContextMenu::AddSourceControlMenuOptions(UToolMenu* Menu)
 {
-	FToolMenuSection& Section = Menu->AddSection("AssetContextSourceControl");
+	FToolMenuSection& Section = Menu->AddSection("JsonAssetContextSourceControl");
 
 	if (ISourceControlModule::Get().IsEnabled())
 	{
 		// SCC sub menu
 		Section.AddSubMenu(
-			"SourceControlSubMenu",
+			"JsonSourceControlSubMenu",
 			LOCTEXT("SourceControlSubMenuLabel", "Source Control"),
 			LOCTEXT("SourceControlSubMenuToolTip", "Source control actions."),
 			FNewToolMenuDelegate::CreateSP(this, &FJsonFileSourceControlContextMenu::FillSourceControlSubMenu),
@@ -54,7 +54,7 @@ void FJsonFileSourceControlContextMenu::AddSourceControlMenuOptions(UToolMenu* M
 	else
 	{
 		Section.AddMenuEntry(
-			"SCCConnectToSourceControl",
+			"JsonSCCConnectToSourceControl",
 			LOCTEXT("SCCConnectToSourceControl", "Connect To Source Control..."),
 			LOCTEXT(
 				"SCCConnectToSourceControlTooltip",
@@ -70,7 +70,7 @@ void FJsonFileSourceControlContextMenu::AddSourceControlMenuOptions(UToolMenu* M
 	if (CanExecuteDiffSelected())
 	{
 		Section.AddMenuEntry(
-			"DiffSelected",
+			"JsonDiffSelected",
 			LOCTEXT("DiffSelected", "Diff Selected"),
 			LOCTEXT("DiffSelectedTooltip", "Diff the two assets that you have selected."),
 			FSlateIcon(FAppStyle::GetAppStyleSetName(), "SourceControl.Actions.Diff"),
@@ -100,13 +100,13 @@ void FJsonFileSourceControlContextMenu::AddMenuOptions(UToolMenu* Menu)
 void FJsonFileSourceControlContextMenu::FillSourceControlSubMenu(UToolMenu* Menu)
 {
 	FToolMenuSection& Section = Menu->AddSection(
-		"AssetSourceControlActions",
+		"JsonAssetSourceControlActions",
 		LOCTEXT("AssetSourceControlActionsMenuHeading", "Source Control"));
 
 	if (bCanExecuteSCCSync)
 	{
 		Section.AddMenuEntry(
-			"SCCSync",
+			"JsonSCCSync",
 			LOCTEXT("SCCSync", "Sync"),
 			LOCTEXT("SCCSyncTooltip", "Updates the item to the latest version in source control."),
 			FSlateIcon(FAppStyle::GetAppStyleSetName(), "SourceControl.Actions.Sync"),
@@ -118,7 +118,7 @@ void FJsonFileSourceControlContextMenu::FillSourceControlSubMenu(UToolMenu* Menu
 	if (bCanExecuteSCCCheckOut)
 	{
 		Section.AddMenuEntry(
-			"SCCCheckOut",
+			"JsonSCCCheckOut",
 			LOCTEXT("SCCCheckOut", "Check Out"),
 			LOCTEXT("SCCCheckOutTooltip", "Checks out the selected asset from source control."),
 			FSlateIcon(FAppStyle::GetAppStyleSetName(), "SourceControl.Actions.CheckOut"),
@@ -130,7 +130,7 @@ void FJsonFileSourceControlContextMenu::FillSourceControlSubMenu(UToolMenu* Menu
 	if (bCanExecuteSCCOpenForAdd)
 	{
 		Section.AddMenuEntry(
-			"SCCOpenForAdd",
+			"JsonSCCOpenForAdd",
 			LOCTEXT("SCCOpenForAdd", "Mark For Add"),
 			LOCTEXT("SCCOpenForAddTooltip", "Adds the selected asset to source control."),
 			FSlateIcon(FAppStyle::GetAppStyleSetName(), "SourceControl.Actions.Add"),
@@ -142,7 +142,7 @@ void FJsonFileSourceControlContextMenu::FillSourceControlSubMenu(UToolMenu* Menu
 	if (bCanExecuteSCCCheckIn)
 	{
 		Section.AddMenuEntry(
-			"SCCCheckIn",
+			"JsonSCCCheckIn",
 			LOCTEXT("SCCCheckIn", "Check In"),
 			LOCTEXT("SCCCheckInTooltip", "Checks in the selected asset to source control."),
 			FSlateIcon(FAppStyle::GetAppStyleSetName(), "SourceControl.Actions.Submit"),
@@ -152,7 +152,7 @@ void FJsonFileSourceControlContextMenu::FillSourceControlSubMenu(UToolMenu* Menu
 	}
 
 	Section.AddMenuEntry(
-		"SCCRefresh",
+		"JsonSCCRefresh",
 		LOCTEXT("SCCRefresh", "Refresh"),
 		LOCTEXT("SCCRefreshTooltip", "Updates the source control status of the asset."),
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "SourceControl.Actions.Refresh"),
@@ -163,7 +163,7 @@ void FJsonFileSourceControlContextMenu::FillSourceControlSubMenu(UToolMenu* Menu
 	if (bCanExecuteSCCHistory)
 	{
 		Section.AddMenuEntry(
-			"SCCHistory",
+			"JsonSCCHistory",
 			LOCTEXT("SCCHistory", "History"),
 			LOCTEXT("SCCHistoryTooltip", "Displays the source control revision history of the selected asset."),
 			FSlateIcon(FAppStyle::GetAppStyleSetName(), "SourceControl.Actions.History"),
@@ -172,7 +172,7 @@ void FJsonFileSourceControlContextMenu::FillSourceControlSubMenu(UToolMenu* Menu
 				FCanExecuteAction::CreateLambda([this]() { return bCanExecuteSCCHistory; })));
 
 		Section.AddMenuEntry(
-			"SCCDiffAgainstDepot",
+			"JsonSCCDiffAgainstDepot",
 			LOCTEXT("SCCDiffAgainstDepot", "Diff Against Depot"),
 			LOCTEXT(
 				"SCCDiffAgainstDepotTooltip",
@@ -186,7 +186,7 @@ void FJsonFileSourceControlContextMenu::FillSourceControlSubMenu(UToolMenu* Menu
 	if (bCanExecuteSCCRevert)
 	{
 		Section.AddMenuEntry(
-			"SCCRevert",
+			"JsonSCCRevert",
 			LOCTEXT("SCCRevert", "Revert"),
 			LOCTEXT("SCCRevertTooltip", "Reverts the asset to the state it was before it was checked out."),
 			FSlateIcon(FAppStyle::GetAppStyleSetName(), "SourceControl.Actions.Revert"),
