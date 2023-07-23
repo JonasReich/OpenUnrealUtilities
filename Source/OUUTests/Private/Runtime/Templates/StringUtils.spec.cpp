@@ -5,6 +5,7 @@
 #if WITH_AUTOMATION_WORKER
 
 	#include "Templates/StringUtils.h"
+	#include "UObject/Package.h"
 
 enum class EStringUtilsTestEnum
 {

@@ -13,5 +13,8 @@ namespace OUU::Editor
 	 * DisallowedClassFlags.
 	 * @returns nullptr if the user cancels out of the dialog
 	 */
-	UClass* OpenSimpleClassPickerDialog(UClass* ParentClass, EClassFlags DisallowedClassFlags, const FText TitleText);
+	OUUEDITOR_API UClass* OpenSimpleClassPickerDialog(
+		UClass* ParentClass,
+		EClassFlags DisallowedClassFlags,
+		const FText TitleText);
 } // namespace OUU::Editor

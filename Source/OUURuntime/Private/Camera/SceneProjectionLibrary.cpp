@@ -4,6 +4,7 @@
 
 #include "Camera/CameraComponent.h"
 #include "Engine/Engine.h"
+#include "Engine/GameViewportClient.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/WorldSettings.h"

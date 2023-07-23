@@ -24,6 +24,7 @@
 	#include "Misc/RegexUtils.h"
 	#include "Templates/ReverseIterator.h"
 	#include "Templates/StringUtils.h"
+	#include "Engine.h"
 
 TAutoConsoleVariable<FString> AbilityFilter{
 	TEXT("ouu.Debug.Ability.Filter"),

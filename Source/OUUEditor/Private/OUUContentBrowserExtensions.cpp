@@ -5,6 +5,7 @@
 #include "Algo/AllOf.h"
 #include "ContentBrowserDelegates.h"
 #include "ContentBrowserModule.h"
+#include "Engine/SkeletalMesh.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
 #include "OUUAnimationEditorLibrary.h"
 

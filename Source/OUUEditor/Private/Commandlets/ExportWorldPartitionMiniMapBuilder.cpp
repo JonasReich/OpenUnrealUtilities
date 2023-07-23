@@ -82,7 +82,7 @@ namespace OUU::Editor::Private
 bool UExportWorldPartitionMiniMapBuilder::PreRun(UWorld* World, FPackageSourceControlHelper& PackageHelper)
 {
 	WorldMiniMap = FWorldPartitionMiniMapHelper::GetWorldPartitionMiniMap(World, true);
-	return 0;
+	return true;
 }
 
 bool UExportWorldPartitionMiniMapBuilder::RunInternal(
@@ -116,7 +116,7 @@ bool UExportWorldPartitionMiniMapBuilder::RunInternal(
 	UImageWriteBlueprintLibrary::ExportToDisk(WorldMiniMap->MiniMapTexture, ExportPath, Options);
 #endif
 
-	return 0;
+	return true;
 }
 
 bool UExportWorldPartitionMiniMapBuilder::PostRun(
@@ -124,5 +124,5 @@ bool UExportWorldPartitionMiniMapBuilder::PostRun(
 	FPackageSourceControlHelper& PackageHelper,
 	const bool bInRunSuccess)
 {
-	return 0;
+	return true;
 }

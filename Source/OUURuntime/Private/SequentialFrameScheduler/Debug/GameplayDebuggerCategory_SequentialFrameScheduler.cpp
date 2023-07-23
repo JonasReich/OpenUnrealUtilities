@@ -7,6 +7,7 @@
 #include "GameplayAbilities/Debug/GameplayDebuggerCategory_OUUAbilities.h"
 #include "Misc/CanvasGraphPlottingUtils.h"
 #include "SequentialFrameScheduler/WorldBoundSFSchedulerRegistry.h"
+#include "UnrealClient.h"
 
 #if WITH_GAMEPLAY_DEBUGGER
 

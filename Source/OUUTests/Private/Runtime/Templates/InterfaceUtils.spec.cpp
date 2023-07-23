@@ -6,6 +6,7 @@
 
 	#include "Runtime/Templates/InterfaceUtilsTests_Implementations.h"
 	#include "Templates/InterfaceUtils.h"
+	#include "UObject/Package.h"
 
 template <typename TestInterface, typename InterfaceUtilsSpecType>
 class TInterfaceUtilsSpec
