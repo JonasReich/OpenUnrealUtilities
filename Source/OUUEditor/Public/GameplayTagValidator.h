@@ -27,7 +27,7 @@ class UGameplayTagValidationSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, meta = (ForceInlineRow))
 	TMap<FGameplayTag, FGameplayTagValidationSettingsEntry> TagOverrides;
 
 	UPROPERTY(Config, EditAnywhere)

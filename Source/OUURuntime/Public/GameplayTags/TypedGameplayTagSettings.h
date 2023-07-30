@@ -6,9 +6,25 @@
 
 #include "Engine/DeveloperSettings.h"
 #include "GameplayTagContainer.h"
-#include "Engine/DeveloperSettings.h"
 
 #include "TypedGameplayTagSettings.generated.h"
+
+#if WITH_EDITORONLY_DATA
+USTRUCT()
+struct FTypedGameplayTagSettingsEntry
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(VisibleAnywhere)
+	FString Comment;
+
+	UPROPERTY(VisibleAnywhere)
+	FGameplayTagContainer NativeRootTags;
+
+	UPROPERTY(EditAnywhere)
+	FGameplayTagContainer AdditionalRootTags;
+};
+#endif
 
 /**
  * Settings for typed gameplay tags.
@@ -20,6 +36,9 @@ UCLASS(DefaultConfig, Config = Game)
 class OUURUNTIME_API UTypedGameplayTagSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
+
+	friend class FTypedGameplayTagSettingsDetails;
+
 public:
 	static void GetAdditionalRootTags(FGameplayTagContainer& OutRootTags, UStruct* BlueprintStruct);
 	static void AddNativeRootTags(const FGameplayTagContainer& RootTags, UStruct* BlueprintStruct);
@@ -35,15 +54,32 @@ public:
 	 */
 	UFUNCTION(CallInEditor)
 	static void CleanAdditionalTags();
+
+	// - UObject
+	void PostInitProperties() override;
+	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	// --
 #endif
 
 private:
+#if WITH_EDITOR
+	void UpdateCopyForUIFromSettings();
+	void UpdateSettingsFromCopyForUI();
+#endif
+
 	// These tags come from C++ declarations of gameplay tag structs and cannot be altered via the settings.
 	// They are only here for reference.
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY()
 	TMap<FName, FGameplayTagContainer> NativeRootTags;
 
 	// These tags are defined in the settings and will be available in addition to the native root tags.
-	UPROPERTY(Config, EditAnywhere, meta = (ReadOnlyKeys))
+	UPROPERTY(Config)
 	TMap<FName, FGameplayTagContainer> AdditionalRootTags;
+
+#if WITH_EDITORONLY_DATA
+	// These are not the settings stored in the ini file, but a copy that is better to read/edit in the UI.
+	// Updates must be propagated to AdditionalRootTags.
+	UPROPERTY(EditAnywhere, meta = (ForceInlineRow, ReadOnlyKeys, DisplayName = "Gameplay Tag Types"))
+	TMap<FName, FTypedGameplayTagSettingsEntry> SettingsCopyForUI;
+#endif
 };

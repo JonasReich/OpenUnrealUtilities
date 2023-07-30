@@ -54,7 +54,8 @@ OUU_DECLARE_GAMEPLAY_TAGS_START(
 OUU_DECLARE_GAMEPLAY_TAGS_END(FSampleGameplayTags_NotRegsitered)
 
 /**
- * Subclassed gameplay tag that only accepts child tags of OUUTestTags.Bar and OUUTestTags.Baz.
+ * Test tags for OpenUnrealUtilties tests. Do not use for anything else!
+ * Tests assume this has OUUTestTags.Bar and OUUTestTags.Baz as native tags and no additional root tags.
  */
 USTRUCT(BlueprintType)
 struct OUURUNTIME_API FOUUSampleBarTag : public FTypedGameplayTag_Base

@@ -24,6 +24,8 @@ void UTypedGameplayTagSettings::AddNativeRootTags(const FGameplayTagContainer& R
 
 	// also add an entry for additional tags if not already present
 	Settings->AdditionalRootTags.FindOrAdd(StructName, FGameplayTagContainer::EmptyContainer);
+
+	Settings->UpdateCopyForUIFromSettings();
 }
 
 void UTypedGameplayTagSettings::GetAllRootTags(FGameplayTagContainer& OutRootTags, UStruct* BlueprintStruct)
@@ -84,5 +86,48 @@ void UTypedGameplayTagSettings::CleanAdditionalTags()
 	{
 		Settings.AdditionalRootTags.Remove(Key);
 	}
+
+	Settings.UpdateCopyForUIFromSettings();
 }
+
+void UTypedGameplayTagSettings::PostInitProperties()
+{
+	Super::PostInitProperties();
+	UpdateCopyForUIFromSettings();
+}
+
+void UTypedGameplayTagSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	UpdateSettingsFromCopyForUI();
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+}
+
+void UTypedGameplayTagSettings::UpdateCopyForUIFromSettings()
+{
+	SettingsCopyForUI.Reset();
+	for (auto& Entry : NativeRootTags)
+	{
+		SettingsCopyForUI.FindOrAdd(Entry.Key).NativeRootTags = Entry.Value;
+	}
+	for (auto& Entry : AdditionalRootTags)
+	{
+		SettingsCopyForUI.FindOrAdd(Entry.Key).AdditionalRootTags = Entry.Value;
+	}
+	for (auto& Entry : SettingsCopyForUI)
+	{
+		UStruct* Struct = FStructUtils::FindStructureInPackageChecked(*Entry.Key.ToString(), nullptr);
+		Entry.Value.Comment = Struct->GetMetaData(TEXT("Tooltip"));
+	}
+}
+
+void UTypedGameplayTagSettings::UpdateSettingsFromCopyForUI()
+{
+	// Native tags can't be changed in editor, so only update AdditionalRootTags
+	AdditionalRootTags.Reset();
+	for (auto& Entry : SettingsCopyForUI)
+	{
+		AdditionalRootTags.FindOrAdd(Entry.Key) = Entry.Value.AdditionalRootTags;
+	}
+}
+
 #endif
