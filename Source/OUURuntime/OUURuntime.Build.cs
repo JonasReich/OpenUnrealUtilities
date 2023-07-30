@@ -70,7 +70,9 @@ public class OUURuntime : OUUModuleRules
 		// - Editor only dependencies
 		if (Target.bBuildEditor)
 		{
-			PrivateDependencyModuleNames.AddRange(new string[] {
+			PublicDependencyModuleNames.AddRange(new string[] { "OUUEditor" });
+
+            PrivateDependencyModuleNames.AddRange(new string[] {
 				"UnrealEd",
 				"GameplayTagsEditor",
 				"PropertyEditor",

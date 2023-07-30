@@ -3,6 +3,7 @@
 #include "GameplayTagValidator.h"
 
 #include "Editor.h"
+#include "GameplayTags/LiteralGameplayTag.h"
 #include "GameplayTagsManager.h"
 #include "GameplayTagsModule.h"
 #include "LogOpenUnrealUtilities.h"
@@ -13,6 +14,30 @@ FAutoConsoleCommand GTagsValidateCommand{
 	TEXT("ouu.Tags.Validate"),
 	TEXT("Run tags validation on all registered gameplay tags"),
 	FConsoleCommandDelegate::CreateLambda([]() { UGameplayTagValidatorSubsystem::Get().ValidateGameplayTagTree(); })};
+
+void UGameplayTagValidationSettings::RefreshNativeTagOverrides()
+{
+	NativeTagOverrides.Reset();
+	for (auto& Entry : OUU::Editor::Private::GetTagFlagsForValidation())
+	{
+		auto& NativeTagOverride = NativeTagOverrides.FindOrAdd(Entry.Key);
+		NativeTagOverride.bCanHaveContentChildren = bool(Entry.Value & ELiteralGameplayTagFlags::AllowContentChildTags);
+		if (NativeTagOverride.bCanHaveContentChildren)
+		{
+			NativeTagOverride.AllowedChildDepth = NativeTagAllowedChildDepth;
+		}
+	}
+}
+
+const FGameplayTagValidationSettingsEntry* UGameplayTagValidationSettings::FindTagOverride(FGameplayTag Tag) const
+{
+	// Editable tag overrides supercede natively declared rules.
+	if (auto* Result = TagOverrides.Find(Tag))
+	{
+		return Result;
+	}
+	return NativeTagOverrides.Find(Tag);
+}
 
 void UGameplayTagValidationSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
@@ -96,6 +121,9 @@ void UGameplayTagValidatorSubsystem::Initialize(FSubsystemCollectionBase& Collec
 	Super::Initialize(Collection);
 	IGameplayTagsModule::Get()
 		.OnGameplayTagTreeChanged.AddUObject(this, &UGameplayTagValidatorSubsystem::ValidateGameplayTagTree);
+
+	auto& Settings = *GetMutableDefault<UGameplayTagValidationSettings>();
+	Settings.RefreshNativeTagOverrides();
 }
 
 void UGameplayTagValidatorSubsystem::Deinitialize()
@@ -254,7 +282,7 @@ void UOUUGameplayTagValidator::ValidateTag(
 			if (AllNativeTags.HasTagExact(Parent))
 			{
 				// Parent is Native
-				if (auto* SettingsEntry = Settings.TagOverrides.Find(Parent))
+				if (auto* SettingsEntry = Settings.FindTagOverride(Parent))
 				{
 					if (SettingsEntry->bCanHaveContentChildren == false)
 					{

@@ -7,9 +7,11 @@
 #include "GameplayTagContainer.h"
 #include "GameplayTagsManager.h"
 #include "GameplayTagsModule.h"
+#include "LiteralGameplayTagMacros.h"
 #include "LogOpenUnrealUtilities.h"
 #include "Misc/EngineVersionComparison.h"
 #include "NativeGameplayTags.h"
+#include "Templates/BitmaskUtils.h"
 #include "Templates/UnrealTypeTraits.h"
 #include "Traits/IsSameWrapper.h"
 
@@ -53,6 +55,36 @@ struct TIsChildTagOf
 {
 	static constexpr bool Value = TOr<TIsChildTagOf_Single<Child, TestParents>...>::Value;
 };
+
+enum class ELiteralGameplayTagFlags
+{
+	None = 0,
+
+	// Automatically register the tags.
+	// Should be omitted, if the tag declarations are referring to tags registered elsewhere.
+	AutoRegister = 0b1,
+
+	// Automatically set up an entry in GameplayTagValidationSettings to allow child tags to be created
+	AllowContentChildTags = 0b10,
+
+	// Recommended default tags for most use-cases
+	Default = (AutoRegister)
+};
+
+DECLARE_BITMASK_OPERATORS(ELiteralGameplayTagFlags)
+
+constexpr ELiteralGameplayTagFlags AutoConvertLiteralGameplayTagFlags(ELiteralGameplayTagFlags Flags)
+{
+	return Flags;
+}
+
+UE_DEPRECATED(
+	5.2,
+	"Using bool in literal gameplay tag declarations is deprecated. Please use ELiteralGameplayTagFlags instead.")
+constexpr ELiteralGameplayTagFlags AutoConvertLiteralGameplayTagFlags(bool bInAutoAddNativeTag)
+{
+	return bInAutoAddNativeTag ? ELiteralGameplayTagFlags::AutoRegister : ELiteralGameplayTagFlags::None;
+}
 
 /**
  * The base class for literal gameplay tag types.
@@ -131,27 +163,23 @@ bool operator==(const FGameplayTag& LHS, const TLiteralGameplayTag<SelfTagType, 
 //---------------------------------------------------------------------------------------------------------------------
 
 /**
- * The root of a literal gameplay tag collection.
- * contains some settings that apply to all contained tags, e.g.
- * bAutoAddNativeTag: If yes, all the tags inside are added as native tags to the gameplay tags manager similar to
- * how FAutoConsoleObject registers with IConsoleManager.
+ * The root of a group of literal gameplay tags.
+ *
+ * ELiteralGameplayTagFlags can be used as single optional last parameter. ELiteralGameplayTagFlags::Default if omitted.
+ * Flags propagate to child tags unless overridden.
  */
-#define OUU_DECLARE_GAMEPLAY_TAGS_START(MODULE_API, TagType, RootTagName, Description, bInAutoAddNativeTag)            \
-	struct TagType;                                                                                                    \
-	extern TagType TagType##_Instance;                                                                                 \
-	struct MODULE_API TagType : public TLiteralGameplayTag<TagType, TagType, TagType>                                  \
-	{                                                                                                                  \
-	public:                                                                                                            \
-		static const bool bAutoAddNativeTag = bInAutoAddNativeTag;                                                     \
-		static const TagType& GetInstance() { return TagType##_Instance; }                                             \
-		PRIVATE_OUU_GTAG_COMMON_FUNCS_IMPL(RootTagName, Description)                                                   \
-		PRIVATE_OUU_GTAG_GETTER_IMPL(TagType, TagType, bInAutoAddNativeTag)                                            \
-	public:
+#define OUU_DECLARE_GAMEPLAY_TAGS_START(MODULE_API, TagType, RootTagName, Description, ...)                            \
+	OUU_DECLARE_GAMEPLAY_TAGS_START_IMPL(                                                                              \
+		MODULE_API,                                                                                                    \
+		TagType,                                                                                                       \
+		RootTagName,                                                                                                   \
+		Description,                                                                                                   \
+		RESOLVE_OPTIONAL_FLAGS(, ##__VA_ARGS__, __VA_ARGS__, ELiteralGameplayTagFlags::Default))
 
-// clang-format off
-#define OUU_DECLARE_GAMEPLAY_TAGS_END(TypeName)                                                                        \
-	};
-// clang-format on
+/**
+ * Always use this at the end of a group of literal gameplay tag declarations.
+ */
+#define OUU_DECLARE_GAMEPLAY_TAGS_END(TypeName) OUU_DECLARE_GAMEPLAY_TAGS_END_IMPL(TypeName)
 
 /**
  * Put this into a cpp file so the literal gameplay tags are only defined once for multiple translation units.
@@ -166,51 +194,40 @@ bool operator==(const FGameplayTag& LHS, const TLiteralGameplayTag<SelfTagType, 
  *        OUU_GTAG(Bar);
  *        OUU_GTAG(FooBar);
  *    OUU_GTAG_GROUP_END(Foo)
+ *
+ * ELiteralGameplayTagFlags can be used as single optional last parameter. ELiteralGameplayTagFlags::Default if omitted.
+ * Flags propagate to child tags unless overridden.
  */
-#define OUU_GTAG_GROUP_START(TagType, TagDescription)                                                                  \
-	struct TagType : public TLiteralGameplayTag<TagType, SelfTagType, RootTagType>                                     \
-	{                                                                                                                  \
-		PRIVATE_OUU_GTAG_COMMON_FUNCS_IMPL(PREPROCESSOR_TO_STRING(TagType), TagDescription)                            \
-		PRIVATE_OUU_GTAG_GETTER_IMPL(TagType, RootTagType, RootTagType::bAutoAddNativeTag)                             \
-	public:                                                                                                            \
-		static const TagType& GetInstance() { return ParentTagType::GetInstance().TagType##_Instance; }
+#define OUU_GTAG_GROUP_START(TagType, TagDescription, ...)                                                             \
+	OUU_GTAG_GROUP_START_IMPL(TagType, TagDescription, RESOLVE_OPTIONAL_FLAGS(, #__VA_ARGS__, __VA_ARGS__, Flags))
 
 /** Close a previously opened tag group. */
 // clang-format off
 #define OUU_GTAG_GROUP_END(TagType)                                                                                    \
-	};                                                                                                                 \
-private:                                                                                                               \
-	TagType TagType##_Instance;                                                                                        \
-public:
+	OUU_GTAG_GROUP_END_IMPL(TagType)
 // clang-format on
 
 /**
  * Create a leaf tag that does not contain other tags in the literal tags hierarchy in C++.
  * The "real" tag equivalent configured via GameplayTags.ini may contain sub-tags,
  * but those sub-tags won't be available via literal gameplay tags then.
+ *
+ * ELiteralGameplayTagFlags can be used as single optional last parameter. ELiteralGameplayTagFlags::Default if omitted.
+ * Flags propagate to child tags unless overridden.
  */
-#define OUU_GTAG(Tag, TagDescription)                                                                                  \
-	OUU_GTAG_GROUP_START(Tag, TagDescription)                                                                          \
+#define OUU_GTAG(Tag, TagDescription, ...)                                                                             \
+	OUU_GTAG_GROUP_START(Tag, TagDescription, #__VA_ARGS__)                                                            \
 	OUU_GTAG_GROUP_END(Tag)
 
 //---------------------------------------------------------------------------------------------------------------------
 
-#define PRIVATE_OUU_GTAG_GETTER_IMPL(TagType, RootTagType, bAutoAdd)                                                   \
-private:                                                                                                               \
-	template <typename, typename, typename>                                                                            \
-	friend struct TLiteralGameplayTag;                                                                                 \
-	template <typename, bool>                                                                                          \
-	friend struct OUU::Runtime::Private::TConditionalNativeTagGetter;                                                  \
-	OUU::Runtime::Private::TConditionalNativeTagGetter<TagType, bAutoAdd> NativeTagGetter;
-
-#define PRIVATE_OUU_GTAG_COMMON_FUNCS_IMPL(TagName, TagDescription)                                                    \
-public:                                                                                                                \
-	static FString GetRelativeName() { return FString(TagName); }                                                      \
-	static FString GetDescription() { return FString(TEXT(TagDescription)); }                                          \
-	static FName GetModuleName() { return UE_MODULE_NAME; }                                                            \
-	static FName GetPluginName() { return UE_PLUGIN_NAME; }
-
-//---------------------------------------------------------------------------------------------------------------------
+namespace OUU::Editor::Private
+{
+#if WITH_EDITOR
+	OUURUNTIME_API void RegisterLiteralTagFlagsForValidation(FGameplayTag Tag, ELiteralGameplayTagFlags Flags);
+	OUURUNTIME_API const TMap<FGameplayTag, ELiteralGameplayTagFlags>& GetTagFlagsForValidation();
+#endif
+} // namespace OUU::Editor::Private
 
 namespace OUU::Runtime::Private
 {
@@ -236,14 +253,22 @@ namespace OUU::Runtime::Private
 		}
 	};
 
-	template <typename OwningType, bool bAutoAddNativeTag>
+	template <typename OwningType, ELiteralGameplayTagFlags Flags, bool bAutoAddNativeTag>
 	struct TConditionalNativeTagGetter : public TConditionalNativeTagGetter_Base<OwningType>
 	{
 	};
 
-	template <typename OwningType>
-	struct TConditionalNativeTagGetter<OwningType, true>
+	template <typename OwningType, ELiteralGameplayTagFlags Flags>
+	struct TConditionalNativeTagGetter<OwningType, Flags, true>
 	{
+	public:
+		TConditionalNativeTagGetter()
+		{
+#if WITH_EDITOR
+			OUU::Editor::Private::RegisterLiteralTagFlagsForValidation(Get(), Flags);
+#endif
+		}
+
 	private:
 		FNativeGameplayTag NativeInstance{
 			OwningType::GetPluginName(),

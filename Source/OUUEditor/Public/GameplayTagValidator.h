@@ -27,11 +27,13 @@ class UGameplayTagValidationSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(Config, EditAnywhere, meta = (ForceInlineRow))
-	TMap<FGameplayTag, FGameplayTagValidationSettingsEntry> TagOverrides;
-
 	UPROPERTY(Config, EditAnywhere)
 	int32 MaxGlobalTagDepth = 10;
+
+	// Default depth allowed for native tags that are marked as "allow child tags" from C++ code.
+	// You can always create tag overrides that supercede this setting for individual tags.
+	UPROPERTY(Config, EditAnywhere)
+	int32 NativeTagAllowedChildDepth = 3;
 
 	UPROPERTY(Config, EditAnywhere)
 	bool bAllowContentRootTags = false;
@@ -54,10 +56,21 @@ public:
 	UPROPERTY(Config, EditAnywhere)
 	FGameplayTagContainer WarnOnlyGameplayTags;
 
+	void RefreshNativeTagOverrides();
+	const FGameplayTagValidationSettingsEntry* FindTagOverride(FGameplayTag Tag) const;
+
 public:
 	// - UObject
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	// --
+
+private:
+	UPROPERTY(Config, EditAnywhere, meta = (ForceInlineRow))
+	TMap<FGameplayTag, FGameplayTagValidationSettingsEntry> TagOverrides;
+
+	// Settings declared in code from literal gameplay tags
+	UPROPERTY(VisibleAnywhere, meta = (ForceInlineRow))
+	TMap<FGameplayTag, FGameplayTagValidationSettingsEntry> NativeTagOverrides;
 };
 
 UCLASS(Abstract)

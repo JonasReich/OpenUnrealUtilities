@@ -19,7 +19,7 @@ OUU_DECLARE_GAMEPLAY_TAGS_START(
 	FSampleGameplayTags,
 	"OUUTestTags",
 	"Test tags for OpenUnrealUtilties tests. Do not use for anything else!",
-	true)
+	ELiteralGameplayTagFlags::Default)
 	OUU_GTAG(Foo, "Foo is a leaf tag that has no children");
 	OUU_GTAG_GROUP_START(Bar, "Bar has children")
 		OUU_GTAG_GROUP_START(Alpha, "Alpha is the greek letter equivalent of A")
@@ -38,7 +38,7 @@ OUU_DECLARE_GAMEPLAY_TAGS_START(
 	FSampleGameplayTags_Nested,
 	"OUUTestTags.NestedTreeRoot",
 	"Test tags for OpenUnrealUtilties tests. Do not use for anything else!",
-	true)
+	ELiteralGameplayTagFlags::Default)
 OUU_DECLARE_GAMEPLAY_TAGS_END(FSampleGameplayTags_Nested)
 
 /**
@@ -50,7 +50,7 @@ OUU_DECLARE_GAMEPLAY_TAGS_START(
 	FSampleGameplayTags_NotRegsitered,
 	"UUTestTag_NotRegistered",
 	"This tag should never be registered",
-	false)
+	ELiteralGameplayTagFlags::Default ^ ELiteralGameplayTagFlags::AutoRegister)
 OUU_DECLARE_GAMEPLAY_TAGS_END(FSampleGameplayTags_NotRegsitered)
 
 /**
