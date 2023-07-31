@@ -15,12 +15,18 @@ struct FTypedGameplayTagSettingsEntry
 {
 	GENERATED_BODY()
 public:
+	// Comment from C++ code on what this type is used for.
 	UPROPERTY(VisibleAnywhere)
 	FString Comment;
 
+	// Gameplay tags declared in C++ code that are always available for this FTypedGameplayTag type.
+	// Can't be edited. Only here for reference.
 	UPROPERTY(VisibleAnywhere)
 	FGameplayTagContainer NativeRootTags;
 
+	// Additional tags that are valid root tags for this gameplay tag type.
+	// These can be either content tags (tags from INI files) or native tags from other systems.
+	// This allows tag sharing between systems while still keeping separate FTypedGameplayTag types.
 	UPROPERTY(EditAnywhere)
 	FGameplayTagContainer AdditionalRootTags;
 };
@@ -28,11 +34,9 @@ public:
 
 /**
  * Settings for typed gameplay tags.
- * In here you can add additional type info to gameplay tags.
- * Each key of the root tag maps is a "TypedGameplayTag" struct type.
- * The values are possible root tags for the respective gameplay tags & tag containers.
+ * In here you can add additional type info to each FTypedGameplayTag type.
  */
-UCLASS(DefaultConfig, Config = Game)
+UCLASS(DefaultConfig, Config = GameplayTags)
 class OUURUNTIME_API UTypedGameplayTagSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
@@ -59,6 +63,11 @@ public:
 	void PostInitProperties() override;
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	// --
+
+	// - UDeveloperSettings
+	FName GetCategoryName() const override { return TEXT("Project"); }
+	FText GetSectionText() const override { return INVTEXT("Gameplay Tags (OUU Typed Tags)"); }
+	// --
 #endif
 
 private:
@@ -67,18 +76,15 @@ private:
 	void UpdateSettingsFromCopyForUI();
 #endif
 
-	// These tags come from C++ declarations of gameplay tag structs and cannot be altered via the settings.
-	// They are only here for reference.
 	UPROPERTY()
 	TMap<FName, FGameplayTagContainer> NativeRootTags;
 
-	// These tags are defined in the settings and will be available in addition to the native root tags.
 	UPROPERTY(Config)
 	TMap<FName, FGameplayTagContainer> AdditionalRootTags;
 
 #if WITH_EDITORONLY_DATA
 	// These are not the settings stored in the ini file, but a copy that is better to read/edit in the UI.
-	// Updates must be propagated to AdditionalRootTags.
+	// Updates are automatically propagated to AdditionalRootTags, which is saved to the INI file.
 	UPROPERTY(EditAnywhere, meta = (ForceInlineRow, ReadOnlyKeys, DisplayName = "Gameplay Tag Types"))
 	TMap<FName, FTypedGameplayTagSettingsEntry> SettingsCopyForUI;
 #endif

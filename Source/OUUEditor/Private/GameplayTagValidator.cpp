@@ -39,6 +39,16 @@ const FGameplayTagValidationSettingsEntry* UGameplayTagValidationSettings::FindT
 	return NativeTagOverrides.Find(Tag);
 }
 
+FName UGameplayTagValidationSettings::GetCategoryName() const
+{
+	return TEXT("Project");
+}
+
+FText UGameplayTagValidationSettings::GetSectionText() const
+{
+	return INVTEXT("Gameplay Tags (OUU Validation)");
+}
+
 void UGameplayTagValidationSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
