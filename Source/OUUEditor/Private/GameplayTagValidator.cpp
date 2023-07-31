@@ -58,7 +58,10 @@ void UGameplayTagValidationSettings::PostEditChangeProperty(FPropertyChangedEven
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
-	if (bValidateTagsAfterSettingsChange)
+	// We assume this is only called once during cook.
+	// If not, it shouldn't be too bad either - worst case, we get the same error multiple times,
+	// but we should not get completely wrong errors.
+	if (IsRunningCookCommandlet() ? bValidateTagsDuringCook : bValidateTagsAfterSettingsChange)
 	{
 		UGameplayTagValidatorSubsystem::Get().ValidateGameplayTagTree();
 	}

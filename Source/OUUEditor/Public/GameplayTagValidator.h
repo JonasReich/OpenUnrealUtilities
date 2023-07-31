@@ -53,6 +53,9 @@ public:
 	UPROPERTY(Config, EditAnywhere)
 	bool bValidateTagsAfterTagTreeChange = true;
 
+	UPROPERTY(Config, EditAnywhere)
+	bool bValidateTagsDuringCook = true;
+
 	// If true, run gameplay tag validation after every change of settings in this settings class.
 	UPROPERTY(Config, EditAnywhere)
 	bool bValidateTagsAfterSettingsChange = true;
