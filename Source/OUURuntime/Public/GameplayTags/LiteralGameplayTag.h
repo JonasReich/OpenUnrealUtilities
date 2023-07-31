@@ -64,8 +64,11 @@ enum class ELiteralGameplayTagFlags
 	// Should be omitted, if the tag declarations are referring to tags registered elsewhere.
 	AutoRegister = 0b1,
 
-	// Automatically set up an entry in GameplayTagValidationSettings to allow child tags to be created
+	// Automatically set up an entry in GameplayTagValidationSettings to allow child tags to be created.
 	AllowContentChildTags = 0b10,
+
+	// These tag flags are inherited from the parent tag.
+	Inherited = 0b100,
 
 	// Recommended default tags for most use-cases
 	Default = (AutoRegister)
@@ -199,7 +202,10 @@ bool operator==(const FGameplayTag& LHS, const TLiteralGameplayTag<SelfTagType, 
  * Flags propagate to child tags unless overridden.
  */
 #define OUU_GTAG_GROUP_START(TagType, TagDescription, ...)                                                             \
-	OUU_GTAG_GROUP_START_IMPL(TagType, TagDescription, RESOLVE_OPTIONAL_FLAGS(, #__VA_ARGS__, __VA_ARGS__, Flags))
+	OUU_GTAG_GROUP_START_IMPL(                                                                                         \
+		TagType,                                                                                                       \
+		TagDescription,                                                                                                \
+		RESOLVE_OPTIONAL_FLAGS(, #__VA_ARGS__, __VA_ARGS__, (Flags & ELiteralGameplayTagFlags::Inherited)))
 
 /** Close a previously opened tag group. */
 // clang-format off

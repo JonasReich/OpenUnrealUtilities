@@ -20,6 +20,11 @@ void UGameplayTagValidationSettings::RefreshNativeTagOverrides()
 	NativeTagOverrides.Reset();
 	for (auto& Entry : OUU::Editor::Private::GetTagFlagsForValidation())
 	{
+		if (Entry.Value & ELiteralGameplayTagFlags::Inherited)
+		{
+			// Skip tags with inherited flags. They should be implicitly covered by their parents.
+			continue;
+		}
 		auto& NativeTagOverride = NativeTagOverrides.FindOrAdd(Entry.Key);
 		NativeTagOverride.bCanHaveContentChildren = bool(Entry.Value & ELiteralGameplayTagFlags::AllowContentChildTags);
 		if (NativeTagOverride.bCanHaveContentChildren)
