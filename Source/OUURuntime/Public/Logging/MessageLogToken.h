@@ -6,6 +6,8 @@
 
 #include "Logging/TokenizedMessage.h"
 
+#include <type_traits>
+
 #include "MessageLogToken.generated.h"
 
 /**
@@ -68,12 +70,30 @@ public:
 		return CreateTextMessageLogToken(FText::FromString(Text));
 	}
 
+	static FORCEINLINE FMessageLogToken Create(const char* Literal)
+	{
+		return CreateTextMessageLogToken(FText::FromString(Literal));
+	}
+
+	static FORCEINLINE FMessageLogToken Create(const wchar_t* Literal)
+	{
+		return CreateTextMessageLogToken(FText::FromString(Literal));
+	}
+
+	static FORCEINLINE FMessageLogToken Create(FName Name) { return CreateTextMessageLogToken(FText::FromName(Name)); }
+
+	template <typename NumericT>
+	static FORCEINLINE std::enable_if_t<std::is_arithmetic_v<NumericT>, FMessageLogToken> Create(const NumericT Number)
+	{
+		return CreateTextMessageLogToken(FText::AsNumber(Number));
+	}
+
 	static FORCEINLINE FMessageLogToken Create(const UObject* Object)
 	{
 		return CreateObjectMessageLogToken(Object, FText());
 	}
 
-	template<typename ObjectType>
+	template <typename ObjectType>
 	static FORCEINLINE FMessageLogToken Create(const TSoftObjectPtr<ObjectType>& Object)
 	{
 		return CreateObjectMessageLogToken(Object.LoadSynchronous(), FText());
