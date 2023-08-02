@@ -222,7 +222,8 @@ bool operator==(const FGameplayTag& LHS, const TLiteralGameplayTag<SelfTagType, 
 #define OUU_DECLARE_GAMEPLAY_TAGS_EXTENSION_START(MODULE_API, TagType, TagTypeToExtend)                                \
 	struct TagType;                                                                                                    \
 	extern TagType TagType##_Instance;                                                                                 \
-	struct MODULE_API TagType : public TLiteralGameplayTag<TagType, TagType, TagType>                                  \
+	struct MODULE_API TagType :                                                                                        \
+		public TLiteralGameplayTag<TagType, TagTypeToExtend::ParentTagType, TagTypeToExtend::RootTagType>              \
 	{                                                                                                                  \
 		using EFlags = ELiteralGameplayTagFlags;                                                                       \
                                                                                                                        \
@@ -240,7 +241,7 @@ bool operator==(const FGameplayTag& LHS, const TLiteralGameplayTag<SelfTagType, 
 		static FName GetModuleName();                                                                                  \
 		static FName GetPluginName();                                                                                  \
                                                                                                                        \
-		PRIVATE_OUU_GTAG_GETTER_IMPL(TagType, TagType)                                                                 \
+		PRIVATE_OUU_GTAG_GETTER_IMPL(TagType, RootTagType)                                                             \
 	public:
 
 /**
@@ -272,7 +273,7 @@ bool operator==(const FGameplayTag& LHS, const TLiteralGameplayTag<SelfTagType, 
 	OUU_GTAG_GROUP_START_IMPL(                                                                                         \
 		TagType,                                                                                                       \
 		TagDescription,                                                                                                \
-		(ResolveFallbackFlags((Flags & ELiteralGameplayTagFlags::Inherited)), ##__VA_ARGS__))
+		(ResolveFallbackFlags((ParentTagType::Flags | ELiteralGameplayTagFlags::Inherited)), ##__VA_ARGS__))
 
 /** Close a previously opened tag group. */
 // clang-format off

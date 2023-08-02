@@ -50,7 +50,7 @@ OUU_DECLARE_GAMEPLAY_TAGS_START(
 	FSampleGameplayTags_NotRegsitered,
 	"UUTestTag_NotRegistered",
 	"This tag should never be registered",
-	ELiteralGameplayTagFlags::Default ^ ELiteralGameplayTagFlags::AutoRegister)
+	ELiteralGameplayTagFlags::Default & (~ELiteralGameplayTagFlags::AutoRegister))
 OUU_DECLARE_GAMEPLAY_TAGS_END(FSampleGameplayTags_NotRegsitered)
 
 /**
