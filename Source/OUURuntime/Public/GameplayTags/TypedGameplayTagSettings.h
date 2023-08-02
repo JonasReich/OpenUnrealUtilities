@@ -73,8 +73,12 @@ public:
 private:
 #if WITH_EDITOR
 	void UpdateCopyForUIFromSettings();
+	UFUNCTION()
+	void UpdateTooltips();
 	void UpdateSettingsFromCopyForUI();
 #endif
+
+	bool bCanLoadTooltipsFromReflectionData = false;
 
 	UPROPERTY()
 	TMap<FName, FGameplayTagContainer> NativeRootTags;

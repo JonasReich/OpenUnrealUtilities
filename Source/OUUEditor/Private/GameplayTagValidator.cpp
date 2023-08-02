@@ -74,6 +74,12 @@ UGameplayTagValidatorSubsystem& UGameplayTagValidatorSubsystem::Get()
 
 void UGameplayTagValidatorSubsystem::ValidateGameplayTagTree()
 {
+	// Not perfect, but this saves us from an infinite freeze when lots of gameplay tag changes happen in the same
+	// frame. This caused Minerva editor to completely freeze up otherwise.
+	if (LastValidationFrame == GFrameCounter)
+		return;
+	LastValidationFrame = GFrameCounter;
+
 	auto Validators = GetAllValidators();
 
 	if (Validators.Num() == 0)
@@ -81,6 +87,9 @@ void UGameplayTagValidatorSubsystem::ValidateGameplayTagTree()
 		UE_LOG(LogOpenUnrealUtilities, Error, TEXT("No non-abstract gameplay tag validator classes found."));
 		return;
 	}
+
+	auto& Settings = *GetMutableDefault<UGameplayTagValidationSettings>();
+	Settings.RefreshNativeTagOverrides();
 
 	auto& TagsManager = UGameplayTagsManager::Get();
 	TArray<TSharedPtr<FGameplayTagNode>> RootNodes;
@@ -139,9 +148,6 @@ void UGameplayTagValidatorSubsystem::Initialize(FSubsystemCollectionBase& Collec
 	Super::Initialize(Collection);
 	IGameplayTagsModule::Get()
 		.OnGameplayTagTreeChanged.AddUObject(this, &UGameplayTagValidatorSubsystem::ValidateGameplayTagTree);
-
-	auto& Settings = *GetMutableDefault<UGameplayTagValidationSettings>();
-	Settings.RefreshNativeTagOverrides();
 }
 
 void UGameplayTagValidatorSubsystem::Deinitialize()
@@ -183,6 +189,14 @@ void UGameplayTagValidatorSubsystem::ValidateTagNode(
 	auto& TagsManager = UGameplayTagsManager::Get();
 
 	auto SelfTag = TagNode->GetCompleteTag();
+	const auto SelfTagCopy = SelfTag;
+	TagsManager.RedirectSingleGameplayTag(SelfTag, nullptr);
+	if (SelfTag != SelfTagCopy)
+	{
+		// Tag was redirected and can be ignored
+		return;
+	}
+
 	TArray<FName> Names;
 	TagsManager.SplitGameplayTagFName(SelfTag, OUT Names);
 

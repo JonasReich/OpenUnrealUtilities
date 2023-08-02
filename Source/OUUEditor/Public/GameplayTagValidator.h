@@ -33,7 +33,7 @@ class UGameplayTagValidationSettings : public UDeveloperSettings
 public:
 	// Maximum nesting depth of tags including the root tags.
 	// e.g. 'Foo' has a nesting level of 1, 'Foo.Bar' has 2, 'Foo.Bar.Baz' has 3, etc.
-	UPROPERTY(Config, EditAnywhere, meta = (UIMin=1, UIMax=20))
+	UPROPERTY(Config, EditAnywhere, meta = (UIMin = 1, UIMax = 20))
 	int32 MaxGlobalTagDepth = 10;
 
 	// Default depth allowed for native tags that are marked as "allow child tags" from C++ code.
@@ -117,6 +117,8 @@ public:
 	// --
 
 private:
+	uint64 LastValidationFrame = 0;
+
 	// Returns a list of all validators and initializes them.
 	static TArray<UGameplayTagValidator_Base*> GetAllValidators();
 

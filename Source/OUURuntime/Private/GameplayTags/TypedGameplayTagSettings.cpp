@@ -113,10 +113,29 @@ void UTypedGameplayTagSettings::UpdateCopyForUIFromSettings()
 	{
 		SettingsCopyForUI.FindOrAdd(Entry.Key).AdditionalRootTags = Entry.Value;
 	}
+	if (bCanLoadTooltipsFromReflectionData)
+	{
+		UpdateTooltips();
+	}
+	else
+	{
+		FCoreDelegates::OnAllModuleLoadingPhasesComplete.AddUObject(this, &UTypedGameplayTagSettings::UpdateTooltips);
+	}
+}
+
+void UTypedGameplayTagSettings::UpdateTooltips()
+{
+	bCanLoadTooltipsFromReflectionData = true;
 	for (auto& Entry : SettingsCopyForUI)
 	{
-		UStruct* Struct = FStructUtils::FindStructureInPackageChecked(*Entry.Key.ToString(), nullptr);
-		Entry.Value.Comment = Struct->GetMetaData(TEXT("Tooltip"));
+		if (UStruct* Struct = UClass::TryFindTypeSlow<UStruct>(*Entry.Key.ToString()))
+		{
+			Entry.Value.Comment = Struct->GetMetaData(TEXT("Tooltip"));
+		}
+		else
+		{
+			Entry.Value.Comment = TEXT("Failed to find structure");
+		}
 	}
 }
 
