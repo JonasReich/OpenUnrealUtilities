@@ -40,7 +40,7 @@
 // clang-format off
 #define OUU_GTAG_GROUP_END_IMPL(TagType)                                                                               \
 	};                                                                                                                 \
-private:                                                                                                               \
+protected:                                                                                                               \
 	TagType TagType##_Instance;                                                                                        \
 public:
 // clang-format on
@@ -48,7 +48,7 @@ public:
 //---------------------------------------------------------------------------------------------------------------------
 
 #define PRIVATE_OUU_GTAG_GETTER_IMPL(TagType, RootTagType)                                                             \
-private:                                                                                                               \
+protected:                                                                                                             \
 	template <typename, typename, typename>                                                                            \
 	friend struct TLiteralGameplayTag;                                                                                 \
 	template <typename, ELiteralGameplayTagFlags, bool>                                                                \

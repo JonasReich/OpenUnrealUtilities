@@ -93,12 +93,14 @@ class OUUEDITOR_API UGameplayTagValidator_Base : public UObject
 	GENERATED_BODY()
 public:
 	virtual void InitializeValidator() PURE_VIRTUAL(UGameplayTagValidator_Base::InitializeValidator);
-	virtual void ValidateTag(
+	// Return if tag validation should resume with child tags
+	virtual bool ValidateTag(
 		const FGameplayTag& RootTag,
 		const FGameplayTag& ParentTag,
 		const FGameplayTag& Tag,
 		const TArray<FName>& TagComponents,
-		FDataValidationContext& InOutValidationContext) PURE_VIRTUAL(UGameplayTagValidator_Base::ValidateTag);
+		FDataValidationContext& InOutValidationContext)
+		PURE_VIRTUAL(UGameplayTagValidator_Base::ValidateTag, return true;);
 };
 
 UCLASS(BlueprintType)
@@ -142,7 +144,7 @@ class UOUUGameplayTagValidator : public UGameplayTagValidator_Base
 public:
 	// - UGameplayTagValidator_Base
 	void InitializeValidator() override;
-	void ValidateTag(
+	bool ValidateTag(
 		const FGameplayTag& RootTag,
 		const FGameplayTag& ImmediateParentTag,
 		const FGameplayTag& Tag,

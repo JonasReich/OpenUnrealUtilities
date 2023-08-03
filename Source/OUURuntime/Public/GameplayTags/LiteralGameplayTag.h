@@ -176,15 +176,14 @@ private:
 			TLiteralGameplayTag<typename T::SelfTagType, typename T::ParentTagType, typename T::RootTagType>;
 		static_assert(
 			TIsDerivedFrom<T, TemplateType>::Value && !std::is_same_v<T, TemplateType>,
-			"Type must be a struct type derived from TLiteralGameplayTag, but not TLiteralGameplayTag "
-			"itself.\n"
-			"It's strongly recommended to only create these derived types via the GTAG and GGROUP macros.");
+			"Type must be a struct type derived from TLiteralGameplayTag, but not TLiteralGameplayTag itself.\n"
+			"It's strongly recommended to only create these derived types via the OUU_GTAG and OUU_GTAG_GROUP macros.");
 
 		// we only check for this one function.
 		static_assert(
 			TModels<CHasRelativeTagName, T>::Value,
 			"Type must have member GetRelativeName().\n"
-			"It's strongly recommended to only create these derived types via the GTAG and GGROUP macros.");
+			"It's strongly recommended to only create these derived types via the OUU_GTAG and OUU_GTAG_GROUP macros.");
 	}
 };
 
@@ -218,30 +217,32 @@ bool operator==(const FGameplayTag& LHS, const TLiteralGameplayTag<SelfTagType, 
 
 /**
  * Use this if you want to extend an existing literal gameplay tag declaration from another module.
+ * All flags are copied. Internally this is treated as a new "root" tag.
+ * This means a root tag in a literal gameplay tag is not necessarily a root node in the tag tree.
  */
 #define OUU_DECLARE_GAMEPLAY_TAGS_EXTENSION_START(MODULE_API, TagType, TagTypeToExtend)                                \
 	struct TagType;                                                                                                    \
 	extern TagType TagType##_Instance;                                                                                 \
-	struct MODULE_API TagType :                                                                                        \
-		public TLiteralGameplayTag<TagType, TagTypeToExtend::ParentTagType, TagTypeToExtend::RootTagType>              \
+	struct MODULE_API TagType : public TLiteralGameplayTag<TagType, TagType, TagType>                                  \
 	{                                                                                                                  \
 		using EFlags = ELiteralGameplayTagFlags;                                                                       \
                                                                                                                        \
 	public:                                                                                                            \
 		static const ELiteralGameplayTagFlags Flags = TagTypeToExtend::Flags;                                          \
-		/* do not auto-register the tag via extension. should only ever be done from a "normal" declaration. */        \
+		/* Do not auto-register the tag via extension. should only ever be done from a "normal" declaration. */        \
 		static const bool bAutoAddNativeTag = false;                                                                   \
 		static const TagType& GetInstance() { return TagType##_Instance; }                                             \
-		/* Return the literal tag this is extending to allow existing implicit conversion to e.g. typed tags */        \
-		static const TagTypeToExtend& Get() { return TagTypeToExtend::Get(); }                                         \
-                                                                                                                       \
-	public:                                                                                                            \
-		static FString GetRelativeName() { return TagTypeToExtend::GetRelativeName(); }                                \
+		static FString GetRelativeName()                                                                               \
+		{                                                                                                              \
+			/** Use GetName to get the full name (because this is a root tag in the native tags sense) */              \
+			return TagTypeToExtend::GetName();                                                                         \
+		}                                                                                                              \
 		static FString GetDescription() { return TagTypeToExtend::GetDescription(); }                                  \
 		static FName GetModuleName();                                                                                  \
 		static FName GetPluginName();                                                                                  \
                                                                                                                        \
-		PRIVATE_OUU_GTAG_GETTER_IMPL(TagType, RootTagType)                                                             \
+		PRIVATE_OUU_GTAG_GETTER_IMPL(TagType, TagType)                                                                 \
+                                                                                                                       \
 	public:
 
 /**

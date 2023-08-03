@@ -200,16 +200,32 @@ void UGameplayTagValidatorSubsystem::ValidateTagNode(
 	TArray<FName> Names;
 	TagsManager.SplitGameplayTagFName(SelfTag, OUT Names);
 
+	bool bContinueWithChildTags = true;
 	for (auto* Validator : Validators)
 	{
-		Validator->ValidateTag(RootTag, ImmediateParentTag, SelfTag, IN Names, IN OUT InOutValidationContext);
+		if (Validator->ValidateTag(RootTag, ImmediateParentTag, SelfTag, IN Names, IN OUT InOutValidationContext)
+			== false)
+		{
+			bContinueWithChildTags = false;
+		}
 	}
 
-	auto ChildNodes = TagNode->GetChildTagNodes();
-	for (auto& ChildNode : ChildNodes)
+	if (bContinueWithChildTags)
 	{
-		auto ChildTag = ChildNode->GetCompleteTag();
-		ValidateTagNode(RootTag, SelfTag, ChildNode, Validators, IN OUT InOutValidationContext);
+		auto ChildNodes = TagNode->GetChildTagNodes();
+		for (auto& ChildNode : ChildNodes)
+		{
+			auto ChildTag = ChildNode->GetCompleteTag();
+			ValidateTagNode(RootTag, SelfTag, ChildNode, Validators, IN OUT InOutValidationContext);
+		}
+	}
+	else
+	{
+		FGameplayTagContainer Children = TagsManager.RequestGameplayTagChildren(TagNode->GetCompleteTag());
+		InOutValidationContext.AddWarning(FText::Format(
+			INVTEXT("{0} is invalid but has {1} child tags that will be ignored for validation"),
+			FText::FromString(TagNode->GetCompleteTagString()),
+			FText::AsNumber(Children.Num())));
 	}
 }
 
@@ -235,7 +251,7 @@ void UOUUGameplayTagValidator::InitializeValidator()
 	}
 }
 
-void UOUUGameplayTagValidator::ValidateTag(
+bool UOUUGameplayTagValidator::ValidateTag(
 	const FGameplayTag& RootTag,
 	const FGameplayTag& ImmediateParentTag,
 	const FGameplayTag& Tag,
@@ -267,7 +283,7 @@ void UOUUGameplayTagValidator::ValidateTag(
 				"enable {1}"),
 			FText::FromString(Tag.ToString()),
 			FText::FromString(PREPROCESSOR_TO_STRING(UGameplayTagValidationSettings::bAllowContentRootTags))));
-		return;
+		return false;
 	}
 
 	auto ParentTagsAsContainer = Tag.GetGameplayTagParents();
@@ -281,7 +297,7 @@ void UOUUGameplayTagValidator::ValidateTag(
 			FText::FromString(Tag.ToString()),
 			FText::AsNumber(CurrentTagDepth),
 			FText::AsNumber(Settings.MaxGlobalTagDepth)));
-		return;
+		return false;
 	}
 
 	TArray<FGameplayTag> ParentTagsAsSortedArray;
@@ -322,6 +338,7 @@ void UOUUGameplayTagValidator::ValidateTag(
 							INVTEXT("{0} is a child of tag {1} which explicitly forbids creating child content tags"),
 							FText::FromString(Tag.ToString()),
 							FText::FromString(Parent.ToString())));
+						return false;
 					}
 					else
 					{
@@ -337,6 +354,7 @@ void UOUUGameplayTagValidator::ValidateTag(
 								FText::AsNumber(NativeRelativeTagDepth),
 								FText::FromString(Parent.ToString()),
 								FText::AsNumber(SettingsEntry->AllowedChildDepth)));
+							return false;
 						}
 					}
 				}
@@ -373,7 +391,9 @@ void UOUUGameplayTagValidator::ValidateTag(
 					FText::FromString(FirstNativeTag.ToString()),
 					FText::FromString(
 						PREPROCESSOR_TO_STRING(UGameplayTagValidationSettings::bDefaultAllowContentTagChildren))));
+				return false;
 			}
 		}
 	}
+	return true;
 }
