@@ -25,7 +25,9 @@ void UTypedGameplayTagSettings::AddNativeRootTags(const FGameplayTagContainer& R
 	// also add an entry for additional tags if not already present
 	Settings->AdditionalRootTags.FindOrAdd(StructName, FGameplayTagContainer::EmptyContainer);
 
+#if WITH_EDITOR
 	Settings->UpdateCopyForUIFromSettings();
+#endif
 }
 
 void UTypedGameplayTagSettings::GetAllRootTags(FGameplayTagContainer& OutRootTags, UStruct* BlueprintStruct)

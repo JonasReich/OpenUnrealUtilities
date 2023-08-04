@@ -9,18 +9,18 @@
 
 #include "TypedGameplayTagSettings.generated.h"
 
-#if WITH_EDITORONLY_DATA
 USTRUCT()
 struct FTypedGameplayTagSettingsEntry
 {
 	GENERATED_BODY()
 public:
+#if WITH_EDITORONLY_DATA
 	// Comment from C++ code on what this type is used for.
 	UPROPERTY(VisibleAnywhere)
 	FString Comment;
 
 	// Gameplay tags declared in C++ code that are always available for this FTypedGameplayTag type.
-	// Can't be edited. Only here for reference.
+	// Can't be edited. Only here for reference.y
 	UPROPERTY(VisibleAnywhere)
 	FGameplayTagContainer NativeRootTags;
 
@@ -29,8 +29,8 @@ public:
 	// This allows tag sharing between systems while still keeping separate FTypedGameplayTag types.
 	UPROPERTY(EditAnywhere)
 	FGameplayTagContainer AdditionalRootTags;
-};
 #endif
+};
 
 /**
  * Settings for typed gameplay tags.
