@@ -3,6 +3,7 @@
 #include "GameplayTags/TypedGameplayTagSettings.h"
 
 #include "GameplayTagsManager.h"
+#include "Misc/CoreDelegates.h"
 
 void UTypedGameplayTagSettings::GetAdditionalRootTags(FGameplayTagContainer& OutRootTags, UStruct* BlueprintStruct)
 {
