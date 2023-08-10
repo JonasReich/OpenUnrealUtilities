@@ -131,7 +131,10 @@ void UTypedGameplayTagSettings::UpdateTooltips()
 	bCanLoadTooltipsFromReflectionData = true;
 	for (auto& Entry : SettingsCopyForUI)
 	{
-		if (UStruct* Struct = UClass::TryFindTypeSlow<UStruct>(*Entry.Key.ToString()))
+		auto StructShortName = Entry.Key.ToString();
+		auto StructPathName = UClass::TryConvertShortTypeNameToPathName(UStruct::StaticClass(), StructShortName);
+
+		if (UStruct* Struct = UClass::TryFindTypeSlow<UStruct>(StructPathName.ToString()))
 		{
 			Entry.Value.Comment = Struct->GetMetaData(TEXT("Tooltip"));
 		}
