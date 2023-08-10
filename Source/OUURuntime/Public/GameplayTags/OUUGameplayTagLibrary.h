@@ -31,7 +31,4 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	static FGameplayTag CreateTagFromComponents(const TArray<FName>& TagComponents);
-
-	UFUNCTION(BlueprintPure)
-	static TArray<FGameplayTag> GetGameplayTagArrayFromContainer(const FGameplayTagContainer& Container);
 };
