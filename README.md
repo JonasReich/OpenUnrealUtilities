@@ -82,7 +82,7 @@ The **bold** features are the big ones that I most reccommend you to try the plu
 
 Plugin versions are flagged with tags. Check the [GitHub Releases](https://github.com/JonasReich/OpenUnrealUtilities/releases) for a brief summary of changes between versions. [master](https://github.com/JonasReich/OpenUnrealUtilities/tree/master) always points to the latest release.
 
-> Latest plugin release: [v1.1.0](https://github.com/JonasReich/OpenUnrealUtilities/tree/v1.1.0) on [master](https://github.com/JonasReich/OpenUnrealUtilities/tree/master)
+> Latest plugin release: [v1.2.0](https://github.com/JonasReich/OpenUnrealUtilities/tree/v1.2.0) on [master](https://github.com/JonasReich/OpenUnrealUtilities/tree/master)
 
 If you want stable versions, you should stick to the labeled release commits on the master branch.
 
