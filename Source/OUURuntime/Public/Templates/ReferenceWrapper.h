@@ -28,7 +28,8 @@ public:
 	 */
 	template <
 		typename U,
-		typename = typename TEnableIf<!TIsSame<TReferenceWrapper, typename TRemoveReference<U>::Type>::Value>::Type>
+		typename =
+			typename TEnableIf<!std::is_same<TReferenceWrapper, typename TRemoveReference<U>::Type>::value>::Type>
 	constexpr TReferenceWrapper(U&& Argument) : Pointer(AddressOf(Forward<U>(Argument)))
 	{
 	}

@@ -172,6 +172,8 @@ public:                                                                         
 		"Typed Gameplay Tags must be derived from FTypedGameplayTag_Base");                                            \
                                                                                                                        \
 	using TypedTagImplType = TTypedGameplayTag<TagType, ##__VA_ARGS__>;                                                \
+	template <typename, typename, typename>                                                                            \
+	friend struct ::TLiteralGameplayTag;                                                                               \
 	TagType() = default;                                                                                               \
                                                                                                                        \
 	template <typename T, typename U, typename V>                                                                      \
@@ -197,9 +199,9 @@ private:                                                                        
 	TagType(FGameplayTag Tag) { TagName = Tag.GetTagName(); }                                                          \
                                                                                                                        \
 	template <typename, typename...>                                                                                   \
-	friend struct TTypedGameplayTag;                                                                                   \
+	friend struct ::TTypedGameplayTag;                                                                                 \
                                                                                                                        \
-	friend struct TTypedGameplayTagContainerIterator<TagType>;                                                         \
+	friend struct ::TTypedGameplayTagContainerIterator<TagType>;                                                       \
                                                                                                                        \
 private:                                                                                                               \
 	/* This helper is used for settings registration */                                                                \
