@@ -49,10 +49,11 @@ public:
 
 #define PRIVATE_OUU_GTAG_GETTER_IMPL(TagType, RootTagType)                                                             \
 protected:                                                                                                             \
-	template <typename, typename, typename>                                                                            \
-	friend struct TLiteralGameplayTag;                                                                                 \
 	template <typename, ELiteralGameplayTagFlags, bool>                                                                \
 	friend struct OUU::Runtime::Private::TConditionalNativeTagGetter;                                                  \
+	template <typename, typename, typename>                                                                            \
+	friend struct ::TLiteralGameplayTag;                                                                               \
+                                                                                                                       \
 	OUU::Runtime::Private::TConditionalNativeTagGetter<TagType, Flags, bAutoAddNativeTag> NativeTagGetter;
 
 #define PRIVATE_OUU_GTAG_COMMON_FUNCS_IMPL(TagName, TagDescription)                                                    \

@@ -140,7 +140,7 @@ struct TLiteralGameplayTag
 
 #define RESULT_IF_ROOT_TAG(Result, Expected)                                                                           \
 	template <typename T = SelfTagType>                                                                                \
-	static typename TEnableIf<TIsSame<RootTagType, T>::Value == Expected, Result>::Type
+	static typename TEnableIf<std::is_same<RootTagType, T>::value == Expected, Result>::Type
 
 	// Return the relative name as full name if this is the root tag
 	RESULT_IF_ROOT_TAG(FString, true) GetName() { return SelfTagType::GetRelativeName(); }
@@ -327,9 +327,11 @@ namespace OUU::Runtime::Private
 	struct TConditionalNativeTagGetter : public TConditionalNativeTagGetter_Base<OwningType>
 	{
 	public:
+		using Super = TConditionalNativeTagGetter_Base<OwningType>;
+
 		static FGameplayTag Get()
 		{
-			static FGameplayTag Tag = RequestTag();
+			static FGameplayTag Tag = Super::RequestTag();
 			UE_CLOG(
 				Tag == Tag.EmptyTag,
 				LogOpenUnrealUtilities,

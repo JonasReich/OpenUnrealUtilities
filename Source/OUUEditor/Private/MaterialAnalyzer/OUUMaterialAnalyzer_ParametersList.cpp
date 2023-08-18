@@ -2,6 +2,7 @@
 
 #include "MaterialAnalyzer/OUUMaterialAnalyzer_ParametersList.h"
 
+#include "Brushes/SlateColorBrush.h"
 #include "IMaterialEditor.h"
 #include "MaterialAnalyzer/OUUMaterialAnalyzer.h"
 #include "MaterialAnalyzer/OUUMaterialAnalyzer_EditorObject.h"
@@ -57,8 +58,8 @@ namespace OUU::Editor::Private::MaterialAnalyzer::Widgets
 
 	const FSlateBrush* SOUUMaterialAnalyzer_ParametersListItem::GetBorderImage() const
 	{
-		return IsHovered() ? FAppStyle::GetBrush("DetailsView.CategoryMiddle_Hovered")
-						   : FAppStyle::GetBrush("DetailsView.CategoryMiddle");
+		return IsHovered() ? new FSlateColorBrush(FAppStyle::Get().GetSlateColor("Colors.Hover"))
+						   : new FSlateColorBrush(FAppStyle::Get().GetSlateColor("Colors.Header"));
 	}
 
 	FReply SOUUMaterialAnalyzer_ParametersListItem::OnParameterButtonClicked() const

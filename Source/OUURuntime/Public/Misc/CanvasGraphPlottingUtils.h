@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2023 Jonas Reich & Contributors
+// Copyright (c) 2023 Jonas Reich & Contributors
 
 #pragma once
 
@@ -33,15 +33,15 @@ namespace OUU::Runtime::CanvasGraphPlottingUtils
 
 			FValueRangeRef(
 				const void* InValueContainer,
-				TFunctionRef<float(const void*, int32)> InGetValueDelegate,
-				TFunctionRef<float(const void*)> InGetNumDelegate) :
+				TFunction<float(const void*, int32)> InGetValueDelegate,
+				TFunction<float(const void*)> InGetNumDelegate) :
 				ValueContainer(InValueContainer),
 				GetValueDelegate(InGetValueDelegate),
 				GetNumDelegate(InGetNumDelegate){};
 
 			const void* ValueContainer = nullptr;
-			TFunctionRef<float(const void*, int32)> GetValueDelegate;
-			TFunctionRef<float(const void*)> GetNumDelegate;
+			TFunction<float(const void*, int32)> GetValueDelegate;
+			TFunction<float(const void*)> GetNumDelegate;
 
 			float operator[](int32 Idx) const { return GetValueDelegate(ValueContainer, Idx); }
 			int32 Num() const { return GetNumDelegate(ValueContainer); }
