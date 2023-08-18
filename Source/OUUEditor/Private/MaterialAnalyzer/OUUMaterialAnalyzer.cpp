@@ -2,6 +2,7 @@
 
 #include "MaterialAnalyzer/OUUMaterialAnalyzer.h"
 
+#include "Brushes/SlateColorBrush.h"
 #include "Curves/CurveLinearColor.h"
 #include "EdGraph/EdGraph.h"
 #include "EditorStyleSet.h"
@@ -266,7 +267,11 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 				+ SVerticalBox::Slot()
 				.FillHeight(2.f)
 				[
-					SAssignNew(ParameterListRoot, SBox)
+					SNew(SBorder)
+					.BorderImage(new FSlateColorBrush(FAppStyle::Get().GetSlateColor("Colors.Background")))
+					[
+						SAssignNew(ParameterListRoot, SBox)
+					]
 				]
 			];
 			// clang-format on
@@ -282,7 +287,7 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 			{
 				ParameterListRoot->SetContent(
 					SNew(SBorder)
-						.BorderImage(FAppStyle::GetBrush("MaterialInstanceEditor.StackBody"))
+						.BorderImage(new FSlateColorBrush(FAppStyle::Get().GetSlateColor("Colors.Background")))
 						.Padding(FMargin(4.0f))[SNew(STextBlock).Text(INVTEXT("Connect a parameter to see it here."))]);
 				return;
 			}
@@ -331,7 +336,8 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 			return SNew(SDockTab)
 			.Label(INVTEXT("Material Analyzer (OUU)"))
 			[
-				SNew(SBox)
+				SNew(SBorder)
+				.BorderImage(new FSlateColorBrush(FAppStyle::Get().GetSlateColor("Colors.Background")))
 				[
 					SNew(SOUUMaterialAnalyzer)
 				]
