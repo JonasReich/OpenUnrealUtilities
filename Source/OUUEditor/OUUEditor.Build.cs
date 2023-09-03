@@ -4,61 +4,62 @@ using UnrealBuildTool;
 
 public class OUUEditor : OUUModuleRules
 {
-    public OUUEditor(ReadOnlyTargetRules Target) : base(Target)
-    {
-        PublicDependencyModuleNames.AddRange(new string[] {
+	public OUUEditor(ReadOnlyTargetRules Target) : base(Target)
+	{
+		PublicDependencyModuleNames.AddRange(new string[] {
 
             // Engine
             "Core",
-            "InputCore",
-            "UMG",
+			"InputCore",
+			"UMG",
 
             // Plugin
             "OUURuntime"
-        });
+		});
 
-        PrivateDependencyModuleNames.AddRange(new string[] {
+		PrivateDependencyModuleNames.AddRange(new string[] {
 
             // Engine
             "CoreUObject",
-            "Engine",
-            "Slate",
-            "SlateCore",
-            "MaterialEditor",
-            "UnrealEd",
-            "EditorStyle",
-            "Projects",
-            "SessionFrontend",
-            "Blutility",
-            "UMGEditor",
-            "WorkspaceMenuStructure",
-            "PropertyEditor",
-            "SkeletalMeshEditor",
-            "SkeletalMeshUtilitiesCommon",
-            "EditorFramework",
-            "LevelEditor",
-            "ImageWriteQueue",
-            "RenderCore",
-            "PropertyEditor",
-            "ContentBrowser",
-            "Kismet",
-            "ContentBrowserFileDataSource",
-            "ContentBrowserData",
-            "ToolMenus",
-            "SourceControlWindows",
-            "AssetTools",
-            "SourceControl",
-            "AssetRegistry",
-            "Projects",
-            "DataValidation",
-            "EditorWidgets",
-            "EditorSubsystem",
-            "DeveloperSettings",
-            "GameplayTags",
+			"Engine",
+			"Slate",
+			"SlateCore",
+			"MaterialEditor",
+			"UnrealEd",
+			"EditorStyle",
+			"Projects",
+			"SessionFrontend",
+			"Blutility",
+			"UMGEditor",
+			"WorkspaceMenuStructure",
+			"PropertyEditor",
+			"SkeletalMeshEditor",
+			"SkeletalMeshUtilitiesCommon",
+			"EditorFramework",
+			"LevelEditor",
+			"ImageWriteQueue",
+			"RenderCore",
+			"PropertyEditor",
+			"ContentBrowser",
+			"Kismet",
+			"ContentBrowserFileDataSource",
+			"ContentBrowserData",
+			"ToolMenus",
+			"SourceControlWindows",
+			"AssetTools",
+			"SourceControl",
+			"AssetRegistry",
+			"Projects",
+			"DataValidation",
+			"EditorWidgets",
+			"EditorSubsystem",
+			"DeveloperSettings",
+			"GameplayTags",
+			"GameplayTagsEditor",
 
             // OUU
             "OUURuntime",
-            "OUUDeveloper"
-        });
-    }
+			"OUUDeveloper"
+		});
+	}
 }

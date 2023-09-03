@@ -38,6 +38,10 @@ namespace OUU::Runtime::Private
 		}
 	};
 
+#if WITH_EDITOR
+	OUURUNTIME_API FString MakeFilterString(const FGameplayTagContainer& GameplayTags);
+#endif
+
 } // namespace OUU::Runtime::Private
 
 // Forward declare the derived container types...

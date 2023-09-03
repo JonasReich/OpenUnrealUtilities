@@ -41,12 +41,12 @@ class OUURUNTIME_API UTypedGameplayTagSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 
-	friend class FTypedGameplayTagSettingsDetails;
-
 public:
 	static void GetAdditionalRootTags(FGameplayTagContainer& OutRootTags, UStruct* BlueprintStruct);
+	static void GetAdditionalRootTags(FGameplayTagContainer& OutRootTags, const FName& BlueprintStructName);
 	static void AddNativeRootTags(const FGameplayTagContainer& RootTags, UStruct* BlueprintStruct);
 	static void GetAllRootTags(FGameplayTagContainer& OutRootTags, UStruct* BlueprintStruct);
+	static void GetAllRootTags(FGameplayTagContainer& OutRootTags, const FName& BlueprintStructName);
 	// Get all leaf tags (tags without children) for the given typed gameplay tag
 	static void GetAllLeafTags(FGameplayTagContainer& OutLeafTags, UStruct* BlueprintStruct);
 
