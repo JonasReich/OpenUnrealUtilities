@@ -5,8 +5,13 @@
 #include "DetailWidgetRow.h"
 #include "GameplayTagsEditorModule.h"
 #include "IDetailChildrenBuilder.h"
+#include "UObject/UObjectIterator.h"
 #include "Widgets/Input/SButton.h"
+#include "Widgets/Input/SComboBox.h"
 #include "Widgets/Layout/SBorder.h"
+#include "Widgets/Layout/SBox.h"
+#include "Widgets/SBoxPanel.h"
+#include "Widgets/SNullWidget.h"
 #include "Widgets/Text/STextBlock.h"
 
 FTypedGameplayTagContainer* GetContainerFromPropertyHandle(TSharedPtr<IPropertyHandle> Handle)
