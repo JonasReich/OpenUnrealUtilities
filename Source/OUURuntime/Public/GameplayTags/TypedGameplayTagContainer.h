@@ -31,23 +31,22 @@ private:
 
 public:
 	template <typename TypedTagType>
-	FTypedGameplayTagContainer(const TArray<FGameplayTag>& InTags) :
-		FTypedGameplayTagContainer(
-			*TypedTagType::StaticStruct(),
-			TTypedGameplayTagContainerValue<TypedTagType>::CreateChecked(FGameplayTagContainer::FromArray(InTags)))
+	static FTypedGameplayTagContainer Create(const TArray<FGameplayTag>& InTags)
 	{
 		static_assert(
 			TIsDerivedFrom<TypedTagType, FTypedGameplayTag_Base>::Value,
 			"TypedTagType must be derived from FTypedGameplayTag_Base");
+
+		return FTypedGameplayTagContainer(
+			*TypedTagType::StaticStruct(),
+			TTypedGameplayTagContainerValue<TypedTagType>::CreateChecked(
+				FGameplayTagContainer::CreateFromArray(InTags)));
 	}
 
 	template <typename TypedTagType>
-	FTypedGameplayTagContainer(std::initializer_list<FGameplayTag> InTags) :
-		FTypedGameplayTagContainer(*TypedTagType::StaticStruct(), TArray<FGameplayTag>(InTags))
+	static FTypedGameplayTagContainer Create(std::initializer_list<FGameplayTag> InTags)
 	{
-		static_assert(
-			TIsDerivedFrom<TypedTagType, FTypedGameplayTag_Base>::Value,
-			"TypedTagType must be derived from FTypedGameplayTag_Base");
+		return Create<TypedTagType>(TArray<FGameplayTag>(InTags));
 	}
 
 	const FGameplayTagContainer& GetTags() const { return Tags; }
