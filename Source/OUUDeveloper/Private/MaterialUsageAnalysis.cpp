@@ -7,6 +7,7 @@
 #include "Components/SkinnedMeshComponent.h"
 #include "Containers/CircularBuffer.h"
 #include "Engine/Canvas.h"
+#include "Engine/Engine.h"
 #include "Engine/LevelStreaming.h"
 #include "Engine/SkeletalMesh.h"
 #include "Engine/StaticMesh.h"

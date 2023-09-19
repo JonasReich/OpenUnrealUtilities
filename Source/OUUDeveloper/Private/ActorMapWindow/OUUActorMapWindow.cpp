@@ -8,6 +8,7 @@
 #include "ActorMapWindow/OUUActorMapWindow_Private.h"
 #include "Brushes/SlateColorBrush.h"
 #include "Components/SceneCaptureComponent2D.h"
+#include "Engine/Engine.h"
 #include "Engine/SceneCapture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "EngineUtils.h"

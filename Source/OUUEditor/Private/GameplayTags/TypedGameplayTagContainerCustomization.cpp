@@ -5,6 +5,7 @@
 #include "DetailWidgetRow.h"
 #include "GameplayTagsEditorModule.h"
 #include "IDetailChildrenBuilder.h"
+#include "UObject/Class.h"
 #include "UObject/UObjectIterator.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SComboBox.h"

@@ -7,6 +7,7 @@
 	#include "Engine/World.h"
 	#include "GameFramework/GameStateBase.h"
 	#include "LogOpenUnrealUtilities.h"
+	#include "Misc/PackageName.h"
 	#include "Misc/Paths.h"
 	#include "Tests/AutomationCommon.h"
 	#include "TimerManager.h"
