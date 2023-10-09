@@ -159,6 +159,10 @@ public:
 	static void RegisterAllDerivedPropertyTypeLayouts();
 	static void UnregisterAllDerivedPropertyTypeLayouts();
 #endif
+
+public:
+	/* Get a short display name for the given tag, relative to its root tags. */
+	static FString ToShortDisplayString(const FGameplayTag& Tag, const FGameplayTagContainer& RootTags);
 };
 
 /**
@@ -190,6 +194,10 @@ public:                                                                         
 	{                                                                                                                  \
 		static_cast<FGameplayTag&>(*this) = static_cast<const FGameplayTag&>(Other);                                   \
 		return *this;                                                                                                  \
+	}                                                                                                                  \
+	FString ToShortDisplayString() const                                                                               \
+	{                                                                                                                  \
+		return FTypedGameplayTag_Base::ToShortDisplayString(*this, GetAllRootTags().Get());                            \
 	}                                                                                                                  \
 	static TagType TryConvert(FGameplayTag FromTag) { return TypedTagImplType::TryConvert(FromTag, false); }           \
 	static TagType ConvertChecked(FGameplayTag FromTag) { return TypedTagImplType::TryConvert(FromTag, true); }        \
