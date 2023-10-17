@@ -129,6 +129,17 @@ public:
 	{
 	}
 
+protected:
+	enum class EForceConstruct
+	{
+		Value
+	};
+
+	TSubclassWithInterfaces_Base(ObjectBaseClass* InObject, EForceConstruct) : Object(InObject) {}
+
+	TSubclassWithInterfaces_Base(ObjectBaseClass& InObject, EForceConstruct) : Object(InObject) {}
+
+public:
 	// Get the object as ObjectBaseClass* or ObjectBaseClass& depending on bIsPointer value
 	StorageType GetObject() const { return Object; }
 
@@ -159,8 +170,81 @@ public:
 	}
 };
 
-template <class InObjectBaseClassWithStorageSpecifier, class... InInterfaceClasses>
-using TSubclassWithInterfaces = TSubclassWithInterfaces_Base<
-	InObjectBaseClassWithStorageSpecifier,
-	typename OUU::Runtime::Private::SubclassWithInterface::TObject<InObjectBaseClassWithStorageSpecifier>::Type,
-	InInterfaceClasses...>;
+template <class InObjectBaseClassWithStorageSpecifier, class... InterfaceClasses>
+struct TSubclassWithInterfaces :
+	public TSubclassWithInterfaces_Base<
+		InObjectBaseClassWithStorageSpecifier,
+		typename OUU::Runtime::Private::SubclassWithInterface::TObject<InObjectBaseClassWithStorageSpecifier>::Type,
+		InterfaceClasses...>
+{
+public:
+	using Super = typename TSubclassWithInterfaces_Base<
+		InObjectBaseClassWithStorageSpecifier,
+		typename OUU::Runtime::Private::SubclassWithInterface::TObject<InObjectBaseClassWithStorageSpecifier>::Type,
+		InterfaceClasses...>;
+
+	using ThisType = typename TSubclassWithInterfaces_Base<InObjectBaseClassWithStorageSpecifier, InterfaceClasses...>;
+
+	using ObjectBaseClass = typename Super::ObjectBaseClass;
+
+	static const uint32 NumInterfaces = sizeof...(InterfaceClasses);
+
+private:
+	TSubclassWithInterfaces(ObjectBaseClass* InObject, typename Super::EForceConstruct) :
+		Super(InObject, Super::EForceConstruct::Value)
+	{
+	}
+	TSubclassWithInterfaces(ObjectBaseClass& InObject, typename Super::EForceConstruct) :
+		Super(InObject, Super::EForceConstruct::Value)
+	{
+	}
+
+public:
+	template <
+		typename DerivedClass,
+		typename = typename TEnableIf<TAnd<
+			TIsDerivedFrom<DerivedClass, ObjectBaseClass>,
+			TIsDerivedFrom<DerivedClass, InterfaceClasses>...>::Value>::Type>
+	TSubclassWithInterfaces(DerivedClass* InObject) : Super(InObject)
+	{
+	}
+
+	template <
+		typename DerivedClass,
+		typename = typename TEnableIf<TAnd<
+			TIsDerivedFrom<DerivedClass, ObjectBaseClass>,
+			TIsDerivedFrom<DerivedClass, InterfaceClasses>...>::Value>::Type>
+	TSubclassWithInterfaces(DerivedClass& InObject) : Super(InObject)
+	{
+	}
+
+	template <typename InterfaceT>
+	static bool IsImplemented(ObjectBaseClass* Object)
+	{
+		return Cast<InterfaceT>(Object) != nullptr;
+	}
+
+	template <typename InterfaceTypeA, typename InterfaceTypeB, typename... RemainingInterfaceTypes>
+	static bool IsImplemented(ObjectBaseClass* Object)
+	{
+		return IsImplemented<InterfaceTypeA>(Object)
+			&& IsImplemented<InterfaceTypeB, RemainingInterfaceTypes...>(Object);
+	}
+
+	template <typename... Ts>
+	static bool IsImplemented(ObjectBaseClass& Object)
+	{
+		return IsImplemented<Ts...>(&Object);
+	}
+
+	template <typename ObjectType>
+	static TOptional<TSubclassWithInterfaces> TryCreate(ObjectType Object)
+	{
+		if (IsImplemented<InterfaceClasses...>(Object))
+		{
+			return TSubclassWithInterfaces(Object, Super::EForceConstruct::Value);
+		}
+
+		return {};
+	}
+};
