@@ -21,7 +21,7 @@ struct OUURUNTIME_API FTypedGameplayTagContainer
 {
 	GENERATED_BODY()
 
-	friend class FTypedGameplayTagContainer_PropertyTypeCustomiation;
+	friend class FTypedGameplayTagContainer_PropertyTypeCustomization;
 
 public:
 	FTypedGameplayTagContainer() = default;

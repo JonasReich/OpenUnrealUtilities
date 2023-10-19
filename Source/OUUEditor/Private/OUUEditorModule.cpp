@@ -41,7 +41,7 @@ namespace OUU::Editor
 
 			OUU::Editor::PropertyEditorUtils::RegisterCustomPropertyTypeLayout<
 				FTypedGameplayTagContainer,
-				FTypedGameplayTagContainer_PropertyTypeCustomiation>();
+				FTypedGameplayTagContainer_PropertyTypeCustomization>();
 		}
 
 		virtual void ShutdownModule() override

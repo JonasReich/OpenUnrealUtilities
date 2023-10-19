@@ -28,7 +28,7 @@ FTypedGameplayTagContainer* GetContainerFromPropertyHandle(TSharedPtr<IPropertyH
 	return nullptr;
 }
 
-void FTypedGameplayTagContainer_PropertyTypeCustomiation::CustomizeHeader(
+void FTypedGameplayTagContainer_PropertyTypeCustomization::CustomizeHeader(
 	TSharedRef<IPropertyHandle> PropertyHandle,
 	FDetailWidgetRow& HeaderRow,
 	IPropertyTypeCustomizationUtils& CustomizationUtils)
@@ -81,7 +81,7 @@ void FTypedGameplayTagContainer_PropertyTypeCustomiation::CustomizeHeader(
 			SNew(SVerticalBox)
 			+ SVerticalBox::Slot().AutoHeight().Padding(2.f)[SAssignNew(ComboBoxSlot, SBox)]
 			+ SVerticalBox::Slot().AutoHeight().Padding(2.f)[SAssignNew(ErrorBox, SBox)]
-			+ SVerticalBox::Slot().AutoHeight().Padding(2.f)[SAssignNew(GamplayTagContainerBox, SBox)]
+			+ SVerticalBox::Slot().AutoHeight().Padding(2.f)[SAssignNew(GameplayTagContainerBox, SBox)]
 		];
 		// clang-format on
 
@@ -131,7 +131,7 @@ void FTypedGameplayTagContainer_PropertyTypeCustomiation::CustomizeHeader(
 	}
 }
 
-void FTypedGameplayTagContainer_PropertyTypeCustomiation::CustomizeChildren(
+void FTypedGameplayTagContainer_PropertyTypeCustomization::CustomizeChildren(
 	TSharedRef<IPropertyHandle> PropertyHandle,
 	IDetailChildrenBuilder& ChildBuilder,
 	IPropertyTypeCustomizationUtils& CustomizationUtils)
@@ -139,7 +139,7 @@ void FTypedGameplayTagContainer_PropertyTypeCustomiation::CustomizeChildren(
 	// No children.
 }
 
-void FTypedGameplayTagContainer_PropertyTypeCustomiation::RefreshContainerWidget()
+void FTypedGameplayTagContainer_PropertyTypeCustomization::RefreshContainerWidget()
 {
 	if (auto* Container = GetContainerFromPropertyHandle(HandleSP))
 	{
@@ -199,11 +199,11 @@ void FTypedGameplayTagContainer_PropertyTypeCustomiation::RefreshContainerWidget
 				[this](const FGameplayTagContainer& NewValue) { SetNewTags(NewValue); }),
 			WorkingContainer,
 			FilterString);
-		GamplayTagContainerBox->SetContent(GameplayTagContainerWidget);
+		GameplayTagContainerBox->SetContent(GameplayTagContainerWidget);
 	}
 }
 
-void FTypedGameplayTagContainer_PropertyTypeCustomiation::SetNewTags(const FGameplayTagContainer& NewValue)
+void FTypedGameplayTagContainer_PropertyTypeCustomization::SetNewTags(const FGameplayTagContainer& NewValue)
 {
 	if (auto* Container = GetContainerFromPropertyHandle(HandleSP))
 	{

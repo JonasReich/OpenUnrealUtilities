@@ -8,7 +8,7 @@
 
 class SBox;
 
-class FTypedGameplayTagContainer_PropertyTypeCustomiation : public IPropertyTypeCustomization
+class FTypedGameplayTagContainer_PropertyTypeCustomization : public IPropertyTypeCustomization
 {
 public:
 	// - IPropertyTypeCustomization
@@ -31,7 +31,7 @@ private:
 private:
 	TArray<FName> TypedTagOptions;
 	TSharedPtr<FGameplayTagContainer> WorkingContainer;
-	TSharedPtr<SBox> GamplayTagContainerBox;
+	TSharedPtr<SBox> GameplayTagContainerBox;
 	TSharedPtr<SBox> ErrorBox;
 	TSharedPtr<IPropertyHandle> HandleSP;
 };
