@@ -470,9 +470,12 @@ public:
 	}
 	TArray<FGameplayTag>::TConstIterator CreateConstIterator() const { return GetRef().CreateConstIterator(); }
 	bool IsValidIndex(int32 Index) const { return GetRef().IsValidIndex(); }
-	BlueprintTagType GetByIndex(int32 Index) const { return GetRef().GetByIndex(Index); }
-	BlueprintTagType First() const { return GetRef().First(); }
-	BlueprintTagType Last() const { return GetRef().Last(); }
+	BlueprintTagType GetByIndex(int32 Index) const
+	{
+		return BlueprintTagType::ConvertChecked(GetRef().GetByIndex(Index));
+	}
+	BlueprintTagType First() const { return BlueprintTagType::ConvertChecked(GetRef().First()); }
+	BlueprintTagType Last() const { return BlueprintTagType::ConvertChecked(GetRef().Last()); }
 
 	// Can't be sure that these are still underneath the root tag, so just don't allow it
 	// void FillParentTags() { return GetRef().FillParentTags(); }
