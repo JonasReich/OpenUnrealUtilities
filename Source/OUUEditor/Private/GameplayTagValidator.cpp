@@ -13,7 +13,11 @@
 FAutoConsoleCommand GTagsValidateCommand{
 	TEXT("ouu.Tags.Validate"),
 	TEXT("Run tags validation on all registered gameplay tags"),
-	FConsoleCommandDelegate::CreateLambda([]() { UGameplayTagValidatorSubsystem::Get().ValidateGameplayTagTree(); })};
+	FConsoleCommandDelegate::CreateLambda(
+		[]()
+		{
+			UGameplayTagValidatorSubsystem::Get().ValidateGameplayTagTree();
+		})};
 
 void UGameplayTagValidationSettings::RefreshNativeTagOverrides()
 {
@@ -36,7 +40,7 @@ void UGameplayTagValidationSettings::RefreshNativeTagOverrides()
 
 const FGameplayTagValidationSettingsEntry* UGameplayTagValidationSettings::FindTagOverride(FGameplayTag Tag) const
 {
-	// Editable tag overrides supercede natively declared rules.
+	// Editable tag overrides supersede natively declared rules.
 	if (auto* Result = TagOverrides.Find(Tag))
 	{
 		return Result;
@@ -108,7 +112,7 @@ void UGameplayTagValidatorSubsystem::ValidateGameplayTagTree()
 	TArray<FText> Warnings, Errors;
 	ValidationContext.SplitIssues(OUT Warnings, OUT Errors);
 
-#define MESSAGELOG_CAT AssetCheck
+	#define MESSAGELOG_CAT AssetCheck
 	auto MessageLogName = GetMessageLogName(EMessageLogName::MESSAGELOG_CAT);
 
 	UMessageLogBlueprintLibrary::NewMessageLogPage(MessageLogName, INVTEXT("Gameplay Tag Validation"));
@@ -140,7 +144,7 @@ void UGameplayTagValidatorSubsystem::ValidateGameplayTagTree()
 	{
 		UE_MESSAGELOG(MESSAGELOG_CAT, Info, "No GameplayTag validation issues found.");
 	}
-#undef MESSAGELOG_CAT
+	#undef MESSAGELOG_CAT
 }
 
 void UGameplayTagValidatorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -222,10 +226,14 @@ void UGameplayTagValidatorSubsystem::ValidateTagNode(
 	else
 	{
 		FGameplayTagContainer Children = TagsManager.RequestGameplayTagChildren(TagNode->GetCompleteTag());
-		InOutValidationContext.AddWarning(FText::Format(
-			INVTEXT("{0} is invalid but has {1} child tags that will be ignored for validation"),
-			FText::FromString(TagNode->GetCompleteTagString()),
-			FText::AsNumber(Children.Num())));
+		if (Children.Num() > 0)
+		{
+			InOutValidationContext.AddWarning(
+				FText::Format(
+					INVTEXT("{0} is invalid but has {1} child tags that will be ignored for validation"),
+					FText::FromString(TagNode->GetCompleteTagString()),
+					FText::AsNumber(Children.Num())));
+		}
 	}
 }
 
@@ -260,7 +268,8 @@ bool UOUUGameplayTagValidator::ValidateTag(
 {
 	const UGameplayTagValidationSettings& Settings = *GetDefault<UGameplayTagValidationSettings>();
 
-	auto AddIssue = [&](const FText& IssueText) {
+	auto AddIssue = [&](const FText& IssueText)
+	{
 		for (auto& WarnOnlyTag : Settings.WarnOnlyGameplayTags)
 		{
 			if (Tag.MatchesTag(WarnOnlyTag))
@@ -277,12 +286,13 @@ bool UOUUGameplayTagValidator::ValidateTag(
 
 	if ((Settings.bAllowContentRootTags == false) && bTagIsRoot && (bTagIsNative == false))
 	{
-		AddIssue(FText::Format(
-			INVTEXT(
-				"{0}: Content tags are not permitted as root tags. Please declare it as a Native tag in C++ code or "
-				"enable {1}"),
-			FText::FromString(Tag.ToString()),
-			FText::FromString(PREPROCESSOR_TO_STRING(UGameplayTagValidationSettings::bAllowContentRootTags))));
+		AddIssue(
+			FText::Format(
+				INVTEXT(
+					"{0}: Content tags are not permitted as root tags. Please declare it as a Native tag in C++ code or "
+					"enable {1}"),
+				FText::FromString(Tag.ToString()),
+				FText::FromString(PREPROCESSOR_TO_STRING(UGameplayTagValidationSettings::bAllowContentRootTags))));
 		return false;
 	}
 
@@ -292,11 +302,12 @@ bool UOUUGameplayTagValidator::ValidateTag(
 	if (CurrentTagDepth > Settings.MaxGlobalTagDepth)
 	{
 		// This tag depth rule should apply both for native and content tags, so we check it before.
-		AddIssue(FText::Format(
-			INVTEXT("{0} is too deep ({1}). MaxGlobalTagDepth is {2}"),
-			FText::FromString(Tag.ToString()),
-			FText::AsNumber(CurrentTagDepth),
-			FText::AsNumber(Settings.MaxGlobalTagDepth)));
+		AddIssue(
+			FText::Format(
+				INVTEXT("{0} is too deep ({1}). MaxGlobalTagDepth is {2}"),
+				FText::FromString(Tag.ToString()),
+				FText::AsNumber(CurrentTagDepth),
+				FText::AsNumber(Settings.MaxGlobalTagDepth)));
 		return false;
 	}
 
@@ -307,9 +318,11 @@ bool UOUUGameplayTagValidator::ValidateTag(
 	}
 
 	// Sort by how deep the tags match. Earlier entries are closer to the tag. Later entries are closer to the root.
-	ParentTagsAsSortedArray.Sort([&Tag](const FGameplayTag& A, const FGameplayTag& B) -> bool {
-		return A.MatchesTagDepth(Tag) > B.MatchesTagDepth(Tag);
-	});
+	ParentTagsAsSortedArray.Sort(
+		[&Tag](const FGameplayTag& A, const FGameplayTag& B) -> bool
+		{
+			return A.MatchesTagDepth(Tag) > B.MatchesTagDepth(Tag);
+		});
 
 	ensure(ParentTagsAsSortedArray[0] == Tag);
 	ensure(ParentTagsAsSortedArray.Last() == RootTag);
@@ -327,43 +340,52 @@ bool UOUUGameplayTagValidator::ValidateTag(
 		auto FirstNativeTag = FGameplayTag::EmptyTag;
 		for (auto& Parent : ParentTagsAsSortedArray)
 		{
-			if (AllNativeTags.HasTagExact(Parent))
+			if (auto* SettingsEntry = Settings.FindTagOverride(Parent))
 			{
-				// Parent is Native
-				if (auto* SettingsEntry = Settings.FindTagOverride(Parent))
+				if (SettingsEntry->bCanHaveContentChildren == false)
 				{
-					if (SettingsEntry->bCanHaveContentChildren == false)
-					{
-						AddIssue(FText::Format(
+					AddIssue(
+						FText::Format(
 							INVTEXT("{0} is a child of tag {1} which explicitly forbids creating child content tags"),
 							FText::FromString(Tag.ToString()),
 							FText::FromString(Parent.ToString())));
-						return false;
-					}
-					else
-					{
-						bFoundAllowRule = true;
+					return false;
+				}
+				else
+				{
+					bFoundAllowRule = true;
 
-						if (SettingsEntry->AllowedChildDepth < NativeRelativeTagDepth)
-						{
-							AddIssue(FText::Format(
-								INVTEXT("{0} is a {1} level deep child of tag {2}, but that parent tags only allows "
-										"content "
-										"children of up to {3} levels"),
+					if (SettingsEntry->AllowedChildDepth > NativeRelativeTagDepth)
+					{
+						// This rules allows tags below, so we don't have to check higher in the hierarchy.
+						break;
+					}
+
+					if (SettingsEntry->AllowedChildDepth < NativeRelativeTagDepth)
+					{
+						AddIssue(
+							FText::Format(
+								INVTEXT(
+									"{0} is a {1} level deep child of tag {2}, but that parent tags only allows "
+									"content "
+									"children of up to {3} levels"),
 								FText::FromString(Tag.ToString()),
 								FText::AsNumber(NativeRelativeTagDepth),
 								FText::FromString(Parent.ToString()),
 								FText::AsNumber(SettingsEntry->AllowedChildDepth)));
-							return false;
-						}
+						return false;
 					}
 				}
+			}
 
+			if (AllNativeTags.HasTagExact(Parent))
+			{
+				// Parent is Native
 				FirstNativeTag = Parent;
 
 				// Break at the first native tag.
 				// Native / Content can't be mixed.
-				// Only exception: We could encounter some implcit tags from native tags that are also declared
+				// Only exception: We could encounter some implicit tags from native tags that are also declared
 				// explicitly in content. We ignore those tags for this check.
 				break;
 			}
@@ -383,14 +405,16 @@ bool UOUUGameplayTagValidator::ValidateTag(
 			}
 			else
 			{
-				AddIssue(FText::Format(
-					INVTEXT("{0} is a content tag created below native tag {1}, but there was no rule explicitly "
+				AddIssue(
+					FText::Format(
+						INVTEXT(
+							"{0} is a content tag created below native tag {1}, but there was no rule explicitly "
 							"allowing content tags below that native tag. You can enable {2} to allow content tags "
 							"unless explicitly prohibited."),
-					FText::FromString(Tag.ToString()),
-					FText::FromString(FirstNativeTag.ToString()),
-					FText::FromString(
-						PREPROCESSOR_TO_STRING(UGameplayTagValidationSettings::bDefaultAllowContentTagChildren))));
+						FText::FromString(Tag.ToString()),
+						FText::FromString(FirstNativeTag.ToString()),
+						FText::FromString(
+							PREPROCESSOR_TO_STRING(UGameplayTagValidationSettings::bDefaultAllowContentTagChildren))));
 				return false;
 			}
 		}
