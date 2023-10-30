@@ -88,7 +88,7 @@ namespace OUU::Runtime::Private::GameplayTagQueryParser
 
 		/**
 		 * Nested tags, if any.
-		 * Should never have elements if there are InnerExprs
+		 * Should never have elements if there are InnerExpressions
 		 */
 		TArray<FGameplayTag> Tags;
 
@@ -155,49 +155,49 @@ namespace OUU::Runtime::Private::GameplayTagQueryParser
 	/** FQueryExprHelper subclass for ANY() operations */
 	struct FQueryExpr_AnyExpr : FQueryExprHelper
 	{
-		void InitNativeExpressionForTags(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
+		virtual void InitNativeExpressionForTags(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
 		{
 			InNativeExpr->AnyTagsMatch();
 		}
 
-		void InitNativeExpressionForExpressions(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
+		virtual void InitNativeExpressionForExpressions(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
 		{
 			InNativeExpr->AnyExprMatch();
 		}
 
-		FString GetOpString() const override { return OpStrings::Any; }
+		virtual FString GetOpString() const override { return OpStrings::Any; }
 	};
 
 	/** FQueryExprHelper subclass for ALL() operations */
 	struct FQueryExpr_AllExpr : FQueryExprHelper
 	{
-		void InitNativeExpressionForTags(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
+		virtual void InitNativeExpressionForTags(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
 		{
 			InNativeExpr->AllTagsMatch();
 		}
 
-		void InitNativeExpressionForExpressions(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
+		virtual void InitNativeExpressionForExpressions(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
 		{
 			InNativeExpr->AllExprMatch();
 		}
 
-		FString GetOpString() const override { return OpStrings::All; }
+		virtual FString GetOpString() const override { return OpStrings::All; }
 	};
 
 	/** FQueryExprHelper subclass for NONE() operations */
 	struct FQueryExpr_NoExpr : FQueryExprHelper
 	{
-		void InitNativeExpressionForTags(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
+		virtual void InitNativeExpressionForTags(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
 		{
 			InNativeExpr->NoTagsMatch();
 		}
 
-		void InitNativeExpressionForExpressions(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
+		virtual void InitNativeExpressionForExpressions(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
 		{
 			InNativeExpr->NoExprMatch();
 		}
 
-		FString GetOpString() const override { return OpStrings::None; }
+		virtual FString GetOpString() const override { return OpStrings::None; }
 	};
 
 	/**
@@ -217,7 +217,7 @@ namespace OUU::Runtime::Private::GameplayTagQueryParser
 	}
 
 	/** Forward declare utility function to parse inner expressions from the string */
-	void ParseInnerExprs(const TCHAR*& Str, const TSharedPtr<FQueryExprHelper>& HelperRoot);
+	void ParseInnerExpressions(const TCHAR*& Str, const TSharedPtr<FQueryExprHelper>& HelperRoot);
 	/** Forward declare utility function to parse inner tags from the string */
 	void ParseTags(const TCHAR*& Str, const TSharedPtr<FQueryExprHelper>& HelperRoot);
 
@@ -239,7 +239,7 @@ namespace OUU::Runtime::Private::GameplayTagQueryParser
 		// Parse the nested content of the expression - either inner expressions or gameplay tags
 		if (StartsWithArbitraryOp(Str))
 		{
-			ParseInnerExprs(Str, HelperRoot);
+			ParseInnerExpressions(Str, HelperRoot);
 		}
 		else
 		{
@@ -248,7 +248,7 @@ namespace OUU::Runtime::Private::GameplayTagQueryParser
 		return HelperRoot;
 	}
 
-	void ParseInnerExprs(const TCHAR*& Str, const TSharedPtr<FQueryExprHelper>& HelperRoot)
+	void ParseInnerExpressions(const TCHAR*& Str, const TSharedPtr<FQueryExprHelper>& HelperRoot)
 	{
 		// If we have a valid expression operation string now, this expression is an ExprExpr
 		// -> an expression wrapping other expressions
@@ -318,13 +318,16 @@ FGameplayTagQuery FGameplayTagQueryParser::ParseQuery(const FString& SourceStrin
 	namespace QueryParser = OUU::Runtime::Private::GameplayTagQueryParser;
 
 	// Declare replacement string on outer scope so we can assign it to Str without going out of scope
+	// ReSharper disable once CppTooWideScope
+	// ReSharper disable once CppJoinDeclarationAndAssignment
+	FString ReplacementString;
 	const TCHAR* Str = *SourceString;
 	QueryParser::SkipWhitespace(Str);
 	if (!QueryParser::StartsWithArbitraryOp(Str))
 	{
 		// If no root query operation is used, assume it's an ALL(Tag) query,
 		// e.g. "Foo.Bar" should just be interpreted as "ALL(Foo.Bar)"
-		const FString ReplacementString = QueryParser::OpStrings::Any + SourceString + ")";
+		ReplacementString = QueryParser::OpStrings::Any + SourceString + ")";
 		Str = *ReplacementString;
 	}
 
