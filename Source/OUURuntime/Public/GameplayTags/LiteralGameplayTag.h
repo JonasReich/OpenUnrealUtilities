@@ -404,9 +404,8 @@ namespace OUU::Runtime::Private::ResolveFallbackFlagsTests
 		"this string should lead to a compile error if ever considered",
 		(ELiteralGameplayTagFlags::Default | ELiteralGameplayTagFlags::Inherited
 		 | ELiteralGameplayTagFlags::AllowContentChildTags));
-	constexpr ELiteralGameplayTagFlags ExpectedFlags = ELiteralGameplayTagFlags(
-		ELiteralGameplayTagFlags::Default | ELiteralGameplayTagFlags::AllowContentChildTags
-		| ELiteralGameplayTagFlags::Explicit);
+	constexpr ELiteralGameplayTagFlags ExpectedFlags = ELiteralGameplayTagFlags::Default
+		| ELiteralGameplayTagFlags::AllowContentChildTags | ELiteralGameplayTagFlags::Explicit;
 	static_assert(
 		TAssertValuesEqual<ELiteralGameplayTagFlags, ActualFlags, ExpectedFlags>::Value,
 		"Inherited tag should be removed + Explicit should be added");

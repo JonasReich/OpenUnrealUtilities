@@ -31,6 +31,7 @@ struct TIteratorTraits<IteratorType, true>
 // See "Models.h"
 struct CBidirectionalIterator
 {
+	// ReSharper disable once CppFunctionIsNotImplemented
 	template <typename IteratorType>
 	auto Requires(IteratorType It) -> decltype(--It, ++It, *It);
 };

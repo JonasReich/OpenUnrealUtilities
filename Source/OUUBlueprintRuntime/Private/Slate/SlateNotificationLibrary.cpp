@@ -2,7 +2,6 @@
 
 #include "Slate/SlateNotificationLibrary.h"
 
-#include "Components/Widget.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "LogOpenUnrealUtilities.h"
 #include "Widgets/Notifications/SNotificationList.h"

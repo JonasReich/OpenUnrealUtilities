@@ -31,7 +31,7 @@ namespace OUU::TestUtilities
 			for (const FWorldContext& Context : WorldContexts)
 			{
 				if (((Context.WorldType == EWorldType::PIE) || (Context.WorldType == EWorldType::Game))
-					&& (Context.World() != NULL))
+					&& (Context.World() != nullptr))
 				{
 					TestWorld = Context.World();
 					break;

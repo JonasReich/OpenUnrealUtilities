@@ -6,6 +6,16 @@
 // execution - primarily getting rid of initial test listings and adding options for additional test results exports.
 // All mods compared to Epic's original code are marked with #OUU_MOD comments.
 
+// We don't want any reports from static analysis in this file. Fixing them would just make it harder to merge in
+// changes by Epic
+
+// ReSharper disable CppTooWideScope
+// ReSharper disable CppInconsistentNaming
+// ReSharper disable CppLocalVariableMayBeConst
+// ReSharper disable CommentTypo
+// ReSharper disable IdentifierTypo
+// ReSharper disable CppDeclaratorNeverUsed
+
 #include "CoreMinimal.h"
 
 #include "AssetRegistry/AssetRegistryModule.h"
@@ -50,11 +60,15 @@ public:
 	static const float DefaultDelayTimer;
 	static const float DefaultFindWorkersTimeout;
 
-	FOUUAutomationExecCmd()
+	// OUU_MOD Adjusted initialization so every member is initialized properly
+	FOUUAutomationExecCmd() :
+		AutomationTestState(EOUUAutomationTestState::Initializing),
+		AutomationCommand(EOUUAutomationCommand::Quit),
+		DelayTimer(DefaultDelayTimer),
+		FindWorkersTimeout(DefaultFindWorkersTimeout),
+		FindWorkerAttempts(0),
+		TestCount(0)
 	{
-		DelayTimer = DefaultDelayTimer;
-		FindWorkersTimeout = DefaultFindWorkersTimeout;
-		FindWorkerAttempts = 0;
 	}
 
 	void Init()
@@ -537,7 +551,7 @@ public:
 	}
 
 	/** Console commands, see embeded usage statement **/
-	virtual bool Exec(UWorld*, const TCHAR* Cmd, FOutputDevice& Ar) override
+	bool Exec(UWorld*, const TCHAR* Cmd, FOutputDevice& Ar) override
 	{
 		bool bHandled = false;
 		// Track whether we have a flag we care about passing through.

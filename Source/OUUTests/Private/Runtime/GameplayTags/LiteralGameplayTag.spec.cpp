@@ -47,7 +47,6 @@ void FLiteralGameplayTagSpec::Define()
 		It("should return an invalid tag for tags that are not registered", [this]() {
 			// Disable errors, otherwise we get a nasty ensureAlways from the gameplay tags manager
 			AddExpectedError("Requested Gameplay Tag UUTestTag_NotRegistered was not found");
-			constexpr bool bErrorIfNotFound = false;
 			const FGameplayTag Tag = FSampleGameplayTags_NotRegsitered::GetTag();
 			SPEC_TEST_FALSE(Tag.IsValid());
 		});

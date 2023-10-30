@@ -56,7 +56,7 @@ namespace OUU::TestUtilities::Private
 		return T();
 	}
 
-	template <typename T, typename EnableType = typename TEnableIf<std::is_same<T, FVector>::value>::Type>
+	template <typename T, typename EnableType = typename TEnableIf<std::is_same_v<T, FVector>>::Type>
 	FVector ParseValue(const FString& s)
 	{
 		FVector Result;

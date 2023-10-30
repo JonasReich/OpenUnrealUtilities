@@ -49,9 +49,6 @@ namespace OUU::Editor
 		Options.Mode = EClassViewerMode::ClassPicker;
 		Options.ClassFilters.Add(Filter);
 
-		// Load the classviewer module to display a class picker
-		FClassViewerModule& ClassViewerModule = FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer");
-
 		UClass* NewChosenClass = nullptr;
 		if (SClassPickerDialog::PickClass(TitleText, Options, OUT NewChosenClass, ParentClass))
 		{

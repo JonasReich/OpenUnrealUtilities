@@ -89,7 +89,7 @@ void FTypedGameplayTagContainer_PropertyTypeCustomization::CustomizeHeader(
 				PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FTypedGameplayTagContainer, TypedTagName)))
 		{
 			auto SelectionChangedLambda = [this](FName NewName, ESelectInfo::Type) {
-				if (auto* Container = GetContainerFromPropertyHandle(HandleSP))
+				if (GetContainerFromPropertyHandle(HandleSP) != nullptr)
 				{
 					// Change tag name
 					const auto TypedTagName =
@@ -205,7 +205,7 @@ void FTypedGameplayTagContainer_PropertyTypeCustomization::RefreshContainerWidge
 
 void FTypedGameplayTagContainer_PropertyTypeCustomization::SetNewTags(const FGameplayTagContainer& NewValue) const
 {
-	if (auto* Container = GetContainerFromPropertyHandle(HandleSP))
+	if (GetContainerFromPropertyHandle(HandleSP) != nullptr)
 	{
 		const auto Tags = HandleSP->GetChildHandle(GET_MEMBER_NAME_CHECKED(FTypedGameplayTagContainer, Tags)).ToSharedRef();
 

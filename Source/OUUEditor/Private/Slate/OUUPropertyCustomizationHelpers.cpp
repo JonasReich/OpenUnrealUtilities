@@ -32,21 +32,6 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 				OnShouldFilterAsset);
 		}
 
-		// Helper to retrieve the correct property that has the applicable metadata.
-		static const FProperty* GetActualMetadataProperty(const FProperty* Property)
-		{
-			if (const FProperty* OuterProperty = Property->GetOwner<FProperty>())
-			{
-				if (OuterProperty->IsA<FArrayProperty>() || OuterProperty->IsA<FSetProperty>()
-					|| OuterProperty->IsA<FMapProperty>())
-				{
-					return OuterProperty;
-				}
-			}
-
-			return Property;
-		}
-
 		// Helper to support both meta=(TagName) and meta=(TagName=true) syntaxes
 		static bool GetTagOrBoolMetadata(const FProperty* Property, const TCHAR* TagName, bool bDefault)
 		{

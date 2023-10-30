@@ -277,9 +277,9 @@ void FGameplayDebuggerCategory_Animation::DisplayDebug(
 
 			if (PrevChainID != Line.ChainID)
 			{
-				const int32 HalfStep = int32(DisplayDebugManager.GetMaxCharHeight() / 2);
+				const int32 HalfStep = static_cast<int32>(DisplayDebugManager.GetMaxCharHeight() / 2);
 				DisplayDebugManager.ShiftYDrawPosition(
-					float(HalfStep)); // Extra spacing to delimit different chains, CurrLineYBase now
+					static_cast<float>(HalfStep)); // Extra spacing to delimit different chains, CurrLineYBase now
 				// roughly represents middle of text line, so we can use it for line drawing
 
 				// Handle line drawing

@@ -268,8 +268,8 @@ void FReferenceWrapperSpec::Define()
 	It("should be allowed to be passed as parameter to functions that require a regular reference", [this]() {
 		int32 i = 0;
 		auto SomeFunction = [](int32& iRef) -> void { iRef = 42; };
-		TReferenceWrapper<int32> IReferenceWrapper = i;
-		SomeFunction(i);
+		const TReferenceWrapper<int32> ReferenceWrapper = i;
+		SomeFunction(ReferenceWrapper);
 		SPEC_TEST_EQUAL(i, 42);
 	});
 }
