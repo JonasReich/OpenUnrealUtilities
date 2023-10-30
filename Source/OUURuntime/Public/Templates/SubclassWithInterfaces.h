@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 
-#include "Traits/ConditionalType.h"
 #include "Traits/IsSameWrapper.h"
 
 namespace OUU::Runtime::Private::SubclassWithInterface
@@ -178,12 +177,12 @@ struct TSubclassWithInterfaces :
 		InterfaceClasses...>
 {
 public:
-	using Super = typename TSubclassWithInterfaces_Base<
+	using Super = TSubclassWithInterfaces_Base<
 		InObjectBaseClassWithStorageSpecifier,
 		typename OUU::Runtime::Private::SubclassWithInterface::TObject<InObjectBaseClassWithStorageSpecifier>::Type,
 		InterfaceClasses...>;
 
-	using ThisType = typename TSubclassWithInterfaces_Base<InObjectBaseClassWithStorageSpecifier, InterfaceClasses...>;
+	using ThisType = TSubclassWithInterfaces_Base<InObjectBaseClassWithStorageSpecifier, InterfaceClasses...>;
 
 	using ObjectBaseClass = typename Super::ObjectBaseClass;
 

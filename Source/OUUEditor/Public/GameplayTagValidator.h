@@ -66,7 +66,7 @@ public:
 	FGameplayTagContainer WarnOnlyGameplayTags;
 
 	void RefreshNativeTagOverrides();
-	const FGameplayTagValidationSettingsEntry* FindTagOverride(FGameplayTag Tag) const;
+	const FGameplayTagValidationSettingsEntry* FindTagOverride(const FGameplayTag& Tag) const;
 
 public:
 	// - UDeveloperSettings
@@ -124,7 +124,7 @@ private:
 	// Returns a list of all validators and initializes them.
 	static TArray<UGameplayTagValidator_Base*> GetAllValidators();
 
-	void ValidateTagNode(
+	static void ValidateTagNode(
 		const FGameplayTag& RootTag,
 		const FGameplayTag& ImmediateParentTag,
 		const TSharedPtr<FGameplayTagNode>& TagNode,

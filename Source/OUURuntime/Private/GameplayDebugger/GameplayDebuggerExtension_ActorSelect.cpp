@@ -19,6 +19,7 @@ namespace OUU::Runtime::GameplayDebugger::Private
 	FAutoConsoleCommand CCommand_SelectClosestNPC(
 		TEXT("ouu.gdt.SelectClosestNPC"),
 		TEXT("Selects the closest NPC to the local player character in the gameplay debugger tool."),
+		// ReSharper disable once CppExpressionWithoutSideEffects
 		FConsoleCommandDelegate::CreateLambda([]() { GOnSelectClosestNPC.ExecuteIfBound(); }));
 }; // namespace OUU::Runtime::GameplayDebugger::Private
 

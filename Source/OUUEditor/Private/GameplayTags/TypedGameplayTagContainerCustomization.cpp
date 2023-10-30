@@ -88,11 +88,11 @@ void FTypedGameplayTagContainer_PropertyTypeCustomization::CustomizeHeader(
 		if (auto TypedTagName =
 				PropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FTypedGameplayTagContainer, TypedTagName)))
 		{
-			auto SelectionChangedLambda = [&, this](FName NewName, ESelectInfo::Type) {
+			auto SelectionChangedLambda = [this](FName NewName, ESelectInfo::Type) {
 				if (auto* Container = GetContainerFromPropertyHandle(HandleSP))
 				{
 					// Change tag name
-					auto TypedTagName =
+					const auto TypedTagName =
 						HandleSP->GetChildHandle(GET_MEMBER_NAME_CHECKED(FTypedGameplayTagContainer, TypedTagName))
 							.ToSharedRef();
 
@@ -116,7 +116,7 @@ void FTypedGameplayTagContainer_PropertyTypeCustomization::CustomizeHeader(
 					SNew(STextBlock)
 					.Text_Lambda([this]() -> FText
 					{
-						if (auto* Container = GetContainerFromPropertyHandle(HandleSP))
+						if (const auto* Container = GetContainerFromPropertyHandle(HandleSP))
 						{
 							return FText::FromName(Container->TypedTagName);
 						}
@@ -157,7 +157,7 @@ void FTypedGameplayTagContainer_PropertyTypeCustomization::RefreshContainerWidge
 			if (OnlyWrongTags.Tags.Num() > 0)
 			{
 				// clang-format off
-				TSharedRef<SWidget> ErrorWidget =
+				const TSharedRef<SWidget> ErrorWidget =
 					SNew(SBorder)
 					.ColorAndOpacity(FColor::Yellow)
 					[
@@ -194,7 +194,7 @@ void FTypedGameplayTagContainer_PropertyTypeCustomization::RefreshContainerWidge
 		}
 
 		const FString FilterString = OUU::Runtime::Private::MakeFilterString(Container->CachedFilterTags);
-		auto GameplayTagContainerWidget = IGameplayTagsEditorModule::Get().MakeGameplayTagContainerWidget(
+		const auto GameplayTagContainerWidget = IGameplayTagsEditorModule::Get().MakeGameplayTagContainerWidget(
 			FOnSetGameplayTagContainer::CreateLambda(
 				[this](const FGameplayTagContainer& NewValue) { SetNewTags(NewValue); }),
 			WorkingContainer,
@@ -203,11 +203,11 @@ void FTypedGameplayTagContainer_PropertyTypeCustomization::RefreshContainerWidge
 	}
 }
 
-void FTypedGameplayTagContainer_PropertyTypeCustomization::SetNewTags(const FGameplayTagContainer& NewValue)
+void FTypedGameplayTagContainer_PropertyTypeCustomization::SetNewTags(const FGameplayTagContainer& NewValue) const
 {
 	if (auto* Container = GetContainerFromPropertyHandle(HandleSP))
 	{
-		auto Tags = HandleSP->GetChildHandle(GET_MEMBER_NAME_CHECKED(FTypedGameplayTagContainer, Tags)).ToSharedRef();
+		const auto Tags = HandleSP->GetChildHandle(GET_MEMBER_NAME_CHECKED(FTypedGameplayTagContainer, Tags)).ToSharedRef();
 
 		Tags->SetValueFromFormattedString(NewValue.ToString());
 	}

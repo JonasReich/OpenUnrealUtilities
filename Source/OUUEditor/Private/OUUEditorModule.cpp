@@ -20,7 +20,7 @@ namespace OUU::Editor
 	class FOUUEditorModule : public IModuleInterface
 	{
 	public:
-		virtual void StartupModule() override
+		void StartupModule() override
 		{
 			IAssetRegistry& AssetRegistry = IAssetRegistry::GetChecked();
 			if (AssetRegistry.IsLoadingAssets())
@@ -44,7 +44,7 @@ namespace OUU::Editor
 				FTypedGameplayTagContainer_PropertyTypeCustomization>();
 		}
 
-		virtual void ShutdownModule() override
+		void ShutdownModule() override
 		{
 			MaterialAnalyzer::UnregisterNomadTabSpawner();
 			ContentBrowserExtensions::UnregisterHooks();

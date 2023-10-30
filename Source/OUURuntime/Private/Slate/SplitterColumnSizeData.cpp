@@ -85,8 +85,6 @@ TSharedRef<SWidget> FSplitterMultiSizeData::MakeSimpleSplitter(
 		return Widgets[0].ToSharedRef();
 	}
 
-	using FGetter = TAttribute<float>::FGetter;
-
 	EntrySizes = MoveTemp(DefaultColumnSizes);
 	if (EntrySizes.Num() < Widgets.Num())
 	{

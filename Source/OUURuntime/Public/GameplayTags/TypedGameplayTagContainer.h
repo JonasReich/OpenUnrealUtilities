@@ -27,7 +27,7 @@ public:
 	FTypedGameplayTagContainer() = default;
 
 private:
-	FTypedGameplayTagContainer(UStruct& InTypedTagStruct, const FGameplayTagContainer& InTags);
+	FTypedGameplayTagContainer(const UStruct& InTypedTagStruct, const FGameplayTagContainer& InTags);
 
 public:
 	template <typename TypedTagType>

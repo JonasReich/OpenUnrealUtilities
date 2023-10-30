@@ -16,7 +16,6 @@
 #include "Misc/App.h"
 #include "Misc/CommandLine.h"
 #include "Misc/CoreMisc.h"
-#include "Misc/FileHelper.h"
 #include "Misc/FilterCollection.h"
 #include "Misc/Guid.h"
 #include "Misc/OutputDeviceRedirector.h"
@@ -768,7 +767,6 @@ private:
 
 const float FOUUAutomationExecCmd::DefaultDelayTimer = 5.0f;
 const float FOUUAutomationExecCmd::DefaultFindWorkersTimeout = 30.0f;
-static FOUUAutomationExecCmd AutomationExecCmd;
 
 void OUU_EmptyLinkFunctionForStaticInitializationAutomationExecCmd()
 {

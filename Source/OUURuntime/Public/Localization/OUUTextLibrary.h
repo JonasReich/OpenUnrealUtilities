@@ -23,6 +23,7 @@ public:
 	 * - ["foo", "bar", "foobar"] -> "foo, bar and foobar"
 	 * Supports an arbitrary number of items.
 	 *
+	 * @param	Texts							List of texts components to combine into a list. 
 	 * @param	bFormatWithFinalAndSeparator	If true, the last two items in the list are combined with a special word
 	 *											("and" if untranslated). If false, the final two items also use the
 	 *											generic separator ("," if untranslated).

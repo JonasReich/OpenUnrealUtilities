@@ -53,8 +53,8 @@ public:
 		ETickingGroup TickingGroup);
 
 	// - AActor
-	virtual void RegisterActorTickFunctions(bool bRegister) override;
-	virtual void TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
+	void RegisterActorTickFunctions(bool bRegister) override;
+	void TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
 	// --
 
 private:

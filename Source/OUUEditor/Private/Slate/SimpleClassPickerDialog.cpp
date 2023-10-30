@@ -16,7 +16,7 @@ public:
 	/** Disallowed class flags. */
 	EClassFlags DisallowedClassFlags;
 
-	virtual bool IsClassAllowed(
+	bool IsClassAllowed(
 		const FClassViewerInitializationOptions& InInitOptions,
 		const UClass* InClass,
 		TSharedRef<FClassViewerFilterFuncs> InFilterFuncs) override
@@ -25,7 +25,7 @@ public:
 			&& InFilterFuncs->IfInChildOfClassesSet(AllowedChildrenOfClasses, InClass) != EFilterReturn::Failed;
 	}
 
-	virtual bool IsUnloadedClassAllowed(
+	bool IsUnloadedClassAllowed(
 		const FClassViewerInitializationOptions& InInitOptions,
 		const TSharedRef<const IUnloadedBlueprintData> InUnloadedClassData,
 		TSharedRef<FClassViewerFilterFuncs> InFilterFuncs) override

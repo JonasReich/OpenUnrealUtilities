@@ -175,10 +175,6 @@ public:
 
 #define PRIVATE_TYPED_GAMEPLAY_TAG_IMPL(TagType, ...)                                                                  \
 public:                                                                                                                \
-	static_assert(                                                                                                     \
-		TIsDerivedFrom<TagType, FTypedGameplayTag_Base>::Value,                                                        \
-		"Typed Gameplay Tags must be derived from FTypedGameplayTag_Base");                                            \
-                                                                                                                       \
 	using TypedTagImplType = TTypedGameplayTag<TagType, ##__VA_ARGS__>;                                                \
 	template <typename, typename, typename>                                                                            \
 	friend struct ::TLiteralGameplayTag;                                                                               \
@@ -227,6 +223,9 @@ private:                                                                        
 	/* sorry :'( */                                                                                                    \
 	}                                                                                                                  \
 	;                                                                                                                  \
+	static_assert(                                                                                                     \
+		TIsDerivedFrom<TagType, FTypedGameplayTag_Base>::Value,                                                        \
+		"Typed Gameplay Tags must be derived from FTypedGameplayTag_Base");                                            \
                                                                                                                        \
 	using TagType##s_Value = TTypedGameplayTagContainerValue<TagType>;                                                 \
 	using TagType##s_Ref = TTypedGameplayTagContainerReference<TagType>;                                               \
@@ -325,7 +324,7 @@ public:
 
 	FORCEINLINE BlueprintTagType operator*() const { return BlueprintTagType(*WrappedIterator); }
 
-	FORCEINLINE explicit operator bool() const { return (bool)WrappedIterator; }
+	FORCEINLINE explicit operator bool() const { return !!WrappedIterator; }
 
 	FORCEINLINE friend bool operator==(
 		const TTypedGameplayTagContainerIterator& Lhs,

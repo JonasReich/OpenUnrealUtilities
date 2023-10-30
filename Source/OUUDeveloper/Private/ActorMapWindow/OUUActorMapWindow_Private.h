@@ -32,7 +32,7 @@ namespace OUU::Developer::ActorMapWindow::Private
 		// - SWidget
 		void Construct(const FArguments& InArgs);
 
-		virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
+		void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 			override;
 		// --
 
@@ -139,13 +139,13 @@ namespace OUU::Developer::ActorMapWindow::Private
 
 		void Construct(const FArguments& InArgs);
 
-		virtual FVector2D ComputeDesiredSize(float LayoutScaleMultiplier) const override
+		FVector2D ComputeDesiredSize(float LayoutScaleMultiplier) const override
 		{
 			// No desired size. Always use maximum available space
 			return FVector2D::ZeroVector;
 		}
 
-		virtual int32 OnPaint(
+		int32 OnPaint(
 			const FPaintArgs& Args,
 			const FGeometry& AllottedGeometry,
 			const FSlateRect& MyCullingRect,

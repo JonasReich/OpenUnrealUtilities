@@ -39,6 +39,7 @@ public:
 	/**
 	 * Creates a new dialog for this slow task after the given time threshold. If the task completes before this time,
 	 * no dialog will be shown.
+	 * @param	SlowTaskHandle			Handle to a previously created slow task.
 	 * @param	Threshold				Time in seconds before dialog will be shown.
 	 * @param	bShowCancelButton		Whether to show a cancel button on the dialog or not
 	 * @param	bAllowInPIE				Whether to allow this dialog in PIE. If false, this dialog will not appear
@@ -53,6 +54,7 @@ public:
 
 	/**
 	 * Creates a new dialog for this slow task, if there is currently not one open
+	 * @param	SlowTaskHandle			Handle to a previously created slow task.
 	 * @param	bShowCancelButton		Whether to show a cancel button on the dialog or not
 	 * @param	bAllowInPIE				Whether to allow this dialog in PIE. If false, this dialog will not appear
 	 *									during PIE sessions.
@@ -66,6 +68,7 @@ public:
 	/**
 	 * Indicate that we are to enter a frame that will take up the specified amount of work. Completes any previous
 	 * frames (potentially contributing to parent scopes' progress).
+	 * @param	SlowTaskHandle			Handle to a previously created slow task.
 	 * @param	ExpectedWorkThisFrame	The amount of work that will happen between now and the next frame, as a
 	 *									numerator of TotalAmountOfWork.
 	 * @param	Text					Optional text to describe this frame's purpose.

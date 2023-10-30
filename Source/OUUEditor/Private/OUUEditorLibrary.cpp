@@ -112,8 +112,7 @@ void UOUUEditorLibrary::FocusOnBlueprintContent(const FOUUBlueprintEditorFocusCo
 	if (Blueprint != nullptr)
 	{
 		// Try to grab guid
-		UEdGraphNode* OutNode = NULL;
-		if (UEdGraphNode* GraphNode = FBlueprintEditorUtils::GetNodeByGUID(Blueprint, FGuid(FocusContent.NodeGUID)))
+		if (const UEdGraphNode* GraphNode = FBlueprintEditorUtils::GetNodeByGUID(Blueprint, FGuid(FocusContent.NodeGUID)))
 		{
 			FKismetEditorUtilities::BringKismetToFocusAttentionOnObject(GraphNode, false);
 		}
@@ -127,7 +126,7 @@ void UOUUEditorLibrary::FocusOnBlueprintContent(const FOUUBlueprintEditorFocusCo
 
 FGuid UOUUEditorLibrary::GetCurrentlySelectedBlueprintNodeGuid()
 {
-	FContentBrowserModule& ContentBrowserModule =
+	const FContentBrowserModule& ContentBrowserModule =
 		FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
 	TArray<FAssetData> SelectedAssets;
 	ContentBrowserModule.Get().GetSelectedAssets(SelectedAssets);
@@ -135,15 +134,16 @@ FGuid UOUUEditorLibrary::GetCurrentlySelectedBlueprintNodeGuid()
 	TArray<UClass*> Result;
 	for (FAssetData& AssetData : SelectedAssets)
 	{
-		if (TSubclassOf<UBlueprint> AssetClass = AssetData.GetClass())
+		const UClass* AssetClass = AssetData.GetClass();
+		if (AssetClass->IsChildOf<UBlueprint>())
 		{
-			if (UBlueprint* Blueprint = Cast<UBlueprint>(AssetData.GetAsset()))
+			if (const UBlueprint* Blueprint = Cast<UBlueprint>(AssetData.GetAsset()))
 			{
 				TSharedPtr<FBlueprintEditor> BlueprintEditor = StaticCastSharedPtr<FBlueprintEditor>(
 					FKismetEditorUtilities::GetIBlueprintEditorForObject(Blueprint, false));
 				if (BlueprintEditor.IsValid())
 				{
-					if (UEdGraphNode* EdGraphNode = BlueprintEditor->GetSingleSelectedNode())
+					if (const UEdGraphNode* EdGraphNode = BlueprintEditor->GetSingleSelectedNode())
 					{
 						return EdGraphNode->NodeGuid;
 					}

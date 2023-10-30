@@ -16,6 +16,7 @@ class ULockTestsHelper : public UObject
 {
 	GENERATED_BODY()
 public:
+	UPROPERTY()
 	UObject* Lock = nullptr;
 	bool bLockAlwaysSame = true;
 	TArray<bool> LockStateHistory;

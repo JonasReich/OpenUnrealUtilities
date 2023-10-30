@@ -26,7 +26,7 @@ int32 USpiralIdUtilities::ConvertWorldLocation2DToSpiralId(
 	{
 	case ESpiralCoordinateSystemType::RightHanded: Y = FMath::FloorToInt(Location.Y / GridSize); break;
 	case ESpiralCoordinateSystemType::LeftHanded: Y = FMath::FloorToInt(-Location.Y / GridSize); break;
-	default: Y = 0;
+	default:;
 	}
 
 	return ConvertCoordinatesToSpiralId(X, Y);
@@ -43,7 +43,7 @@ int32 USpiralIdUtilities::ConvertWorldLocationToSpiralId(
 	{
 	case ESpiralCoordinateSystemType::RightHanded: Y = FMath::FloorToInt(Location.Y / GridSize); break;
 	case ESpiralCoordinateSystemType::LeftHanded: Y = FMath::FloorToInt(-Location.Y / GridSize); break;
-	default: Y = 0;
+	default:;
 	}
 
 	return ConvertCoordinatesToSpiralId(X, Y);

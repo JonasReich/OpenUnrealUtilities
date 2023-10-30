@@ -30,7 +30,7 @@ void UGameplayTagValidationSettings::RefreshNativeTagOverrides()
 			continue;
 		}
 		auto& NativeTagOverride = NativeTagOverrides.FindOrAdd(Entry.Key);
-		NativeTagOverride.bCanHaveContentChildren = bool(Entry.Value & ELiteralGameplayTagFlags::AllowContentChildTags);
+		NativeTagOverride.bCanHaveContentChildren = static_cast<bool>(Entry.Value & ELiteralGameplayTagFlags::AllowContentChildTags);
 		if (NativeTagOverride.bCanHaveContentChildren)
 		{
 			NativeTagOverride.AllowedChildDepth = NativeTagAllowedChildDepth;
@@ -38,7 +38,8 @@ void UGameplayTagValidationSettings::RefreshNativeTagOverrides()
 	}
 }
 
-const FGameplayTagValidationSettingsEntry* UGameplayTagValidationSettings::FindTagOverride(FGameplayTag Tag) const
+const FGameplayTagValidationSettingsEntry* UGameplayTagValidationSettings::FindTagOverride(
+	const FGameplayTag& Tag) const
 {
 	// Editable tag overrides supersede natively declared rules.
 	if (auto* Result = TagOverrides.Find(Tag))
@@ -84,7 +85,7 @@ void UGameplayTagValidatorSubsystem::ValidateGameplayTagTree()
 		return;
 	LastValidationFrame = GFrameCounter;
 
-	auto Validators = GetAllValidators();
+	const auto Validators = GetAllValidators();
 
 	if (Validators.Num() == 0)
 	{
@@ -95,7 +96,7 @@ void UGameplayTagValidatorSubsystem::ValidateGameplayTagTree()
 	auto& Settings = *GetMutableDefault<UGameplayTagValidationSettings>();
 	Settings.RefreshNativeTagOverrides();
 
-	auto& TagsManager = UGameplayTagsManager::Get();
+	const auto& TagsManager = UGameplayTagsManager::Get();
 	TArray<TSharedPtr<FGameplayTagNode>> RootNodes;
 	TagsManager.GetFilteredGameplayRootTags(FString(), OUT RootNodes);
 
@@ -112,18 +113,18 @@ void UGameplayTagValidatorSubsystem::ValidateGameplayTagTree()
 	TArray<FText> Warnings, Errors;
 	ValidationContext.SplitIssues(OUT Warnings, OUT Errors);
 
-	#define MESSAGELOG_CAT AssetCheck
-	auto MessageLogName = GetMessageLogName(EMessageLogName::MESSAGELOG_CAT);
+	#define MESSAGE_LOG_CAT AssetCheck
+	const auto MessageLogName = GetMessageLogName(EMessageLogName::MESSAGE_LOG_CAT);
 
 	UMessageLogBlueprintLibrary::NewMessageLogPage(MessageLogName, INVTEXT("Gameplay Tag Validation"));
 
-	for (auto& Error : Errors)
+	for (const auto& Error : Errors)
 	{
-		UE_MESSAGELOG(MESSAGELOG_CAT, Error, Error);
+		UE_MESSAGELOG(MESSAGE_LOG_CAT, Error, Error);
 	}
-	for (auto& Warning : Warnings)
+	for (const auto& Warning : Warnings)
 	{
-		UE_MESSAGELOG(MESSAGELOG_CAT, Warning, Warning);
+		UE_MESSAGELOG(MESSAGE_LOG_CAT, Warning, Warning);
 	}
 
 	if (Errors.Num() > 0)
@@ -142,9 +143,9 @@ void UGameplayTagValidatorSubsystem::ValidateGameplayTagTree()
 	}
 	else
 	{
-		UE_MESSAGELOG(MESSAGELOG_CAT, Info, "No GameplayTag validation issues found.");
+		UE_MESSAGELOG(MESSAGE_LOG_CAT, Info, "No GameplayTag validation issues found.");
 	}
-	#undef MESSAGELOG_CAT
+	#undef MESSAGE_LOG_CAT
 }
 
 void UGameplayTagValidatorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -169,7 +170,7 @@ TArray<UGameplayTagValidator_Base*> UGameplayTagValidatorSubsystem::GetAllValida
 	GetDerivedClasses(UGameplayTagValidator_Base::StaticClass(), OUT ValidatorClasses);
 
 	TArray<UGameplayTagValidator_Base*> Validators;
-	for (auto* ValidatorClass : ValidatorClasses)
+	for (const auto* ValidatorClass : ValidatorClasses)
 	{
 		if (ValidatorClass->HasAnyClassFlags(CLASS_Abstract | CLASS_NewerVersionExists))
 			continue;
@@ -190,7 +191,7 @@ void UGameplayTagValidatorSubsystem::ValidateTagNode(
 	const TArray<UGameplayTagValidator_Base*>& Validators,
 	FDataValidationContext& InOutValidationContext)
 {
-	auto& TagsManager = UGameplayTagsManager::Get();
+	const auto& TagsManager = UGameplayTagsManager::Get();
 
 	auto SelfTag = TagNode->GetCompleteTag();
 	const auto SelfTagCopy = SelfTag;
@@ -219,13 +220,12 @@ void UGameplayTagValidatorSubsystem::ValidateTagNode(
 		auto ChildNodes = TagNode->GetChildTagNodes();
 		for (auto& ChildNode : ChildNodes)
 		{
-			auto ChildTag = ChildNode->GetCompleteTag();
 			ValidateTagNode(RootTag, SelfTag, ChildNode, Validators, IN OUT InOutValidationContext);
 		}
 	}
 	else
 	{
-		FGameplayTagContainer Children = TagsManager.RequestGameplayTagChildren(TagNode->GetCompleteTag());
+		const FGameplayTagContainer Children = TagsManager.RequestGameplayTagChildren(TagNode->GetCompleteTag());
 		if (Children.Num() > 0)
 		{
 			InOutValidationContext.AddWarning(
@@ -250,10 +250,10 @@ void UOUUGameplayTagValidator::InitializeValidator()
 {
 	AllNativeTags.Reset();
 
-	auto& TagsManager = UGameplayTagsManager::Get();
+	const auto& TagsManager = UGameplayTagsManager::Get();
 	TArray<TSharedPtr<FGameplayTagNode>> NativeTagNodes;
 	TagsManager.GetAllTagsFromSource(FGameplayTagSource::GetNativeName(), OUT NativeTagNodes);
-	for (auto NativeTagNode : NativeTagNodes)
+	for (const auto NativeTagNode : NativeTagNodes)
 	{
 		AllNativeTags.AddTag(NativeTagNode->GetCompleteTag());
 	}
@@ -298,7 +298,7 @@ bool UOUUGameplayTagValidator::ValidateTag(
 
 	auto ParentTagsAsContainer = Tag.GetGameplayTagParents();
 
-	auto CurrentTagDepth = ParentTagsAsContainer.Num();
+	const auto CurrentTagDepth = ParentTagsAsContainer.Num();
 	if (CurrentTagDepth > Settings.MaxGlobalTagDepth)
 	{
 		// This tag depth rule should apply both for native and content tags, so we check it before.
@@ -327,15 +327,13 @@ bool UOUUGameplayTagValidator::ValidateTag(
 	ensure(ParentTagsAsSortedArray[0] == Tag);
 	ensure(ParentTagsAsSortedArray.Last() == RootTag);
 
-	auto& TagsManager = UGameplayTagsManager::Get();
-
-	bool bFoundAllowRule = false;
 	if (bTagIsNative)
 	{
 		// #TODO checks for native tags
 	}
 	else
 	{
+		bool bFoundAllowRule = false;
 		int32 NativeRelativeTagDepth = 0;
 		auto FirstNativeTag = FGameplayTag::EmptyTag;
 		for (auto& Parent : ParentTagsAsSortedArray)

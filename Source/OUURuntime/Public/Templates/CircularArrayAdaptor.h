@@ -13,7 +13,7 @@ public:
 	using ArrayType = TArray<ElementType, AllocatorType>;
 
 	TCircularArrayAdaptor_Base(ArrayType& InArrayReference, SizeType InArrayMax) :
-		StorageReference(InArrayReference), WriteIndex(0), ArrayMax(InArrayMax)
+		StorageReference(InArrayReference), ArrayMax(InArrayMax)
 	{
 	}
 

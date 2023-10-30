@@ -15,6 +15,7 @@
  */
 namespace OUU::Runtime::GameplayDebuggerUtils
 {
+	// ReSharper disable CppFunctionIsNotImplemented
 	struct CHasCategoryName
 	{
 		template <typename T>
@@ -26,6 +27,7 @@ namespace OUU::Runtime::GameplayDebuggerUtils
 		template <typename T>
 		auto Requires() -> decltype(TSharedRef<FGameplayDebuggerCategory>(T::MakeInstance()));
 	};
+	// ReSharper restore CppFunctionIsNotImplemented
 } // namespace OUU::Runtime::GameplayDebuggerUtils
 
 /**

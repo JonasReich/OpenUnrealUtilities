@@ -41,10 +41,10 @@ namespace OUU::Editor::Private
 			for (int32 X = 0; X < Width; ++X)
 			{
 				const int32 PixelByteOffset = (X + Y * Width) * BytesPerPixel;
-				const uint8* PixelPtr = RawTextureData.GetData() + PixelByteOffset;
+				uint8* PixelPtr = RawTextureData.GetData() + PixelByteOffset;
 				auto& Color = OutPixels[Y * Width + X];
 
-				Color = *((FColor*)PixelPtr);
+				Color = *static_cast<FColor*>(static_cast<void*>(PixelPtr));
 				// Force no alpha
 				Color.A = 255;
 			}

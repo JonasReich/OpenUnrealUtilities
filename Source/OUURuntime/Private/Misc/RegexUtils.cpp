@@ -21,13 +21,13 @@ namespace OUU::Runtime::Private::Regex
 
 	bool IsExactMatchRange(const FString& TestString, int32 MatchBeginning, int32 MatchEnding)
 	{
-		int32 StringLength = TestString.Len();
+		const int32 StringLength = TestString.Len();
 		return (StringLength > 0) && (MatchBeginning == 0) && (MatchEnding == StringLength);
 	}
 
 	bool IsValidMatchRange(const FString& TestString, int32 MatchBeginning, int32 MatchEnding)
 	{
-		int32 StringLength = TestString.Len();
+		const int32 StringLength = TestString.Len();
 		return (MatchEnding > MatchBeginning) && StringLength > 0
 			&& (MatchBeginning >= 0 && MatchBeginning <= StringLength)
 			&& (MatchEnding >= 0 && MatchEnding <= StringLength);
@@ -42,7 +42,7 @@ namespace OUU::Runtime::Private::Regex
 		FalsePredicateType FalsePredicate)
 	{
 		FScopedRegex Regex{PatternString, TestString};
-		int32 StringLength = TestString.Len();
+		const int32 StringLength = TestString.Len();
 		for (int32 i = BeginIndex; i < StringLength; i++)
 		{
 			Regex->SetLimits(i, StringLength);
@@ -65,7 +65,7 @@ namespace OUU::Runtime::Private::Regex
 			RegexPattern,
 			TestString,
 			BeginIndex,
-			[&](FScopedRegex& Regex, int32 MatchBeginning, int32 MatchEnding, int32 BeginIndex) { return true; },
+			[&](FScopedRegex& Regex, int32 MatchBeginning, int32, int32) { return true; },
 			[]() { return false; });
 	}
 
@@ -75,7 +75,8 @@ namespace OUU::Runtime::Private::Regex
 			RegexPattern,
 			TestString,
 			BeginIndex,
-			[&](FScopedRegex& Regex, int32 MatchBeginning, int32 MatchEnding, int32 BeginIndex) {
+			[&RegexPattern,
+			 &TestString](FScopedRegex& Regex, int32 MatchBeginning, int32 MatchEnding, int32 BeginIndex) {
 				return CountRegexMatches_Recursive(RegexPattern, TestString, BeginIndex) + 1;
 			},
 			[]() { return 0; });
@@ -90,7 +91,8 @@ namespace OUU::Runtime::Private::Regex
 			RegexPattern,
 			TestString,
 			BeginIndex,
-			[&](FScopedRegex& Regex, int32 MatchBeginning, int32 MatchEnding, int32 BeginIndex) {
+			[&RegexPattern,
+			 &TestString](FScopedRegex& Regex, int32 MatchBeginning, int32 MatchEnding, int32 BeginIndex) {
 				TArray<FRegexMatch> ResultList;
 				ResultList.Add(FRegexMatch{
 					MatchBeginning,
@@ -112,7 +114,9 @@ namespace OUU::Runtime::Private::Regex
 			RegexPattern,
 			TestString,
 			BeginIndex,
-			[&](FScopedRegex& Regex, int32 MatchBeginning, int32 MatchEnding, int32 BeginIndex) {
+			[&RegexPattern,
+			 &TestString,
+			 &GroupCount](FScopedRegex& Regex, int32 MatchBeginning, int32 MatchEnding, int32 BeginIndex) {
 				TArray<FRegexGroups> ResultList;
 				FRegexGroups Result;
 				for (int32 i = 0; i < GroupCount; i++)
@@ -166,12 +170,11 @@ FRegexGroups URegexFunctionLibrary::GetRegexMatchAndGroupsExact(
 	FRegexGroups Result;
 
 	OUU::Runtime::Private::Regex::FScopedRegex Regex{RegexPattern, TestString};
-	int32 StringLength = TestString.Len();
 	if (!Regex->FindNext())
 		return Result;
 
-	int32 MatchBeginning = Regex->GetMatchBeginning();
-	int32 MatchEnding = Regex->GetMatchEnding();
+	const int32 MatchBeginning = Regex->GetMatchBeginning();
+	const int32 MatchEnding = Regex->GetMatchEnding();
 	if (!OUU::Runtime::Private::Regex::IsExactMatchRange(TestString, MatchBeginning, MatchEnding))
 		return Result;
 

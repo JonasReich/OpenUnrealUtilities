@@ -62,15 +62,15 @@ public:
 	TArray<FOUUMapsToCookList> MapLists;
 
 	// - UObject
-	virtual void PostReloadConfig(FProperty* PropertyThatWasLoaded) override;
+	void PostReloadConfig(FProperty* PropertyThatWasLoaded) override;
 #if WITH_EDITOR
-	virtual void PreEditChange(FProperty* PropertyAboutToChange) override;
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	void PreEditChange(FProperty* PropertyAboutToChange) override;
+	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
-	virtual void PostInitProperties() override;
+	void PostInitProperties() override;
 	// --
 
-	virtual FName GetCategoryName() const override;
+	FName GetCategoryName() const override;
 
 private:
 #if WITH_EDITORONLY_DATA

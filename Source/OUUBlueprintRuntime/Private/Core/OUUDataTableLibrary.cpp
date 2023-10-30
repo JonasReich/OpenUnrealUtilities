@@ -38,16 +38,17 @@ DEFINE_FUNCTION(UOUUDataTableLibrary::execAddRowToDataTable)
 	bool bSuccess = false;
 	if (!DataTable)
 	{
-		FBlueprintExceptionInfo ExceptionInfo(
+		const FBlueprintExceptionInfo ExceptionInfo(
 			EBlueprintExceptionType::AccessViolation,
 			INVTEXT("Failed to resolve the table input. Be sure the DataTable is valid."));
 		FBlueprintCoreDelegates::ThrowScriptException(P_THIS, Stack, ExceptionInfo);
 	}
 	else if (StructProp && RowPtr)
 	{
-		UScriptStruct* OutputType = StructProp->Struct;
+		const UScriptStruct* OutputType = StructProp->Struct;
 		const UScriptStruct* TableType = DataTable->GetRowStruct();
 
+		// ReSharper disable once CppTooWideScope
 		const bool bCompatible = (OutputType == TableType)
 			|| (OutputType->IsChildOf(TableType) && FStructUtils::TheSameLayout(OutputType, TableType));
 		if (bCompatible)
@@ -58,7 +59,7 @@ DEFINE_FUNCTION(UOUUDataTableLibrary::execAddRowToDataTable)
 		}
 		else
 		{
-			FBlueprintExceptionInfo ExceptionInfo(
+			const FBlueprintExceptionInfo ExceptionInfo(
 				EBlueprintExceptionType::AccessViolation,
 				INVTEXT("Incompatible input parameter; the data table's type is not the same as the type to add."));
 			FBlueprintCoreDelegates::ThrowScriptException(P_THIS, Stack, ExceptionInfo);
@@ -66,13 +67,13 @@ DEFINE_FUNCTION(UOUUDataTableLibrary::execAddRowToDataTable)
 	}
 	else
 	{
-		FBlueprintExceptionInfo ExceptionInfo(
+		const FBlueprintExceptionInfo ExceptionInfo(
 			EBlueprintExceptionType::AccessViolation,
 			INVTEXT("Failed to resolve the input parameter for AddRowToDataTable."));
 		FBlueprintCoreDelegates::ThrowScriptException(P_THIS, Stack, ExceptionInfo);
 	}
 
-	*(bool*)RESULT_PARAM = bSuccess;
+	*static_cast<bool*>(RESULT_PARAM) = bSuccess;
 }
 
 bool UOUUDataTableLibrary::Generic_AddRowToDataTable(

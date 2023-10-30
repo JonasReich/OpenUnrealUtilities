@@ -110,12 +110,12 @@ void OUU::Runtime::CanvasGraphPlottingUtils::DrawCanvasGraph(
 			}
 
 			const FVector LineStart(
-				GraphLeftXPos + (float)PrevFrameIndex * GraphHorizPixelsPerFrame,
+				GraphLeftXPos + StaticCast<float>(PrevFrameIndex) * GraphHorizPixelsPerFrame,
 				GraphBottomYPos - FMath::Min(PrevValuePixels, GraphTotalHeight),
 				0.0f);
 
 			const FVector LineEnd(
-				GraphLeftXPos + (float)CurFrameIndex * GraphHorizPixelsPerFrame,
+				GraphLeftXPos + StaticCast<float>(CurFrameIndex) * GraphHorizPixelsPerFrame,
 				GraphBottomYPos - FMath::Min(CurValuePixels, GraphTotalHeight),
 				0.0f);
 

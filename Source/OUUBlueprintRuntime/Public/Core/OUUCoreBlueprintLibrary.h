@@ -25,14 +25,14 @@ public:
 
 	/** @returns the mutable class default object of the objects class. Proceed with caution! */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Class")
-	static UObject* GetClassDefaultObjectFromObject(UObject* Object);
+	static UObject* GetClassDefaultObjectFromObject(const UObject* Object);
 
 	/**
 	 * Attempts to get the world from a world context object.
 	 * @returns nullptr if no world was found.
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|World")
-	static UWorld* TryGetWorldFromObject(UObject* WorldContextObject);
+	static UWorld* TryGetWorldFromObject(const UObject* WorldContextObject);
 
 	/**
 	 * Attempts to get the world from the current blueprint context.
@@ -44,7 +44,7 @@ public:
 		BlueprintPure,
 		Category = "Open Unreal Utilities|World",
 		meta = (DisplayName = "Try Get World", WorldContext = "WorldContextObject"))
-	static UWorld* TryGetWorldFromObject_K2(UObject* WorldContextObject);
+	static UWorld* TryGetWorldFromObject_K2(const UObject* WorldContextObject);
 
 	/**
 	 * Mark an object as modified.
@@ -59,19 +59,19 @@ public:
 		BlueprintPure,
 		meta = (DisplayName = "To String (Top Level Asset Path)", CompactNodeTitle = "->", BlueprintAutocast),
 		Category = "Utilities|Top Level Asset Path")
-	static FString Conv_TopLevelAssetPathToString(FTopLevelAssetPath InPath);
+	static FString Conv_TopLevelAssetPathToString(const FTopLevelAssetPath& InPath);
 
 	/** Converts an FString to a TopLevelAssetPath */
 	UFUNCTION(
 		BlueprintPure,
 		meta = (DisplayName = "To Top Level Asset Path (String)", CompactNodeTitle = "->", BlueprintAutocast),
 		Category = "Utilities|Top Level Asset Path")
-	static FTopLevelAssetPath Conv_StringToTopLevelAssetPath(FString InPath);
+	static FTopLevelAssetPath Conv_StringToTopLevelAssetPath(const FString& InPath);
 
 	/** Converts a UClass to a TopLevelAssetPath */
 	UFUNCTION(
 		BlueprintPure,
 		meta = (DisplayName = "To Top Level Asset Path (Class)", CompactNodeTitle = "->", BlueprintAutocast),
 		Category = "Utilities|Top Level Asset Path")
-	static FTopLevelAssetPath Conv_ClassToTopLevelAssetPath(UClass* InClass);
+	static FTopLevelAssetPath Conv_ClassToTopLevelAssetPath(const UClass* InClass);
 };

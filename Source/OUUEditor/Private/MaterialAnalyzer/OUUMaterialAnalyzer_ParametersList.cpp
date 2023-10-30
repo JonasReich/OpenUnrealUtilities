@@ -23,7 +23,7 @@ namespace OUU::Editor::Private::MaterialAnalyzer::Widgets
 		this->ChildSlot[
 			SNew(SBorder)
 			.Padding(0.0f)
-			.BorderImage(this, &SOUUMaterialAnalyzer_ParametersListItem::GetBorderImage)
+			.BorderImage(this, &SOUUMaterialAnalyzer_ParametersListItem::GetParameterListBorderImage)
 			[
 				Widgets::Splitter(ColumnSizeData,
 					// left
@@ -56,7 +56,7 @@ namespace OUU::Editor::Private::MaterialAnalyzer::Widgets
 			OwnerTableView);
 	}
 
-	const FSlateBrush* SOUUMaterialAnalyzer_ParametersListItem::GetBorderImage() const
+	const FSlateBrush* SOUUMaterialAnalyzer_ParametersListItem::GetParameterListBorderImage() const
 	{
 		return IsHovered() ? new FSlateColorBrush(FAppStyle::Get().GetSlateColor("Colors.Hover"))
 						   : new FSlateColorBrush(FAppStyle::Get().GetSlateColor("Colors.Header"));

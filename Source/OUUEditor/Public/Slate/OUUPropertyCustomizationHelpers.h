@@ -19,9 +19,9 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 	 * @returns new widget
 	 */
 	OUUEDITOR_API TSharedRef<SObjectPropertyEntryBox> MakeFilteredObjectPropertyWidget(
-		TSharedRef<IPropertyHandle> PropertyHandle,
-		FObjectPropertyBase* ObjectProperty,
-		TSharedPtr<FAssetThumbnailPool> ThumbnailPool,
+		const TSharedRef<IPropertyHandle>& PropertyHandle,
+		const FObjectPropertyBase* ObjectProperty,
+		const TSharedPtr<FAssetThumbnailPool>& ThumbnailPool,
 		const FOnShouldFilterAsset& OnShouldFilterAsset);
 
 	/**
@@ -29,9 +29,9 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 	 * @returns new widget or nullptr, if the passed property is not an object property
 	 */
 	OUUEDITOR_API TSharedPtr<SObjectPropertyEntryBox> TryMakeFilteredObjectPropertyWidget(
-		TSharedRef<IPropertyHandle> PropertyHandle,
-		TSharedPtr<FAssetThumbnailPool> ThumbnailPool,
-		FOnShouldFilterAsset OnShouldFilterAsset);
+		const TSharedRef<IPropertyHandle>& PropertyHandle,
+		const TSharedPtr<FAssetThumbnailPool>& ThumbnailPool,
+		const FOnShouldFilterAsset& OnShouldFilterAsset);
 
 	/**
 	 * For generate children call in array builders:
@@ -41,7 +41,7 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 	OUUEDITOR_API bool MakeFilteredObjectPropertyOrDefault(
 		TSharedRef<IPropertyHandle> PropertyHandle,
 		IDetailChildrenBuilder& ChildrenBuilder,
-		TSharedPtr<FAssetThumbnailPool> ThumbnailPool,
+		const TSharedPtr<FAssetThumbnailPool>& ThumbnailPool,
 		const FOnShouldFilterAsset& OnShouldFilterAsset);
 
 	/**
@@ -60,9 +60,9 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 	 * Disadvantage: No customization of non-object properties in recursed arrays/structs after-the-fact.
 	 */
 	OUUEDITOR_API void CustomizeChildren_FilterObjectProperties(
-		TSharedRef<IPropertyHandle> PropertyHandle,
+		const TSharedRef<IPropertyHandle>& PropertyHandle,
 		IDetailChildrenBuilder& ChildBuilder,
-		IPropertyTypeCustomizationUtils& CustomizationUtils,
+		const IPropertyTypeCustomizationUtils& CustomizationUtils,
 		const FOnShouldFilterAsset& OnShouldFilterAsset);
 
 	/**

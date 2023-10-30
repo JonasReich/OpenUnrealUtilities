@@ -4,7 +4,8 @@
 
 #include "GameplayTags/TypedGameplayTagSettings.h"
 
-FTypedGameplayTagContainer::FTypedGameplayTagContainer(UStruct& InTypedTagStruct, const FGameplayTagContainer& InTags)
+FTypedGameplayTagContainer::FTypedGameplayTagContainer(
+	const UStruct& InTypedTagStruct, const FGameplayTagContainer& InTags)
 {
 	TypedTagName = *InTypedTagStruct.GetName();
 

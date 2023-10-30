@@ -49,6 +49,12 @@ namespace OUU::Runtime::Private
 		case VMI_CollisionVisibility: return TEXT("CollisionVis");
 		case VMI_LODColoration: return TEXT("LODColoration");
 		case VMI_HLODColoration: return TEXT("HLODColoration");
+		case VMI_GroupLODColoration: return TEXT("GroupLODColoration");
+		case VMI_VisualizeGPUSkinCache: return TEXT("VisualizeGPUSkinCache");
+		case VMI_VisualizeSubstrate: return TEXT("VisualizeSubstrate");
+		case VMI_VisualizeGroom: return TEXT("VisualizeGroom");
+		case VMI_Max: return TEXT("Max");
+		default:;
 		}
 		return TEXT("");
 	}
@@ -147,7 +153,7 @@ void FGameplayDebuggerCategory_ViewModes::CycleViewMode()
 
 		if (NextViewModeIndex != CurrViewModeIndex)
 		{
-			FString NextViewModeName = OUU::Runtime::Private::GetViewModeName((EViewModeIndex)NextViewModeIndex);
+			FString NextViewModeName = OUU::Runtime::Private::GetViewModeName(StaticCast<EViewModeIndex>(NextViewModeIndex));
 
 			if (!NextViewModeName.IsEmpty())
 			{

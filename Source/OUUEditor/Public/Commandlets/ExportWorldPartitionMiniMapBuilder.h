@@ -19,16 +19,17 @@ class OUUEDITOR_API UExportWorldPartitionMiniMapBuilder : public UWorldPartition
 	GENERATED_BODY()
 public:
 	// - UWorldPartitionBuilder
-	virtual bool RequiresCommandletRendering() const override { return true; }
-	virtual ELoadingMode GetLoadingMode() const override { return ELoadingMode::Custom; }
+	bool RequiresCommandletRendering() const override { return true; }
+	ELoadingMode GetLoadingMode() const override { return ELoadingMode::Custom; }
 
 protected:
-	virtual bool PreRun(UWorld* World, FPackageSourceControlHelper& PackageHelper) override;
-	virtual bool RunInternal(UWorld* World, const FCellInfo& InCellInfo, FPackageSourceControlHelper& PackageHelper)
+	bool PreRun(UWorld* World, FPackageSourceControlHelper& PackageHelper) override;
+	bool RunInternal(UWorld* World, const FCellInfo& InCellInfo, FPackageSourceControlHelper& PackageHelper)
 		override;
-	virtual bool PostRun(UWorld* World, FPackageSourceControlHelper& PackageHelper, const bool bInRunSuccess) override;
+	bool PostRun(UWorld* World, FPackageSourceControlHelper& PackageHelper, const bool bInRunSuccess) override;
 	// --
 
 private:
+	UPROPERTY()
 	TObjectPtr<AWorldPartitionMiniMap> WorldMiniMap;
 };

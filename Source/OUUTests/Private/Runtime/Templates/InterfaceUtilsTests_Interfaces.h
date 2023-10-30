@@ -16,7 +16,6 @@ UINTERFACE(meta = (CannotImplementInterfaceInBlueprint))
 class UInterfaceUtilsTests_CppInterface : public UInterface
 {
 	GENERATED_BODY()
-public:
 };
 
 class IInterfaceUtilsTests_CppInterface
@@ -35,7 +34,6 @@ UINTERFACE(BlueprintType)
 class UInterfaceUtilsTests_BpInterface : public UInterface
 {
 	GENERATED_BODY()
-public:
 };
 
 class IInterfaceUtilsTests_BpInterface

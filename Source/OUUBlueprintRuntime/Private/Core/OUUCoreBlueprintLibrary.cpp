@@ -9,17 +9,17 @@ UObject* UOUUCoreBlueprintLibrary::GetClassDefaultObject(TSubclassOf<UObject> Cl
 	return Class != nullptr ? GetMutableDefault<UObject>(Class) : nullptr;
 }
 
-UObject* UOUUCoreBlueprintLibrary::GetClassDefaultObjectFromObject(UObject* Object)
+UObject* UOUUCoreBlueprintLibrary::GetClassDefaultObjectFromObject(const UObject* Object)
 {
 	return IsValid(Object) ? GetMutableDefault<UObject>(Object->GetClass()) : nullptr;
 }
 
-UWorld* UOUUCoreBlueprintLibrary::TryGetWorldFromObject(UObject* WorldContextObject)
+UWorld* UOUUCoreBlueprintLibrary::TryGetWorldFromObject(const UObject* WorldContextObject)
 {
 	return GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::ReturnNull);
 }
 
-UWorld* UOUUCoreBlueprintLibrary::TryGetWorldFromObject_K2(UObject* WorldContextObject)
+UWorld* UOUUCoreBlueprintLibrary::TryGetWorldFromObject_K2(const UObject* WorldContextObject)
 {
 	return TryGetWorldFromObject(WorldContextObject);
 }
@@ -32,17 +32,17 @@ void UOUUCoreBlueprintLibrary::ModifyObject(UObject* Object)
 	}
 }
 
-FString UOUUCoreBlueprintLibrary::Conv_TopLevelAssetPathToString(FTopLevelAssetPath InPath)
+FString UOUUCoreBlueprintLibrary::Conv_TopLevelAssetPathToString(const FTopLevelAssetPath& InPath)
 {
 	return InPath.ToString();
 }
 
-FTopLevelAssetPath UOUUCoreBlueprintLibrary::Conv_StringToTopLevelAssetPath(FString InPath)
+FTopLevelAssetPath UOUUCoreBlueprintLibrary::Conv_StringToTopLevelAssetPath(const FString& InPath)
 {
 	return FTopLevelAssetPath(InPath);
 }
 
-FTopLevelAssetPath UOUUCoreBlueprintLibrary::Conv_ClassToTopLevelAssetPath(UClass* InClass)
+FTopLevelAssetPath UOUUCoreBlueprintLibrary::Conv_ClassToTopLevelAssetPath(const UClass* InClass)
 {
 	return IsValid(InClass) ? FTopLevelAssetPath(InClass->GetClassPathName()) : FTopLevelAssetPath{};
 }

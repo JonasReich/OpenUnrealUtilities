@@ -207,6 +207,7 @@ void FReferenceWrapperSpec::Define()
 		It("should be allowed to values of the referenced type", [this]() {
 			int32 i = 42;
 			const TReferenceWrapper<int32> iRefWrapper = i;
+			// ReSharper disable once CppInitializedValueIsAlwaysRewritten
 			int32 iCopy = 0;
 			iCopy = iRefWrapper;
 			SPEC_TEST_EQUAL(iCopy, 42);

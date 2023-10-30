@@ -26,7 +26,7 @@ public:
 private:
 	void RefreshContainerWidget();
 
-	void SetNewTags(const FGameplayTagContainer& NewValue);
+	void SetNewTags(const FGameplayTagContainer& NewValue) const;
 
 private:
 	TArray<FName> TypedTagOptions;

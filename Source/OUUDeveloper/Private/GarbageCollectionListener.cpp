@@ -200,7 +200,7 @@ public:
 		StartTime = FPlatformTime::Seconds();
 	}
 
-	virtual ~FGarbageCollectionListener()
+	virtual ~FGarbageCollectionListener() override
 	{
 		ClearTimer();
 		DumpCurrentClassDeletions();
@@ -221,14 +221,14 @@ public:
 	static void Deactivate() { GGarbageCollectionListener.Reset(); }
 
 	// - FUObjectArray::FUObjectDeleteListener
-	virtual void NotifyUObjectDeleted(const UObjectBase* ObjectBase, int32 Index) override
+	 void NotifyUObjectDeleted(const UObjectBase* ObjectBase, int32 Index) override
 	{
 		auto& Stats = ClassToStatsMap.FindOrAdd(ObjectBase->GetClass(), {});
 		Stats.Count += 1;
 		LazySetTimerForNextTick();
 	}
 
-	virtual void OnUObjectArrayShutdown() override
+	 void OnUObjectArrayShutdown() override
 	{
 		// Target array is shutting down so we can deactivate.
 		// Probably won't log anything anymore because this should only happen when the engine shuts down.

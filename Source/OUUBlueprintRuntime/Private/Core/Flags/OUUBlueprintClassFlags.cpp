@@ -3,6 +3,7 @@
 #include "Core/Flags/OUUBlueprintClassFlags.h"
 
 #include "OUUValidateInlineFiles.h"
+#include "Traits/AssertValueEquality.h"
 
 namespace OUU::BlueprintRuntime::Private::BlueprintClassFlags
 {

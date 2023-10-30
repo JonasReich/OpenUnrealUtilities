@@ -17,7 +17,6 @@
 #include "GameFramework/PlayerController.h"
 #include "GameplayTagContainer.h"
 #include "GameplayTags/GameplayTagQueryParser.h"
-#include "LogOpenUnrealUtilities.h"
 #include "Misc/EngineVersionComparison.h"
 #include "Misc/RegexUtils.h"
 #include "TextureResource.h"
@@ -138,9 +137,7 @@ namespace OUU::Developer::ActorMapWindow
 
 			const bool bEnabled = ShouldBeEnabled(bParentEnabled);
 			const ESlateDrawEffect DrawEffects = bEnabled ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect;
-
-			const FLinearColor ColorAndOpacitySRGB = InWidgetStyle.GetColorAndOpacityTint();
-
+			
 			const FVector2D LocalSize = AllottedGeometry.GetLocalSize();
 			const FVector2D LocalCenter = LocalSize / 2;
 			const float MaxComponent = LocalCenter.GetMin();

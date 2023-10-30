@@ -62,8 +62,8 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("0|0|0|1")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(Raise)
 {
 	// Arrange
-	FAutomationTestParameterParser Parser{Parameters};
-	FOUURequestTestEnvironment Env;
+	const FAutomationTestParameterParser Parser{Parameters};
+	const FOUURequestTestEnvironment Env;
 	const bool bExpectSuccess = Parser.GetValue<bool>(0);
 	Env.Responder->bCompleteRequestSuccesfully = bExpectSuccess;
 	const bool bResetAfterCompletion = Parser.GetValue<bool>(1);
@@ -93,9 +93,9 @@ OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(Raise)
 
 	// Assert
 	TestTrue("Callback was received", Env.Owner->bRequestCompleted);
-	EOUURequestState ExpectedCallbackState = bExpectSuccess ? EOUURequestState::Successful : EOUURequestState::Failed;
+	const EOUURequestState ExpectedCallbackState = bExpectSuccess ? EOUURequestState::Successful : EOUURequestState::Failed;
 	TestEqual("Success State (callback)", Env.Owner->StateAfterCompletion, ExpectedCallbackState);
-	EOUURequestState ExpectedRequestState =
+	const EOUURequestState ExpectedRequestState =
 		(bResetAfterCompletion || bResetManually) ? EOUURequestState::Idle : ExpectedCallbackState;
 	TestEqual("Success State (request)", Env.Request->GetState(), ExpectedRequestState);
 
@@ -107,7 +107,7 @@ OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(Raise)
 OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(RaiseTwice, DEFAULT_OUU_TEST_FLAGS)
 {
 	// Arrange
-	FOUURequestTestEnvironment Env;
+	const FOUURequestTestEnvironment Env;
 	Env.Responder->bCompleteRequestSuccesfully = true;
 	Env.Request->bResetAfterCompletion = true;
 	Env.Request->OnCompleted.AddDynamic(Env.Owner, &UOUURequestTests_Owner::HandleRequestCompleted);
@@ -130,7 +130,7 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(RaiseTwice, DEFAULT_OUU_TEST_FLAGS)
 OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(Cancel, DEFAULT_OUU_TEST_FLAGS)
 {
 	// Arrange
-	FOUURequestTestEnvironment Env;
+	const FOUURequestTestEnvironment Env;
 	Env.Responder->bCompleteRequestSuccesfully = true;
 	Env.Request->bResetAfterCompletion = true;
 	Env.Request->OnCompleted.AddDynamic(Env.Owner, &UOUURequestTests_Owner::HandleRequestCompleted);
@@ -153,7 +153,7 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(Cancel, DEFAULT_OUU_TEST_FLAGS)
 OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(OnStatusChanged, DEFAULT_OUU_TEST_FLAGS)
 {
 	// Arrange
-	FOUURequestTestEnvironment Env;
+	const FOUURequestTestEnvironment Env;
 	Env.Responder->bCompleteRequestSuccesfully = true;
 	Env.Request->bResetAfterCompletion = false;
 	Env.Request->OnStatusChanged.AddDynamic(Env.Owner, &UOUURequestTests_Owner::HandleStateChanged);
@@ -169,7 +169,7 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(OnStatusChanged, DEFAULT_OUU_TEST_FLAGS)
 	Env.Request->Complete(false);
 
 	// Assert
-	TArray<EOUURequestState> ExpectedHistory = {
+	const TArray<EOUURequestState> ExpectedHistory = {
 		EOUURequestState::Pending,
 		EOUURequestState::Canceled,
 		EOUURequestState::Idle,
@@ -199,16 +199,16 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(CreateNewRequest, DEFAULT_OUU_TEST_FLAGS)
 	// Act
 	UOUURequest* Request0 = RequestQueue->CreateNewRequest();
 	UOUURequest* Request1 = RequestQueue->CreateNewRequest();
-	TArray<UOUURequest*> OpenRequests = RequestQueue->GetRequestsInQueue();
+	const TArray<UOUURequest*> OpenRequests = RequestQueue->GetRequestsInQueue();
 	UOUURequest* OldestRequest = RequestQueue->GetOldestRequest();
 	UOUURequest* OldestPendingRequest = RequestQueue->GetOldestRequestWithState(EOUURequestState::Pending);
 	UOUURequest* OldestIdleRequest = RequestQueue->GetOldestRequestWithState(EOUURequestState::Idle);
 
 	// Assert
-	bool bRequest0CorrectClass = IsValid(Cast<UOUURequestQueue_TestRequest>(Request0));
-	bool bRequest1CorrectClass = IsValid(Cast<UOUURequestQueue_TestRequest>(Request1));
-	bool bDifferentObjects = Request0 != Request1;
-	TArray<UOUURequest*> ExpectedRequestList = {Request0, Request1};
+	const bool bRequest0CorrectClass = IsValid(Cast<UOUURequestQueue_TestRequest>(Request0));
+	const bool bRequest1CorrectClass = IsValid(Cast<UOUURequestQueue_TestRequest>(Request1));
+	const bool bDifferentObjects = Request0 != Request1;
+	const TArray<UOUURequest*> ExpectedRequestList = {Request0, Request1};
 
 	TestTrue("Request 0 has correct class", bRequest0CorrectClass);
 	TestTrue("Request 1 has correct class", bRequest1CorrectClass);
@@ -216,7 +216,7 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(CreateNewRequest, DEFAULT_OUU_TEST_FLAGS)
 	TestEqual("Request 1 state", Request1->GetState(), EOUURequestState::Idle);
 	TestTrue("Request 0 and 1 are different objects", bDifferentObjects);
 	TestEqual("OldestRequest", OldestRequest, Request0);
-	TestEqual("OldestPendingRequest", OldestPendingRequest, (UOUURequest*)nullptr);
+	TestEqual("OldestPendingRequest", OldestPendingRequest, StaticCast<UOUURequest*>(nullptr));
 	TestEqual("OldestIdleRequest", OldestIdleRequest, Request0);
 	TestArraysEqual(*this, "PendingRequests", OpenRequests, ExpectedRequestList);
 
@@ -234,16 +234,16 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(RaiseNewRequest, DEFAULT_OUU_TEST_FLAGS)
 	// Act
 	UOUURequest* Request0 = RequestQueue->RaiseNewRequest();
 	UOUURequest* Request1 = RequestQueue->RaiseNewRequest();
-	TArray<UOUURequest*> OpenRequests = RequestQueue->GetRequestsInQueue();
+	const TArray<UOUURequest*> OpenRequests = RequestQueue->GetRequestsInQueue();
 	UOUURequest* OldestRequest = RequestQueue->GetOldestRequest();
 	UOUURequest* OldestPendingRequest = RequestQueue->GetOldestRequestWithState(EOUURequestState::Pending);
 	UOUURequest* OldestIdleRequest = RequestQueue->GetOldestRequestWithState(EOUURequestState::Idle);
 
 	// Assert
-	bool bRequest0CorrectClass = IsValid(Cast<UOUURequestQueue_TestRequest>(Request0));
-	bool bRequest1CorrectClass = IsValid(Cast<UOUURequestQueue_TestRequest>(Request1));
-	bool bDifferentObjects = Request0 != Request1;
-	TArray<UOUURequest*> ExpectedRequestList = {Request0, Request1};
+	const bool bRequest0CorrectClass = IsValid(Cast<UOUURequestQueue_TestRequest>(Request0));
+	const bool bRequest1CorrectClass = IsValid(Cast<UOUURequestQueue_TestRequest>(Request1));
+	const bool bDifferentObjects = Request0 != Request1;
+	const TArray<UOUURequest*> ExpectedRequestList = {Request0, Request1};
 
 	TestTrue("Request 0 has correct class", bRequest0CorrectClass);
 	TestTrue("Request 1 has correct class", bRequest1CorrectClass);
@@ -252,7 +252,7 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(RaiseNewRequest, DEFAULT_OUU_TEST_FLAGS)
 	TestTrue("Request 0 and 1 are different objects", bDifferentObjects);
 	TestEqual("OldestRequest", OldestRequest, Request0);
 	TestEqual("OldestPendingRequest", OldestPendingRequest, Request0);
-	TestEqual("OldestIdleRequest", OldestIdleRequest, (UOUURequest*)nullptr);
+	TestEqual("OldestIdleRequest", OldestIdleRequest, static_cast<UOUURequest*>(nullptr));
 	TestArraysEqual(*this, "PendingRequests", OpenRequests, ExpectedRequestList);
 
 	return true;
@@ -316,7 +316,7 @@ OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(RaiseRequest_Complete)
 	};
 
 	// Arrange
-	FAutomationTestParameterParser Parser{Parameters};
+	const FAutomationTestParameterParser Parser{Parameters};
 	const ETestRequestAction Action0 = Parser.GetValue<ETestRequestAction>(0);
 	const ETestRequestAction Action1 = Parser.GetValue<ETestRequestAction>(1);
 	const bool bReverseActions = Parser.GetValue<bool>(2);
@@ -358,6 +358,8 @@ OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(RaiseRequest_Complete)
 		case ETestRequestAction::Success: return EOUURequestState::Successful;
 		case ETestRequestAction::Fail: return EOUURequestState::Failed;
 		case ETestRequestAction::Cancel: return EOUURequestState::Canceled;
+		case ETestRequestAction::DoNothing:
+		default:;
 		}
 		return EOUURequestState::Pending;
 	};
@@ -373,7 +375,7 @@ OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(RaiseRequest_Complete)
 	{
 		ExpectedRequestList.Add(Request1);
 	}
-	TArray<UOUURequest*> OpenRequests = RequestQueue->GetRequestsInQueue();
+	const TArray<UOUURequest*> OpenRequests = RequestQueue->GetRequestsInQueue();
 	TestArraysEqual(*this, "PendingRequests", OpenRequests, ExpectedRequestList);
 
 	return true;

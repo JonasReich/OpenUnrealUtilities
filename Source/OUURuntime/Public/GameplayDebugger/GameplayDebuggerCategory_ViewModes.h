@@ -24,7 +24,7 @@ public:
 
 	static auto GetCategoryName() { return TEXT("BufferVisualization"); }
 
-	virtual void DrawData(APlayerController* InOwnerPC, FGameplayDebuggerCanvasContext& CanvasContext) override;
+	void DrawData(APlayerController* InOwnerPC, FGameplayDebuggerCanvasContext& CanvasContext) override;
 
 private:
 	TSoftObjectPtr<APlayerController> OwnerPC;

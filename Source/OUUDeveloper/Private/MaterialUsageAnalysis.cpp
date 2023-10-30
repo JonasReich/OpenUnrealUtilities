@@ -139,7 +139,7 @@ FMaterialAnalysisResults AnalyzeMaterialUsage(UWorld* TargetWorld)
 
 	FMaterialAnalysisResults Results;
 	TSet<UMaterialInterface*> UniqueMaterials;
-	for (auto* Actor : TActorRange<AActor>(TargetWorld))
+	for (const auto* Actor : TActorRange<AActor>(TargetWorld))
 	{
 		Actor->ForEachComponent<UPrimitiveComponent>(false, [&](const UPrimitiveComponent* PrimitiveComponent) {
 			auto* Mesh = GetMeshFromPrimitiveComponent(PrimitiveComponent);
@@ -257,7 +257,7 @@ void DumpMaterialAnalysis(UWorld* TargetWorld)
 			auto LongPackageName = Level->GetWorldAssetPackageName();
 			FString PackageRoot, PackagePath, PackageName;
 			FPackageName::SplitLongPackageName(LongPackageName, OUT PackageRoot, OUT PackagePath, OUT PackageName);
-			PackageName.RemoveFromStart("UEDPIE_0_");
+			PackageName.RemoveFromStart(TEXT("UEDPIE_0_"));
 			LoadedLevelsStrings.Add(PackageName);
 		}
 	}
@@ -367,7 +367,7 @@ private:
 	float MaxInstances = 0.f;
 
 	// - FTickableGameObject
-	virtual void Tick(float DeltaTime) override
+	void Tick(float DeltaTime) override
 	{
 		AccumulatedTime += DeltaTime;
 		if (AccumulatedTime > UpdateInterval)
@@ -415,7 +415,7 @@ private:
 		}
 	}
 
-	void OnShowDebugInfo(AHUD* HUD, UCanvas* InCanvas)
+	void OnShowDebugInfo(AHUD* HUD, UCanvas* InCanvas) const
 	{
 		const float GraphBottomYPos =
 			InCanvas->Canvas->GetRenderTarget()->GetSizeXY().Y / InCanvas->GetDPIScale() - 50.0f;
@@ -448,11 +448,11 @@ private:
 			bUseLogarithmicYAxis);
 	}
 
-	virtual TStatId GetStatId() const override { return TStatId(); }
+	TStatId GetStatId() const override { return TStatId(); }
 
-	virtual ETickableTickType GetTickableTickType() const override { return ETickableTickType::Always; }
+	ETickableTickType GetTickableTickType() const override { return ETickableTickType::Always; }
 
-	virtual UWorld* GetTickableGameObjectWorld() const override { return GetTargetWorld(); }
+	UWorld* GetTickableGameObjectWorld() const override { return GetTargetWorld(); }
 	// --
 };
 

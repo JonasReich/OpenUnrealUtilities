@@ -99,7 +99,7 @@ public:
 
 	/** Version that takes a TFunction */
 	FORCEINLINE FTaskHandle
-		AddTask(TFunction<void(void)>&& Callback, float InPeriod, bool bTickAsOftenAsPossible = true)
+		AddTask(TFunction<void()>&& Callback, float InPeriod, bool bTickAsOftenAsPossible = true)
 	{
 		return InternalAddTask(FTaskUnifiedDelegate(MoveTemp(Callback)), InPeriod, bTickAsOftenAsPossible);
 	}
