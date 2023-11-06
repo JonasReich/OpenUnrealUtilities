@@ -134,134 +134,6 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 	// -------------------------------------------------------------
 
 	{
-		DrawTitle(Info, "GAMEPLAY EFFECTS");
-
-		for (FActiveGameplayEffect& ActiveGE : &(AbilitySystem->ActiveGameplayEffects))
-		{
-			if (Info.Canvas)
-			{
-				Info.Canvas->SetDrawColor(FColor::White);
-			}
-
-			FString DurationStr = TEXT("Infinite Duration ");
-			if (ActiveGE.GetDuration() > 0.f)
-			{
-				DurationStr = FString::Printf(
-					TEXT("Duration: %.2f. Remaining: %.2f (Start: %.2f / %.2f / %.2f) %s "),
-					ActiveGE.GetDuration(),
-					ActiveGE.GetTimeRemaining(AbilitySystem->GetWorld()->GetTimeSeconds()),
-					ActiveGE.StartServerWorldTime,
-					ActiveGE.CachedStartServerWorldTime,
-					ActiveGE.StartWorldTime,
-					ActiveGE.DurationHandle.IsValid() ? TEXT("Valid Handle") : TEXT("INVALID Handle"));
-				if (ActiveGE.DurationHandle.IsValid())
-				{
-					DurationStr += FString::Printf(
-						TEXT("(Local Duration: %.2f)"),
-						AbilitySystem->GetWorld()->GetTimerManager().GetTimerRemaining(ActiveGE.DurationHandle));
-				}
-			}
-			if (ActiveGE.GetPeriod() > 0.f)
-			{
-				DurationStr += FString::Printf(TEXT("Period: %.2f"), ActiveGE.GetPeriod());
-			}
-
-			FString StackString;
-			if (ActiveGE.Spec.StackCount > 1)
-			{
-				if (ActiveGE.Spec.Def->StackingType == EGameplayEffectStackingType::AggregateBySource)
-				{
-					StackString = FString::Printf(
-						TEXT("(Stacks: %d. From: %s) "),
-						ActiveGE.Spec.StackCount,
-						*GetNameSafe(
-							ActiveGE.Spec.GetContext().GetInstigatorAbilitySystemComponent()->GetAvatarActor_Direct()));
-				}
-				else
-				{
-					StackString = FString::Printf(TEXT("(Stacks: %d) "), ActiveGE.Spec.StackCount);
-				}
-			}
-
-			FString LevelString;
-			if (ActiveGE.Spec.GetLevel() > 1.f)
-			{
-				LevelString = FString::Printf(TEXT("Level: %.2f"), ActiveGE.Spec.GetLevel());
-			}
-
-			FString PredictionString;
-			if (ActiveGE.PredictionKey.IsValidKey())
-			{
-				if (ActiveGE.PredictionKey.WasLocallyGenerated())
-				{
-					PredictionString = FString::Printf(TEXT("(Predicted and Waiting)"));
-				}
-				else
-				{
-					PredictionString = FString::Printf(TEXT("(Predicted and Caught Up)"));
-				}
-			}
-
-			if (Info.Canvas)
-			{
-				Info.Canvas->SetDrawColor(ActiveGE.bIsInhibited ? FColorList::Grey : FColor::White);
-			}
-
-			DebugLine(
-				Info,
-				FString::Printf(
-					TEXT("%s %s %s %s %s"),
-					*OUU::Runtime::GameplayDebuggerUtils::CleanupName(GetNameSafe(ActiveGE.Spec.Def)),
-					*DurationStr,
-					*StackString,
-					*LevelString,
-					*PredictionString),
-				4.f,
-				0.f);
-
-			FGameplayTagContainer GrantedTags;
-			ActiveGE.Spec.GetAllGrantedTags(GrantedTags);
-			if (GrantedTags.Num() > 0)
-			{
-				DebugLine(Info, FString::Printf(TEXT("Granted Tags: %s"), *GrantedTags.ToStringSimple()), 7.f, 0.f);
-			}
-
-			for (int32 ModIdx = 0; ModIdx < ActiveGE.Spec.Modifiers.Num(); ++ModIdx)
-			{
-				if (ActiveGE.Spec.Def == nullptr)
-				{
-					DebugLine(Info, FString::Printf(TEXT("null def! (Backwards compat?)")), 7.f, 0.f);
-					continue;
-				}
-
-				const FModifierSpec& ModSpec = ActiveGE.Spec.Modifiers[ModIdx];
-				const FGameplayModifierInfo& ModInfo = ActiveGE.Spec.Def->Modifiers[ModIdx];
-
-				DebugLine(
-					Info,
-					FString::Printf(
-						TEXT("Mod: %s. %s. %.2f"),
-						*ModInfo.Attribute.GetName(),
-						*EGameplayModOpToString(ModInfo.ModifierOp),
-						ModSpec.GetEvaluatedMagnitude()),
-					7.f,
-					0.f);
-
-				if (Info.Canvas)
-				{
-					Info.Canvas->SetDrawColor(ActiveGE.bIsInhibited ? FColor(128, 128, 128) : FColor::White);
-				}
-			}
-
-			AccumulateScreenPos(Info);
-		}
-
-		NewColumnForCategory_Optional(Info);
-	}
-
-	// -------------------------------------------------------------
-
-	{
 		TSet<FGameplayAttribute> DrawAttributes;
 		DrawTitle(Info, "ATTRIBUTES");
 
@@ -388,6 +260,155 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 			}
 		}
 		AccumulateScreenPos(Info);
+
+		NewColumnForCategory_Optional(Info);
+	}
+
+	// -------------------------------------------------------------
+
+	{
+		DrawTitle(Info, "GAMEPLAY EFFECTS");
+
+		for (FActiveGameplayEffect& ActiveGE : &(AbilitySystem->ActiveGameplayEffects))
+		{
+			if (Info.Canvas)
+			{
+				Info.Canvas->SetDrawColor(FColor::White);
+			}
+
+			FString DurationStr = TEXT("Infinite Duration ");
+			if (ActiveGE.GetDuration() > 0.f)
+			{
+				DurationStr = FString::Printf(
+					TEXT("Duration: %.2f. Remaining: %.2f (Start: %.2f / %.2f / %.2f) %s "),
+					ActiveGE.GetDuration(),
+					ActiveGE.GetTimeRemaining(AbilitySystem->GetWorld()->GetTimeSeconds()),
+					ActiveGE.StartServerWorldTime,
+					ActiveGE.CachedStartServerWorldTime,
+					ActiveGE.StartWorldTime,
+					ActiveGE.DurationHandle.IsValid() ? TEXT("Valid Handle") : TEXT("INVALID Handle"));
+				if (ActiveGE.DurationHandle.IsValid())
+				{
+					DurationStr += FString::Printf(
+						TEXT("(Local Duration: %.2f)"),
+						AbilitySystem->GetWorld()->GetTimerManager().GetTimerRemaining(ActiveGE.DurationHandle));
+				}
+			}
+			if (ActiveGE.GetPeriod() > 0.f)
+			{
+				DurationStr += FString::Printf(TEXT("Period: %.2f"), ActiveGE.GetPeriod());
+			}
+
+			FString StackString;
+			if (ActiveGE.Spec.StackCount > 1)
+			{
+				if (ActiveGE.Spec.Def->StackingType == EGameplayEffectStackingType::AggregateBySource)
+				{
+					StackString = FString::Printf(
+						TEXT("(Stacks: %d. From: %s) "),
+						ActiveGE.Spec.StackCount,
+						*GetNameSafe(
+							ActiveGE.Spec.GetContext().GetInstigatorAbilitySystemComponent()->GetAvatarActor_Direct()));
+				}
+				else
+				{
+					StackString = FString::Printf(TEXT("(Stacks: %d) "), ActiveGE.Spec.StackCount);
+				}
+			}
+
+			FString LevelString;
+			if (ActiveGE.Spec.GetLevel() > 1.f)
+			{
+				LevelString = FString::Printf(TEXT("Level: %.2f"), ActiveGE.Spec.GetLevel());
+			}
+
+			FString PredictionString;
+			if (ActiveGE.PredictionKey.IsValidKey())
+			{
+				if (ActiveGE.PredictionKey.WasLocallyGenerated())
+				{
+					PredictionString = FString::Printf(TEXT("(Predicted and Waiting)"));
+				}
+				else
+				{
+					PredictionString = FString::Printf(TEXT("(Predicted and Caught Up)"));
+				}
+			}
+
+			if (Info.Canvas)
+			{
+				Info.Canvas->SetDrawColor(ActiveGE.bIsInhibited ? FColorList::Grey : FColor::White);
+			}
+
+			DebugLine(
+				Info,
+				FString::Printf(
+					TEXT("%s %s %s %s %s"),
+					*OUU::Runtime::GameplayDebuggerUtils::CleanupName(GetNameSafe(ActiveGE.Spec.Def)),
+					*DurationStr,
+					*StackString,
+					*LevelString,
+					*PredictionString),
+				4.f,
+				0.f);
+
+			FGameplayTagContainer GrantedTags;
+			ActiveGE.Spec.GetAllGrantedTags(GrantedTags);
+			if (GrantedTags.Num() > 0)
+			{
+				DebugLine(Info, FString::Printf(TEXT("Granted Tags: %s"), *GrantedTags.ToStringSimple()), 7.f, 0.f);
+			}
+
+			for (int32 ModIdx = 0; ModIdx < ActiveGE.Spec.Modifiers.Num(); ++ModIdx)
+			{
+				if (ActiveGE.Spec.Def == nullptr)
+				{
+					DebugLine(Info, FString::Printf(TEXT("null def! (Backwards compat?)")), 7.f, 0.f);
+					continue;
+				}
+
+				const FModifierSpec& ModSpec = ActiveGE.Spec.Modifiers[ModIdx];
+				const FGameplayModifierInfo& ModInfo = ActiveGE.Spec.Def->Modifiers[ModIdx];
+
+				if (!(ModInfo.ModifierOp == EGameplayModOp::Additive && ModSpec.GetEvaluatedMagnitude() == 0.f))
+				{
+					DebugLine(
+						Info,
+						FString::Printf(
+							TEXT("Mod: %s, %s, %.2f"),
+							*ModInfo.Attribute.GetName(),
+							*EGameplayModOpToString(ModInfo.ModifierOp),
+							ModSpec.GetEvaluatedMagnitude()),
+						7.f,
+						0.f);
+
+					FString SourceTagString = ModInfo.SourceTags.ToString();
+					if (SourceTagString.Len() > 0)
+					{
+						if (SourceTagString.Len() <= 50)
+						{
+							DebugLine(Info, FString::Printf(TEXT("SourceTags: %s"), *SourceTagString), 9.f, 0.f);
+						}
+						else
+						{
+							DebugLine(
+								Info,
+								FString::Printf(TEXT("SourceTags: %s"), *SourceTagString.Left(50)),
+								9.f,
+								0.f);
+							DebugLine(Info, FString::Printf(TEXT("%s"), *SourceTagString.RightChop(50)), 10.f, 0.f);
+						}
+					}
+				}
+
+				if (Info.Canvas)
+				{
+					Info.Canvas->SetDrawColor(ActiveGE.bIsInhibited ? FColor(128, 128, 128) : FColor::White);
+				}
+			}
+
+			AccumulateScreenPos(Info);
+		}
 
 		NewColumnForCategory_Optional(Info);
 	}
