@@ -2,6 +2,8 @@
 
 #include "Core/OUUConfigBlueprintLibrary.h"
 
+#include "Misc/ConfigCacheIni.h"
+
 FString UOUUConfigBlueprintLibrary::GetConfigIniPath(EGlobalIniFile IniFile)
 {
 #define SWITCH_CASE_INI(ConfigName)                                                                                    \
