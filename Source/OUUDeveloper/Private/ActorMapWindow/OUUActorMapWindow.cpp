@@ -8,6 +8,7 @@
 #include "ActorMapWindow/OUUActorMapWindow_Private.h"
 #include "Brushes/SlateColorBrush.h"
 #include "Components/SceneCaptureComponent2D.h"
+#include "Engine/Engine.h"
 #include "Engine/SceneCapture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "EngineUtils.h"
@@ -16,7 +17,6 @@
 #include "GameFramework/PlayerController.h"
 #include "GameplayTagContainer.h"
 #include "GameplayTags/GameplayTagQueryParser.h"
-#include "LogOpenUnrealUtilities.h"
 #include "Misc/EngineVersionComparison.h"
 #include "Misc/RegexUtils.h"
 #include "TextureResource.h"
@@ -137,9 +137,7 @@ namespace OUU::Developer::ActorMapWindow
 
 			const bool bEnabled = ShouldBeEnabled(bParentEnabled);
 			const ESlateDrawEffect DrawEffects = bEnabled ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect;
-
-			const FLinearColor ColorAndOpacitySRGB = InWidgetStyle.GetColorAndOpacityTint();
-
+			
 			const FVector2D LocalSize = AllottedGeometry.GetLocalSize();
 			const FVector2D LocalCenter = LocalSize / 2;
 			const float MaxComponent = LocalCenter.GetMin();

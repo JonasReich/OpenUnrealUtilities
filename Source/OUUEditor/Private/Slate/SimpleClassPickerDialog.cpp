@@ -16,7 +16,7 @@ public:
 	/** Disallowed class flags. */
 	EClassFlags DisallowedClassFlags;
 
-	virtual bool IsClassAllowed(
+	bool IsClassAllowed(
 		const FClassViewerInitializationOptions& InInitOptions,
 		const UClass* InClass,
 		TSharedRef<FClassViewerFilterFuncs> InFilterFuncs) override
@@ -25,7 +25,7 @@ public:
 			&& InFilterFuncs->IfInChildOfClassesSet(AllowedChildrenOfClasses, InClass) != EFilterReturn::Failed;
 	}
 
-	virtual bool IsUnloadedClassAllowed(
+	bool IsUnloadedClassAllowed(
 		const FClassViewerInitializationOptions& InInitOptions,
 		const TSharedRef<const IUnloadedBlueprintData> InUnloadedClassData,
 		TSharedRef<FClassViewerFilterFuncs> InFilterFuncs) override
@@ -48,9 +48,6 @@ namespace OUU::Editor
 		FClassViewerInitializationOptions Options;
 		Options.Mode = EClassViewerMode::ClassPicker;
 		Options.ClassFilters.Add(Filter);
-
-		// Load the classviewer module to display a class picker
-		FClassViewerModule& ClassViewerModule = FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer");
 
 		UClass* NewChosenClass = nullptr;
 		if (SClassPickerDialog::PickClass(TitleText, Options, OUT NewChosenClass, ParentClass))

@@ -38,6 +38,10 @@ namespace OUU::Runtime::Private
 		}
 	};
 
+#if WITH_EDITOR
+	OUURUNTIME_API FString MakeFilterString(const FGameplayTagContainer& GameplayTags);
+#endif
+
 } // namespace OUU::Runtime::Private
 
 // Forward declare the derived container types...
@@ -155,6 +159,10 @@ public:
 	static void RegisterAllDerivedPropertyTypeLayouts();
 	static void UnregisterAllDerivedPropertyTypeLayouts();
 #endif
+
+public:
+	/* Get a short display name for the given tag, relative to its root tags. */
+	static FString ToShortDisplayString(const FGameplayTag& Tag, const FGameplayTagContainer& RootTags);
 };
 
 /**
@@ -167,10 +175,6 @@ public:
 
 #define PRIVATE_TYPED_GAMEPLAY_TAG_IMPL(TagType, ...)                                                                  \
 public:                                                                                                                \
-	static_assert(                                                                                                     \
-		TIsDerivedFrom<TagType, FTypedGameplayTag_Base>::Value,                                                        \
-		"Typed Gameplay Tags must be derived from FTypedGameplayTag_Base");                                            \
-                                                                                                                       \
 	using TypedTagImplType = TTypedGameplayTag<TagType, ##__VA_ARGS__>;                                                \
 	template <typename, typename, typename>                                                                            \
 	friend struct ::TLiteralGameplayTag;                                                                               \
@@ -186,6 +190,10 @@ public:                                                                         
 	{                                                                                                                  \
 		static_cast<FGameplayTag&>(*this) = static_cast<const FGameplayTag&>(Other);                                   \
 		return *this;                                                                                                  \
+	}                                                                                                                  \
+	FString ToShortDisplayString() const                                                                               \
+	{                                                                                                                  \
+		return FTypedGameplayTag_Base::ToShortDisplayString(*this, GetAllRootTags().Get());                            \
 	}                                                                                                                  \
 	static TagType TryConvert(FGameplayTag FromTag) { return TypedTagImplType::TryConvert(FromTag, false); }           \
 	static TagType ConvertChecked(FGameplayTag FromTag) { return TypedTagImplType::TryConvert(FromTag, true); }        \
@@ -215,6 +223,9 @@ private:                                                                        
 	/* sorry :'( */                                                                                                    \
 	}                                                                                                                  \
 	;                                                                                                                  \
+	static_assert(                                                                                                     \
+		TIsDerivedFrom<TagType, FTypedGameplayTag_Base>::Value,                                                        \
+		"Typed Gameplay Tags must be derived from FTypedGameplayTag_Base");                                            \
                                                                                                                        \
 	using TagType##s_Value = TTypedGameplayTagContainerValue<TagType>;                                                 \
 	using TagType##s_Ref = TTypedGameplayTagContainerReference<TagType>;                                               \
@@ -313,7 +324,7 @@ public:
 
 	FORCEINLINE BlueprintTagType operator*() const { return BlueprintTagType(*WrappedIterator); }
 
-	FORCEINLINE explicit operator bool() const { return (bool)WrappedIterator; }
+	FORCEINLINE explicit operator bool() const { return !!WrappedIterator; }
 
 	FORCEINLINE friend bool operator==(
 		const TTypedGameplayTagContainerIterator& Lhs,
@@ -458,9 +469,12 @@ public:
 	}
 	TArray<FGameplayTag>::TConstIterator CreateConstIterator() const { return GetRef().CreateConstIterator(); }
 	bool IsValidIndex(int32 Index) const { return GetRef().IsValidIndex(); }
-	BlueprintTagType GetByIndex(int32 Index) const { return GetRef().GetByIndex(Index); }
-	BlueprintTagType First() const { return GetRef().First(); }
-	BlueprintTagType Last() const { return GetRef().Last(); }
+	BlueprintTagType GetByIndex(int32 Index) const
+	{
+		return BlueprintTagType::ConvertChecked(GetRef().GetByIndex(Index));
+	}
+	BlueprintTagType First() const { return BlueprintTagType::ConvertChecked(GetRef().First()); }
+	BlueprintTagType Last() const { return BlueprintTagType::ConvertChecked(GetRef().Last()); }
 
 	// Can't be sure that these are still underneath the root tag, so just don't allow it
 	// void FillParentTags() { return GetRef().FillParentTags(); }

@@ -22,7 +22,7 @@ using OUU_GameplayDebuggerCategories = TGameplayDebuggerCategoryTypeList<
 class FOUURuntimeModule : public IModuleInterface
 {
 	// - IModuleInterface
-	virtual void StartupModule() override
+	void StartupModule() override
 	{
 #if WITH_GAMEPLAY_DEBUGGER
 		OUU_GameplayDebuggerCategories::RegisterCategories<EGameplayDebuggerCategoryState::Disabled>();
@@ -36,7 +36,7 @@ class FOUURuntimeModule : public IModuleInterface
 
 #endif
 	}
-	virtual void ShutdownModule() override
+	void ShutdownModule() override
 	{
 #if WITH_GAMEPLAY_DEBUGGER
 		OUU_GameplayDebuggerCategories::UnregisterCategories();

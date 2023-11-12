@@ -6,10 +6,8 @@
 
 #include "GameplayTagContainer.h"
 #include "GameplayTagsManager.h"
-#include "GameplayTagsModule.h"
 #include "LiteralGameplayTagMacros.h"
 #include "LogOpenUnrealUtilities.h"
-#include "Misc/EngineVersionComparison.h"
 #include "NativeGameplayTags.h"
 #include "Templates/BitmaskUtils.h"
 #include "Templates/UnrealTypeTraits.h"
@@ -158,13 +156,14 @@ struct TLiteralGameplayTag
 #undef RESULT_IF_ROOT_TAG
 
 	static const SelfTagType& Get() { return SelfTagType::GetInstance(); }
-	static const FGameplayTag GetTag() { return SelfTagType::GetInstance().NativeTagGetter.Get(); }
+	static FGameplayTag GetTag() { return SelfTagType::GetInstance().NativeTagGetter.Get(); }
 
 	operator FGameplayTag() const { return GetTag(); }
 
 private:
 	struct CHasRelativeTagName
 	{
+		// ReSharper disable once CppFunctionIsNotImplemented
 		template <typename T>
 		auto Requires() -> decltype(FString(T::GetRelativeName()));
 	};
@@ -405,9 +404,8 @@ namespace OUU::Runtime::Private::ResolveFallbackFlagsTests
 		"this string should lead to a compile error if ever considered",
 		(ELiteralGameplayTagFlags::Default | ELiteralGameplayTagFlags::Inherited
 		 | ELiteralGameplayTagFlags::AllowContentChildTags));
-	constexpr ELiteralGameplayTagFlags ExpectedFlags = ELiteralGameplayTagFlags(
-		ELiteralGameplayTagFlags::Default | ELiteralGameplayTagFlags::AllowContentChildTags
-		| ELiteralGameplayTagFlags::Explicit);
+	constexpr ELiteralGameplayTagFlags ExpectedFlags = ELiteralGameplayTagFlags::Default
+		| ELiteralGameplayTagFlags::AllowContentChildTags | ELiteralGameplayTagFlags::Explicit;
 	static_assert(
 		TAssertValuesEqual<ELiteralGameplayTagFlags, ActualFlags, ExpectedFlags>::Value,
 		"Inherited tag should be removed + Explicit should be added");

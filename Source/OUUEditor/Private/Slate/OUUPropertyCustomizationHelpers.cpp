@@ -16,33 +16,20 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 {
 	namespace Private
 	{
+		// ReSharper disable CppPassValueParameterByConstReference
 		void OnGenerateElementForObjectArray(
 			TSharedRef<IPropertyHandle> PropertyHandle,
 			int32 GroupIndex,
 			IDetailChildrenBuilder& ChildrenBuilder,
 			TSharedPtr<FAssetThumbnailPool> ThumbnailPool,
 			FOnShouldFilterAsset OnShouldFilterAsset)
+		// ReSharper restore CppPassValueParameterByConstReference
 		{
 			OUU::Editor::PropertyCustomizationHelpers::MakeFilteredObjectPropertyOrDefault(
 				PropertyHandle,
 				ChildrenBuilder,
 				ThumbnailPool,
 				OnShouldFilterAsset);
-		}
-
-		// Helper to retrieve the correct property that has the applicable metadata.
-		static const FProperty* GetActualMetadataProperty(const FProperty* Property)
-		{
-			if (FProperty* OuterProperty = Property->GetOwner<FProperty>())
-			{
-				if (OuterProperty->IsA<FArrayProperty>() || OuterProperty->IsA<FSetProperty>()
-					|| OuterProperty->IsA<FMapProperty>())
-				{
-					return OuterProperty;
-				}
-			}
-
-			return Property;
 		}
 
 		// Helper to support both meta=(TagName) and meta=(TagName=true) syntaxes
@@ -73,9 +60,9 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 	} // namespace Private
 
 	TSharedRef<SObjectPropertyEntryBox> MakeFilteredObjectPropertyWidget(
-		TSharedRef<IPropertyHandle> PropertyHandle,
-		FObjectPropertyBase* ObjectProperty,
-		TSharedPtr<FAssetThumbnailPool> ThumbnailPool,
+		const TSharedRef<IPropertyHandle>& PropertyHandle,
+		const FObjectPropertyBase* ObjectProperty,
+		const TSharedPtr<FAssetThumbnailPool>& ThumbnailPool,
 		const FOnShouldFilterAsset& OnShouldFilterAsset)
 	{
 		return SNew(SObjectPropertyEntryBox)
@@ -87,11 +74,11 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 	}
 
 	TSharedPtr<SObjectPropertyEntryBox> TryMakeFilteredObjectPropertyWidget(
-		TSharedRef<IPropertyHandle> PropertyHandle,
-		TSharedPtr<FAssetThumbnailPool> ThumbnailPool,
-		FOnShouldFilterAsset OnShouldFilterAsset)
+		const TSharedRef<IPropertyHandle>& PropertyHandle,
+		const TSharedPtr<FAssetThumbnailPool>& ThumbnailPool,
+		const FOnShouldFilterAsset& OnShouldFilterAsset)
 	{
-		if (auto* ObjectProperty = CastField<FObjectPropertyBase>(PropertyHandle->GetProperty()))
+		if (const auto* ObjectProperty = CastField<FObjectPropertyBase>(PropertyHandle->GetProperty()))
 		{
 			return MakeFilteredObjectPropertyWidget(PropertyHandle, ObjectProperty, ThumbnailPool, OnShouldFilterAsset);
 		}
@@ -101,14 +88,14 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 	bool MakeFilteredObjectPropertyOrDefault(
 		TSharedRef<IPropertyHandle> PropertyHandle,
 		IDetailChildrenBuilder& ChildrenBuilder,
-		TSharedPtr<FAssetThumbnailPool> ThumbnailPool,
+		const TSharedPtr<FAssetThumbnailPool>& ThumbnailPool,
 		const FOnShouldFilterAsset& OnShouldFilterAsset)
 	{
 		// references:
 		// - FMetasoundDefaultMemberElementDetailCustomizationBase::CustomizeChildren
 		// - FMetasoundDefaultMemberElementDetailCustomizationBase::CreateValueWidget
 
-		auto PropWidget = TryMakeFilteredObjectPropertyWidget(PropertyHandle, ThumbnailPool, OnShouldFilterAsset);
+		const auto PropWidget = TryMakeFilteredObjectPropertyWidget(PropertyHandle, ThumbnailPool, OnShouldFilterAsset);
 		if (!PropWidget)
 		{
 			// Ideally we would recurse into array/struct properties here, but that's super hard.
@@ -121,7 +108,7 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 		TSharedPtr<IPropertyHandle> ElementPropertyHandle = PropertyHandle;
 		if (ElementPropertyHandle.IsValid())
 		{
-			TSharedPtr<IPropertyHandle> ParentProperty = ElementPropertyHandle->GetParentHandle();
+			const TSharedPtr<IPropertyHandle> ParentProperty = ElementPropertyHandle->GetParentHandle();
 			while (ParentProperty.IsValid() && ParentProperty->GetProperty() != nullptr)
 			{
 				ParentPropertyHandleArray = ParentProperty->AsArray();
@@ -134,33 +121,39 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 		}
 
 		TSharedPtr<IPropertyHandle> StructPropertyPtr = PropertyHandle;
-		FExecuteAction InsertAction = FExecuteAction::CreateLambda([ParentPropertyHandleArray, StructPropertyPtr] {
-			const int32 ArrayIndex = StructPropertyPtr.IsValid() ? StructPropertyPtr->GetIndexInArray() : INDEX_NONE;
-			if (ParentPropertyHandleArray.IsValid() && ArrayIndex >= 0)
-			{
-				ParentPropertyHandleArray->Insert(ArrayIndex);
-			}
-		});
+		const FExecuteAction InsertAction =
+			FExecuteAction::CreateLambda([ParentPropertyHandleArray, StructPropertyPtr] {
+				const int32 ArrayIndex =
+					StructPropertyPtr.IsValid() ? StructPropertyPtr->GetIndexInArray() : INDEX_NONE;
+				if (ParentPropertyHandleArray.IsValid() && ArrayIndex >= 0)
+				{
+					ParentPropertyHandleArray->Insert(ArrayIndex);
+				}
+			});
 
-		FExecuteAction DeleteAction = FExecuteAction::CreateLambda([ParentPropertyHandleArray, StructPropertyPtr] {
-			const int32 ArrayIndex = StructPropertyPtr.IsValid() ? StructPropertyPtr->GetIndexInArray() : INDEX_NONE;
-			if (ParentPropertyHandleArray.IsValid() && ArrayIndex >= 0)
-			{
-				ParentPropertyHandleArray->DeleteItem(ArrayIndex);
-			}
-		});
+		const FExecuteAction DeleteAction =
+			FExecuteAction::CreateLambda([ParentPropertyHandleArray, StructPropertyPtr] {
+				const int32 ArrayIndex =
+					StructPropertyPtr.IsValid() ? StructPropertyPtr->GetIndexInArray() : INDEX_NONE;
+				if (ParentPropertyHandleArray.IsValid() && ArrayIndex >= 0)
+				{
+					ParentPropertyHandleArray->DeleteItem(ArrayIndex);
+				}
+			});
 
-		FExecuteAction DuplicateAction = FExecuteAction::CreateLambda([ParentPropertyHandleArray, StructPropertyPtr] {
-			const int32 ArrayIndex = StructPropertyPtr.IsValid() ? StructPropertyPtr->GetIndexInArray() : INDEX_NONE;
-			if (ParentPropertyHandleArray.IsValid() && ArrayIndex >= 0)
-			{
-				ParentPropertyHandleArray->DuplicateItem(ArrayIndex);
-			}
-		});
-		auto PropertyNameWidget = PropertyHandle->CreatePropertyNameWidget();
+		const FExecuteAction DuplicateAction =
+			FExecuteAction::CreateLambda([ParentPropertyHandleArray, StructPropertyPtr] {
+				const int32 ArrayIndex =
+					StructPropertyPtr.IsValid() ? StructPropertyPtr->GetIndexInArray() : INDEX_NONE;
+				if (ParentPropertyHandleArray.IsValid() && ArrayIndex >= 0)
+				{
+					ParentPropertyHandleArray->DuplicateItem(ArrayIndex);
+				}
+			});
+		const auto PropertyNameWidget = PropertyHandle->CreatePropertyNameWidget();
 
 		// clang-format off
-		auto ValueWidgetWrapper =
+		const auto ValueWidgetWrapper =
 			SNew(SHorizontalBox)
 			+ SHorizontalBox::Slot()
 			.FillWidth(1.0f)
@@ -209,14 +202,14 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 		if (!PropertyHandle->IsValidHandle())
 			return false;
 
-		auto* Field = PropertyHandle->GetProperty();
+		const auto* Field = PropertyHandle->GetProperty();
 
 		IDetailCategoryBuilder& PropertyCategory =
 			DetailBuilder.EditCategory(FObjectEditorUtils::GetCategoryFName(Field));
 
 		if (auto pArrayHandle = PropertyHandle->AsArray())
 		{
-			auto ArrayBuilder = MakeShared<FDetailArrayBuilder>(PropertyHandle);
+			const auto ArrayBuilder = MakeShared<FDetailArrayBuilder>(PropertyHandle);
 			ArrayBuilder->OnGenerateArrayElementWidget(FOnGenerateArrayElementWidget::CreateStatic(
 				&OUU::Editor::PropertyCustomizationHelpers::Private::OnGenerateElementForObjectArray,
 				DetailBuilder.GetThumbnailPool(),
@@ -227,7 +220,7 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 			return true;
 		}
 
-		if (auto PropWidget = OUU::Editor::PropertyCustomizationHelpers::TryMakeFilteredObjectPropertyWidget(
+		if (const auto PropWidget = OUU::Editor::PropertyCustomizationHelpers::TryMakeFilteredObjectPropertyWidget(
 				PropertyHandle,
 				DetailBuilder.GetThumbnailPool(),
 				OnShouldFilterAsset))
@@ -252,9 +245,9 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 	}
 
 	void CustomizeChildren_FilterObjectProperties(
-		TSharedRef<IPropertyHandle> PropertyHandle,
+		const TSharedRef<IPropertyHandle>& PropertyHandle,
 		IDetailChildrenBuilder& ChildBuilder,
-		IPropertyTypeCustomizationUtils& CustomizationUtils,
+		const IPropertyTypeCustomizationUtils& CustomizationUtils,
 		const FOnShouldFilterAsset& OnShouldFilterAsset)
 	{
 		auto ThumbnailPool = CustomizationUtils.GetThumbnailPool();
@@ -304,14 +297,15 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 		UClass* OwningClass,
 		const FOnShouldFilterAsset& OnShouldFilterAsset)
 	{
-		for (FProperty* Property : TFieldRange<FProperty>(OwningClass))
+		for (const FProperty* Property : TFieldRange<FProperty>(OwningClass))
 		{
 			if ((Property->PropertyFlags & EPropertyFlags::CPF_Edit) == 0)
 			{
 				continue;
 			}
 
-			TSharedRef<IPropertyHandle> PropertyHandle = DetailBuilder.GetProperty(Property->GetFName(), OwningClass);
+			const TSharedRef<IPropertyHandle> PropertyHandle =
+				DetailBuilder.GetProperty(Property->GetFName(), OwningClass);
 
 			OUU::Editor::PropertyCustomizationHelpers::TryOverrideFilteredObjectPropertyWidget(
 				PropertyHandle,
@@ -326,7 +320,7 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 		TArray<const UClass*>& OutAllowedClassFilters,
 		TArray<const UClass*>& OutDisallowedClassFilters)
 	{
-		auto* ObjectClass = GetObjectPropertyClass(Property);
+		const auto* ObjectClass = GetObjectPropertyClass(Property);
 
 		// Copied from void SPropertyEditorAsset::InitializeClassFilters(const FProperty* Property)
 		if (Property == nullptr)
@@ -354,14 +348,12 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 
 			for (const FString& ClassName : AllowedClassFilterNames)
 			{
-				UClass* Class = FindClass(ClassName);
-
-				if (Class)
+				if (const UClass* Class = FindClass(ClassName))
 				{
 					// If the class is an interface, expand it to be all classes in memory that implement the class.
 					if (Class->HasAnyClassFlags(CLASS_Interface))
 					{
-						for (UClass* ClassWithInterface : TObjectRange<UClass>())
+						for (const UClass* ClassWithInterface : TObjectRange<UClass>())
 						{
 							if (ClassWithInterface->ImplementsInterface(Class))
 							{
@@ -391,14 +383,12 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 
 			for (const FString& ClassName : DisallowedClassFilterNames)
 			{
-				UClass* Class = FindClass(ClassName);
-
-				if (Class)
+				if (const UClass* Class = FindClass(ClassName))
 				{
 					// If the class is an interface, expand it to be all classes in memory that implement the class.
 					if (Class->HasAnyClassFlags(CLASS_Interface))
 					{
-						for (UClass* ClassWithInterface : TObjectRange<UClass>())
+						for (const UClass* ClassWithInterface : TObjectRange<UClass>())
 						{
 							if (ClassWithInterface->ImplementsInterface(Class))
 							{

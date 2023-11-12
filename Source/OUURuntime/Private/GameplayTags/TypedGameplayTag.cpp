@@ -129,3 +129,21 @@ void FTypedGameplayTag_Base::UnregisterAllDerivedPropertyTypeLayouts()
 		[&](FName TypeName) { PropertyEditorModule.UnregisterCustomPropertyTypeLayout(TypeName); });
 }
 #endif // WITH_EDITOR
+
+FString FTypedGameplayTag_Base::ToShortDisplayString(const FGameplayTag& Tag, const FGameplayTagContainer& RootTags)
+{
+	FString TagName = Tag.ToString();
+	int32 LongestMatch = 0;
+	for (const auto& RootTag : RootTags)
+	{
+		const auto RootTagName = RootTag.ToString() + ".";
+		if (TagName.StartsWith(RootTagName, ESearchCase::CaseSensitive))
+		{
+			LongestMatch = FMath::Max(RootTagName.Len(), LongestMatch);
+		}
+	}
+
+	TagName.RightChopInline(LongestMatch);
+
+	return TagName;
+}

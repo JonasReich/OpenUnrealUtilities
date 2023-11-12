@@ -17,7 +17,7 @@ public:
 	static constexpr auto GetCategoryName() { return "SequentialFrameScheduler"; }
 
 	// - FGameplayDebuggerCategory
-	virtual void DrawData(APlayerController* OwnerPC, FGameplayDebuggerCanvasContext& CanvasContext) override;
+	void DrawData(APlayerController* OwnerPC, FGameplayDebuggerCanvasContext& CanvasContext) override;
 	// --
 
 private:

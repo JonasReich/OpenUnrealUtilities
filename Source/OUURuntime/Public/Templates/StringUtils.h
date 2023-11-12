@@ -27,6 +27,7 @@ FORCEINLINE FString LexToString(TScriptInterface<T> Interface)
 /** Concept for a class that supports string conversion via ToString() member */
 struct CMemberToStringConvertable
 {
+	// ReSharper disable once CppFunctionIsNotImplemented
 	template <typename ElementType>
 	auto Requires(const ElementType& Val) -> decltype(Val.ToString());
 };
@@ -77,6 +78,7 @@ FString LexToString(TSharedPtr<T> Object)
  */
 struct CLexToStringConvertible
 {
+	// ReSharper disable once CppFunctionIsNotImplemented
 	template <typename ElementType>
 	auto Requires(const ElementType& Val) -> decltype(LexToString(Val));
 };

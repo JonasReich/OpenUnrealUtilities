@@ -98,8 +98,8 @@ public:
 	virtual ~FOUUScopedAutomationTestWorld() override;
 
 	// - FAutomationTestWorld
-	virtual void CreateWorld(const FString& WorldSuffix) override;
-	virtual void DestroyWorld() override;
+	void CreateWorld(const FString& WorldSuffix) override;
+	void DestroyWorld() override;
 	// --
 };
 

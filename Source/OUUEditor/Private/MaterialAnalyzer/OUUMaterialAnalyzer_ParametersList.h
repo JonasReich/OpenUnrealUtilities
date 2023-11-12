@@ -24,7 +24,7 @@ namespace OUU::Editor::Private::MaterialAnalyzer::Widgets
 		void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& OwnerTableView);
 
 	private:
-		const FSlateBrush* GetBorderImage() const;
+		const FSlateBrush* GetParameterListBorderImage() const;
 
 		FReply OnParameterButtonClicked() const;
 

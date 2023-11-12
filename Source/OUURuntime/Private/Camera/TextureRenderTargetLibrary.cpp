@@ -26,8 +26,8 @@ EPixelFormat UTextureRenderTargetLibrary::ReadRenderTargetHelper(
 		return OutFormat;
 	}
 
-	FTextureRenderTarget2DResource* RTResource =
-		(FTextureRenderTarget2DResource*)TextureRenderTarget->GameThread_GetRenderTargetResource();
+	const FTextureRenderTarget2DResource* RTResource =
+		static_cast<FTextureRenderTarget2DResource*>(TextureRenderTarget->GameThread_GetRenderTargetResource());
 	if (!RTResource)
 	{
 		return OutFormat;
@@ -40,8 +40,8 @@ EPixelFormat UTextureRenderTargetLibrary::ReadRenderTargetHelper(
 	Width = Width - FMath::Max(X + Width - TextureRenderTarget->SizeX, 0);
 	Height = Height - FMath::Max(Y + Height - TextureRenderTarget->SizeY, 0);
 
-	FIntRect SampleRect(X, Y, X + Width, Y + Height);
-	FReadSurfaceDataFlags ReadSurfaceDataFlags;
+	const FIntRect SampleRect(X, Y, X + Width, Y + Height);
+	const FReadSurfaceDataFlags ReadSurfaceDataFlags;
 
 	FRenderTarget* RenderTarget = TextureRenderTarget->GameThread_GetRenderTargetResource();
 	OutFormat = TextureRenderTarget->GetFormat();
@@ -95,7 +95,7 @@ FLinearColor UTextureRenderTargetLibrary::GetAverageColor(
 		{
 			// I don't know why they use this, instead of the constructor conversion (which remaps properly to linear
 			// space, instead of directly assigning)
-			Average += FLinearColor(float(Color.R), float(Color.G), float(Color.B), float(Color.A));
+			Average += FLinearColor(Color.R, Color.G, Color.B, Color.A);
 		}
 		Average /= TotalPixelCount;
 		break;

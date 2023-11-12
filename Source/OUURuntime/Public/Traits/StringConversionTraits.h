@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 
 // CMemberToStringConvertable and CLexToStringConvertible were moved to Templates/StringUtils.h
-// Because clang requires the LexToString() template overloads to be defined before the conecept template.
+// Because clang requires the LexToString() template overloads to be defined before the concept template.
+
+// ReSharper disable CppFunctionIsNotImplemented
 
 /** Concept for a class that supports parsing from FString/TCHAR* via LexTryParseString() */
 struct CLexTryParseString_Parseable

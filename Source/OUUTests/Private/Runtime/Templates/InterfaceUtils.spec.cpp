@@ -121,11 +121,11 @@ void FInterfaceUtilsSpec::Define()
 			BeforeEach([this]() {
 				UClass* BlueprintClass = StaticLoadClass(
 					UObject::StaticClass(),
-					NULL,
+					nullptr,
 					TEXT("/OpenUnrealUtilities/Editor/Tests/BP_BpInterface_BpImpl.BP_BpInterface_BpImpl_C"),
-					NULL,
+					nullptr,
 					LOAD_None,
-					NULL);
+					nullptr);
 				TargetObject = NewObject<UObject>(GetTransientPackage(), BlueprintClass);
 			});
 
@@ -151,11 +151,11 @@ void FInterfaceUtilsSpec::Define()
 		It("should call a Blueprint implementation of a hybrid interface", [this]() {
 			UClass* BlueprintClass = StaticLoadClass(
 				UObject::StaticClass(),
-				NULL,
+				nullptr,
 				TEXT("/OpenUnrealUtilities/Editor/Tests/BP_BpInterface_BpImpl.BP_BpInterface_BpImpl_C"),
-				NULL,
+				nullptr,
 				LOAD_None,
-				NULL);
+				nullptr);
 			TargetObject = NewObject<UObject>(GetTransientPackage(), BlueprintClass);
 			TScriptInterface<IInterfaceUtilsTests_BpInterface> ScriptInterface = TargetObject;
 

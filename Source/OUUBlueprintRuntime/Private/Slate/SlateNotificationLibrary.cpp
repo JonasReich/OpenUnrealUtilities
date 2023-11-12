@@ -2,7 +2,6 @@
 
 #include "Slate/SlateNotificationLibrary.h"
 
-#include "Components/Widget.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "LogOpenUnrealUtilities.h"
 #include "Widgets/Notifications/SNotificationList.h"
@@ -108,6 +107,7 @@ void USlateNotificationLibrary::SetSlateNotificationHyperlink(
 {
 	if (auto* Notification = FindNotification(NotificationHandle))
 	{
+		// ReSharper disable once CppExpressionWithoutSideEffects
 		const FSimpleDelegate Delegate = FSimpleDelegate::CreateLambda([=]() { HyperlinkDelegate.ExecuteIfBound(); });
 		Notification->SetHyperlink(Delegate, HyperlinkText);
 	}

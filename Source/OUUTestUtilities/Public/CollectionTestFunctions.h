@@ -31,7 +31,7 @@ namespace OUU::TestUtilities::Private
 
 /**
  * Test if two arrays are equal.
- * This check doesn't have any functional difference to an arrays equality check via operator==(),
+ * This check does not have any functional difference to an arrays equality check via operator==(),
  * but this function has more verbose output because it compares individual array elements.
  */
 template <typename ElementType, typename AllocatorType>
@@ -52,8 +52,8 @@ void TestArraysEqual(
 	};
 
 	// Quick initial test: Compare element counts
-	int32 ActualNum = ActualArray.Num();
-	int32 ExpectedNum = ExpectedArray.Num();
+	const int32 ActualNum = ActualArray.Num();
+	const int32 ExpectedNum = ExpectedArray.Num();
 	if (ActualNum != ExpectedNum)
 	{
 		AutomationTest.AddError(
@@ -96,8 +96,8 @@ void TestUnorderedArraysMatch(
 	const TArray<ElementType, AllocatorType>& ExpectedArray)
 {
 	// Quick initial test: Compare element counts
-	int32 ActualNum = ActualArray.Num();
-	int32 ExpectedNum = ExpectedArray.Num();
+	const int32 ActualNum = ActualArray.Num();
+	const int32 ExpectedNum = ExpectedArray.Num();
 	if (ActualNum != ExpectedNum)
 	{
 		AutomationTest.AddError(
@@ -111,7 +111,7 @@ void TestUnorderedArraysMatch(
 	}
 	TArray<ElementType, AllocatorType> ActualArrayCopy = ActualArray;
 	TArray<ElementType, AllocatorType> ExpectedArrayCopy = ExpectedArray;
-	for (int32 i = ExpectedArrayCopy.Num() - 1; i >= 0; i--)
+	for (int32 i = ExpectedArrayCopy.Num() - 1; i >= 0; --i)
 	{
 		const auto& Value = ExpectedArrayCopy[i];
 		int32 j = ActualArrayCopy.Find(Value);

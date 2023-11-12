@@ -4,25 +4,26 @@
 
 #if WITH_GAMEPLAY_DEBUGGER
 
-	#include "Misc/EngineVersionComparison.h"
-	#include "Animation/Debug/DebuggableAnimInstance.h"
-	#include "Templates/InterfaceUtils.h"
 	#include "Animation/AnimInstanceProxy.h"
-	#include "Components/SkeletalMeshComponent.h"
-	#include "DisplayDebugHelpers.h"
-	#include "Engine/Canvas.h"
-	#include "GameFramework/PlayerController.h"
-	#include "SkeletalRenderPublic.h"
-	#include "Rendering/SkeletalMeshRenderData.h"
+	#include "Animation/AnimMontage.h"
 	#include "Animation/AnimNodeBase.h"
-	#include "DrawDebugHelpers.h"
+	#include "Animation/AnimNotifies/AnimNotifyState.h"
 	#include "Animation/AnimSequence.h"
 	#include "Animation/AnimTypes.h"
-	#include "GameplayDebugger/GameplayDebugger_DisplayDebugManager.h"
-	#include "Animation/AnimNotifies/AnimNotifyState.h"
-	#include "Templates/StringUtils.h"
+	#include "Animation/Debug/DebuggableAnimInstance.h"
+	#include "Components/SkeletalMeshComponent.h"
+	#include "DisplayDebugHelpers.h"
+	#include "DrawDebugHelpers.h"
+	#include "Engine/Canvas.h"
+	#include "Engine/Engine.h"
 	#include "Engine/StaticMesh.h"
-	#include "Animation/AnimMontage.h"
+	#include "GameFramework/PlayerController.h"
+	#include "GameplayDebugger/GameplayDebugger_DisplayDebugManager.h"
+	#include "Misc/EngineVersionComparison.h"
+	#include "Rendering/SkeletalMeshRenderData.h"
+	#include "SkeletalRenderPublic.h"
+	#include "Templates/InterfaceUtils.h"
+	#include "Templates/StringUtils.h"
 
 	#if UE_VERSION_OLDER_THAN(5, 0, 0)
 		#include "Animation/BlendSpaceBase.h"
@@ -276,9 +277,9 @@ void FGameplayDebuggerCategory_Animation::DisplayDebug(
 
 			if (PrevChainID != Line.ChainID)
 			{
-				const int32 HalfStep = int32(DisplayDebugManager.GetMaxCharHeight() / 2);
+				const int32 HalfStep = static_cast<int32>(DisplayDebugManager.GetMaxCharHeight() / 2);
 				DisplayDebugManager.ShiftYDrawPosition(
-					float(HalfStep)); // Extra spacing to delimit different chains, CurrLineYBase now
+					static_cast<float>(HalfStep)); // Extra spacing to delimit different chains, CurrLineYBase now
 				// roughly represents middle of text line, so we can use it for line drawing
 
 				// Handle line drawing

@@ -19,9 +19,8 @@ class UInterfaceUtilsTests_CppInterface_Impl : public UObject, public IInterface
 public:
 	float Number;
 
-	virtual void SetNumber(float f) override { Number = f; }
-
-	virtual float GetNumber() const { return Number; }
+	void SetNumber(float f) override { Number = f; }
+	float GetNumber() const override { return Number; }
 };
 
 // -------------------------
@@ -36,7 +35,6 @@ class UInterfaceUtilsTests_BpInterface_CppImpl : public UObject, public IInterfa
 public:
 	float Number;
 
-	virtual void SetNumber_Implementation(float f) override { Number = f; }
-
-	virtual float GetNumber_Implementation() const { return Number; }
+	void SetNumber_Implementation(float f) override { Number = f; }
+	float GetNumber_Implementation() const override { return Number; }
 };

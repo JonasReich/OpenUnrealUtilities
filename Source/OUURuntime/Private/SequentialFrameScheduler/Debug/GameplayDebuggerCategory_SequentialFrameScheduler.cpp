@@ -175,7 +175,6 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
 		// tasks to execute
 		{
 			TArray<OUU::Runtime::CanvasGraphPlottingUtils::FGraphStatData> FrameTimesStats;
-			using TaskHistoryType = FSequentialFrameScheduler::FDebugData::TaskHistoryType;
 			OUU::Runtime::CanvasGraphPlottingUtils::FGraphStatData::FValueRangeRef MaxRef{
 				&DebugScheduler->DebugData.TaskHistory,
 				[&](const void*, int32) -> float { return DebugScheduler->MaxNumTasksToExecutePerFrame; },

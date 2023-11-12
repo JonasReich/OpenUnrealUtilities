@@ -11,7 +11,6 @@
 #include "HAL/FileManager.h"
 #include "HAL/IConsoleManager.h"
 #include "Interfaces/IPluginManager.h"
-#include "Interfaces/IProjectManager.h"
 #include "Kismet2/CompilerResultsLog.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "KismetCompilerModule.h"
@@ -49,7 +48,7 @@ namespace OUU::Editor::CompileBlueprints
 
 		FTimerHandle TickTimerHandle;
 
-		FOUUCompileBlueprintsCommandHelper(FString ArgsLine);
+		FOUUCompileBlueprintsCommandHelper(const FString& ArgsLine);
 
 		~FOUUCompileBlueprintsCommandHelper();
 
@@ -83,12 +82,12 @@ namespace OUU::Editor::CompileBlueprints
 
 		void InitKismetBlueprintCompiler();
 
-		void Shutdown();
+		void Shutdown() const;
 	};
 
 	TUniquePtr<FOUUCompileBlueprintsCommandHelper> GRecompileHelper;
 
-	FOUUCompileBlueprintsCommandHelper::FOUUCompileBlueprintsCommandHelper(FString ArgsLine)
+	FOUUCompileBlueprintsCommandHelper::FOUUCompileBlueprintsCommandHelper(const FString& ArgsLine)
 	{
 		InitCommandLine(ArgsLine);
 		InitKismetBlueprintCompiler();
@@ -237,7 +236,7 @@ namespace OUU::Editor::CompileBlueprints
 		BlueprintAssetList.Empty();
 
 		UE_LOG(LogOpenUnrealUtilities, Display, TEXT("Loading Asset Registry..."));
-		FAssetRegistryModule& AssetRegistryModule =
+		const FAssetRegistryModule& AssetRegistryModule =
 			FModuleManager::LoadModuleChecked<FAssetRegistryModule>(AssetRegistryConstants::ModuleName);
 		auto& AssetRegistry = AssetRegistryModule.Get();
 		if (AssetRegistry.IsLoadingAssets())
@@ -470,7 +469,7 @@ namespace OUU::Editor::CompileBlueprints
 				TotalNumFatalIssues += MessageLog.NumErrors;
 				TotalNumWarnings += MessageLog.NumWarnings;
 
-				for (TSharedRef<class FTokenizedMessage>& Message : MessageLog.Messages)
+				for (const TSharedRef<FTokenizedMessage>& Message : MessageLog.Messages)
 				{
 					FString MessageString = Message->ToText().ToString();
 					if (Message->GetSeverity() == EMessageSeverity::Error)
@@ -495,7 +494,7 @@ namespace OUU::Editor::CompileBlueprints
 		UE_LOG(LogOpenUnrealUtilities, Display, TEXT("Finished Loading Kismit Blueprint Compiler..."));
 	}
 
-	void FOUUCompileBlueprintsCommandHelper::Shutdown()
+	void FOUUCompileBlueprintsCommandHelper::Shutdown() const
 	{
 		// results output
 		UE_LOG(
@@ -545,10 +544,10 @@ namespace OUU::Editor::CompileBlueprints
 		}
 
 		TArray<TSharedRef<IPlugin>> AllContentPlugins = IPluginManager::Get().GetEnabledPluginsWithContent();
-		for (TSharedRef<IPlugin> Plugin : AllContentPlugins)
+		for (const TSharedRef<IPlugin> Plugin : AllContentPlugins)
 		{
-			if (const bool bIncludePlugin = (bIncludeProject && Plugin->GetLoadedFrom() == EPluginLoadedFrom::Project)
-					|| (bIncludeEngine && Plugin->GetLoadedFrom() == EPluginLoadedFrom::Engine))
+			if ((bIncludeProject && Plugin->GetLoadedFrom() == EPluginLoadedFrom::Project)
+				|| (bIncludeEngine && Plugin->GetLoadedFrom() == EPluginLoadedFrom::Engine))
 			{
 				FString PluginContentPath = Plugin->GetMountedAssetPath();
 				IncludeFoldersList.Add(PluginContentPath);
@@ -559,7 +558,7 @@ namespace OUU::Editor::CompileBlueprints
 	}
 
 	FConsoleCommandWithArgsDelegate CompileBlueprintsCommand_Preset(
-		FString PresetName,
+		const FString& PresetName,
 		bool bIncludeProject,
 		bool bIncludeEngine)
 	{

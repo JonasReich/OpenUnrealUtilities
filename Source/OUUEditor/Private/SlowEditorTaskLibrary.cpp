@@ -7,12 +7,10 @@
 
 FSlowEditorTaskHandle::FSlowEditorTaskHandle(FGuid InNewGuid) : TaskId(InNewGuid) {}
 
-static TMap<FGuid, TUniquePtr<FScopedSlowTask>> RegisteredSlowTasks;
-
 FSlowEditorTaskHandle USlowEditorTaskLibrary::StartSlowTask(float AmountOfWork, FText DefaultMessage)
 {
 	FGuid NewTaskGuid = FGuid::NewGuid();
-	while (auto* TaskPtr = Get()->RegisteredSlowTasks.Find(NewTaskGuid))
+	while (Get()->RegisteredSlowTasks.Find(NewTaskGuid) != nullptr)
 	{
 		NewTaskGuid = FGuid::NewGuid();
 	}
@@ -27,7 +25,7 @@ void USlowEditorTaskLibrary::MakeSlowTaskDialogDelayed(
 	bool bShowCancelButton,
 	bool bAllowInPIE)
 {
-	if (auto* TaskPtr = Get()->RegisteredSlowTasks.Find(SlowTaskHandle.TaskId))
+	if (const auto* TaskPtr = Get()->RegisteredSlowTasks.Find(SlowTaskHandle.TaskId))
 	{
 		TaskPtr->Get()->MakeDialogDelayed(Threshold, bShowCancelButton, bAllowInPIE);
 	}
@@ -42,7 +40,7 @@ void USlowEditorTaskLibrary::MakeSlowTaskDialog(
 	bool bShowCancelButton,
 	bool bAllowInPIE)
 {
-	if (auto* TaskPtr = Get()->RegisteredSlowTasks.Find(SlowTaskHandle.TaskId))
+	if (const auto* TaskPtr = Get()->RegisteredSlowTasks.Find(SlowTaskHandle.TaskId))
 	{
 		TaskPtr->Get()->MakeDialogDelayed(bShowCancelButton, bAllowInPIE);
 	}
@@ -57,7 +55,7 @@ void USlowEditorTaskLibrary::EnterSlowTaskProgressFrame(
 	float ExpectedWorkThisFrame,
 	FText Text)
 {
-	if (auto* TaskPtr = Get()->RegisteredSlowTasks.Find(SlowTaskHandle.TaskId))
+	if (const auto* TaskPtr = Get()->RegisteredSlowTasks.Find(SlowTaskHandle.TaskId))
 	{
 		TaskPtr->Get()->EnterProgressFrame(ExpectedWorkThisFrame, Text);
 	}

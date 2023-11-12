@@ -38,7 +38,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawBackground(
 	const FVector2D& BackgroundSize)
 {
 	// Draw a transparent background so that the text is easier to look at
-	const FLinearColor BackgroundColor(0.1f, 0.1f, 0.1f, 0.8f);
+	constexpr FLinearColor BackgroundColor(0.1f, 0.1f, 0.1f, 0.8f);
 	FCanvasTileItem Background(FVector2D(0.0f, 0.0f), BackgroundSize, BackgroundColor);
 	Background.BlendMode = SE_BLEND_Translucent;
 	CanvasContext.DrawItem(Background, BackgroundLocation.X, BackgroundLocation.Y);
@@ -81,7 +81,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawData(
 
 			DrawBackground(CanvasContext, BackgroundLocation, BackgroundSize);
 
-			// Use custom debugger for UOUUAbilitySystemComponents
+			// Use custom debugger for OUU-AbilitySystemComponents
 			Debug_Custom(DebugInfo, OUUAbilityComp);
 			CanvasContext.CursorY = ViewPortSize.Y;
 		}
@@ -98,7 +98,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawData(
 
 void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 	FAbilitySystemComponentDebugInfo& Info,
-	UOUUAbilitySystemComponent* AbilitySystem)
+	UOUUAbilitySystemComponent* AbilitySystem) const
 {
 	DrawDebugHeader(Info, AbilitySystem);
 
@@ -124,8 +124,6 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 			NewColumn(Info);
 		}
 	}
-
-	TSet<FGameplayAttribute> DrawAttributes;
 
 	float MaxCharHeight = 10;
 	if (AbilitySystem->GetOwner()->GetNetMode() != NM_DedicatedServer)
@@ -264,19 +262,20 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 	// -------------------------------------------------------------
 
 	{
+		TSet<FGameplayAttribute> DrawAttributes;
 		DrawTitle(Info, "ATTRIBUTES");
 
-		TArray<FGameplayAttribute> AllAtributes;
-		AbilitySystem->GetAllAttributes(AllAtributes);
-		for (auto& Attribute : AllAtributes)
+		TArray<FGameplayAttribute> AllAttributes;
+		AbilitySystem->GetAllAttributes(AllAttributes);
+		for (auto& Attribute : AllAttributes)
 		{
-			FAggregator SnaphotAggregator;
-			GetAttributeAggregatorSnapshot(AbilitySystem, Attribute, OUT SnaphotAggregator);
+			FAggregator SnapshotAggregator;
+			GetAttributeAggregatorSnapshot(AbilitySystem, Attribute, OUT SnapshotAggregator);
 
 			FAggregatorEvaluateParameters EmptyParams;
-			SnaphotAggregator.EvaluateQualificationForAllMods(EmptyParams);
+			SnapshotAggregator.EvaluateQualificationForAllMods(EmptyParams);
 			TMap<EGameplayModEvaluationChannel, const TArray<FAggregatorMod>*> ModMap;
-			SnaphotAggregator.GetAllAggregatorMods(ModMap);
+			SnapshotAggregator.GetAllAggregatorMods(ModMap);
 
 			if (ModMap.Num() == 0)
 			{
@@ -284,7 +283,7 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 			}
 
 			float FinalValue = AbilitySystem->GetNumericAttribute(Attribute);
-			float BaseValue = SnaphotAggregator.GetBaseValue();
+			float BaseValue = SnapshotAggregator.GetBaseValue();
 
 			FString PaddedAttributeName = Attribute.GetName();
 			while (PaddedAttributeName.Len() < 30)
@@ -531,8 +530,8 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 					{
 						if (Instance->ActiveTasks.Contains(Msg.FromTask) == false)
 						{
-							// Cap finished task msgs to 5 per ability if we are printing to screen (else things will
-							// scroll off)
+							// Cap finished task messages to 5 per ability if we are printing to screen (else things
+							// will scroll off)
 							if (Info.Canvas && ++MsgCount > 5)
 							{
 								break;
@@ -574,8 +573,10 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 	{
 		DrawTitle(Info, "CUES");
 
-		const bool bPrintNotLoadedCues = false;
-		const bool bPrintUnmappedCues = false;
+		// ReSharper disable once CppTooWideScope
+		constexpr bool bPrintNotLoadedCues = false;
+		// ReSharper disable once CppTooWideScope
+		constexpr bool bPrintUnmappedCues = false;
 
 		UGameplayCueManager* CueManager = UAbilitySystemGlobals::Get().GetGameplayCueManager();
 		auto BaseCueTag = UGameplayCueSet::BaseGameplayCueTag();
@@ -594,6 +595,7 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 				if (CueData.LoadedGameplayCueClass == nullptr)
 				{
 					if (bPrintNotLoadedCues)
+					// ReSharper disable once CppUnreachableCode
 					{
 						if (Info.Canvas)
 						{
@@ -606,8 +608,7 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 
 				auto CueClass = CueData.LoadedGameplayCueClass;
 
-				if (UGameplayCueNotify_Static* NonInstancedCueCDO =
-						Cast<UGameplayCueNotify_Static>(CueClass->ClassDefaultObject))
+				if (Cast<UGameplayCueNotify_Static>(CueClass->ClassDefaultObject) != nullptr)
 				{
 					if (Info.Canvas)
 					{
@@ -615,9 +616,7 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 					}
 					DebugLine(Info, FString::Printf(TEXT("%s -> non-instanced"), *CueTagString), 0.f, 0.f);
 				}
-				else if (
-					AGameplayCueNotify_Actor* InstancedCueCDO =
-						Cast<AGameplayCueNotify_Actor>(CueClass->ClassDefaultObject))
+				else if (Cast<AGameplayCueNotify_Actor>(CueClass->ClassDefaultObject) != nullptr)
 				{
 					AActor* LocalAvatarActor = AbilitySystem->GetAvatarActor_Direct();
 					AActor* LocalOwnerActor = AbilitySystem->GetOwnerActor();
@@ -649,6 +648,7 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 				}
 			}
 			else if (bPrintUnmappedCues)
+			// ReSharper disable once CppUnreachableCode
 			{
 				if (Info.Canvas)
 				{
@@ -703,7 +703,7 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 void FGameplayDebuggerCategory_OUUAbilities::GetAttributeAggregatorSnapshot(
 	UOUUAbilitySystemComponent* AbilitySystem,
 	FGameplayAttribute& Attribute,
-	FAggregator SnaphotAggregator)
+	FAggregator SnapshotAggregator)
 {
 	// NOTE: As of writing this code, this is how I understand the usage of CaptureSource and bSnapshot.
 	//       There might be some misunderstandings, so feel free to make corrections and add an appropriate explanation,
@@ -711,15 +711,15 @@ void FGameplayDebuggerCategory_OUUAbilities::GetAttributeAggregatorSnapshot(
 
 	// We pick target, because we pretend that we build this capture for an effect that modifies the attributes on this
 	// ASC.
-	const EGameplayEffectAttributeCaptureSource CaptureSource = EGameplayEffectAttributeCaptureSource::Target;
+	constexpr EGameplayEffectAttributeCaptureSource CaptureSource = EGameplayEffectAttributeCaptureSource::Target;
 	// We pick snapshot, because we do not want any future updates of the values, just a single snapshot.
-	const bool bSnapshot = true;
+	constexpr bool bSnapshot = true;
 
 	FGameplayEffectAttributeCaptureDefinition CaptureDefinition{Attribute, CaptureSource, bSnapshot};
 	FGameplayEffectAttributeCaptureSpec CaptureSpec{CaptureDefinition};
 	AbilitySystem->CaptureAttributeForGameplayEffect(IN OUT CaptureSpec);
 
-	bool bGotSnapshot = CaptureSpec.AttemptGetAttributeAggregatorSnapshot(OUT SnaphotAggregator);
+	bool bGotSnapshot = CaptureSpec.AttemptGetAttributeAggregatorSnapshot(OUT SnapshotAggregator);
 	ensureAlwaysMsgf(
 		bGotSnapshot,
 		TEXT("Snapshots should always be successful! "
@@ -727,15 +727,16 @@ void FGameplayDebuggerCategory_OUUAbilities::GetAttributeAggregatorSnapshot(
 			 "See docs of FGameplayEffectAttributeCaptureSpec::AttemptGetAttributeAggregatorSnapshot."));
 }
 
-void FGameplayDebuggerCategory_OUUAbilities::DrawTitle(FAbilitySystemComponentDebugInfo& Info, FString DebugTitle)
+void FGameplayDebuggerCategory_OUUAbilities::DrawTitle(FAbilitySystemComponentDebugInfo& Info,
+	const FString& DebugTitle) const
 {
 	if (Info.Canvas)
 	{
 		Info.Canvas->SetDrawColor(FColor::White);
 		FFontRenderInfo RenderInfo = FFontRenderInfo();
 		RenderInfo.bEnableShadow = true;
-		const float HeadingScale = 1.0f;
-		auto LargeFont = GEngine->GetLargeFont();
+		constexpr float HeadingScale = 1.0f;
+		const auto LargeFont = GEngine->GetLargeFont();
 		Info.YL =
 			Info.Canvas->DrawText(LargeFont, DebugTitle, Info.XPos, Info.YPos, HeadingScale, HeadingScale, RenderInfo);
 		Info.YL = FMath::Max(Info.YL, LargeFont->GetMaxCharHeight() * HeadingScale);
@@ -749,11 +750,11 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawTitle(FAbilitySystemComponentDe
 
 void FGameplayDebuggerCategory_OUUAbilities::DrawDebugHeader(
 	FAbilitySystemComponentDebugInfo& Info,
-	UOUUAbilitySystemComponent* AbilitySystem)
+	const UOUUAbilitySystemComponent* AbilitySystem) const
 {
 	FString DebugTitle("");
-	AActor* LocalAvatarActor = AbilitySystem->GetAvatarActor_Direct();
-	AActor* LocalOwnerActor = AbilitySystem->GetOwnerActor();
+	const AActor* LocalAvatarActor = AbilitySystem->GetAvatarActor_Direct();
+	const AActor* LocalOwnerActor = AbilitySystem->GetOwnerActor();
 
 	// Avatar info
 	if (LocalAvatarActor)
@@ -797,7 +798,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawDebugHeader(
 	DrawTitle(Info, "");
 }
 
-void FGameplayDebuggerCategory_OUUAbilities::AccumulateScreenPos(FAbilitySystemComponentDebugInfo& Info)
+void FGameplayDebuggerCategory_OUUAbilities::AccumulateScreenPos(FAbilitySystemComponentDebugInfo& Info) const
 {
 	const float NewY = Info.YPos + Info.YL;
 	if (NewY > Info.MaxY)
@@ -843,10 +844,10 @@ void FGameplayDebuggerCategory_OUUAbilities::NewColumnForCategory_Optional(FAbil
 
 void FGameplayDebuggerCategory_OUUAbilities::DebugLine(
 	FAbilitySystemComponentDebugInfo& Info,
-	FString Str,
+	const FString& Str,
 	float XOffset,
 	float YOffset,
-	int32 MinTextRowsToAdvance)
+	int32 MinTextRowsToAdvance) const
 {
 	if (Info.Canvas)
 	{
@@ -863,7 +864,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DebugLine(
 	if (Info.bPrintToLog)
 	{
 		FString LogStr;
-		for (int32 i = 0; i < (int32)XOffset; ++i)
+		for (int32 i = 0; i < static_cast<int32>(XOffset); ++i)
 		{
 			LogStr += TEXT(" ");
 		}
@@ -874,7 +875,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DebugLine(
 	if (Info.Accumulate)
 	{
 		FString LogStr;
-		for (int32 i = 0; i < (int32)XOffset; ++i)
+		for (int32 i = 0; i < static_cast<int32>(XOffset); ++i)
 		{
 			LogStr += TEXT(" ");
 		}
@@ -885,12 +886,12 @@ void FGameplayDebuggerCategory_OUUAbilities::DebugLine(
 
 void FGameplayDebuggerCategory_OUUAbilities::AddTagList(
 	FAbilitySystemComponentDebugInfo& Info,
-	UOUUAbilitySystemComponent* AbilitySystem,
+	const UOUUAbilitySystemComponent* AbilitySystem,
 	FGameplayTagContainer Tags,
-	FString TagsListTitle)
+	const FString& TagsListTitle) const
 {
 	int32 TagCount = 1;
-	int32 NumTags = Tags.Num();
+	const int32 NumTags = Tags.Num();
 	FString CombinedTagsString = "";
 	for (FGameplayTag Tag : Tags)
 	{

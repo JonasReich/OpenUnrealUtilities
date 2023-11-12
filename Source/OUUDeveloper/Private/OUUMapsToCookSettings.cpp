@@ -15,7 +15,7 @@ namespace OUU::Developer::Private
 {
 	void CheckoutConfigFile(const FString& RelativeConfigFilePath)
 	{
-		FString ConfigPath = FPaths::ConvertRelativePathToFull(RelativeConfigFilePath);
+		const FString ConfigPath = FPaths::ConvertRelativePathToFull(RelativeConfigFilePath);
 
 		if (!FPlatformFileManager::Get().GetPlatformFile().FileExists(*ConfigPath))
 		{
@@ -29,7 +29,7 @@ namespace OUU::Developer::Private
 			if (!SourceControlHelpers::CheckoutOrMarkForAdd(
 					ConfigPath,
 					FText::FromString(ConfigPath),
-					NULL,
+					nullptr,
 					ErrorMessage))
 			{
 				UE_LOG(LogOpenUnrealUtilities, Error, TEXT("%s"), *ErrorMessage.ToString());
@@ -64,7 +64,7 @@ void FOUUMapsToCookList::ReloadConfig(const FString& ConfigPath)
 
 void FOUUMapsToCookList::UpdateDefaultConfigFile(const FString& ConfigPath)
 {
-	// Default ini's require the array syntax to be applied to the property name
+	// Default ini files require the array syntax to be applied to the property name
 	// We also use the hardcoded name "Map", because that's required by the cooker.
 	const FString CompleteKey = TEXT("+Map");
 	FConfigSection* Sec = GConfig->GetSectionPrivate(*OwningConfigSection, true, false, *ConfigPath);
@@ -119,7 +119,7 @@ void UOUUMapsToCookSettings::PreEditChange(FProperty* PropertyAboutToChange)
 void UOUUMapsToCookSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
-	auto ConfigPath = GetDefaultConfigFilename();
+	const auto ConfigPath = GetDefaultConfigFilename();
 
 	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(UOUUMapsToCookSettings, ConfigSections))
 	{

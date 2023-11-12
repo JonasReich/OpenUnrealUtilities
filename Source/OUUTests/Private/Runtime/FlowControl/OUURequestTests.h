@@ -1,5 +1,7 @@
 // Copyright (c) 2023 Jonas Reich & Contributors
 
+#pragma once
+
 #include "CoreMinimal.h"
 
 #include "FlowControl/OUURequest.h"
@@ -41,5 +43,4 @@ UCLASS(meta = (Hidden, HideDropDown))
 class UOUURequestQueue_TestRequest : public UOUURequest
 {
 	GENERATED_BODY()
-public:
 };

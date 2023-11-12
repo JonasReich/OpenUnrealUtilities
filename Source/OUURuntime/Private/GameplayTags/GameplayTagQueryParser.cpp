@@ -88,7 +88,7 @@ namespace OUU::Runtime::Private::GameplayTagQueryParser
 
 		/**
 		 * Nested tags, if any.
-		 * Should never have elements if there are InnerExprs
+		 * Should never have elements if there are InnerExpressions
 		 */
 		TArray<FGameplayTag> Tags;
 
@@ -124,7 +124,7 @@ namespace OUU::Runtime::Private::GameplayTagQueryParser
 			return FString::Printf(TEXT("%s%s%s)"), *GetOpString(), *InnerExpressionsString, *TagsString);
 		}
 
-		void AddInnerExpression(TSharedPtr<FQueryExprHelper> InExpression) { InnerExpressions.Add(InExpression); }
+		void AddInnerExpression(const TSharedPtr<FQueryExprHelper>& InExpression) { InnerExpressions.Add(InExpression); }
 
 		void AddTag(FGameplayTag&& Tag) { Tags.Add(Tag); }
 
@@ -135,7 +135,7 @@ namespace OUU::Runtime::Private::GameplayTagQueryParser
 			if (Tags.Num() > 0)
 			{
 				InitNativeExpressionForTags(NativeExpr.ToSharedRef());
-				for (auto& Tag : Tags)
+				for (const auto& Tag : Tags)
 				{
 					NativeExpr->AddTag(Tag);
 				}
@@ -143,7 +143,7 @@ namespace OUU::Runtime::Private::GameplayTagQueryParser
 			else
 			{
 				InitNativeExpressionForExpressions(NativeExpr.ToSharedRef());
-				for (auto& Expr : InnerExpressions)
+				for (const auto& Expr : InnerExpressions)
 				{
 					NativeExpr->AddExpr(Expr->MakeNativeExpr());
 				}
@@ -217,9 +217,9 @@ namespace OUU::Runtime::Private::GameplayTagQueryParser
 	}
 
 	/** Forward declare utility function to parse inner expressions from the string */
-	void ParseInnerExprs(const TCHAR*& Str, TSharedPtr<FQueryExprHelper> HelperRoot);
+	void ParseInnerExpressions(const TCHAR*& Str, const TSharedPtr<FQueryExprHelper>& HelperRoot);
 	/** Forward declare utility function to parse inner tags from the string */
-	void ParseTags(const TCHAR*& Str, TSharedPtr<FQueryExprHelper> HelperRoot);
+	void ParseTags(const TCHAR*& Str, const TSharedPtr<FQueryExprHelper>& HelperRoot);
 
 	/**
 	 * Parse a string into a tree of helper structs.
@@ -239,7 +239,7 @@ namespace OUU::Runtime::Private::GameplayTagQueryParser
 		// Parse the nested content of the expression - either inner expressions or gameplay tags
 		if (StartsWithArbitraryOp(Str))
 		{
-			ParseInnerExprs(Str, HelperRoot);
+			ParseInnerExpressions(Str, HelperRoot);
 		}
 		else
 		{
@@ -248,7 +248,7 @@ namespace OUU::Runtime::Private::GameplayTagQueryParser
 		return HelperRoot;
 	}
 
-	void ParseInnerExprs(const TCHAR*& Str, TSharedPtr<FQueryExprHelper> HelperRoot)
+	void ParseInnerExpressions(const TCHAR*& Str, const TSharedPtr<FQueryExprHelper>& HelperRoot)
 	{
 		// If we have a valid expression operation string now, this expression is an ExprExpr
 		// -> an expression wrapping other expressions
@@ -265,7 +265,7 @@ namespace OUU::Runtime::Private::GameplayTagQueryParser
 		UE_CLOG(*Str != LITERAL(TCHAR, ')'), LogTemp, Warning, TEXT("Parentheses do not close properly!"));
 	}
 
-	void ParseTags(const TCHAR*& Str, TSharedPtr<FQueryExprHelper> HelperRoot)
+	void ParseTags(const TCHAR*& Str, const TSharedPtr<FQueryExprHelper>& HelperRoot)
 	{
 		const TCHAR* AllTagsEnd = Str;
 		while (AllTagsEnd)
@@ -318,6 +318,8 @@ FGameplayTagQuery FGameplayTagQueryParser::ParseQuery(const FString& SourceStrin
 	namespace QueryParser = OUU::Runtime::Private::GameplayTagQueryParser;
 
 	// Declare replacement string on outer scope so we can assign it to Str without going out of scope
+	// ReSharper disable once CppTooWideScope
+	// ReSharper disable once CppJoinDeclarationAndAssignment
 	FString ReplacementString;
 	const TCHAR* Str = *SourceString;
 	QueryParser::SkipWhitespace(Str);
@@ -329,7 +331,7 @@ FGameplayTagQuery FGameplayTagQueryParser::ParseQuery(const FString& SourceStrin
 		Str = *ReplacementString;
 	}
 
-	if (auto HelperTree = QueryParser::ParseIntoHelperTree(Str))
+	if (const auto HelperTree = QueryParser::ParseIntoHelperTree(Str))
 	{
 		auto& NativeExpr = HelperTree->MakeNativeExpr();
 		auto Result = FGameplayTagQuery::BuildQuery(NativeExpr, SourceString);

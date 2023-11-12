@@ -66,7 +66,7 @@ private:
 
 public:
 	// - UAbilitySystemComponent
-	virtual int32 HandleGameplayEvent(FGameplayTag EventTag, const FGameplayEventData* Payload) override;
+	int32 HandleGameplayEvent(FGameplayTag EventTag, const FGameplayEventData* Payload) override;
 	// --
 
 protected:

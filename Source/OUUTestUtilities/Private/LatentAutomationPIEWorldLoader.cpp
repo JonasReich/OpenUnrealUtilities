@@ -7,6 +7,7 @@
 	#include "Engine/World.h"
 	#include "GameFramework/GameStateBase.h"
 	#include "LogOpenUnrealUtilities.h"
+	#include "Misc/PackageName.h"
 	#include "Misc/Paths.h"
 	#include "Tests/AutomationCommon.h"
 	#include "TimerManager.h"
@@ -30,7 +31,7 @@ namespace OUU::TestUtilities
 			for (const FWorldContext& Context : WorldContexts)
 			{
 				if (((Context.WorldType == EWorldType::PIE) || (Context.WorldType == EWorldType::Game))
-					&& (Context.World() != NULL))
+					&& (Context.World() != nullptr))
 				{
 					TestWorld = Context.World();
 					break;

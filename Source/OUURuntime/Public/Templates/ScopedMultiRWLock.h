@@ -203,7 +203,7 @@ public:
 #if UE_VERSION_OLDER_THAN(5, 0, 0)
 			return UE4Tuple_Private::MakeTupleImpl(&TypedThis.GetByIdx<Indices>()...);
 #else
-			return MakeTuple(&TypedThis.template GetByIdx<Indices>()...);
+			return MakeTuple(&TypedThis.GetByIdx<Indices>()...);
 #endif
 		}
 	};

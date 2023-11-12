@@ -1,6 +1,7 @@
 // Copyright (c) 2023 Jonas Reich & Contributors
 
 #pragma once
+
 #include "AbilitySystemComponent.h"
 
 #if WITH_GAMEPLAY_DEBUGGER
@@ -12,6 +13,7 @@ class UOUUAbilitySystemComponent;
 
 class AActor;
 class APlayerController;
+class UCanvas;
 
 /**
  * This is a modified copy of FGameplayDebuggerCategory_Abilities that focuses on improved local debug data
@@ -29,14 +31,14 @@ class OUURUNTIME_API FGameplayDebuggerCategory_OUUAbilities : public FGameplayDe
 public:
 	static auto GetCategoryName() { return TEXT("Abilities (OUU)"); }
 
-	virtual void DrawData(APlayerController* OwnerPC, FGameplayDebuggerCanvasContext& CanvasContext) override;
+	void DrawData(APlayerController* OwnerPC, FGameplayDebuggerCanvasContext& CanvasContext) override;
 
 protected:
 	struct FAbilitySystemComponentDebugInfo
 	{
 		FAbilitySystemComponentDebugInfo() { FMemory::Memzero(*this); }
 
-		class UCanvas* Canvas;
+		UCanvas* Canvas;
 
 		bool bPrintToLog;
 
@@ -65,31 +67,31 @@ protected:
 	 * members. This is the equivalent of UAbilitySystemComponent::Debug_Internal, which is still used for native
 	 * UAbilitySystemComponents.
 	 */
-	void Debug_Custom(FAbilitySystemComponentDebugInfo& Info, UOUUAbilitySystemComponent* AbilitySystem);
+	void Debug_Custom(FAbilitySystemComponentDebugInfo& Info, UOUUAbilitySystemComponent* AbilitySystem) const;
 
 	static void GetAttributeAggregatorSnapshot(
 		UOUUAbilitySystemComponent* AbilitySystem,
 		FGameplayAttribute& Attribute,
-		FAggregator SnaphotAggregator);
-	void DrawTitle(FAbilitySystemComponentDebugInfo& Info, FString DebugTitle);
-	void DrawDebugHeader(FAbilitySystemComponentDebugInfo& Info, UOUUAbilitySystemComponent* AbilitySystem);
+		FAggregator SnapshotAggregator);
+	void DrawTitle(FAbilitySystemComponentDebugInfo& Info, const FString& DebugTitle) const;
+	void DrawDebugHeader(FAbilitySystemComponentDebugInfo& Info, const UOUUAbilitySystemComponent* AbilitySystem) const;
 
-	void AccumulateScreenPos(FAbilitySystemComponentDebugInfo& Info);
+	void AccumulateScreenPos(FAbilitySystemComponentDebugInfo& Info) const;
 	void NewColumn(FAbilitySystemComponentDebugInfo& Info) const;
 	void NewColumnForCategory_Optional(FAbilitySystemComponentDebugInfo& Info) const;
 
 	void DebugLine(
 		FAbilitySystemComponentDebugInfo& Info,
-		FString Str,
+		const FString& Str,
 		float XOffset,
 		float YOffset,
-		int32 MinTextRowsToAdvance = 0);
+		int32 MinTextRowsToAdvance = 0) const;
 
 	void AddTagList(
 		FAbilitySystemComponentDebugInfo& Info,
-		UOUUAbilitySystemComponent* AbilitySystem,
+		const UOUUAbilitySystemComponent* AbilitySystem,
 		FGameplayTagContainer Tags,
-		FString TagsListTitle);
+		const FString& TagsListTitle) const;
 };
 
 #endif // WITH_GAMEPLAY_DEBUGGER

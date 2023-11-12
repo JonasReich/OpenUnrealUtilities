@@ -13,7 +13,7 @@
 namespace OUU::Runtime::Private
 {
 	template <class UserClass>
-	using TOUUKeyBindFunctionType = typename FGameplayDebuggerInputHandler::FHandler::TMethodPtr<UserClass>;
+	using TOUUKeyBindFunctionType = FGameplayDebuggerInputHandler::FHandler::TMethodPtr<UserClass>;
 
 	/**
 	 * Templated base class for gameplay debugger extensions to support advanced key bindings.
@@ -62,7 +62,7 @@ namespace OUU::Runtime::Private
 			EGameplayDebuggerInputMode InputMode = EGameplayDebuggerInputMode::Local,
 			bool bBoolSwitchDefaultValue = false)
 		{
-			int32 SwitchId = BoolSwitchValues.Num();
+			const int32 SwitchId = BoolSwitchValues.Num();
 			RegisterKeyBind(ConfigName, true, bBoolSwitchDefaultValue);
 
 			return Super::template BindKeyPress<SelfType>(
@@ -121,7 +121,7 @@ class OUURUNTIME_API FOUUGameplayDebuggerExtension_Base :
 {
 public:
 	// - FGameplayDebuggerExtension
-	virtual FString GetDescription() const override;
+	FString GetDescription() const override;
 	// --
 };
 

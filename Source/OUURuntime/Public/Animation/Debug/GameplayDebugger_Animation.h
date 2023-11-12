@@ -27,7 +27,7 @@ public:
 
 	static auto GetCategoryName() { return TEXT("Animation"); }
 
-	virtual void DrawData(APlayerController* OwnerPC, FGameplayDebuggerCanvasContext& CanvasContext) override;
+	void DrawData(APlayerController* OwnerPC, FGameplayDebuggerCanvasContext& CanvasContext) override;
 
 private:
 	int32 DebugMeshComponentIndex = 0;

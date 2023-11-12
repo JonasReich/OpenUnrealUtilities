@@ -13,10 +13,10 @@ static_assert(
 
 static_assert(
 	TIsConstructible<FOUUSampleBarTags_Ref>::Value == false,
-	"Typed tags container ref type should not be constructible without parameters");
+	"Typed tags container ref type should not be constructable without parameters");
 static_assert(
 	TIsConstructible<FOUUSampleBarTags_Ref, FOUUSampleBarTags_Value>::Value == true,
-	"Typed tags container ref type should be constructible from value type");
+	"Typed tags container ref type should be constructable from value type");
 
 BEGIN_DEFINE_SPEC(
 	FTypedGameplayTagSpec,
@@ -26,15 +26,17 @@ END_DEFINE_SPEC(FTypedGameplayTagSpec)
 
 void FTypedGameplayTagSpec::Define()
 {
-	It("should be constructible from a literal gameplay tag", [this]() {
-		FOUUSampleBarTag InstanceTag{FSampleGameplayTags::Bar::Get()};
-		FGameplayTag RegularTag{FSampleGameplayTags::Bar::Get()};
+	It("should be constructable from a literal gameplay tag", [this]() {
+		const FOUUSampleBarTag InstanceTag{FSampleGameplayTags::Bar::Get()};
+		const FGameplayTag RegularTag{FSampleGameplayTags::Bar::Get()};
 		SPEC_TEST_EQUAL(InstanceTag.ToString(), RegularTag.ToString());
 	});
 
 	It("should be assignable from a literal gameplay tag", [this]() {
+		// ReSharper disable CppJoinDeclarationAndAssignment
 		FOUUSampleBarTag InstanceTag;
 		FGameplayTag RegularTag;
+		// ReSharper restore CppJoinDeclarationAndAssignment
 		InstanceTag = FSampleGameplayTags::Bar::Get();
 		RegularTag = FSampleGameplayTags::Bar::Get();
 		SPEC_TEST_EQUAL(InstanceTag.ToString(), RegularTag.ToString());
@@ -42,9 +44,9 @@ void FTypedGameplayTagSpec::Define()
 
 	Describe("operator==", [this]() {
 		It("should support comparison with a regular gameplay tag", [this]() {
-			FOUUSampleBarTag TypedTag = FSampleGameplayTags::Bar::Get();
-			FGameplayTag RegularTag = FSampleGameplayTags::Bar::Get();
-			FGameplayTag RegularTag_Foo = FSampleGameplayTags::Foo::Get();
+			const FOUUSampleBarTag TypedTag = FSampleGameplayTags::Bar::Get();
+			const FGameplayTag RegularTag = FSampleGameplayTags::Bar::Get();
+			const FGameplayTag RegularTag_Foo = FSampleGameplayTags::Foo::Get();
 
 			SPEC_TEST_TRUE(TypedTag == RegularTag);
 			SPEC_TEST_TRUE(RegularTag == TypedTag);
@@ -56,7 +58,7 @@ void FTypedGameplayTagSpec::Define()
 		It("should support comparison with a literal gameplay tag", [this]() {
 			const FSampleGameplayTags::Foo& LiteralTag_Foo = FSampleGameplayTags::Foo::Get();
 			const FSampleGameplayTags::Bar& LiteralTag_Bar = FSampleGameplayTags::Bar::Get();
-			FOUUSampleBarTag TypedTag_Bar = LiteralTag_Bar;
+			const FOUUSampleBarTag TypedTag_Bar = LiteralTag_Bar;
 
 			SPEC_TEST_FALSE(TypedTag_Bar == LiteralTag_Foo);
 			SPEC_TEST_FALSE(LiteralTag_Foo == TypedTag_Bar);
@@ -66,9 +68,9 @@ void FTypedGameplayTagSpec::Define()
 		});
 
 		It("should support comparison with another typed tag", [this]() {
-			FOUUSampleBarTag TypedTag_Bar_1 = FSampleGameplayTags::Bar::Get();
-			FOUUSampleBarTag TypedTag_Bar_2 = FSampleGameplayTags::Bar::Get();
-			FOUUSampleBarTag TypedTag_Bar_Alpha = FSampleGameplayTags::Bar::Alpha::Get();
+			const FOUUSampleBarTag TypedTag_Bar_1 = FSampleGameplayTags::Bar::Get();
+			const FOUUSampleBarTag TypedTag_Bar_2 = FSampleGameplayTags::Bar::Get();
+			const FOUUSampleBarTag TypedTag_Bar_Alpha = FSampleGameplayTags::Bar::Alpha::Get();
 
 			SPEC_TEST_TRUE(TypedTag_Bar_1 == TypedTag_Bar_2);
 
@@ -80,33 +82,33 @@ void FTypedGameplayTagSpec::Define()
 	Describe("TryConvert", [this]() {
 		It("should succeed with matching tags", [this]() {
 			{
-				FGameplayTag VanillaBarTag = FGameplayTag::RequestGameplayTag(TEXT("OUUTestTags.Bar"));
-				FOUUSampleBarTag Result = FOUUSampleBarTag::TryConvert(VanillaBarTag);
+				const FGameplayTag VanillaBarTag = FGameplayTag::RequestGameplayTag(TEXT("OUUTestTags.Bar"));
+				const FOUUSampleBarTag Result = FOUUSampleBarTag::TryConvert(VanillaBarTag);
 				SPEC_TEST_TRUE(VanillaBarTag.IsValid());
 				SPEC_TEST_TRUE(Result.IsValid());
 			}
 			// Added the option to have two root tags, so we must test this
 			{
-				FGameplayTag VanillaBazTag = FGameplayTag::RequestGameplayTag(TEXT("OUUTestTags.Baz"));
-				FOUUSampleBarTag Result = FOUUSampleBarTag::TryConvert(VanillaBazTag);
+				const FGameplayTag VanillaBazTag = FGameplayTag::RequestGameplayTag(TEXT("OUUTestTags.Baz"));
+				const FOUUSampleBarTag Result = FOUUSampleBarTag::TryConvert(VanillaBazTag);
 				SPEC_TEST_TRUE(VanillaBazTag.IsValid());
 				SPEC_TEST_TRUE(Result.IsValid());
 			}
 		});
 
 		It("should fail with non-matching tags", [this]() {
-			FGameplayTag VanillaFooTag = FGameplayTag::RequestGameplayTag(TEXT("OUUTestTags.Foo"));
+			const FGameplayTag VanillaFooTag = FGameplayTag::RequestGameplayTag(TEXT("OUUTestTags.Foo"));
 			// Vanilla tag should always be valid.
 			SPEC_TEST_TRUE(VanillaFooTag.IsValid());
 
-			FOUUSampleBarTag Result = FOUUSampleBarTag::TryConvert(VanillaFooTag);
+			const FOUUSampleBarTag Result = FOUUSampleBarTag::TryConvert(VanillaFooTag);
 			SPEC_TEST_FALSE(Result.IsValid());
 		});
 	});
 
 	Describe("GetAllRootTags", [this]() {
 		It("should return all native tags", [this]() {
-			auto AllRootTags = FOUUSampleBarTag::GetAllRootTags();
+			const auto AllRootTags = FOUUSampleBarTag::GetAllRootTags();
 			SPEC_TEST_TRUE(AllRootTags.HasTagExact(FSampleGameplayTags::Bar::Get()));
 			SPEC_TEST_TRUE(AllRootTags.HasTagExact(FSampleGameplayTags::Baz::Get()));
 		});
@@ -114,7 +116,7 @@ void FTypedGameplayTagSpec::Define()
 
 	Describe("GetAllLeafTags", [this]() {
 		It("should return all native leaf tags", [this]() {
-			auto AllLeafTags = FOUUSampleBarTag::GetAllLeafTags();
+			const auto AllLeafTags = FOUUSampleBarTag::GetAllLeafTags();
 
 			// These are all children of Bar that don't have any successive children
 			SPEC_TEST_TRUE(AllLeafTags.HasTagExact(FSampleGameplayTags::Bar::Alpha::One::Get()));
@@ -128,7 +130,7 @@ void FTypedGameplayTagSpec::Define()
 		});
 
 		It("should not return native container tags", [this]() {
-			auto AllLeafTags = FOUUSampleBarTag::GetAllLeafTags();
+			const auto AllLeafTags = FOUUSampleBarTag::GetAllLeafTags();
 			SPEC_TEST_FALSE(AllLeafTags.HasTagExact(FSampleGameplayTags::Bar::Alpha::Get()));
 		});
 	});
@@ -147,7 +149,7 @@ void FTypedGameplayTagSpec::Define()
 			Tags.AddTag(FSampleGameplayTags::Bar::Get());
 			Tags.AddTag(FSampleGameplayTags::Baz::Get());
 
-			FGameplayTagContainer NormalTags = Tags.Get();
+			const FGameplayTagContainer NormalTags = Tags.Get();
 			SPEC_TEST_TRUE(NormalTags.HasTagExact(FSampleGameplayTags::Bar::Get()));
 			SPEC_TEST_TRUE(NormalTags.HasTagExact(FSampleGameplayTags::Baz::Get()));
 		});
@@ -157,7 +159,7 @@ void FTypedGameplayTagSpec::Define()
 			NormalTags.AddTag(FSampleGameplayTags::Bar::Get());
 			NormalTags.AddTag(FSampleGameplayTags::Baz::Get());
 
-			FOUUSampleBarTags_Value Tags = FOUUSampleBarTags_Value::CreateFiltered(NormalTags);
+			const FOUUSampleBarTags_Value Tags = FOUUSampleBarTags_Value::CreateFiltered(NormalTags);
 			SPEC_TEST_TRUE(Tags.HasTagExact(FSampleGameplayTags::Bar::Get()));
 			SPEC_TEST_TRUE(Tags.HasTagExact(FSampleGameplayTags::Baz::Get()));
 			SPEC_TEST_EQUAL(Tags.Num(), 2);
@@ -168,13 +170,13 @@ void FTypedGameplayTagSpec::Define()
 			NormalTags.AddTag(FSampleGameplayTags::Foo::Get());
 			NormalTags.AddTag(FSampleGameplayTags::Bar::Get());
 
-			FOUUSampleBarTags_Value Tags = FOUUSampleBarTags_Value::CreateFiltered(NormalTags);
+			const FOUUSampleBarTags_Value Tags = FOUUSampleBarTags_Value::CreateFiltered(NormalTags);
 			SPEC_TEST_TRUE(Tags.HasTagExact(FSampleGameplayTags::Bar::Get()));
 			SPEC_TEST_EQUAL(Tags.Num(), 1);
 		});
 
-		It("should allow modifying original contianer through ref type", [this]() {
-			FOUUSampleBarTags_Value Tags;
+		It("should allow modifying original container through ref type", [this]() {
+			const FOUUSampleBarTags_Value Tags;
 
 			FOUUSampleBarTags_Ref TagsRef = Tags;
 			TagsRef.AddTag(FSampleGameplayTags::Bar::Get());
