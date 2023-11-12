@@ -14,6 +14,7 @@
 	#include "LogOpenUnrealUtilities.h"
 	#include "Traits/IteratorTraits.h"
 	#include "GameMapsSettings.h"
+	#include "Engine/GameViewportClient.h"
 
 	#if UE_VERSION_OLDER_THAN(5, 0, 0)
 		#include "UObject/CoreOnline.h"
@@ -87,6 +88,11 @@ bool FOUUAutomationTestWorld::InitializeGame()
 
 	// Debug error string required for many of the initialization functions on UWorld
 	FString ErrorString;
+
+	// Create a viewport client
+	auto* ViewportClient = NewObject<UGameViewportClient>(GEngine, GEngine->GameViewportClientClass);
+	ViewportClient->Init(*GameInstance->GetWorldContext(), GameInstance);
+	GameInstance->GetWorldContext()->GameViewport = ViewportClient;
 
 	// Create a local player
 	GameMode->PlayerStateClass = APlayerState::StaticClass();
