@@ -39,6 +39,8 @@
 	#include "WorkspaceMenuStructureModule.h"
 #endif
 
+UE_DISABLE_OPTIMIZATION
+
 namespace OUU::Developer::ActorMapWindow
 {
 	namespace Private
@@ -137,7 +139,7 @@ namespace OUU::Developer::ActorMapWindow
 
 			const bool bEnabled = ShouldBeEnabled(bParentEnabled);
 			const ESlateDrawEffect DrawEffects = bEnabled ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect;
-			
+
 			const FVector2D LocalSize = AllottedGeometry.GetLocalSize();
 			const FVector2D LocalCenter = LocalSize / 2;
 			const float MaxComponent = LocalCenter.GetMin();
@@ -185,8 +187,8 @@ namespace OUU::Developer::ActorMapWindow
 						OutDrawElements,
 						RetLayerId++,
 						AllottedGeometry.ToPaintGeometry(
-							WidgetSpaceLocation - (MarkerSize / 2.f),
-							FSlateLayoutTransform(FVector2f(MarkerSize, MarkerSize))),
+							FVector2D(MarkerSize, MarkerSize),
+							FSlateLayoutTransform(1.f, WidgetSpaceLocation - (MarkerSize / 2.f))),
 						&Private::White,
 						DrawEffects,
 						Query->QueryColor);
@@ -199,8 +201,10 @@ namespace OUU::Developer::ActorMapWindow
 						OutDrawElements,
 						RetLayerId++,
 						AllottedGeometry.ToPaintGeometry(
-							WidgetSpaceLocation - (MarkerSize / 2.f) + FVector2D(0, MarkerSize),
-							FSlateLayoutTransform(LabelDimensions)),
+							FVector2D(LabelDimensions),
+							FSlateLayoutTransform(
+								1.f,
+								WidgetSpaceLocation - (MarkerSize / 2.f) + FVector2D(0, MarkerSize))),
 						&Private::White,
 						DrawEffects,
 						Private::LabelBackgroundColor);
@@ -209,8 +213,10 @@ namespace OUU::Developer::ActorMapWindow
 						OutDrawElements,
 						RetLayerId++,
 						AllottedGeometry.ToPaintGeometry(
-							WidgetSpaceLocation - (MarkerSize / 2.f) + FVector2D(0, MarkerSize),
-							FSlateLayoutTransform(FVector2f(MarkerSize, MarkerSize))),
+							FVector2D(FVector2f(MarkerSize, MarkerSize)),
+							FSlateLayoutTransform(
+								1.f,
+								WidgetSpaceLocation - (MarkerSize / 2.f) + FVector2D(0, MarkerSize))),
 						LabelText,
 						FontInfo,
 						DrawEffects,
@@ -766,3 +772,5 @@ namespace OUU::Developer::ActorMapWindow
 		FConsoleCommandDelegate::CreateStatic(TryInvokeTab));
 
 } // namespace OUU::Developer::ActorMapWindow
+
+UE_DISABLE_OPTIMIZATION
