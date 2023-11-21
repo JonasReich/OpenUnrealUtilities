@@ -124,6 +124,16 @@ void FSequentialFrameScheduler::AddTaskDebugName(const FTaskHandle& Handle, cons
 #endif
 }
 
+FString FSequentialFrameScheduler::GetTaskDebugName(const FTaskHandle& Handle) const
+{
+#if WITH_GAMEPLAY_DEBUGGER
+	if (const FName* TaskName = DebugData.TaskDebugNames.Find(Handle))
+		return TaskName->ToString();
+#endif
+
+	return TEXT("Unnamed Task");
+}
+
 bool FSequentialFrameScheduler::IsTaskPaused(const FTaskHandle& Handle) const
 {
 	if (auto* Task = TaskHandlesToTaskInfos.Find(Handle))

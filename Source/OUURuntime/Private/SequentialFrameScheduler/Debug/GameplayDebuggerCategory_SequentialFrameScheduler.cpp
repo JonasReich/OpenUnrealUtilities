@@ -150,7 +150,7 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
 		float TaskDuration;
 		Tie(FrameNumber, TaskHandle, TimeBetweenUpdates, TaskDuration) = TaskHistory[i];
 
-		FName TaskName = DebugScheduler->DebugData.TaskDebugNames[TaskHandle];
+		FString TaskName = DebugScheduler->GetTaskDebugName(TaskHandle);
 		if (TSharedPtr<FSequentialFrameTask>* TaskInfo = DebugScheduler->TaskHandlesToTaskInfos.Find(TaskHandle))
 		{
 			HistoryString += FString::Printf(
@@ -158,7 +158,7 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
 				FrameNumber,
 				TimeBetweenUpdates * 1000.f,
 				TaskInfo->Get()->Period * 1000.f,
-				*TaskName.ToString(),
+				*TaskName,
 				TaskDuration * 1000.f);
 		}
 		else
@@ -224,7 +224,7 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
 					static_cast<float>(i) / static_cast<float>(DebugScheduler->TaskHandlesToTaskInfos.Num());
 
 				auto& TaskHandle = Entry.Key;
-				FString TaskName = DebugScheduler->DebugData.TaskDebugNames[TaskHandle].ToString();
+				FString TaskName = DebugScheduler->GetTaskDebugName(TaskHandle);
 
 				TArray<OUU::Runtime::CanvasGraphPlottingUtils::FGraphStatData> FrameTimesStats;
 				using TaskHistoryType = FSequentialFrameScheduler::FDebugData::TaskHistoryType;
