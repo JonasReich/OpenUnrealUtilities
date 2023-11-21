@@ -20,6 +20,8 @@ public:
 		int32 Index = INDEX_NONE;
 
 		bool operator==(const FTaskHandle& Other) const { return Index == Other.Index; }
+		bool IsValid() const { return Index != INDEX_NONE; }
+		void Reset() { Index = INDEX_NONE; }
 	};
 
 	/**

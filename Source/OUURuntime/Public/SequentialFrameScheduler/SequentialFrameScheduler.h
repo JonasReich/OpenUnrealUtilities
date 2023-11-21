@@ -108,6 +108,7 @@ public:
 
 	/** Give the task a somewhat recognizable name for debugging purposes. */
 	void AddTaskDebugName(const FTaskHandle& Handle, const FName TaskName);
+	FString GetTaskDebugName(const FTaskHandle& Handle) const;
 
 	bool IsTaskPaused(const FTaskHandle& Handle) const;
 	void PauseTask(const FTaskHandle& Handle);
