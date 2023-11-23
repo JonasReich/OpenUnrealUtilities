@@ -38,10 +38,10 @@ public:
 
 	FTaskHandle Handle;
 
+	// #TODO change time values to double
 	float Period = 0.03f;
 	bool bTickAsOftenAsPossible = true;
 
-	float Now = 0.f;
 	float LastInvocationTime = 0.f;
 	float SecondToLastInvocationTime = 0.f;
 
@@ -62,7 +62,7 @@ public:
 	/** Get a prediction for overtime in a future number of frames */
 	float GetPredictedOvertimeFraction(float PredictedDeltaTime, int32 NumFrames) const;
 
-	void Execute();
+	void Execute(float Now);
 
 	// Movable only (required because of FTimerUnifiedDelegate)
 	FSequentialFrameTask() = default;
@@ -74,6 +74,9 @@ public:
 private:
 	float CachedOvertimeSeconds = 0.f;
 	float CachedOvertimeFraction = 0.f;
+
+	// Get period which can be used safely as divisor
+	float GetPeriodDivisor() const;
 };
 
 FORCEINLINE uint32 OUURUNTIME_API GetTypeHash(const FSequentialFrameTask::FTaskHandle& Handle)
