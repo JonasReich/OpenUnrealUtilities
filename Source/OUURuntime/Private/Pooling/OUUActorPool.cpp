@@ -5,6 +5,7 @@
 #include "LogOpenUnrealUtilities.h"
 #include "ProfilingDebugging/CsvProfiler.h"
 #include "Templates/InterfaceUtils.h"
+#include "VisualLogger/VisualLogger.h"
 
 CSV_DEFINE_CATEGORY(OUUActorPool, true);
 
