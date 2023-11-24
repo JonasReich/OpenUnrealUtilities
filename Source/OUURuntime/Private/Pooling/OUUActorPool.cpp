@@ -2,6 +2,8 @@
 
 #include "Pooling/OUUActorPool.h"
 
+#include "Engine/World.h"
+#include "HAL/IConsoleManager.h"
 #include "LogOpenUnrealUtilities.h"
 #include "ProfilingDebugging/CsvProfiler.h"
 #include "Templates/InterfaceUtils.h"

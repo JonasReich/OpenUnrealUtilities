@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 
+#include "GameFramework/Actor.h"
 #include "IndexedHandle.h"
+#include "Subsystems/WorldSubsystem.h"
 #include "UObject/Interface.h"
 
 #include "OUUActorPool.generated.h"
