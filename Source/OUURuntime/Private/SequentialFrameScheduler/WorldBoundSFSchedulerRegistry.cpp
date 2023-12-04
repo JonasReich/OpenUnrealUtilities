@@ -111,6 +111,11 @@ AWorldBoundSFSchedulerRegistry* AWorldBoundSFSchedulerRegistry::GetWorldSingleto
 {
 	check(IsValid(WorldContextObject));
 	UWorld* World = WorldContextObject->GetWorld();
+	if (World == nullptr)
+	{
+		return nullptr;
+	}
+
 	if (const auto Itr = TActorIterator<AWorldBoundSFSchedulerRegistry>(World))
 	{
 		return *Itr;
