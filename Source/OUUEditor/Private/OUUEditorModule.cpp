@@ -7,6 +7,7 @@
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidget.h"
 #include "EditorUtilityWidgetBlueprint.h"
+#include "Engine/AssetManager.h"
 #include "GameplayTags/TypedGameplayTag.h"
 #include "GameplayTags/TypedGameplayTagContainerCustomization.h"
 #include "IAssetTools.h"
@@ -46,6 +47,12 @@ namespace OUU::Editor
 
 		void ShutdownModule() override
 		{
+			if (OnUtilityWidgetsLoadedHandle.IsValid())
+			{
+				OnUtilityWidgetsLoadedHandle->CancelHandle();
+				OnUtilityWidgetsLoadedHandle = nullptr;
+			}
+
 			MaterialAnalyzer::UnregisterNomadTabSpawner();
 			ContentBrowserExtensions::UnregisterHooks();
 
@@ -56,6 +63,7 @@ namespace OUU::Editor
 
 	private:
 		FDelegateHandle OnFilesLoadedHandle;
+		TSharedPtr<FStreamableHandle> OnUtilityWidgetsLoadedHandle;
 
 		void HandleOnFiledLoaded()
 		{
@@ -68,7 +76,7 @@ namespace OUU::Editor
 		 * Search and register all editor utility widget blueprints so they can be opened from the "Developer Tools"
 		 * menu.
 		 */
-		static void RegisterAllEditorUtilityWidgetTabs()
+		void RegisterAllEditorUtilityWidgetTabs()
 		{
 			if (!GEditor)
 				return;
@@ -79,18 +87,39 @@ namespace OUU::Editor
 			Filter.bRecursiveClasses = true;
 			IAssetRegistry::GetChecked().GetAssets(Filter, BlueprintList);
 
-			UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
-			if (!IsValid(EditorUtilitySubsystem))
+			if (BlueprintList.IsEmpty())
 				return;
 
-			for (auto& Asset : BlueprintList)
+			TArray<FSoftObjectPath> AssetPathsToLoad;
+			AssetPathsToLoad.Reserve(BlueprintList.Num());
+			for (const auto& AssetData : BlueprintList)
 			{
-				if (auto* EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(Asset.GetAsset()))
-				{
-					FName TabId;
-					EditorUtilitySubsystem->RegisterTabAndGetID(EditorWidget, OUT TabId);
-				}
+				AssetPathsToLoad.Add(AssetData.GetSoftObjectPath());
 			}
+
+			FStreamableManager& StreamableManager = UAssetManager::Get().GetStreamableManager();
+
+			OnUtilityWidgetsLoadedHandle =
+				StreamableManager.RequestAsyncLoad(AssetPathsToLoad, [this, AssetPathsToLoad]() -> void {
+					UEditorUtilitySubsystem* EditorUtilitySubsystem =
+						GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
+
+					if (!IsValid(EditorUtilitySubsystem))
+						return;
+
+					for (const auto& AssetPath : AssetPathsToLoad)
+					{
+						auto EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(AssetPath.ResolveObject());
+
+						if (EditorWidget)
+						{
+							FName TabId;
+							EditorUtilitySubsystem->RegisterTabAndGetID(EditorWidget, OUT TabId);
+						}
+					}
+
+					OnUtilityWidgetsLoadedHandle = nullptr;
+				});
 		}
 	};
 } // namespace OUU::Editor
