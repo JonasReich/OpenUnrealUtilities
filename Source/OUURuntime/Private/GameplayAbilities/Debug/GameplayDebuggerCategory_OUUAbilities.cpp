@@ -241,11 +241,13 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 				continue;
 			}
 
-			for (TFieldIterator<FProperty> It(Set->GetClass()); It; ++It)
+			for (FProperty* Property : TFieldRange<FProperty>(Set->GetClass()))
 			{
-				FGameplayAttribute Attribute(*It);
+				if (Property == nullptr)
+					continue;
 
-				if (DrawAttributes.Contains(Attribute))
+				FGameplayAttribute Attribute(Property);
+				if (Attribute.IsValid() == false)
 					continue;
 
 				if (Attribute.IsValid())
