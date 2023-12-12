@@ -116,8 +116,8 @@ AWorldBoundSFSchedulerRegistry* AWorldBoundSFSchedulerRegistry::GetWorldSingleto
 		return nullptr;
 	}
 
-	// Any world that's not game or PIE, potentially doesn't tick the scheduler and thus tasks won't be worked on
-	// properly. We just don't support scheduling for these worlds.
+	// Any world that's not game or PIE potentially doesn't tick the scheduler and thus tasks won't be properly worked
+	// on. We just don't support scheduling for these worlds.
 	if (World->WorldType != EWorldType::Game && World->WorldType != EWorldType::PIE)
 	{
 		return nullptr;
