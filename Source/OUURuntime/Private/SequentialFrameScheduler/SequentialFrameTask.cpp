@@ -2,6 +2,19 @@
 
 #include "SequentialFrameScheduler/SequentialFrameTask.h"
 
+#include "SequentialFrameScheduler/SequentialFrameScheduler.h"
+
+void FSequentialFrameTask::FTaskHandle::Cancel()
+{
+	auto pScheduler = pWeakScheduler.Pin();
+	if (pScheduler)
+	{
+		pScheduler->RemoveTask(*this);
+	}
+
+	Reset();
+}
+
 float FSequentialFrameTask::GetNextDesiredInvocationTimeSeconds() const
 {
 	return (LastInvocationTime + Period);

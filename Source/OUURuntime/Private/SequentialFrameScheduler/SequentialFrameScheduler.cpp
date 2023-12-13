@@ -1,6 +1,7 @@
 // Copyright (c) 2023 Jonas Reich & Contributors
 
 #include "SequentialFrameScheduler/SequentialFrameScheduler.h"
+
 #include "LogOpenUnrealUtilities.h"
 
 void FSequentialFrameScheduler::Tick(float DeltaTime)
@@ -81,7 +82,8 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 				LogOpenUnrealUtilities,
 				Warning,
 				TEXT("Task '%s' became stale and was auto-removed. Please explicitly remove your tasks when your task "
-					 "object is destroyed."), *GetTaskDebugName(TaskHandle));
+					 "object is destroyed."),
+				*GetTaskDebugName(TaskHandle));
 			RemoveTask(TaskHandle);
 			continue;
 		}
@@ -176,7 +178,7 @@ FSequentialFrameTask::FTaskHandle FSequentialFrameScheduler::InternalAddTask(
 	float InPeriod,
 	bool bTickAsOftenAsPossible)
 {
-	const FTaskHandle NewHandle = TaskIdCounter;
+	const FTaskHandle NewHandle(TaskIdCounter, AsWeak());
 	TaskIdCounter++;
 	checkf(TaskIdCounter > 0, TEXT("overflow detected"));
 

@@ -6,22 +6,39 @@
 
 #include "TimerManager.h"
 
+class FSequentialFrameScheduler;
+
 /** A task that is registered in the SequentialFrameScheduler */
 class OUURUNTIME_API FSequentialFrameTask
 {
 public:
 	/** Handle to a task registered in the scheduler */
-	struct FTaskHandle
+	struct OUURUNTIME_API FTaskHandle
 	{
+	public:
 		FTaskHandle() = default;
 
-		FTaskHandle(int32 InIndex) : Index(InIndex) {}
+		FTaskHandle(int32 InIndex, const TWeakPtr<FSequentialFrameScheduler>& _pWeakScheduler) :
+			Index(InIndex), pWeakScheduler(_pWeakScheduler)
+		{
+		}
 
 		int32 Index = INDEX_NONE;
 
-		bool operator==(const FTaskHandle& Other) const { return Index == Other.Index; }
-		bool IsValid() const { return Index != INDEX_NONE; }
-		void Reset() { Index = INDEX_NONE; }
+		bool operator==(const FTaskHandle& _Other) const
+		{
+			return Index == _Other.Index && pWeakScheduler == _Other.pWeakScheduler;
+		}
+		bool IsValid() const { return Index != INDEX_NONE && pWeakScheduler != nullptr; }
+		void Reset()
+		{
+			Index = INDEX_NONE;
+			pWeakScheduler = nullptr;
+		}
+		void Cancel();
+
+	private:
+		TWeakPtr<FSequentialFrameScheduler> pWeakScheduler = nullptr;
 	};
 
 	/**

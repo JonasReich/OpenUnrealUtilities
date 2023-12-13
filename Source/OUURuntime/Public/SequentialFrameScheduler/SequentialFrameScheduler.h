@@ -20,7 +20,7 @@
  * This scheduler will help in these situations ensuring that only a predefined number of tasks will ever be executed in
  * the same frame (default: just a single task).
  */
-class OUURUNTIME_API FSequentialFrameScheduler
+class OUURUNTIME_API FSequentialFrameScheduler : public TSharedFromThis<FSequentialFrameScheduler>
 {
 #if WITH_GAMEPLAY_DEBUGGER
 	friend class FGameplayDebuggerCategory_SequentialFrameScheduler;
