@@ -2,19 +2,31 @@
 
 #include "SequentialFrameScheduler/SequentialFrameTask.h"
 
+#include "SequentialFrameScheduler/SequentialFrameScheduler.h"
+
+void FSequentialFrameTask::FTaskHandle::Cancel()
+{
+	auto pScheduler = pWeakScheduler.Pin();
+	if (pScheduler)
+	{
+		pScheduler->RemoveTask(*this);
+	}
+
+	Reset();
+}
+
 float FSequentialFrameTask::GetNextDesiredInvocationTimeSeconds() const
 {
 	return (LastInvocationTime + Period);
 }
 
-void FSequentialFrameTask::Tick(float DeltaTime)
+void FSequentialFrameTask::Tick(float Now)
 {
 	if (bIsPaused)
 		return;
 
-	Now += DeltaTime;
 	CachedOvertimeSeconds = Now - GetNextDesiredInvocationTimeSeconds();
-	CachedOvertimeFraction = CachedOvertimeSeconds / Period;
+	CachedOvertimeFraction = CachedOvertimeSeconds / GetPeriodDivisor();
 }
 
 float FSequentialFrameTask::GetOvertimeSeconds() const
@@ -29,11 +41,16 @@ float FSequentialFrameTask::GetOvertimeFraction() const
 
 float FSequentialFrameTask::GetPredictedOvertimeFraction(float PredictedDeltaTime, int32 NumFrames) const
 {
-	return CachedOvertimeFraction + ((PredictedDeltaTime / Period) * NumFrames);
+	return CachedOvertimeFraction + ((PredictedDeltaTime / GetPeriodDivisor()) * NumFrames);
 }
 
-void FSequentialFrameTask::Execute()
+void FSequentialFrameTask::Execute(float Now)
 {
 	LastInvocationTime = Now;
 	Delegate.Execute();
+}
+
+float FSequentialFrameTask::GetPeriodDivisor() const
+{
+	return FMath::Max(Period, UE_SMALL_NUMBER);
 }

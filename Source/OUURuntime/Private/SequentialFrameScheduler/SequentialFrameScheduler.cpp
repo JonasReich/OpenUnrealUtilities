@@ -2,9 +2,12 @@
 
 #include "SequentialFrameScheduler/SequentialFrameScheduler.h"
 
+#include "LogOpenUnrealUtilities.h"
+
 void FSequentialFrameScheduler::Tick(float DeltaTime)
 {
 	TickCounter++;
+	Now += DeltaTime;
 	DeltaTimeRingBuffer.Add(DeltaTime);
 	const float PredictedDeltaTimeNextFrames = DeltaTimeRingBuffer.Average();
 
@@ -23,7 +26,7 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 	for (auto& KeyValuePair : TaskHandlesToTaskInfos)
 	{
 		auto Task = KeyValuePair.Value.ToSharedRef();
-		Task->Tick(DeltaTime);
+		Task->Tick(Now);
 
 #if WITH_GAMEPLAY_DEBUGGER
 		const float TaskOvertimeSeconds = Task->GetOvertimeSeconds();
@@ -62,22 +65,35 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 		return OvertimeA > OvertimeB;
 	});
 
-	const int32 MaxNumTasksToExecuteThisFrame = FMath::Min(MaxNumTasksToExecutePerFrame, TaskQueue.Num());
 	int32 ActualNumTasksExecutedThisFrame = 0;
 
 	for (int32 QueueIndex = 0; QueueIndex < TaskQueue.Num(); QueueIndex++)
 	{
-		if (ActualNumTasksExecutedThisFrame >= MaxNumTasksToExecuteThisFrame)
+		if (ActualNumTasksExecutedThisFrame >= MaxNumTasksToExecutePerFrame)
 			break;
 
-		TSharedRef<FSequentialFrameTask> CurrentTask = TaskHandlesToTaskInfos[TaskQueue[QueueIndex]].ToSharedRef();
+		auto& TaskHandle = TaskQueue[QueueIndex];
+		TSharedRef<FSequentialFrameTask> CurrentTask = TaskHandlesToTaskInfos[TaskHandle].ToSharedRef();
+
+		// Skip stale tasks
+		if (CurrentTask->Delegate.IsBound() == false)
+		{
+			UE_LOG(
+				LogOpenUnrealUtilities,
+				Warning,
+				TEXT("Task '%s' became stale and was auto-removed. Please explicitly remove your tasks when your task "
+					 "object is destroyed."),
+				*GetTaskDebugName(TaskHandle));
+			RemoveTask(TaskHandle);
+			continue;
+		}
 
 		// No overtime means the task is not due yet.
 		// If it's not set as "tick as often as possible" we should not pick it prematurely
 		// no matter where it is in the queue.
 		// This means we would have to check here anyways even if we factored it in the sorting.
 		// As a result, we can just ignore the bTickAsOftenAsPossible while sorting.
-		if (!CurrentTask->bTickAsOftenAsPossible && (CurrentTask->GetOvertimeSeconds() < 0))
+		if (!CurrentTask->bTickAsOftenAsPossible && (CurrentTask->GetOvertimeSeconds() < 0.f))
 		{
 			continue;
 		}
@@ -85,10 +101,8 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 #if WITH_GAMEPLAY_DEBUGGER
 		const double TimeBeforeTask = FPlatformTime::Seconds();
 #endif
-
-		const float LastInvocationTimeBefore = CurrentTask->LastInvocationTime;
-		CurrentTask->Execute();
-		const float TaskWaitTime = CurrentTask->Now - LastInvocationTimeBefore;
+		const float TaskWaitTime = Now - CurrentTask->LastInvocationTime;
+		CurrentTask->Execute(Now);
 
 		ActualNumTasksExecutedThisFrame++;
 
@@ -164,7 +178,7 @@ FSequentialFrameTask::FTaskHandle FSequentialFrameScheduler::InternalAddTask(
 	float InPeriod,
 	bool bTickAsOftenAsPossible)
 {
-	const FTaskHandle NewHandle = TaskIdCounter;
+	const FTaskHandle NewHandle(TaskIdCounter, AsWeak());
 	TaskIdCounter++;
 	checkf(TaskIdCounter > 0, TEXT("overflow detected"));
 

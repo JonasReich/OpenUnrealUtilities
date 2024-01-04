@@ -20,7 +20,7 @@
  * This scheduler will help in these situations ensuring that only a predefined number of tasks will ever be executed in
  * the same frame (default: just a single task).
  */
-class OUURUNTIME_API FSequentialFrameScheduler
+class OUURUNTIME_API FSequentialFrameScheduler : public TSharedFromThis<FSequentialFrameScheduler>
 {
 #if WITH_GAMEPLAY_DEBUGGER
 	friend class FGameplayDebuggerCategory_SequentialFrameScheduler;
@@ -57,6 +57,9 @@ public:
 	 * Has multiple overloads similar to the Timer Manager that allow
 	 * easy binding with various different types of functions and delegates.
 	 * All overloads return a task handle that can be used to remove the task again.
+	 *
+	 * Delegates that become stale will be automatically removed, but this should be avoided in favor of manual
+	 * unregistering and will therefore log a warning.
 	 */
 	template <class UserClass>
 	FORCEINLINE FTaskHandle AddTask(
@@ -98,8 +101,7 @@ public:
 	}
 
 	/** Version that takes a TFunction */
-	FORCEINLINE FTaskHandle
-		AddTask(TFunction<void()>&& Callback, float InPeriod, bool bTickAsOftenAsPossible = true)
+	FORCEINLINE FTaskHandle AddTask(TFunction<void()>&& Callback, float InPeriod, bool bTickAsOftenAsPossible = true)
 	{
 		return InternalAddTask(FTaskUnifiedDelegate(MoveTemp(Callback)), InPeriod, bTickAsOftenAsPossible);
 	}
@@ -150,10 +152,7 @@ protected:
 		TMap<FTaskHandle, FName> TaskDebugNames;
 
 		// Various debugging metrics.
-		// None of these are used by the plugin, but they will be really useful to display in a gameplay debugger
-		// to show if the configuration of the debugger is balanced appropriately.
-		// No gameplay debugger is provided at this time because the integration into various other systems will impact
-		// how exactly the scheduler will be integrated / where it will be located.
+		// Primarily used in gameplay debugger to show if the configuration of the scheduler is balanced appropriately.
 		TFixedSizeCircularAggregator<float, NumFramesBufferSize> MaxDelaySecondsRingBuffer;
 		TFixedSizeCircularAggregator<float, NumFramesBufferSize> AverageDelaySecondsRingBuffer;
 		TFixedSizeCircularAggregator<float, NumFramesBufferSize> MaxDelayFractionRingBuffer;
@@ -176,6 +175,9 @@ private:
 
 	// Tick/frame counter
 	uint32 TickCounter = 0;
+
+	// Current time. Could be reduced by global application time.
+	float Now = 0.f;
 
 	FTaskHandle InternalAddTask(FTaskUnifiedDelegate&& Delegate, float InPeriod, bool bTickAsOftenAsPossible);
 

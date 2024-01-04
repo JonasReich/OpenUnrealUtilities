@@ -241,22 +241,26 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 				continue;
 			}
 
-			for (TFieldIterator<FProperty> It(Set->GetClass()); It; ++It)
+			for (FProperty* Property : TFieldRange<FProperty>(Set->GetClass()))
 			{
-				FGameplayAttribute Attribute(*It);
+				auto NumericProperty = CastField<FNumericProperty>(Property);
 
-				if (DrawAttributes.Contains(Attribute))
+				// to prevent crashes with AttributeSet properties that are not actually attributes
+				if (NumericProperty != nullptr && !NumericProperty->IsFloatingPoint())
+				{
+					continue;
+				}
+
+				FGameplayAttribute Attribute(Property);
+				if (Attribute.IsValid() == false)
 					continue;
 
-				if (Attribute.IsValid())
-				{
-					float Value = AbilitySystem->GetNumericAttribute(Attribute);
-					FString PaddedAttributeName = Attribute.GetName();
-					while (PaddedAttributeName.Len() < 30)
-						PaddedAttributeName += " ";
+				float Value = AbilitySystem->GetNumericAttribute(Attribute);
+				FString PaddedAttributeName = Attribute.GetName();
+				while (PaddedAttributeName.Len() < 30)
+					PaddedAttributeName += " ";
 
-					DebugLine(Info, FString::Printf(TEXT("%s %.2f"), *PaddedAttributeName, Value), 4.f, 0.f);
-				}
+				DebugLine(Info, FString::Printf(TEXT("%s %.2f"), *PaddedAttributeName, Value), 4.f, 0.f);
 			}
 		}
 		AccumulateScreenPos(Info);

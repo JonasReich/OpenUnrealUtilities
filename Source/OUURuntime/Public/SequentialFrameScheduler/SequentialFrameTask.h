@@ -6,22 +6,39 @@
 
 #include "TimerManager.h"
 
+class FSequentialFrameScheduler;
+
 /** A task that is registered in the SequentialFrameScheduler */
 class OUURUNTIME_API FSequentialFrameTask
 {
 public:
 	/** Handle to a task registered in the scheduler */
-	struct FTaskHandle
+	struct OUURUNTIME_API FTaskHandle
 	{
+	public:
 		FTaskHandle() = default;
 
-		FTaskHandle(int32 InIndex) : Index(InIndex) {}
+		FTaskHandle(int32 InIndex, const TWeakPtr<FSequentialFrameScheduler>& _pWeakScheduler) :
+			Index(InIndex), pWeakScheduler(_pWeakScheduler)
+		{
+		}
 
 		int32 Index = INDEX_NONE;
 
-		bool operator==(const FTaskHandle& Other) const { return Index == Other.Index; }
-		bool IsValid() const { return Index != INDEX_NONE; }
-		void Reset() { Index = INDEX_NONE; }
+		bool operator==(const FTaskHandle& _Other) const
+		{
+			return Index == _Other.Index && pWeakScheduler == _Other.pWeakScheduler;
+		}
+		bool IsValid() const { return Index != INDEX_NONE && pWeakScheduler != nullptr; }
+		void Reset()
+		{
+			Index = INDEX_NONE;
+			pWeakScheduler = nullptr;
+		}
+		void Cancel();
+
+	private:
+		TWeakPtr<FSequentialFrameScheduler> pWeakScheduler = nullptr;
 	};
 
 	/**
@@ -38,10 +55,10 @@ public:
 
 	FTaskHandle Handle;
 
+	// #TODO change time values to double
 	float Period = 0.03f;
 	bool bTickAsOftenAsPossible = true;
 
-	float Now = 0.f;
 	float LastInvocationTime = 0.f;
 	float SecondToLastInvocationTime = 0.f;
 
@@ -62,7 +79,7 @@ public:
 	/** Get a prediction for overtime in a future number of frames */
 	float GetPredictedOvertimeFraction(float PredictedDeltaTime, int32 NumFrames) const;
 
-	void Execute();
+	void Execute(float Now);
 
 	// Movable only (required because of FTimerUnifiedDelegate)
 	FSequentialFrameTask() = default;
@@ -74,6 +91,9 @@ public:
 private:
 	float CachedOvertimeSeconds = 0.f;
 	float CachedOvertimeFraction = 0.f;
+
+	// Get period which can be used safely as divisor
+	float GetPeriodDivisor() const;
 };
 
 FORCEINLINE uint32 OUURUNTIME_API GetTypeHash(const FSequentialFrameTask::FTaskHandle& Handle)
