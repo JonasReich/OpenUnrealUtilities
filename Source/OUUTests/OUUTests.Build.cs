@@ -21,6 +21,7 @@ public class OUUTests : OUUModuleRules
 			"GameplayTags",
 			"Json",
 			"PropertyPath",
+			"GameplayAbilities",
 
 			// OUU Plugins
 			"OUURuntime",

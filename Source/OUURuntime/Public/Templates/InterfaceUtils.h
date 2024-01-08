@@ -56,7 +56,7 @@ using TIsIInterface_T = typename TEnableIf<TIsIInterface<T>::Value>::Type;
 
 /** Get the underlying object from an interface so you can call Execute_* functions on it */
 template <typename T, typename = TIsIInterface_T<T>>
-UObject* GetInterfaceObject(T* InterfaceObject)
+auto* GetInterfaceObject(T* InterfaceObject)
 {
 	return Cast<UObject>(InterfaceObject);
 }
