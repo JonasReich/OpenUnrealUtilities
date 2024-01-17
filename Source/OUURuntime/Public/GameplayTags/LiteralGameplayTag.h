@@ -39,14 +39,41 @@
  */
 //---------------------------------------------------------------------------------------------------------------------
 
+namespace OUU::Runtime::Private
+{
+	// is the tag an extension to another "parent type" tag?
+	struct CLiteralTagIsExtension
+	{
+		template <typename TagType>
+		auto Requires(TagType It) -> decltype(sizeof(TagType::ExtendTagType));
+	};
+
+	template <typename ChildTagType, bool = TModels<CLiteralTagIsExtension, ChildTagType>::Value>
+	struct TParentOrExtendedTag;
+
+	template <typename ChildTagType>
+	struct TParentOrExtendedTag<ChildTagType, true>
+	{
+		using Type = typename ChildTagType::ExtendTagType;
+	};
+
+	template <typename ChildTagType>
+	struct TParentOrExtendedTag<ChildTagType, false>
+	{
+		using Type = typename ChildTagType::ParentTagType;
+	};
+}
+
 template <typename Child, typename TestParent>
 struct TIsChildTagOf_Single
 {
+	using ParentOrExtendedTag = typename OUU::Runtime::Private::TParentOrExtendedTag<Child>::Type;
+
 	static constexpr bool Value =
 		TOr<TIsSameWrapper<typename Child::SelfTagType, TestParent>,
 			TAnd<
-				TNot<TIsSameWrapper<typename Child::SelfTagType, typename Child::ParentTagType>>,
-				TIsChildTagOf_Single<typename Child::ParentTagType, TestParent>>>::Value;
+				TNot<TIsSameWrapper<typename Child::SelfTagType, ParentOrExtendedTag>>,
+				TIsChildTagOf_Single<ParentOrExtendedTag, TestParent>>>::Value;
 };
 
 template <typename Child, typename... TestParents>
@@ -225,6 +252,7 @@ bool operator==(const FGameplayTag& LHS, const TLiteralGameplayTag<SelfTagType, 
 	struct MODULE_API TagType : public TLiteralGameplayTag<TagType, TagType, TagType>                                  \
 	{                                                                                                                  \
 		using EFlags = ELiteralGameplayTagFlags;                                                                       \
+		using ExtendTagType = TagTypeToExtend;                                                                         \
                                                                                                                        \
 	public:                                                                                                            \
 		static const ELiteralGameplayTagFlags Flags = TagTypeToExtend::Flags;                                          \
