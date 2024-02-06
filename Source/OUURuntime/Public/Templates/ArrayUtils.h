@@ -58,7 +58,7 @@ namespace OUU::Runtime::ArrayUtils
 	 * The array must contain at least one element!
 	 */
 	template <typename ElementType, typename AllocatorType>
-	static ElementType GetRandomElement(const TArray<ElementType, AllocatorType>& Array, FRandomStream& Stream)
+	static const ElementType& GetRandomElement(const TArray<ElementType, AllocatorType>& Array, FRandomStream& Stream)
 	{
 		check(Array.Num() > 0);
 		return Array[Stream.RandHelper(Array.Num())];
@@ -69,7 +69,7 @@ namespace OUU::Runtime::ArrayUtils
 	 * The array must contain at least one element!
 	 */
 	template <typename ElementType, typename AllocatorType>
-	static ElementType GetRandomElement(const TArray<ElementType, AllocatorType>& Array)
+	static const ElementType& GetRandomElement(const TArray<ElementType, AllocatorType>& Array)
 	{
 		check(Array.Num() > 0);
 		return Array[FMath::RandHelper(Array.Num())];
