@@ -88,6 +88,9 @@ public:
 	// This needs to be refined if we ever support other non-nullable types.
 	const static bool bIsPointer = std::is_same_v<InStorageType, InObjectBaseClass*>;
 
+	template <class, class...>
+	friend struct TSubclassWithInterfaces;
+
 private:
 	StorageType Object;
 
@@ -188,6 +191,10 @@ public:
 
 	static const uint32 NumInterfaces = sizeof...(InterfaceClasses);
 
+	// befriend all related templates
+	template <class, class...>
+	friend struct TSubclassWithInterfaces;
+
 private:
 	TSubclassWithInterfaces(ObjectBaseClass* InObject, typename Super::EForceConstruct) :
 		Super(InObject, Super::EForceConstruct::Value)
@@ -207,6 +214,8 @@ public:
 	TSubclassWithInterfaces(DerivedClass* InObject) : Super(InObject)
 	{
 	}
+
+	TSubclassWithInterfaces(nullptr_t InObject) : Super(InObject, Super::EForceConstruct::Value) {}
 
 	template <
 		typename DerivedClass,
@@ -245,5 +254,19 @@ public:
 		}
 
 		return {};
+	}
+
+	// Dereference (only really makes sense for UObject* based subclasses)
+	template <typename ResultType = TSubclassWithInterfaces<typename Super::ObjectBaseClass&, InterfaceClasses...>>
+	ResultType AsReference() const
+	{
+		return ResultType(*Super::GetObject(), ResultType::Super::EForceConstruct::Value);
+	}
+
+	// Dereference (only really makes sense for UObject& based subclasses)
+	template <typename ResultType = TSubclassWithInterfaces<typename Super::ObjectBaseClass*, InterfaceClasses...>>
+	ResultType AsPointer() const
+	{
+		return ResultType(&Super::GetObject(), ResultType::Super::EForceConstruct::Value);
 	}
 };
