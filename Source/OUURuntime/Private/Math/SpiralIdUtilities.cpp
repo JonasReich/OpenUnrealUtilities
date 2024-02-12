@@ -4,10 +4,23 @@
 
 int32 USpiralIdUtilities::ConvertCoordinatesToSpiralId(const int32 X, const int32 Y)
 {
-	const int32 A = FMath::Abs(FMath::Abs(X) - FMath::Abs(Y)) + FMath::Abs(X) + FMath::Abs(Y);
+	// If you find this calculation confusing, don't worry I had a hard time understanding it
+	// after a few months as well.
+	// There's a material in /OpenUnrealUtilities/Materials/M_SpiralID_Visualization
+	// which has a visual breakdown of this calculation.
+
+	const int32 ManhattanDistance = FMath::Abs(X) + FMath::Abs(Y);
+	const int32 DistanceFromDiagonals = FMath::Abs(FMath::Abs(X) - FMath::Abs(Y));
+	const int32 RingDistance = DistanceFromDiagonals + ManhattanDistance;
+	// Make a diagonal through the origin through (-1,1) and (1,-1) and
+	// pixels that have DiagSign = 1 will be in the half that contains (1,1).
+	// pixels that have DiagSign = -1 will be in the half that contains (-1,-1).
 	// Increase input by 0.1 to get only non-zero signs (-1 or +1) but never 0!
-	const int32 Sign = StaticCast<int32>(FMath::Sign<double>(0.1 + X + Y));
-	return A * A + Sign * (A + X - Y);
+	const int32 DiagSign = StaticCast<int32>(FMath::Sign<double>(0.1 + X + Y));
+
+	// This is the magic bit. I don't really know how to put this into words.
+	// Can potentially be optimized by a math nerd?
+	return (RingDistance * RingDistance) + (DiagSign * ((RingDistance + X) - Y));
 }
 
 int32 USpiralIdUtilities::ConvertCoordinatePointToSpiralId(const FIntPoint& Point)
