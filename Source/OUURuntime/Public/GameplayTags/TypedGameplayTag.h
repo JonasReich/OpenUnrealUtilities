@@ -114,9 +114,13 @@ public:
 			TIsDerivedFrom<BlueprintTagType, FGameplayTag>::Value,
 			"BlueprintStructType must be derived from FGameplayTag");
 
+		// I did not find a cross-compiler way to implement this check yet, but if all the tag usage is fine with
+		// Windows / MSVC, it should also be ok on other platforms.
+#if PLATFORM_WINDOWS
 		static_assert(
 			TOr<TIsChildTagOf<ParamTagType, InRootLiteralTagTypes>...>::Value,
 			"Can only assign from a literal gameplay tag that is nested under any of the InRootLiteralTagTypes");
+#endif
 
 		return true;
 	}
