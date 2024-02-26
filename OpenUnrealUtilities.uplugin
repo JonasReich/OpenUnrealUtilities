@@ -57,11 +57,19 @@
 			"Enabled": true
 		},
 		{
+			"Name": "Gauntlet",
+			"Enabled": true
+		},
+		{
 			"Name": "GameplayAbilities",
 			"Enabled": true
 		},
 		{
 			"Name": "DataValidation",
+			"Enabled": true
+		},
+		{
+			"Name": "OnlineSubsystemUtils",
 			"Enabled": true
 		}
 	]

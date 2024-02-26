@@ -13,12 +13,15 @@ public class OUUTestUtilities : OUUModuleRules
 			"CoreUObject",
 			"Engine",
 			"UMG",
-			"SignificanceManager",
 			"AutomationController",
+			"Gauntlet",
 			"EngineSettings",
+			"OnlineSubsystem",
+			"OnlineSubsystemUtils",
+			"FunctionalTesting",
 
 			// Plugin
-			"OUURuntime"
+			"OUURuntime",
 		});
 
 		if (Target.bBuildEditor)
