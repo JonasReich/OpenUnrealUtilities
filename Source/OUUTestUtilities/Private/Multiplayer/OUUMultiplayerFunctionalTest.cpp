@@ -88,23 +88,39 @@ void AOUUMultiplayerFunctionalTest::ServerNotifyClientSyncMarkerReached(
 bool AOUUMultiplayerFunctionalTest::RunTest(const TArray<FString>& Params)
 {
 	UOUUMultiplayerTestController::Get().NotifyFunctionalTestStarted();
-	return Super::RunTest(Params);
+	const bool bWasStarted = Super::RunTest(Params);
+	Multicast_OnTestStarted();
+	return bWasStarted;
 }
 
 void AOUUMultiplayerFunctionalTest::FinishTest(EFunctionalTestResult TestResult, const FString& Message)
 {
-	ensureMsgf(
+	if (ensureMsgf(
 		HasAuthority(),
 		TEXT("The FinishTest function should only ever be called on Authority! Use snyc point nodes for all "
-			 "intermediate steps you want to ensure synchronicity."));
-	UOUUMultiplayerTestController::Get().NotifyFunctionalTestEnded(TestResult);
+			 "intermediate steps you want to ensure synchronicity.")) == false)
+	{
+		return;
+	}
 	Super::FinishTest(TestResult, Message);
+	Multicast_OnTestEnded(TestResult, TestIndex, TotalNumTests);
 }
 
 void AOUUMultiplayerFunctionalTest::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AOUUMultiplayerFunctionalTest, LastServerAcknowledgedSyncMarker);
+}
+
+void AOUUMultiplayerFunctionalTest::Multicast_OnTestStarted_Implementation()
+{
+	UOUUMultiplayerTestController::Get().NotifyFunctionalTestStarted();
+	K2_OnTestStarted();
+}
+
+void AOUUMultiplayerFunctionalTest::Multicast_OnTestEnded_Implementation(EFunctionalTestResult TestResult, int32 InTestIndex, int32 InTotalNumTests)
+{
+	UOUUMultiplayerTestController::Get().NotifyFunctionalTestEnded(TestResult, InTestIndex, InTotalNumTests);
 }
 
 void AOUUMultiplayerFunctionalTest::OnRep_ServerSyncMarker() const

@@ -10,7 +10,7 @@
 #include "OUUMultiplayerTestController.generated.h"
 
 enum class EFunctionalTestResult : uint8;
-class AFunctionalTest;
+class AOUUMultiplayerFunctionalTest;
 
 UCLASS()
 class OUUTESTUTILITIES_API UOUUMultiplayerTestController : public UGauntletTestController
@@ -25,7 +25,7 @@ public:
 	void NotifyServerPostSignalReplicated();
 	// Notify the controller that a functional test started.
 	void NotifyFunctionalTestStarted();
-	void NotifyFunctionalTestEnded(EFunctionalTestResult TestResult);
+	void NotifyFunctionalTestEnded(EFunctionalTestResult TestResult, int32 TestIndex, int32 TotalNumTests);
 
 	// - UGauntletTestController
 	void OnInit() override;
@@ -37,12 +37,12 @@ private:
 	// --- SHARED
 	IOnlineSessionPtr GetSessions() const;
 	FUniqueNetIdPtr GetLocalNetID() const;
+	void Heartbeat(const FString& Message);
 	// ---- SERVER
 	void OnCreateSessionComplete(FName, bool Success);
 	void ServerOnPostLogin(AGameModeBase* GameModeBase, APlayerController* PlayerController);
 	void ServerCheckRunFirstTest();
 	void ServerRunNextFunctionalTest();
-	void OnFunctionalTestEnd(FAutomationTestBase* AutomationTest);
 	// ---- CLIENT
 	void ClientStartSessionSearch();
 	void ClientSessionSearchComplete(bool Success);
@@ -51,8 +51,10 @@ private:
 private:
 	// --- SHARED
 	static UOUUMultiplayerTestController* Instance;
+	FString TestRole;
 	bool bIsServer = false;
 	float TotalTickTime = 0.f;
+	bool bUseSessionSearch = true;
 	// --- SERVER
 	bool bServerInitialized = false;
 	bool bServerStartedFirstTest = false;
@@ -60,8 +62,9 @@ private:
 	int32 ServerTotalNumTests = 0;
 	int32 ServerNumFinishedTests = 0;
 	int32 ServerNumSignalsReplicated = 0;
-	TArray<TWeakObjectPtr<AFunctionalTest>> ServerAllFunctionalTests;
+	TArray<TWeakObjectPtr<AOUUMultiplayerFunctionalTest>> ServerAllFunctionalTests;
 	// --- CLIENT
 	bool bClientSessionSearchStarted = false;
 	TSharedPtr<FOnlineSessionSearch> ClientSessionSearch;
 };
+

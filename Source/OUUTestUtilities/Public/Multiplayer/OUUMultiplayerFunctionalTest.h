@@ -18,6 +18,10 @@ public:
 
 	AOUUMultiplayerFunctionalTest();
 
+	// For tracking how far we are along the test progression
+	int32 TestIndex = INDEX_NONE;
+	int32 TotalNumTests = INDEX_NONE;
+
 	// Called on server + all clients if we detected that a sync point was reached.
 	DECLARE_EVENT_OneParam(AOUUMultiplayerFunctionalTest, FOnSyncMarkerReached, int32);
 	FOnSyncMarkerReached OnSyncMarkerReached;
@@ -32,7 +36,15 @@ public:
 	// - UObject
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	// --
-	
+
+public:
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_OnTestStarted();
+	UFUNCTION(BlueprintImplementableEvent, DisplayName = "Multiplayer Test Started")
+	void K2_OnTestStarted();
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_OnTestEnded(EFunctionalTestResult TestResult, int32 InTestIndex, int32 InTotalNumTests);
+
 private:
 	UPROPERTY(Transient)
 	TMap<APlayerController*, int32> ClientSyncMarkerLocations;

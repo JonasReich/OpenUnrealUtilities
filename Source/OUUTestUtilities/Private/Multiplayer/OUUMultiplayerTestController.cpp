@@ -10,15 +10,12 @@
 #include "Interfaces/OnlineSessionInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "LogOpenUnrealUtilities.h"
-#include "Misc/AutomationTest.h"
 #include "Multiplayer/OUUMultiplayerFunctionalTest.h"
 #include "Multiplayer/OUUMultiplayerTestClientSignal.h"
 #include "Online/OnlineSessionNames.h"
 #include "OnlineSessionSettings.h"
 #include "OnlineSubsystemUtils.h"
 #include "Traits/IteratorTraits.h"
-
-UE_DISABLE_OPTIMIZATION
 
 namespace OUU::TestUtilities
 {
@@ -36,37 +33,46 @@ UOUUMultiplayerTestController& UOUUMultiplayerTestController::Get()
 void UOUUMultiplayerTestController::NotifyServerPostSignalReplicated()
 {
 	ServerNumSignalsReplicated++;
-	MarkHeartbeatActive(FString::Printf(TEXT("[SERVER] post signal replicated")));
+	Heartbeat(FString::Printf(TEXT("Post signal replicated")));
 }
 
 void UOUUMultiplayerTestController::NotifyFunctionalTestStarted()
 {
-	MarkHeartbeatActive(TEXT("[SERVER] test started..."));
-			// #TODO start listening for disconnects?
-	/*
-	GEngine->NetworkFailureEvent.AddLambda(
-		[this](UWorld*, UNetDriver*, ENetworkFailure::Type Failure, const FString& Reason) {
-			UE_LOG(
-				LogOpenUnrealUtilities,
-				Fatal,
-				TEXT("Network failure (%s): %s"),
-				ENetworkFailure::ToString(Failure),
-				*Reason);
-		});
-	*/
+	Heartbeat(TEXT("Test started..."));
+	if (GEngine->NetworkFailureEvent.IsBoundToObject(this) == false)
+	{
+		GEngine->NetworkFailureEvent
+			.AddWeakLambda(this, [this](UWorld*, UNetDriver*, ENetworkFailure::Type Failure, const FString& Reason) {
+				UE_LOG(
+					LogOpenUnrealUtilities,
+					Fatal,
+					TEXT("Network failure (%s): %s"),
+					ENetworkFailure::ToString(Failure),
+					*Reason);
+			});
+	}
 }
 
-void UOUUMultiplayerTestController::NotifyFunctionalTestEnded(EFunctionalTestResult TestResult)
+void UOUUMultiplayerTestController::NotifyFunctionalTestEnded(EFunctionalTestResult TestResult, int32 TestIndex, int32 TotalNumTests)
 {
-	MarkHeartbeatActive(TEXT("[SERVER] test ended..."));
-	// #TODO stop listening for disconnects?
-	ServerNumFinishedTests++;
-	if (TestResult != EFunctionalTestResult::Succeeded)
+	if (TestIndex == TotalNumTests - 1)
 	{
-		ServerNumFailedTests++;
+		// stop listening for network failures / disconnects.
+		// even a successful client disconnect results in an error for me.
+		GEngine->NetworkFailureEvent.RemoveAll(this);
 	}
 
-	ServerRunNextFunctionalTest();
+	Heartbeat(TEXT("Test ended..."));
+	if (bIsServer)
+	{
+		ServerNumFinishedTests++;
+		if (TestResult != EFunctionalTestResult::Succeeded)
+		{
+			ServerNumFailedTests++;
+		}
+
+		ServerRunNextFunctionalTest();
+	}
 }
 
 void UOUUMultiplayerTestController::OnInit()
@@ -75,7 +81,6 @@ void UOUUMultiplayerTestController::OnInit()
 	Instance = this;
 
 	Super::OnInit();
-	FString TestRole;
 	FParse::Value(FCommandLine::Get(), TEXT("OUUMPTestRole="), OUT TestRole);
 	UE_LOG(LogOpenUnrealUtilities, Log, TEXT("OUUMPTestRole=%s"), *TestRole);
 	bIsServer = TestRole == OUU::TestUtilities::GTestRole_Server;
@@ -87,7 +92,7 @@ void UOUUMultiplayerTestController::OnInit()
 
 void UOUUMultiplayerTestController::OnPostMapChange(UWorld* World)
 {
-	if (bIsServer)
+	if (bIsServer && bUseSessionSearch)
 	{
 		if (bServerInitialized)
 		{
@@ -96,7 +101,7 @@ void UOUUMultiplayerTestController::OnPostMapChange(UWorld* World)
 		}
 		bServerInitialized = true;
 
-		MarkHeartbeatActive(TEXT("[SERVER] create session..."));
+		Heartbeat(TEXT("Create session..."));
 		FOnlineSessionSettings Settings;
 		Settings.NumPublicConnections = 2;
 		Settings.bShouldAdvertise = true;
@@ -121,7 +126,7 @@ void UOUUMultiplayerTestController::OnTick(float TimeDelta)
 	{
 		ServerCheckRunFirstTest();
 	}
-	else
+	else if (bUseSessionSearch)
 	{
 		// #TODO is there a better way to delay client session search?
 		constexpr float WaitUntilSessionSearch = 5.f;
@@ -147,38 +152,21 @@ FUniqueNetIdPtr UOUUMultiplayerTestController::GetLocalNetID() const
 	return UniqueNetID;
 }
 
+void UOUUMultiplayerTestController::Heartbeat(const FString& Message)
+{
+	MarkHeartbeatActive(FString::Printf(TEXT("[%s] %s"), *TestRole, *Message));
+}
+
 void UOUUMultiplayerTestController::OnCreateSessionComplete(FName, bool Success)
 {
 	if (Success == false)
 	{
-		MarkHeartbeatActive(TEXT("[SERVER] failed to create session"));
+		Heartbeat(TEXT("Failed to create session"));
 		EndTest(1);
 	}
 
-	// CRASH???
-	// as listen server?
-	MarkHeartbeatActive(TEXT("[SERVER] enable listen server..."));
+	Heartbeat(TEXT("Enable listen server..."));
 	GetWorld()->GetGameInstance()->EnableListenServer(true);
-
-	MarkHeartbeatActive(TEXT("[SERVER] Collecting tests..."));
-	for (auto* FTest : TActorRange<AFunctionalTest>(GetWorld()))
-	{
-		if (auto* MultiplayerFTest = Cast<AOUUMultiplayerFunctionalTest>(FTest))
-		{
-			ServerAllFunctionalTests.Add(MultiplayerFTest);
-		}
-		else
-		{
-			UE_LOG(
-				LogOpenUnrealUtilities,
-				Fatal,
-				TEXT("Invalid functional test %s on map %s is not a multiplayer test"),
-				*GetCurrentMap(),
-				*GetNameSafe(FTest));
-		}
-	}
-
-	ServerTotalNumTests = ServerAllFunctionalTests.Num();
 }
 
 void UOUUMultiplayerTestController::ServerOnPostLogin(AGameModeBase* GameModeBase, APlayerController* PlayerController)
@@ -186,14 +174,36 @@ void UOUUMultiplayerTestController::ServerOnPostLogin(AGameModeBase* GameModeBas
 	auto* Signal = GetWorld()->SpawnActor<AOUUMultiplayerTestClientSignal>();
 	check(Signal);
 	Signal->SetOwner(PlayerController);
-	MarkHeartbeatActive(FString::Printf(TEXT("[SERVER] post login (%s)"), *GetNameSafe(PlayerController)));
+	Heartbeat(FString::Printf(TEXT("Post login (%s)"), *GetNameSafe(PlayerController)));
+	ServerCheckRunFirstTest();
 }
 
 void UOUUMultiplayerTestController::ServerCheckRunFirstTest()
 {
 	// #TODO replace with parameter
-	if (bServerStartedFirstTest == false && ServerNumSignalsReplicated == 2 && GetWorld()->GetGameState()->PlayerArray.Num() == 3)
+	if (bServerStartedFirstTest == false && ServerNumSignalsReplicated == 2
+		&& GetWorld()->GetGameState()->PlayerArray.Num() == 3)
 	{
+		Heartbeat(TEXT("Start condition fulfilled. Collecting tests..."));
+		for (auto* FTest : TActorRange<AFunctionalTest>(GetWorld()))
+		{
+			if (auto* MultiplayerFTest = Cast<AOUUMultiplayerFunctionalTest>(FTest))
+			{
+				ServerAllFunctionalTests.Add(MultiplayerFTest);
+			}
+			else
+			{
+				UE_LOG(
+					LogOpenUnrealUtilities,
+					Fatal,
+					TEXT("Invalid functional test %s on map %s is not a multiplayer test"),
+					*GetCurrentMap(),
+					*GetNameSafe(FTest));
+			}
+		}
+
+		ServerTotalNumTests = ServerAllFunctionalTests.Num();
+
 		ServerRunNextFunctionalTest();
 	}
 }
@@ -204,30 +214,30 @@ void UOUUMultiplayerTestController::ServerRunNextFunctionalTest()
 	if (ServerAllFunctionalTests.Num() == 0)
 	{
 		ensure(ServerNumFinishedTests == ServerTotalNumTests);
-		MarkHeartbeatActive(TEXT("[SERVER] all tests completed"));
-		EndTest(ServerNumFailedTests);
+		Heartbeat(TEXT("All tests completed"));
+		// Wait 3 more seconds for clients to disconnect.
+		constexpr float EndTestDelay = 3.f;
+		FTimerHandle TempHandle;
+		GetWorld()->GetTimerManager().SetTimer(
+			IN OUT TempHandle,
+			FTimerDelegate::CreateLambda([this]() { EndTest(ServerNumFailedTests); }),
+			EndTestDelay,
+			false);
 	}
 	else
 	{
 		const auto NextTest = ServerAllFunctionalTests.Pop();
 		check(NextTest.IsValid());
-		MarkHeartbeatActive(TEXT("[SERVER] starting test..."));
+		Heartbeat(TEXT("Starting test..."));
+		NextTest->TestIndex = ServerNumFinishedTests;
+		NextTest->TotalNumTests = ServerTotalNumTests;
 		IFunctionalTestingModule::Get().RunTestOnMap(NextTest->GetName(), false, false);
-	}
-}
-
-void UOUUMultiplayerTestController::OnFunctionalTestEnd(FAutomationTestBase* AutomationTest)
-{
-	MarkHeartbeatActive(FString(TEXT("test completed: ")) + AutomationTest->GetTestName());
-	if (AutomationTest->GetLastExecutionSuccessState() == false)
-	{
-		ServerNumFailedTests++;
 	}
 }
 
 void UOUUMultiplayerTestController::ClientStartSessionSearch()
 {
-	MarkHeartbeatActive(TEXT("[CLIENT] find sessions..."));
+	Heartbeat(TEXT("Start session search..."));
 
 	ClientSessionSearch = MakeShared<FOnlineSessionSearch>();
 	ClientSessionSearch->MaxSearchResults = 1;
@@ -260,11 +270,8 @@ void UOUUMultiplayerTestController::ClientJoinSessionComplete(FName, EOnJoinSess
 		FString ConnectString;
 		if (GetSessions()->GetResolvedConnectString(NAME_GameSession, ConnectString))
 		{
-			UE_LOG_ONLINE_SESSION(Log, TEXT("Join session: traveling to %s"), *ConnectString);
-			MarkHeartbeatActive(TEXT("[CLIENT] travel..."));
+			Heartbeat(TEXT("Client travel..."));
 			GetWorld()->GetFirstPlayerController()->ClientTravel(ConnectString, TRAVEL_Absolute);
 		}
 	}
 }
-
-UE_ENABLE_OPTIMIZATION
