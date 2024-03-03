@@ -1,6 +1,7 @@
 name: Plugin CI
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - github-actions-test
