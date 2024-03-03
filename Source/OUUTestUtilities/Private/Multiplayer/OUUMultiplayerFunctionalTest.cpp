@@ -17,16 +17,15 @@ int32 AOUUMultiplayerFunctionalTest::AdvanceLocalSyncMarker()
 	LastLocalSyncMarker++;
 	if (HasAuthority())
 	{
-		// DO NOT acknowledge yet!
+		// DO NOT acknowledge yet! (LastServerAcknowledgedSyncMarker = LastLocalSyncMarker)
 		// wait for client markers first...
-		// LastServerAcknowledgedSyncMarker = LastLocalSyncMarker;
 		UOUUMultiplayerTestController::Get().MarkHeartbeatActive(
 			FString::Printf(TEXT("[SERVER] Sync Marker %i"), LastLocalSyncMarker));
 	}
 	else
 	{
 		int32 NumSignalActors = 0;
-		for (auto Signal : TActorRange<AOUUMultiplayerTestClientSignal>(GetWorld()))
+		for (auto* Signal : TActorRange<AOUUMultiplayerTestClientSignal>(GetWorld()))
 		{
 			NumSignalActors++;
 			// find the signal actor we can use to send RPCs to the server
@@ -62,7 +61,7 @@ void AOUUMultiplayerFunctionalTest::ServerNotifyClientSyncMarkerReached(
 	}
 
 	int32 LastClientAcknowledgedMarker = -1;
-	for (auto& Entry : ClientSyncMarkerLocations)
+	for (const auto& Entry : ClientSyncMarkerLocations)
 	{
 		if (LastClientAcknowledgedMarker == -1)
 		{
@@ -106,12 +105,6 @@ void AOUUMultiplayerFunctionalTest::FinishTest(EFunctionalTestResult TestResult,
 	Multicast_OnTestEnded(TestResult, TestIndex, TotalNumTests);
 }
 
-void AOUUMultiplayerFunctionalTest::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(AOUUMultiplayerFunctionalTest, LastServerAcknowledgedSyncMarker);
-}
-
 void AOUUMultiplayerFunctionalTest::Multicast_OnTestStarted_Implementation()
 {
 	UOUUMultiplayerTestController::Get().NotifyFunctionalTestStarted();
@@ -132,22 +125,8 @@ void AOUUMultiplayerFunctionalTest::OnRep_ServerSyncMarker() const
 	}
 }
 
-UOUUMultiplayerTestWaitForAll* UOUUMultiplayerTestWaitForAll::WaitForAll(AOUUMultiplayerFunctionalTest* InOwningTest)
+void AOUUMultiplayerFunctionalTest::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	UOUUMultiplayerTestWaitForAll* Proxy = NewObject<UOUUMultiplayerTestWaitForAll>();
-	Proxy->OwningTest = InOwningTest;
-	return Proxy;
-}
-
-void UOUUMultiplayerTestWaitForAll::Activate()
-{
-	OwningTest->OnSyncMarkerReached.AddUObject(this, &UOUUMultiplayerTestWaitForAll::HandleSyncMarkerReached);
-	MarkerIdx = OwningTest->AdvanceLocalSyncMarker();
-}
-
-void UOUUMultiplayerTestWaitForAll::HandleSyncMarkerReached(int32 Marker) const
-{
-	ensure(MarkerIdx == Marker);
-	OwningTest->OnSyncMarkerReached.RemoveAll(this);
-	OnComplete.Broadcast();
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AOUUMultiplayerFunctionalTest, LastServerAcknowledgedSyncMarker);
 }
