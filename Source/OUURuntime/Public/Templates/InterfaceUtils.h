@@ -6,6 +6,7 @@
 
 #include "Templates/Casts.h"
 #include "UObject/ScriptInterface.h"
+#include "UObject/WeakInterfacePtr.h"
 
 /**
  * Call a function on a blueprint implementable interface object.
@@ -86,6 +87,13 @@ UObject* GetInterfaceObject(TScriptInterface<T> InterfaceObject)
 	return InterfaceObject.GetObject();
 }
 
+/** Get the underlying object from an interface so you can call Execute_* functions on it */
+template <typename T, typename = TIsIInterface_T<T>>
+UObject* GetInterfaceObject(TWeakInterfacePtr<T> InterfaceObject)
+{
+	return InterfaceObject.GetObject();
+}
+
 /**
  * Validate an interface object based on it's underlying UObject, extending IsValid(UObject*) functionality.
  * Also checks if the object actually implements the target interface.
@@ -120,6 +128,12 @@ FORCEINLINE bool IsValidInterface(TScriptInterface<T>& InterfaceObject)
 	bool bResult = IsValidInterface<T>(ObjectPointer);
 	InterfaceObject.SetInterface(bResult ? Cast<T>(ObjectPointer) : nullptr);
 	return bResult;
+}
+
+template <typename T, typename = TIsIInterface_T<T>>
+FORCEINLINE bool IsValidInterface(const TWeakInterfacePtr<T>& InterfaceObject)
+{
+	return InterfaceObject.IsValid();
 }
 
 /** Override to throw compile time error for using const TScriptInterface<T> or const TScriptInterface<T>& */
