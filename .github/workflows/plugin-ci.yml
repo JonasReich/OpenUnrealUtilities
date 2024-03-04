@@ -11,4 +11,6 @@ jobs:
     uses:  outoftheboxplugins/BuildMachines/.github/workflows/compile-plugin.yml@master
     with:
         ue_version: "5.2"
-    secrets: inherit
+    secrets:
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
