@@ -10,6 +10,10 @@
 AOUUMultiplayerFunctionalTest::AOUUMultiplayerFunctionalTest()
 {
 	bReplicates = true;
+
+	// All MP tests are disabled by default, so they cannot be run via the session frontend / regular functional test
+	// runner.
+	bIsEnabled = false;
 }
 
 int32 AOUUMultiplayerFunctionalTest::AdvanceLocalSyncMarker()
@@ -95,9 +99,10 @@ bool AOUUMultiplayerFunctionalTest::RunTest(const TArray<FString>& Params)
 void AOUUMultiplayerFunctionalTest::FinishTest(EFunctionalTestResult TestResult, const FString& Message)
 {
 	if (ensureMsgf(
-		HasAuthority(),
-		TEXT("The FinishTest function should only ever be called on Authority! Use snyc point nodes for all "
-			 "intermediate steps you want to ensure synchronicity.")) == false)
+			HasAuthority(),
+			TEXT("The FinishTest function should only ever be called on Authority! Use snyc point nodes for all "
+				 "intermediate steps you want to ensure synchronicity."))
+		== false)
 	{
 		return;
 	}
@@ -111,7 +116,10 @@ void AOUUMultiplayerFunctionalTest::Multicast_OnTestStarted_Implementation()
 	K2_OnTestStarted();
 }
 
-void AOUUMultiplayerFunctionalTest::Multicast_OnTestEnded_Implementation(EFunctionalTestResult TestResult, int32 InTestIndex, int32 InTotalNumTests)
+void AOUUMultiplayerFunctionalTest::Multicast_OnTestEnded_Implementation(
+	EFunctionalTestResult TestResult,
+	int32 InTestIndex,
+	int32 InTotalNumTests)
 {
 	UOUUMultiplayerTestController::Get().NotifyFunctionalTestEnded(TestResult, InTestIndex, InTotalNumTests);
 }
