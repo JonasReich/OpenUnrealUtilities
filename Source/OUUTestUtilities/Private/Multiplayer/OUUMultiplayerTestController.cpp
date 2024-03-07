@@ -2,6 +2,7 @@
 
 #include "Multiplayer/OUUMultiplayerTestController.h"
 
+#include "Engine/GameInstance.h"
 #include "FunctionalTest.h"
 #include "FunctionalTestingModule.h"
 #include "GameFramework/GameModeBase.h"
@@ -10,11 +11,13 @@
 #include "Interfaces/OnlineSessionInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "LogOpenUnrealUtilities.h"
+#include "Misc/CommandLine.h"
 #include "Multiplayer/OUUMultiplayerFunctionalTest.h"
 #include "Multiplayer/OUUMultiplayerTestClientSignal.h"
 #include "Online/OnlineSessionNames.h"
 #include "OnlineSessionSettings.h"
 #include "OnlineSubsystemUtils.h"
+#include "TimerManager.h"
 #include "Traits/IteratorTraits.h"
 
 namespace OUU::TestUtilities
@@ -53,7 +56,10 @@ void UOUUMultiplayerTestController::NotifyFunctionalTestStarted()
 	}
 }
 
-void UOUUMultiplayerTestController::NotifyFunctionalTestEnded(EFunctionalTestResult TestResult, int32 TestIndex, int32 TotalNumTests)
+void UOUUMultiplayerTestController::NotifyFunctionalTestEnded(
+	EFunctionalTestResult TestResult,
+	int32 TestIndex,
+	int32 TotalNumTests)
 {
 	if (TestIndex == TotalNumTests - 1)
 	{
