@@ -32,8 +32,7 @@ namespace OUU::Developer::ActorMapWindow::Private
 		// - SWidget
 		void Construct(const FArguments& InArgs);
 
-		void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
-			override;
+		void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 		// --
 
 		/** Separate initializer outside of construct so the widget can be reused for a different world */
@@ -75,15 +74,21 @@ namespace OUU::Developer::ActorMapWindow::Private
 		FVector LocalCameraLocation = FVector::ZeroVector;
 		FORCEINLINE FVector GetReferencePosition() const { return ReferencePosition + LocalCameraLocation; }
 
-		bool bShouldFollowCamera = false;
-		FORCEINLINE ECheckBoxState GetFollowCameraCheckBoxState() const
-		{
-			return bShouldFollowCamera ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;
-		}
-		FORCEINLINE void OnFollowCameraCheckBoxStateChanged(ECheckBoxState CheckBoxState)
-		{
-			bShouldFollowCamera = CheckBoxState == ECheckBoxState::Checked;
-		}
+#define DEFINE_CHECKBOX_BOOL(BoolName, DefaultValue)                                                                   \
+	bool b##BoolName = DefaultValue;                                                                                   \
+	FORCEINLINE ECheckBoxState Get##BoolName##CheckBoxState() const                                                    \
+	{                                                                                                                  \
+		return b##BoolName ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;                                      \
+	}                                                                                                                  \
+	FORCEINLINE void On##BoolName##CheckBoxStateChanged(ECheckBoxState CheckBoxState)                                  \
+	{                                                                                                                  \
+		b##BoolName = CheckBoxState == ECheckBoxState::Checked;                                                        \
+	}
+
+		DEFINE_CHECKBOX_BOOL(FollowCamera, false)
+		DEFINE_CHECKBOX_BOOL(DrawLabels, true)
+
+#undef DEFINE_CHECKBOX_BOOL
 
 		float TickRate = 0.1f;
 		FORCEINLINE TOptional<float> OnGetOptionalTickRate() const { return TickRate; }
@@ -131,11 +136,13 @@ namespace OUU::Developer::ActorMapWindow::Private
 			SLATE_ATTRIBUTE(const TArray<TSharedPtr<FActorQuery>>*, ActorQueries);
 			SLATE_ATTRIBUTE(FVector, ReferencePosition);
 			SLATE_ATTRIBUTE(float, MapSize);
+			SLATE_ATTRIBUTE(ECheckBoxState, DrawLabels);
 		SLATE_END_ARGS()
 
 		TAttribute<const TArray<TSharedPtr<FActorQuery>>*> ActorQueries;
 		TAttribute<FVector> ReferencePosition = FVector::ZeroVector;
 		TAttribute<float> MapSize = 0.f;
+		TAttribute<ECheckBoxState> DrawLabels;
 
 		void Construct(const FArguments& InArgs);
 
@@ -195,6 +202,7 @@ namespace OUU::Developer::ActorMapWindow::Private
 		DEFINE_ACTOR_MAP_TEXT_ACCESSOR(NameFilter);
 		DEFINE_ACTOR_MAP_TEXT_ACCESSOR(NameRegexPattern);
 		DEFINE_ACTOR_MAP_TEXT_ACCESSOR(ActorClassName);
+		DEFINE_ACTOR_MAP_TEXT_ACCESSOR(ComponentClassName);
 #undef DEFINE_ACTOR_MAP_TEXT_ACCESSOR
 
 		FORCEINLINE FText GetGameplayTagQueryString_Text() const

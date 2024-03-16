@@ -45,6 +45,12 @@ namespace OUU::Developer::ActorMapWindow
 		FString ActorClassName;
 
 		/**
+		 * Exact name of a component class on the actor or any of its parent classes.
+		 * The name must be an exact match, e.g. StaticMeshComponent for UStaticMeshComponent
+		 */
+		FString ComponentClassName;
+
+		/**
 		 * If this is valid, actors are expected to have a gameplay ability system component
 		 * of which the owned gameplay tags are compared with this query.
 		 */
@@ -56,8 +62,6 @@ namespace OUU::Developer::ActorMapWindow
 		FResult CachedQueryResult;
 
 		bool MatchesActor(const AActor* Actor) const;
-
-		bool MatchesActorClassSearchString(const AActor* Actor) const;
 
 		FResult ExecuteQuery(UWorld* World) const;
 
