@@ -120,6 +120,7 @@ namespace OUU::Developer::ActorMapWindow
 			ActorQueries = InArgs._ActorQueries;
 			ReferencePosition = InArgs._ReferencePosition;
 			MapSize = InArgs._MapSize;
+			DrawLabels = InArgs._DrawLabels;
 		}
 
 		int32 SActorLocationOverlay::OnPaint(
@@ -193,34 +194,37 @@ namespace OUU::Developer::ActorMapWindow
 						DrawEffects,
 						Query->QueryColor);
 
-					FText LabelText = FText::FromString(Actor->GetActorNameOrLabel());
+					if (this->DrawLabels.Get() == ECheckBoxState::Checked)
+					{
+						FText LabelText = FText::FromString(Actor->GetActorNameOrLabel());
 
-					FVector2f LabelDimensions = FontMeasure->Measure(LabelText, FontInfo);
+						FVector2f LabelDimensions = FontMeasure->Measure(LabelText, FontInfo);
 
-					FSlateDrawElement::MakeBox(
-						OutDrawElements,
-						RetLayerId++,
-						AllottedGeometry.ToPaintGeometry(
-							FVector2D(LabelDimensions),
-							FSlateLayoutTransform(
-								1.f,
-								WidgetSpaceLocation - (MarkerSize / 2.f) + FVector2D(0, MarkerSize))),
-						&Private::White,
-						DrawEffects,
-						Private::LabelBackgroundColor);
+						FSlateDrawElement::MakeBox(
+							OutDrawElements,
+							RetLayerId++,
+							AllottedGeometry.ToPaintGeometry(
+								FVector2D(LabelDimensions),
+								FSlateLayoutTransform(
+									1.f,
+									WidgetSpaceLocation - (MarkerSize / 2.f) + FVector2D(0, MarkerSize))),
+							&Private::White,
+							DrawEffects,
+							Private::LabelBackgroundColor);
 
-					FSlateDrawElement::MakeText(
-						OutDrawElements,
-						RetLayerId++,
-						AllottedGeometry.ToPaintGeometry(
-							FVector2D(FVector2f(MarkerSize, MarkerSize)),
-							FSlateLayoutTransform(
-								1.f,
-								WidgetSpaceLocation - (MarkerSize / 2.f) + FVector2D(0, MarkerSize))),
-						LabelText,
-						FontInfo,
-						DrawEffects,
-						Query->QueryColor);
+						FSlateDrawElement::MakeText(
+							OutDrawElements,
+							RetLayerId++,
+							AllottedGeometry.ToPaintGeometry(
+								FVector2D(FVector2f(MarkerSize, MarkerSize)),
+								FSlateLayoutTransform(
+									1.f,
+									WidgetSpaceLocation - (MarkerSize / 2.f) + FVector2D(0, MarkerSize))),
+							LabelText,
+							FontInfo,
+							DrawEffects,
+							Query->QueryColor);
+					}
 				}
 			}
 
@@ -244,15 +248,18 @@ namespace OUU::Developer::ActorMapWindow
 			// clang-format off
 		STableRow<TSharedPtr<FActorQuery>>::Construct(
 			STableRow<TSharedPtr<FActorQuery>>::FArguments()
+			.Padding(FMargin(4.f, 2.f))
 			.Content()
 			[
 				SNew(SVerticalBox)
 				+ SVerticalBox::Slot()
+				.Padding(4.f, 2.f)
 				[
 					SNew(SColorBlock)
 					.Color(ActorQuery->QueryColor)
 				]
 				+ SVerticalBox::Slot()
+				.Padding(4.f, 2.f)
 				[
 					ColumnSizeData->MakeSimpleDetailsSplitter(
 						INVTEXT("Name Filter"),
@@ -265,6 +272,7 @@ namespace OUU::Developer::ActorMapWindow
 					)
 				]
 				+ SVerticalBox::Slot()
+				.Padding(4.f, 2.f)
 				[
 					ColumnSizeData->MakeSimpleDetailsSplitter(
 						INVTEXT("Name Regex Pattern"),
@@ -277,10 +285,11 @@ namespace OUU::Developer::ActorMapWindow
 					)
 				]
 				+ SVerticalBox::Slot()
+				.Padding(4.f, 2.f)
 				[
 					ColumnSizeData->MakeSimpleDetailsSplitter(
 						INVTEXT("Class Filter"),
-						INVTEXT("Name string that must be contained within the actors class name or any of its "
+						INVTEXT("Name string that must match the actors class name or any of its "
 							"super classes, for the actor to be included in the query."),
 						SNew(SEditableTextBox)
 						.Text(this, &SActorQueryRow::GetActorClassName_Text)
@@ -289,15 +298,37 @@ namespace OUU::Developer::ActorMapWindow
 					)
 				]
 				+ SVerticalBox::Slot()
+				.Padding(4.f, 2.f)
+				[
+					ColumnSizeData->MakeSimpleDetailsSplitter(
+						INVTEXT("Component Class Filter"),
+						INVTEXT("Name string that must match any of the actor component class names or any of their "
+							"super classes, for the actor to be included in the query."),
+						SNew(SEditableTextBox)
+						.Text(this, &SActorQueryRow::GetComponentClassName_Text)
+						.HintText(INVTEXT("<empty>"))
+						.OnTextCommitted(this, &SActorQueryRow::SetComponentClassName_Text)
+					)
+				]
+				+ SVerticalBox::Slot()
+				.Padding(4.f, 2.f)
 				[
 					ColumnSizeData->MakeSimpleDetailsSplitter(
 						INVTEXT("Gameplay Tag Query"),
-						INVTEXT("Gameplay tag query. Must use the "),
+						INVTEXT("Gameplay tag query. Must use fully qualified tag names that can be combined with ANY(), ALL() and NONE() operators.\ne.g. NONE(ANY(Foo.Bar, Foo.Baz), FooBar)"),
 						SNew(SEditableTextBox)
 						.Text(this, &SActorQueryRow::GetGameplayTagQueryString_Text)
 						.HintText(INVTEXT("<empty>"))
 						.OnTextCommitted(this, &SActorQueryRow::SetGameplayTagQueryString_Text)
 					)
+				]
+				+ SVerticalBox::Slot()
+				.Padding(4.f, 2.f)
+				[
+					SNew(STextBlock).Text_Lambda([this]()
+					{
+						return ActorQuery.IsValid() ? FText::Format(INVTEXT("Num Actors: {0}"), ActorQuery->CachedQueryResult.Actors.Num()) : Private::GInvalidText;
+					})
 				]
 			], InOwnerTableView);
 			// clang-format on
@@ -360,7 +391,7 @@ namespace OUU::Developer::ActorMapWindow
 				if (SceneCaptureActor.IsValid())
 				{
 					LocalCameraLocation = FVector::ZeroVector;
-					if (bShouldFollowCamera)
+					if (bFollowCamera)
 					{
 						bool bSetLocalCameraLocation = false;
 						if (auto* LocalPlayerController = TargetWorld->GetFirstPlayerController())
@@ -586,10 +617,22 @@ namespace OUU::Developer::ActorMapWindow
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		[
+			DetailsColumns.MakeSimpleDetailsSplitter(
+				INVTEXT("Draw Labels"),
+				INVTEXT("If to draw name labels next to the markers on the map"),
+				SNew(SCheckBox)
+					.IsChecked(this, &SActorMap::GetDrawLabelsCheckBoxState)
+					.OnCheckStateChanged(this, &SActorMap::OnDrawLabelsCheckBoxStateChanged)
+			)
+		]
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
 			SNew(SSpacer)
 			.Size(FVector2D{0.f, 20.f})
 		]
 		+ SVerticalBox::Slot()
+		.Padding(0.f, 4.f)
 		.AutoHeight()
 		[
 			SNew(SHorizontalBox)
@@ -646,6 +689,7 @@ namespace OUU::Developer::ActorMapWindow
 			SNew(SActorLocationOverlay)
 				.ActorQueries(&ActorQueries)
 				.MapSize(this, &SActorMap::GetOrthoWidth)
+				.DrawLabels(this, &SActorMap::GetDrawLabelsCheckBoxState)
 				.ReferencePosition(this, &SActorMap::GetReferencePosition)
 		];
 			// clang-format on
@@ -677,6 +721,24 @@ namespace OUU::Developer::ActorMapWindow
 
 	void TryInvokeTab() { FGlobalTabmanager::Get()->TryInvokeTab(GTabName); }
 
+	template <typename ExitClass>
+	bool ObjectMatchesClassSearchString(const UObject* Object, const FString& SearchName)
+	{
+		if (!IsValid(Object))
+			return false;
+
+		auto* Class = Object->GetClass();
+		// Iterate through all parent classes to find a match
+		while (Class != UStruct::StaticClass() && Class != UClass::StaticClass() && Class != ExitClass::StaticClass())
+		{
+			if (Class->GetName().Equals(SearchName, ESearchCase::IgnoreCase))
+				return true;
+			Class = Class->GetSuperClass();
+		}
+
+		return false;
+	}
+
 	bool FActorQuery::MatchesActor(const AActor* Actor) const
 	{
 		if (!IsValid(Actor))
@@ -699,11 +761,26 @@ namespace OUU::Developer::ActorMapWindow
 				return false;
 		}
 
-		// Perform this check last, because it's the most expensive
-		if (!ActorClassName.IsEmpty())
+		if (ActorClassName.IsEmpty() == false)
 		{
 			bAtLeastOneFilterActive = true;
-			if (!MatchesActorClassSearchString(Actor))
+			if (!ObjectMatchesClassSearchString<AActor>(Actor, ActorClassName))
+				return false;
+		}
+
+		if (ComponentClassName.IsEmpty() == false)
+		{
+			bAtLeastOneFilterActive = true;
+			bool bAtLeastOneComponentMatches = false;
+			for (auto& Component : Actor->GetComponents())
+			{
+				if (ObjectMatchesClassSearchString<UActorComponent>(Component, ComponentClassName))
+				{
+					bAtLeastOneComponentMatches = true;
+					break;
+				}
+			}
+			if (!bAtLeastOneComponentMatches)
 				return false;
 		}
 
@@ -725,22 +802,6 @@ namespace OUU::Developer::ActorMapWindow
 		}
 
 		return bAtLeastOneFilterActive;
-	}
-
-	bool FActorQuery::MatchesActorClassSearchString(const AActor* Actor) const
-	{
-		if (!IsValid(Actor))
-			return false;
-
-		auto* Class = Actor->GetClass();
-		// Iterate through all parent classes to find a match
-		while (Class != UStruct::StaticClass() && Class != UClass::StaticClass() && Class != AActor::StaticClass())
-		{
-			if (Class->GetName().Equals(ActorClassName, ESearchCase::IgnoreCase))
-				return true;
-			Class = Class->GetSuperClass();
-		}
-		return false;
 	}
 
 	FActorQuery::FResult FActorQuery::ExecuteQuery(UWorld* World) const

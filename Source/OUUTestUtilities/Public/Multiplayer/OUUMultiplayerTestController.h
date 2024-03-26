@@ -11,6 +11,7 @@
 
 enum class EFunctionalTestResult : uint8;
 class AOUUMultiplayerFunctionalTest;
+class AGameModeBase;
 
 UCLASS()
 class OUUTESTUTILITIES_API UOUUMultiplayerTestController : public UGauntletTestController
@@ -67,4 +68,3 @@ private:
 	bool bClientSessionSearchStarted = false;
 	TSharedPtr<FOnlineSessionSearch> ClientSessionSearch;
 };
-
