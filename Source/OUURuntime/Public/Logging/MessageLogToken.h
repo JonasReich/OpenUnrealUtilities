@@ -70,12 +70,12 @@ public:
 		return CreateTextMessageLogToken(FText::FromString(Text));
 	}
 
-	static FORCEINLINE FMessageLogToken Create(const char* Literal)
+	static FORCEINLINE FMessageLogToken Create(const ANSICHAR* Literal)
 	{
 		return CreateTextMessageLogToken(FText::FromString(Literal));
 	}
 
-	static FORCEINLINE FMessageLogToken Create(const wchar_t* Literal)
+	static FORCEINLINE FMessageLogToken Create(const WIDECHAR* Literal)
 	{
 		return CreateTextMessageLogToken(FText::FromString(Literal));
 	}
