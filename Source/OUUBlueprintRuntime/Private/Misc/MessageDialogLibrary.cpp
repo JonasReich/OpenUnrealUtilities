@@ -30,7 +30,7 @@ TEnumAsByte<EAppReturnType::Type> UMessageDialogLibrary::OpenMessageDialogWithDe
 		GetOptionalTitlePtr(OptionalTitle));
 }
 
-const FText* UMessageDialogLibrary::GetOptionalTitlePtr(FText& Text)
+const FText* UMessageDialogLibrary::GetOptionalTitlePtr(const FText& Text)
 {
 	const int32 TitleLength = Text.ToString().Len();
 	return (TitleLength > 0) ? &Text : nullptr;

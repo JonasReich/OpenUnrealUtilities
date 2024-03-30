@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "OUUTestUtilities.h"
+#include "CoreMinimal.h"
 
 #if WITH_AUTOMATION_WORKER
 

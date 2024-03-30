@@ -16,5 +16,5 @@ namespace OUU::Editor
 	OUUEDITOR_API UClass* OpenSimpleClassPickerDialog(
 		UClass* ParentClass,
 		EClassFlags DisallowedClassFlags,
-		const FText TitleText);
+		const FText& TitleText);
 } // namespace OUU::Editor

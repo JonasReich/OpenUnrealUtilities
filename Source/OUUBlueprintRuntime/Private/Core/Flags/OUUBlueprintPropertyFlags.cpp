@@ -77,7 +77,7 @@ namespace OUU::BlueprintRuntime::Private::BlueprintPropertyFlags
 	}
 } // namespace OUU::BlueprintRuntime::Private::BlueprintPropertyFlags
 
-int64 UOUUBlueprintPropertyFlagsLibrary::CreatePropertyFlagsMask(TSet<EOUUBlueprintPropertyFlags> Flags)
+int64 UOUUBlueprintPropertyFlagsLibrary::CreatePropertyFlagsMask(const TSet<EOUUBlueprintPropertyFlags>& Flags)
 {
 	return static_cast<int64>(OUU::BlueprintRuntime::Private::BlueprintPropertyFlags::ToNativeFlags(Flags));
 }

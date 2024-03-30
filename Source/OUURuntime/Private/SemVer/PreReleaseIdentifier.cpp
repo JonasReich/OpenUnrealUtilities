@@ -81,7 +81,7 @@ const TArray<FString>& FSemVerPreReleaseIdentifier::GetIdentifiers() const
 
 bool FSemVerPreReleaseIdentifier::TryIncrement()
 {
-	int32 NumIdentifiers = Identifiers.Num();
+	const int32 NumIdentifiers = Identifiers.Num();
 	if (NumIdentifiers == 0)
 	{
 		Identifiers.Add("1");
@@ -89,11 +89,11 @@ bool FSemVerPreReleaseIdentifier::TryIncrement()
 	}
 
 	FString& LastIdentifier = Identifiers.Last();
-	int32 LastIdentiferAsNumeric = TryParseNumericIdentifier(LastIdentifier);
-	if (LastIdentiferAsNumeric != INDEX_NONE)
+	int32 LastIdentifierAsNumeric = TryParseNumericIdentifier(LastIdentifier);
+	if (LastIdentifierAsNumeric != INDEX_NONE)
 	{
-		LastIdentiferAsNumeric++;
-		LastIdentifier = LexToString<int32>(LastIdentiferAsNumeric);
+		LastIdentifierAsNumeric++;
+		LastIdentifier = LexToString<int32>(LastIdentifierAsNumeric);
 		return true;
 	}
 
@@ -102,7 +102,7 @@ bool FSemVerPreReleaseIdentifier::TryIncrement()
 
 bool FSemVerPreReleaseIdentifier::operator==(const FSemVerPreReleaseIdentifier& Other) const
 {
-	int32 ThisNumIdentifiers = Identifiers.Num();
+	const int32 ThisNumIdentifiers = Identifiers.Num();
 	if (ThisNumIdentifiers != Other.Identifiers.Num())
 	{
 		return false;
@@ -129,10 +129,10 @@ bool FSemVerPreReleaseIdentifier::operator!=(const FSemVerPreReleaseIdentifier& 
 
 bool FSemVerPreReleaseIdentifier::operator<(const FSemVerPreReleaseIdentifier& Other) const
 {
-	int32 ThisNumIdentifiers = Identifiers.Num();
-	int32 OtherNumIdentifiers = Other.Identifiers.Num();
+	const int32 ThisNumIdentifiers = Identifiers.Num();
+	const int32 OtherNumIdentifiers = Other.Identifiers.Num();
 
-	int32 MinNumIdentifiers = FMath::Min(ThisNumIdentifiers, OtherNumIdentifiers);
+	const int32 MinNumIdentifiers = FMath::Min(ThisNumIdentifiers, OtherNumIdentifiers);
 
 	for (int32 i = 0; i < MinNumIdentifiers; i++)
 	{
@@ -147,7 +147,7 @@ bool FSemVerPreReleaseIdentifier::operator<(const FSemVerPreReleaseIdentifier& O
 		return CompareStringIdentifiersSmaller(ThisIdentifier, OtherIdentifier);
 	}
 
-	// More identifiers means lower precendece
+	// More identifiers means lower precedence
 	return ThisNumIdentifiers > OtherNumIdentifiers;
 }
 
@@ -158,10 +158,10 @@ bool FSemVerPreReleaseIdentifier::operator<=(const FSemVerPreReleaseIdentifier& 
 
 bool FSemVerPreReleaseIdentifier::operator>(const FSemVerPreReleaseIdentifier& Other) const
 {
-	int32 ThisNumIdentifiers = Identifiers.Num();
-	int32 OtherNumIdentifiers = Other.Identifiers.Num();
+	const int32 ThisNumIdentifiers = Identifiers.Num();
+	const int32 OtherNumIdentifiers = Other.Identifiers.Num();
 
-	int32 MinNumIdentifiers = FMath::Min(ThisNumIdentifiers, OtherNumIdentifiers);
+	const int32 MinNumIdentifiers = FMath::Min(ThisNumIdentifiers, OtherNumIdentifiers);
 
 	for (int32 i = 0; i < MinNumIdentifiers; i++)
 	{
@@ -176,7 +176,7 @@ bool FSemVerPreReleaseIdentifier::operator>(const FSemVerPreReleaseIdentifier& O
 		return CompareStringIdentifiersBigger(ThisIdentifier, OtherIdentifier);
 	}
 
-	// More identifiers means lower precendece
+	// More identifiers means lower precedence
 	return ThisNumIdentifiers < OtherNumIdentifiers;
 }
 
@@ -187,8 +187,8 @@ bool FSemVerPreReleaseIdentifier::operator>=(const FSemVerPreReleaseIdentifier& 
 
 bool FSemVerPreReleaseIdentifier::CompareStringIdentifiersSmaller(const FString& A, const FString& B)
 {
-	int32 AInt = TryParseNumericIdentifier(A);
-	int32 BInt = TryParseNumericIdentifier(B);
+	const int32 AInt = TryParseNumericIdentifier(A);
+	const int32 BInt = TryParseNumericIdentifier(B);
 	if (AInt != INDEX_NONE && BInt != INDEX_NONE)
 	{
 		return AInt < BInt;
@@ -206,8 +206,8 @@ bool FSemVerPreReleaseIdentifier::CompareStringIdentifiersSmaller(const FString&
 
 bool FSemVerPreReleaseIdentifier::CompareStringIdentifiersBigger(const FString& A, const FString& B)
 {
-	int32 AInt = TryParseNumericIdentifier(A);
-	int32 BInt = TryParseNumericIdentifier(B);
+	const int32 AInt = TryParseNumericIdentifier(A);
+	const int32 BInt = TryParseNumericIdentifier(B);
 	if (AInt != INDEX_NONE && BInt != INDEX_NONE)
 	{
 		return AInt > BInt;

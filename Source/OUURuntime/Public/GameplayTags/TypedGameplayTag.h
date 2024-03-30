@@ -23,7 +23,7 @@ namespace OUU::Runtime::Private
 	{
 		static void Impl(FGameplayTagContainer& OutRootTags)
 		{
-			FGameplayTag RootTag = T::Get();
+			const FGameplayTag RootTag = T::Get();
 			OutRootTags.AddTag(RootTag);
 			return TGetAllTypedTagRootTags_Recursive<Ts...>::Impl(OutRootTags);
 		}

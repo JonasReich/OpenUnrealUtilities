@@ -36,7 +36,7 @@ enum class EEnumSequenceType
 template <class EnumClass>
 struct TEnumSequenceTraits
 {
-	static const EEnumSequenceType Type = EEnumSequenceType::Undefined;
+	static constexpr EEnumSequenceType Type = EEnumSequenceType::Undefined;
 };
 
 /** Macro to define enum sequence trait in a single line */

@@ -44,6 +44,7 @@ namespace OUU::Runtime::Private
 	// is the tag an extension to another "parent type" tag?
 	struct CLiteralTagIsExtension
 	{
+		// ReSharper disable once CppFunctionIsNotImplemented
 		template <typename TagType>
 		auto Requires(TagType It) -> decltype(sizeof(TagType::ExtendTagType));
 	};
@@ -345,7 +346,7 @@ namespace OUU::Runtime::Private
 		{
 			// Never use the ensure, display a custom error instead if the tag was not found.
 			// That way the API stays consistent without bool parameter.
-			const bool bErrorIfNotFound = false;
+			constexpr bool bErrorIfNotFound = false;
 			return UGameplayTagsManager::Get().RequestGameplayTag(*OwningType::GetName(), bErrorIfNotFound);
 		}
 	};

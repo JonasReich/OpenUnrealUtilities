@@ -49,7 +49,7 @@ private:
 
 private:
 	void CycleViewMode();
-	TArray<FString> GetBufferVisualizationOverviewTargets();
+	static TArray<FString> GetBufferVisualizationOverviewTargets();
 	void ToggleBufferVisualizationOverviewMode();
 	void GetNextBuffer(int32 Step);
 	void GetNextBuffer(const TArray<FString>& OverviewBuffers, int32 Step);

@@ -3,7 +3,6 @@
 #pragma once
 
 #include "Templates/UnrealTypeTraits.h"
-#include "Traits/IsVoidType.h"
 
 namespace OUUAddressOf_Private
 {

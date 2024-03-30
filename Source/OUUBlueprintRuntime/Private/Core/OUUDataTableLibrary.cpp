@@ -33,7 +33,7 @@ DEFINE_FUNCTION(UOUUDataTableLibrary::execAddRowToDataTable)
 
 	// Grab the last property found when we walked the stack
 	// This does not contains the property value, only its type information
-	FStructProperty* StructProp = CastField<FStructProperty>(Stack.MostRecentProperty);
+	const FStructProperty* StructProp = CastField<FStructProperty>(Stack.MostRecentProperty);
 
 	bool bSuccess = false;
 	if (!DataTable)
@@ -79,7 +79,7 @@ DEFINE_FUNCTION(UOUUDataTableLibrary::execAddRowToDataTable)
 bool UOUUDataTableLibrary::Generic_AddRowToDataTable(
 	UDataTable* DataTable,
 	FName RowName,
-	FStructProperty* StructProp,
+	const FStructProperty* StructProp,
 	void* RowPtr)
 {
 	if (!IsValid(DataTable) || !RowPtr || !StructProp)

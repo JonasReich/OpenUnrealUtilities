@@ -99,9 +99,9 @@ void UOUUEditorLibrary::FocusOnBlueprintContent(const FOUUBlueprintEditorFocusCo
 		else
 		{
 			// fallback to trying the main level editor tab manager
-			FLevelEditorModule& LevelEditorModule =
+			const FLevelEditorModule& LevelEditorModule =
 				FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
-			TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule.GetLevelEditorTabManager();
+			const TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule.GetLevelEditorTabManager();
 			LevelEditorTabManager->TryInvokeTab(FName(*FocusContent.TabToFocusOrOpen));
 		}
 	}

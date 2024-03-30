@@ -47,6 +47,6 @@ private:
 	static bool Generic_AddRowToDataTable(
 		UDataTable* DataTable,
 		FName RowName,
-		FStructProperty* StructProp,
+		const FStructProperty* StructProp,
 		void* RowPtr);
 };

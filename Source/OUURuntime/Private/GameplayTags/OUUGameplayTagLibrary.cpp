@@ -39,7 +39,7 @@ TArray<FName> UOUUGameplayTagLibrary::GetTagComponents(const FGameplayTag& Tag)
 
 FGameplayTag UOUUGameplayTagLibrary::CreateTagFromComponents(const TArray<FName>& TagComponents)
 {
-	auto TagString =
+	const auto TagString =
 		FString::JoinBy(TagComponents, TEXT("."), [](const FName& Name) -> FString { return Name.ToString(); });
 	return UGameplayTagsManager::Get().RequestGameplayTag(*TagString, false);
 }

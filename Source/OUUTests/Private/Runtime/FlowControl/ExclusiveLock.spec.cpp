@@ -97,8 +97,8 @@ void FExclusiveLockSpec::Define()
 			SPEC_TEST_EQUAL(Env->Helper->Lock, Cast<UObject>(Env->Lock));
 
 			SPEC_TEST_EQUAL(Env->Helper->NumDelegateCalls, 4);
-			TArray<bool> Bools{true, false, true, false};
-			SPEC_TEST_ARRAYS_EQUAL(Env->Helper->LockStateHistory, Bools);
+			const TArray<bool> Booleans{true, false, true, false};
+			SPEC_TEST_ARRAYS_EQUAL(Env->Helper->LockStateHistory, Booleans);
 		});
 	});
 

@@ -21,9 +21,9 @@
  * It's recommended only to use these as is OR to explicitly define all flags as opposed to combining this macro with
  * other flags.
  */
-const int32 DEFAULT_OUU_TEST_FLAGS = EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter;
+constexpr int32 DEFAULT_OUU_TEST_FLAGS = EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter;
 
-FORCEINLINE FString OUUTESTUTILITIES_API EscapeTestName(FString InTestName)
+FORCEINLINE FString OUUTESTUTILITIES_API EscapeTestName(const FString& InTestName)
 {
 	return InTestName.Replace(TEXT("."), TEXT("<dot>"));
 }

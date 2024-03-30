@@ -45,8 +45,8 @@ public:
 		int32 Major,
 		int32 Minor,
 		int32 Patch,
-		FSemVerPreReleaseIdentifier PreRelease = {},
-		FSemVerBuildMetadata Metadata = {});
+		const FSemVerPreReleaseIdentifier& PreRelease = {},
+		const FSemVerBuildMetadata& Metadata = {});
 
 	/**
 	 * Try to create a semantic version object from a string.

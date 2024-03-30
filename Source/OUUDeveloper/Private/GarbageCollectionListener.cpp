@@ -69,7 +69,7 @@ private:
 		if (TimerHandle.IsValid())
 			return;
 
-		if (auto TimerManager = GetTimerManager())
+		if (auto* TimerManager = GetTimerManager())
 		{
 			const FTimerDelegate Delegate = FTimerDelegate::CreateRaw(this, &FGarbageCollectionListener::Tick);
 			TimerHandle = TimerManager->SetTimerForNextTick(Delegate);
@@ -86,7 +86,7 @@ private:
 
 	static FTimerManager* GetTimerManager()
 	{
-		if (UWorld* World = GEngine->GetCurrentPlayWorld())
+		if (const UWorld* World = GEngine->GetCurrentPlayWorld())
 		{
 			return &(World->GetTimerManager());
 		}
@@ -128,7 +128,7 @@ private:
 			if (Pair.Key.IsValid())
 			{
 				if (auto** SuperClassPtr =
-						GroupingSuperClasses.FindByPredicate([&](UClass* C) -> bool { return Pair.Key->IsChildOf(C); }))
+						GroupingSuperClasses.FindByPredicate([&](const UClass* C) -> bool { return Pair.Key->IsChildOf(C); }))
 				{
 					SuperClass = *SuperClassPtr;
 				}
@@ -139,8 +139,8 @@ private:
 		}
 
 		GroupingSuperClasses.Sort([&](const UClass& A, const UClass& B) -> bool {
-			FClassToGCStats* AccumulatedStatsA = AccumulatedDeletionMaps.Find(&A);
-			FClassToGCStats* AccumulatedStatsB = AccumulatedDeletionMaps.Find(&B);
+			const FClassToGCStats* AccumulatedStatsA = AccumulatedDeletionMaps.Find(&A);
+			const FClassToGCStats* AccumulatedStatsB = AccumulatedDeletionMaps.Find(&B);
 
 			if (AccumulatedStatsA == nullptr || AccumulatedStatsB == nullptr)
 				return false;
@@ -160,7 +160,7 @@ private:
 
 		TSoftClassPtr<UObject> Class = nullptr;
 		FGarbageCollectionStats Stats;
-		for (auto* SuperClass : GroupingSuperClasses)
+		for (const auto* SuperClass : GroupingSuperClasses)
 		{
 			TArray<FClassToGCStats>* SortedClassDeletionMap = SortedClassDeletionMaps.Find(SuperClass);
 			if (SortedClassDeletionMap == nullptr)
@@ -177,7 +177,7 @@ private:
 				TEXT("- %i with super class %s"),
 				AccumulatedDeletionMaps[SuperClass].Value.Count,
 				*SuperClass->GetName());
-			for (auto& Pair : (*SortedClassDeletionMap))
+			for (const auto& Pair : (*SortedClassDeletionMap))
 			{
 				Tie(Class, Stats) = Pair;
 				UE_LOG(
@@ -257,7 +257,7 @@ static FAutoConsoleCommand StopGarbageCollectionDumping(
 	TEXT("ouu.Debug.GC.StopDump"),
 	TEXT("Stop dumping garbage collection summaries into the output log"),
 	FConsoleCommandDelegate::CreateStatic([]() {
-		if (auto* Listener = FGarbageCollectionListener::Find())
+		if (const auto* Listener = FGarbageCollectionListener::Find())
 		{
 			Listener->Deactivate();
 		}

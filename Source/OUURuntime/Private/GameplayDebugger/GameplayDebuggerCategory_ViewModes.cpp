@@ -4,11 +4,9 @@
 
 #if WITH_GAMEPLAY_DEBUGGER
 	#include "BufferVisualizationData.h"
-	#include "Engine.h"
 	#include "Engine/DebugCameraControllerSettings.h"
 	#include "Engine/Font.h"
 	#include "Engine/GameViewportClient.h"
-	#include "EngineUtils.h"
 	#include "GameFramework/PlayerController.h"
 	#include "LogOpenUnrealUtilities.h"
 
@@ -64,7 +62,7 @@ namespace OUU::Runtime::Private
 	{
 		if (!InBufferName.IsEmpty())
 		{
-			if (UMaterialInterface* Material = GetBufferVisualizationData().GetMaterial(*InBufferName))
+			if (const UMaterialInterface* Material = GetBufferVisualizationData().GetMaterial(*InBufferName))
 			{
 				return Material->GetName();
 			}
@@ -145,10 +143,10 @@ void FGameplayDebuggerCategory_ViewModes::CycleViewMode()
 			return;
 		}
 
-		int32 CurrViewModeIndex = GameViewportClient->ViewModeIndex;
-		int32 CurrIndex = LastViewModeSettingsIndex;
+		const int32 CurrViewModeIndex = GameViewportClient->ViewModeIndex;
+		const int32 CurrIndex = LastViewModeSettingsIndex;
 
-		int32 NextIndex = CurrIndex < DebugViewModes.Num() ? (CurrIndex + 1) % DebugViewModes.Num() : 0;
+		const int32 NextIndex = CurrIndex < DebugViewModes.Num() ? (CurrIndex + 1) % DebugViewModes.Num() : 0;
 		int32 NextViewModeIndex = DebugViewModes[NextIndex];
 
 		if (NextViewModeIndex != CurrViewModeIndex)
@@ -233,7 +231,7 @@ void FGameplayDebuggerCategory_ViewModes::ToggleBufferVisualizationOverviewMode(
 		{
 			Cmd += OUU::Runtime::Private::GetViewModeName(VMI_VisualizeBuffer);
 
-			TArray<FString> SelectedBuffers = GetBufferVisualizationOverviewTargets();
+			const TArray<FString> SelectedBuffers = GetBufferVisualizationOverviewTargets();
 
 			if (CurrSelectedBuffer.IsEmpty() || !SelectedBuffers.Contains(CurrSelectedBuffer))
 			{
@@ -255,7 +253,7 @@ void FGameplayDebuggerCategory_ViewModes::GetNextBuffer(int32 Step)
 {
 	if (bEnableBufferVisualization && !bEnableBufferVisualizationFullMode)
 	{
-		TArray<FString> OverviewBuffers = GetBufferVisualizationOverviewTargets();
+		const TArray<FString> OverviewBuffers = GetBufferVisualizationOverviewTargets();
 		GetNextBuffer(OverviewBuffers, Step);
 	}
 }
@@ -299,8 +297,8 @@ void FGameplayDebuggerCategory_ViewModes::GetNextBuffer(const TArray<FString>& O
 		}
 		else
 		{
-			int32 Incr = FMath::Abs(Step);
-			int32 Min = Incr == 1 ? (BufferIndex / 4) * 4 : BufferIndex % 4;
+			const int32 Incr = FMath::Abs(Step);
+			const int32 Min = Incr == 1 ? (BufferIndex / 4) * 4 : BufferIndex % 4;
 			int32 Max = Min;
 			for (int32 i = 0; i < 3 && Max + Incr < OverviewBuffers.Num(); i++)
 			{

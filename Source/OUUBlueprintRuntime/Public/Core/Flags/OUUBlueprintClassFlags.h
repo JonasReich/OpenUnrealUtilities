@@ -127,7 +127,7 @@ class UOUUBlueprintClassFlagsLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Class Flags")
-	static int64 CreateClassFlagsMask(TSet<EOUUBlueprintClassFlags> Flags);
+	static int64 CreateClassFlagsMask(const TSet<EOUUBlueprintClassFlags>& Flags);
 
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Class Flags")
 	static TSet<EOUUBlueprintClassFlags> BreakClassFlagsMask(int64 Flags);
@@ -139,8 +139,8 @@ public:
 	static int64 GetClassFlagsMask(const UClass* Class);
 
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Class Flags")
-	static bool ClassHasAnyFlags(const UClass* Class, TSet<EOUUBlueprintClassFlags> Flags);
+	static bool ClassHasAnyFlags(const UClass* Class, const TSet<EOUUBlueprintClassFlags>& Flags);
 
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Class Flags")
-	static bool ClassHasAllFlags(const UClass* Class, TSet<EOUUBlueprintClassFlags> Flags);
+	static bool ClassHasAllFlags(const UClass* Class, const TSet<EOUUBlueprintClassFlags>& Flags);
 };

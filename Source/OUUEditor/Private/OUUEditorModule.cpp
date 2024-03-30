@@ -5,12 +5,10 @@
 #include "AssetRegistry/IAssetRegistry.h"
 #include "Editor.h"
 #include "EditorUtilitySubsystem.h"
-#include "EditorUtilityWidget.h"
 #include "EditorUtilityWidgetBlueprint.h"
 #include "Engine/AssetManager.h"
 #include "GameplayTags/TypedGameplayTag.h"
 #include "GameplayTags/TypedGameplayTagContainerCustomization.h"
-#include "IAssetTools.h"
 #include "MaterialAnalyzer/OUUMaterialAnalyzer.h"
 #include "Modules/ModuleManager.h"
 #include "OUUContentBrowserExtensions.h"
@@ -109,9 +107,7 @@ namespace OUU::Editor
 
 					for (const auto& AssetPath : AssetPathsToLoad)
 					{
-						auto EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(AssetPath.ResolveObject());
-
-						if (EditorWidget)
+						if (auto* EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(AssetPath.ResolveObject()))
 						{
 							FName TabId;
 							EditorUtilitySubsystem->RegisterTabAndGetID(EditorWidget, OUT TabId);

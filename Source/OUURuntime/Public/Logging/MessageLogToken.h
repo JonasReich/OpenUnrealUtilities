@@ -63,9 +63,9 @@ public:
 	static FMessageLogToken CreateTextMessageLogToken(const FText& Text);
 	static FMessageLogToken CreateURLMessageLogToken(const FString& URL, const FText& OptionalLabelOverride);
 
-	static FORCEINLINE FMessageLogToken Create(FText Text) { return CreateTextMessageLogToken(Text); }
+	static FORCEINLINE FMessageLogToken Create(const FText& Text) { return CreateTextMessageLogToken(Text); }
 
-	static FORCEINLINE FMessageLogToken Create(FString Text)
+	static FORCEINLINE FMessageLogToken Create(const FString& Text)
 	{
 		return CreateTextMessageLogToken(FText::FromString(Text));
 	}

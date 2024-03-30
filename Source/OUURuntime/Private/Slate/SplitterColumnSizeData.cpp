@@ -18,8 +18,8 @@ FSplitterColumnSizeData::FSplitterColumnSizeData(float InColumnWidth) : ColumnWi
 }
 
 TSharedRef<SWidget> FSplitterColumnSizeData::MakeSimpleSplitter(
-	TSharedRef<SWidget> LeftWidget,
-	TSharedRef<SWidget> RightWidget,
+	const TSharedRef<SWidget>& LeftWidget,
+	const TSharedRef<SWidget>& RightWidget,
 	const EOrientation Orientation) const
 {
 	// clang-format off
@@ -45,7 +45,7 @@ TSharedRef<SWidget> FSplitterColumnSizeData::MakeSimpleSplitter(
 TSharedRef<SWidget> FSplitterColumnSizeData::MakeSimpleDetailsSplitter(
 	const FText& Label,
 	const FText& Tooltip,
-	TSharedRef<SWidget> RightWidget,
+	const TSharedRef<SWidget>& RightWidget,
 	const EOrientation Orientation) const
 {
 	// clang-format off

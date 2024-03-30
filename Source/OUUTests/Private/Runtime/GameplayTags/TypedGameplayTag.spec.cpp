@@ -8,15 +8,14 @@
 	#include "GameplayTags/SampleGameplayTags.h"
 
 static_assert(
-	!std::is_assignable<FOUUSampleBarTag, FGameplayTag>::value,
-	"Typed tags must never be assignable from a regular gameplay tag");
-
+	TIsConstructible<FOUUSampleBarTag, FGameplayTag>::Value == false,
+	"Typed tags must never be constructible from a regular gameplay tag");
 static_assert(
 	TIsConstructible<FOUUSampleBarTags_Ref>::Value == false,
-	"Typed tags container ref type should not be constructable without parameters");
+	"Typed tags container ref type should not be constructible without parameters");
 static_assert(
 	TIsConstructible<FOUUSampleBarTags_Ref, FOUUSampleBarTags_Value>::Value == true,
-	"Typed tags container ref type should be constructable from value type");
+	"Typed tags container ref type should be constructible from value type");
 
 BEGIN_DEFINE_SPEC(
 	FTypedGameplayTagSpec,

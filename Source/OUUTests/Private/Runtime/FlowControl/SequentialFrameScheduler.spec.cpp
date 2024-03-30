@@ -33,7 +33,7 @@ void FSequentialFrameSchedulerSpec::Define()
 
 	Describe("AddTask", [this]() {
 		It("should add a task to the queue so it can be executed with the next Tick", [this]() {
-			FSequentialFrameScheduler::FTaskDelegate Delegate =
+			const FSequentialFrameScheduler::FTaskDelegate Delegate =
 				FSequentialFrameScheduler::FTaskDelegate::CreateSP(TargetObjectOne.Get(), &FTestTaskTarget::Tick);
 			Scheduler->AddTask(Delegate, 1.f);
 			Scheduler->Tick(3.f);
@@ -43,9 +43,9 @@ void FSequentialFrameSchedulerSpec::Define()
 
 	Describe("RemoveTask", [this]() {
 		It("should remove the task again so it won't be ticked anymore", [this]() {
-			FSequentialFrameScheduler::FTaskDelegate Delegate =
+			const FSequentialFrameScheduler::FTaskDelegate Delegate =
 				FSequentialFrameScheduler::FTaskDelegate::CreateSP(TargetObjectOne.Get(), &FTestTaskTarget::Tick);
-			auto Handle = Scheduler->AddTask(Delegate, 1.f);
+			const auto Handle = Scheduler->AddTask(Delegate, 1.f);
 			Scheduler->Tick(3.f);
 			Scheduler->RemoveTask(Handle);
 			Scheduler->Tick(3.f);
@@ -54,10 +54,10 @@ void FSequentialFrameSchedulerSpec::Define()
 
 		It("should not disturb the execution of any other registered tasks", [this]() {
 			Scheduler->MaxNumTasksToExecutePerFrame = 2;
-			FSequentialFrameScheduler::FTaskDelegate Delegate =
+			const FSequentialFrameScheduler::FTaskDelegate Delegate =
 				FSequentialFrameScheduler::FTaskDelegate::CreateSP(TargetObjectOne.Get(), &FTestTaskTarget::Tick);
-			auto Handle = Scheduler->AddTask(Delegate, 1.f);
-			FSequentialFrameScheduler::FTaskDelegate DelegateTwo =
+			const auto Handle = Scheduler->AddTask(Delegate, 1.f);
+			const FSequentialFrameScheduler::FTaskDelegate DelegateTwo =
 				FSequentialFrameScheduler::FTaskDelegate::CreateSP(TargetObjectTwo.Get(), &FTestTaskTarget::Tick);
 			Scheduler->AddTask(DelegateTwo, 5.f);
 
@@ -72,11 +72,9 @@ void FSequentialFrameSchedulerSpec::Define()
 
 	Describe("Tick", [this]() {
 		It("should call the delegate even if the timer did not expire if bTickAsOftenAsPossible = true", [this]() {
-			FSequentialFrameScheduler::FTaskDelegate Delegate =
-				FSequentialFrameScheduler::FTaskDelegate::CreateSP(
-					TargetObjectOne.Get(),
-					&FTestTaskTarget::Tick);
-			const bool bTickAsOftenAsPossible = true;
+			const FSequentialFrameScheduler::FTaskDelegate Delegate =
+				FSequentialFrameScheduler::FTaskDelegate::CreateSP(TargetObjectOne.Get(), &FTestTaskTarget::Tick);
+			constexpr bool bTickAsOftenAsPossible = true;
 			Scheduler->AddTask(Delegate, 3.f, bTickAsOftenAsPossible);
 			Scheduler->Tick(1.f);
 			SPEC_TEST_EQUAL(TargetObjectOne->TickCount, 1);
@@ -84,9 +82,9 @@ void FSequentialFrameSchedulerSpec::Define()
 
 		It("should NOT call the delegate again if the timer did not expire and bTickAsOftenAsPossible = false",
 		   [this]() {
-			   FSequentialFrameScheduler::FTaskDelegate Delegate =
+			   const FSequentialFrameScheduler::FTaskDelegate Delegate =
 				   FSequentialFrameScheduler::FTaskDelegate::CreateSP(TargetObjectOne.Get(), &FTestTaskTarget::Tick);
-			   const bool bTickAsOftenAsPossible = false;
+			   constexpr bool bTickAsOftenAsPossible = false;
 			   Scheduler->AddTask(Delegate, 3.f, bTickAsOftenAsPossible);
 			   Scheduler->Tick(1.f);
 			   Scheduler->Tick(1.f);
@@ -95,7 +93,7 @@ void FSequentialFrameSchedulerSpec::Define()
 
 		It("should only call a single task delegate if MaxNumTasksToExecutePerFrame = 1", [this]() {
 			Scheduler->MaxNumTasksToExecutePerFrame = 1;
-			FSequentialFrameScheduler::FTaskDelegate Delegate =
+			const FSequentialFrameScheduler::FTaskDelegate Delegate =
 				FSequentialFrameScheduler::FTaskDelegate::CreateSP(TargetObjectOne.Get(), &FTestTaskTarget::Tick);
 			Scheduler->AddTask(Delegate, 1.f);
 			Scheduler->AddTask(Delegate, 1.f);
@@ -105,7 +103,7 @@ void FSequentialFrameSchedulerSpec::Define()
 
 		It("should call two task delegates if MaxNumTasksToExecutePerFrame = 2", [this]() {
 			Scheduler->MaxNumTasksToExecutePerFrame = 2;
-			FSequentialFrameScheduler::FTaskDelegate Delegate =
+			const FSequentialFrameScheduler::FTaskDelegate Delegate =
 				FSequentialFrameScheduler::FTaskDelegate::CreateSP(TargetObjectOne.Get(), &FTestTaskTarget::Tick);
 			Scheduler->AddTask(Delegate, 1.f);
 			Scheduler->AddTask(Delegate, 1.f);
@@ -116,7 +114,7 @@ void FSequentialFrameSchedulerSpec::Define()
 		It("should not call a task delegate twice in the same frame even if MaxNumTasksToExecutePerFrame = 2",
 		   [this]() {
 			   Scheduler->MaxNumTasksToExecutePerFrame = 2;
-			   FSequentialFrameScheduler::FTaskDelegate Delegate =
+			   const FSequentialFrameScheduler::FTaskDelegate Delegate =
 				   FSequentialFrameScheduler::FTaskDelegate::CreateSP(TargetObjectOne.Get(), &FTestTaskTarget::Tick);
 			   Scheduler->AddTask(Delegate, 1.f);
 			   Scheduler->Tick(3.f);
@@ -126,7 +124,7 @@ void FSequentialFrameSchedulerSpec::Define()
 		It("should call a single task multiple frames in a row if there is no other task requiring ticking, even "
 		   "though the period did not expire yet",
 		   [this]() {
-			   FSequentialFrameScheduler::FTaskDelegate Delegate =
+			   const FSequentialFrameScheduler::FTaskDelegate Delegate =
 				   FSequentialFrameScheduler::FTaskDelegate::CreateSP(TargetObjectOne.Get(), &FTestTaskTarget::Tick);
 			   Scheduler->AddTask(Delegate, 4.f);
 			   Scheduler->Tick(1.f);
@@ -138,10 +136,10 @@ void FSequentialFrameSchedulerSpec::Define()
 		It("should call two tasks with the same delay alternating one after another in non-deterministic order",
 		   [this]() {
 			   Scheduler->MaxNumTasksToExecutePerFrame = 1;
-			   FSequentialFrameScheduler::FTaskDelegate DelegateOne =
+			   const FSequentialFrameScheduler::FTaskDelegate DelegateOne =
 				   FSequentialFrameScheduler::FTaskDelegate::CreateSP(TargetObjectOne.Get(), &FTestTaskTarget::Tick);
 			   Scheduler->AddTask(DelegateOne, 4.f);
-			   FSequentialFrameScheduler::FTaskDelegate DelegateTwo =
+			   const FSequentialFrameScheduler::FTaskDelegate DelegateTwo =
 				   FSequentialFrameScheduler::FTaskDelegate::CreateSP(TargetObjectTwo.Get(), &FTestTaskTarget::Tick);
 			   Scheduler->AddTask(DelegateTwo, 4.f);
 
@@ -163,10 +161,10 @@ void FSequentialFrameSchedulerSpec::Define()
 			   Scheduler->MaxNumTasksToExecutePerFrame = 1;
 			   // Task #1 will have a higher tick period, but allows ticking every frame.
 			   // It should fill in the gaps even though it has a higher period.
-			   FSequentialFrameScheduler::FTaskDelegate DelegateOne =
+			   const FSequentialFrameScheduler::FTaskDelegate DelegateOne =
 				   FSequentialFrameScheduler::FTaskDelegate::CreateSP(TargetObjectOne.Get(), &FTestTaskTarget::Tick);
 			   Scheduler->AddTask(DelegateOne, 10.f, true);
-			   FSequentialFrameScheduler::FTaskDelegate DelegateTwo =
+			   const FSequentialFrameScheduler::FTaskDelegate DelegateTwo =
 				   FSequentialFrameScheduler::FTaskDelegate::CreateSP(TargetObjectTwo.Get(), &FTestTaskTarget::Tick);
 			   Scheduler->AddTask(DelegateTwo, 5.f, false);
 
@@ -191,10 +189,10 @@ void FSequentialFrameSchedulerSpec::Define()
 		   });
 
 		It("should support ticking multiple tasks that have a period of 0", [this]() {
-			FSequentialFrameScheduler::FTaskDelegate DelegateOne =
+			const FSequentialFrameScheduler::FTaskDelegate DelegateOne =
 				FSequentialFrameScheduler::FTaskDelegate::CreateSP(TargetObjectOne.Get(), &FTestTaskTarget::Tick);
 			Scheduler->AddTask(DelegateOne, 0.f, true);
-			FSequentialFrameScheduler::FTaskDelegate DelegateTwo =
+			const FSequentialFrameScheduler::FTaskDelegate DelegateTwo =
 				FSequentialFrameScheduler::FTaskDelegate::CreateSP(TargetObjectTwo.Get(), &FTestTaskTarget::Tick);
 			Scheduler->AddTask(DelegateTwo, 0.f, true);
 
@@ -211,10 +209,10 @@ void FSequentialFrameSchedulerSpec::Define()
 			// Make sure the delegates are created in nested scope, so there is no chance we accidentally keep objects
 			// valid
 			{
-				FSequentialFrameScheduler::FTaskDelegate DelegateOne =
+				const FSequentialFrameScheduler::FTaskDelegate DelegateOne =
 					FSequentialFrameScheduler::FTaskDelegate::CreateSP(TargetObjectOne.Get(), &FTestTaskTarget::Tick);
 				Scheduler->AddTask(DelegateOne, 1.f, true);
-				FSequentialFrameScheduler::FTaskDelegate DelegateTwo =
+				const FSequentialFrameScheduler::FTaskDelegate DelegateTwo =
 					FSequentialFrameScheduler::FTaskDelegate::CreateSP(TargetObjectTwo.Get(), &FTestTaskTarget::Tick);
 				Scheduler->AddTask(DelegateTwo, 1.f, true);
 			}
@@ -226,7 +224,7 @@ void FSequentialFrameSchedulerSpec::Define()
 			SPEC_TEST_EQUAL(TargetObjectOne->TickCount, 1);
 			SPEC_TEST_EQUAL(TargetObjectTwo->TickCount, 1);
 
-			TWeakPtr<FTestTaskTarget> WeakRefToTargetObjectOne = TargetObjectOne;
+			const TWeakPtr<FTestTaskTarget> WeakRefToTargetObjectOne = TargetObjectOne;
 			// Reset object without clearing task, which should invalidate the delegate handle,
 			// but not keep the object alive.
 			TargetObjectOne.Reset();

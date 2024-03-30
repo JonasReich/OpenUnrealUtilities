@@ -179,8 +179,8 @@ namespace OUU::Developer::ActorMapWindow::Private
 
 		void Construct(
 			const FArguments& InArgs,
-			TSharedRef<STableViewBase> InOwnerTableView,
-			TSharedPtr<FActorQuery>& InActorQuery);
+			const TSharedRef<STableViewBase>& InOwnerTableView,
+			const TSharedPtr<FActorQuery>& InActorQuery);
 
 	private:
 		TSharedPtr<FActorQuery> ActorQuery;

@@ -24,8 +24,8 @@ namespace OUU::Runtime::Private
 	template <typename PredicateT>
 	auto ForEachTypedGameplayTagType(PredicateT Predicate)
 	{
-		UStruct* ParentStruct = FTypedGameplayTag_Base::StaticStruct();
-		for (auto* Struct : TObjectRange<UScriptStruct>())
+		const UStruct* ParentStruct = FTypedGameplayTag_Base::StaticStruct();
+		for (const auto* Struct : TObjectRange<UScriptStruct>())
 		{
 			// Exclude the parent struct itself from the results.
 			if (Struct == ParentStruct)
@@ -58,14 +58,14 @@ namespace OUU::Runtime::Private
 void FTypedGameplayTag_Base::RegisterAllDerivedPropertyTypeLayouts()
 {
 	auto& TagsManager = UGameplayTagsManager::Get();
-	TagsManager.OnGetCategoriesMetaFromPropertyHandle.AddLambda([](TSharedPtr<IPropertyHandle> PropertyHandle,
+	TagsManager.OnGetCategoriesMetaFromPropertyHandle.AddLambda([](const TSharedPtr<IPropertyHandle>& PropertyHandle,
 																   FString& OutFilterString) {
 		auto* Property = PropertyHandle->GetProperty();
 
 		if (const FStructProperty* StructProperty = CastField<FStructProperty>(Property))
 		{
 			// only generate filter string for typed gameplay tags
-			auto* Struct = StructProperty->Struct;
+			const auto* Struct = StructProperty->Struct;
 			if (Struct->IsChildOf(FTypedGameplayTag_Base::StaticStruct()))
 			{
 				FGameplayTagContainer AllRootTags;
@@ -75,7 +75,7 @@ void FTypedGameplayTag_Base::RegisterAllDerivedPropertyTypeLayouts()
 			}
 		}
 
-		auto CategoriesString = UGameplayTagsManager::Get().StaticGetCategoriesMetaFromPropertyHandle(PropertyHandle);
+		const auto CategoriesString = UGameplayTagsManager::Get().StaticGetCategoriesMetaFromPropertyHandle(PropertyHandle);
 		auto Matches = OUU::Runtime::RegexUtils::GetRegexMatchesAndGroups("TypedTag\\{(.*)\\}", 1, CategoriesString);
 
 		if (Matches.Num() > 1)
@@ -90,9 +90,9 @@ void FTypedGameplayTag_Base::RegisterAllDerivedPropertyTypeLayouts()
 
 		if (Matches.Num() > 0)
 		{
-			auto TypedTagStructName = Matches[0].CaptureGroups[1].MatchString;
+			const auto TypedTagStructName = Matches[0].CaptureGroups[1].MatchString;
 
-			for (auto* Struct : TObjectRange<UScriptStruct>())
+			for (const auto* Struct : TObjectRange<UScriptStruct>())
 			{
 				if (Struct->IsChildOf(FTypedGameplayTag_Base::StaticStruct())
 					&& Struct->GetName() == TypedTagStructName)

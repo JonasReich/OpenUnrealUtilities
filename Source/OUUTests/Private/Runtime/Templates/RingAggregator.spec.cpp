@@ -238,7 +238,7 @@ void FRingAggregatorSpec::Define()
 
 	Describe("TCircularAggregator", [this]() {
 		It("should be re-constructable with different sizes", [this]() {
-			const int32 MaxNum = 5;
+			constexpr int32 MaxNum = 5;
 
 			TCircularAggregator<int32> TestAggregator(MaxNum);
 			// Iterate from 10 (=5*2) to 1, decreasing the number of available elements per iteration.

@@ -2,10 +2,8 @@
 
 #include "CoreMinimal.h"
 
-#include "CanvasItem.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/SkinnedMeshComponent.h"
-#include "Containers/CircularBuffer.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
 #include "Engine/LevelStreaming.h"
@@ -25,8 +23,8 @@
 	#include "Editor.h"
 #endif
 
-const int32 NumFramesForBuffer = 100;
-const float UpdateInterval = 0.1f;
+constexpr int32 NumFramesForBuffer = 100;
+constexpr float UpdateInterval = 0.1f;
 
 #define MATERIAL_ANALYSIS_BASE_CVAR "ouu.Debug.MaterialUsageAnalysis"
 
@@ -376,7 +374,7 @@ private:
 			if (!TargetWorld)
 				return;
 
-			auto Results = AnalyzeMaterialUsage(TargetWorld);
+			const auto Results = AnalyzeMaterialUsage(TargetWorld);
 
 			auto UpdateMax = [](auto& Stats, auto& MaxValue) {
 				MaxValue = 100.f;
@@ -415,6 +413,7 @@ private:
 		}
 	}
 
+	// ReSharper disable once CppParameterMayBeConstPtrOrRef
 	void OnShowDebugInfo(AHUD* HUD, UCanvas* InCanvas) const
 	{
 		const float GraphBottomYPos =

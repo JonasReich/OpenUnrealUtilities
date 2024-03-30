@@ -4,7 +4,6 @@
 
 #if WITH_AUTOMATION_WORKER
 
-	#include "Algo/IsSorted.h"
 	#include "Engine/EngineTypes.h"
 	#include "Templates/ReverseIterator.h"
 	#include "Templates/StringUtils.h"
@@ -155,7 +154,7 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(CArray_FFooPtr, DEFAULT_OUU_TEST_FLAGS)
 	// Arrange
 	FFoo Instances[5] = {1, 2, 3, 4, 5};
 	FFoo* OriginCArray[5] = {&Instances[0], &Instances[1], &Instances[2], &Instances[3], &Instances[4]};
-	TArray<FFoo*> ExpectedArray = {&Instances[4], &Instances[3], &Instances[2], &Instances[1], &Instances[0]};
+	const TArray<FFoo*> ExpectedArray = {&Instances[4], &Instances[3], &Instances[2], &Instances[1], &Instances[0]};
 
 	// Test
 	TestReverseIterator<FFoo* [5], FFoo*>(*this, OriginCArray, ExpectedArray, "FFoo*[]");
@@ -173,7 +172,7 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(TArray_FFooPtr, DEFAULT_OUU_TEST_FLAGS)
 	// Arrange
 	FFoo Instances[5] = {1, 2, 3, 4, 5};
 	TArray<FFoo*> OriginArray = {&Instances[0], &Instances[1], &Instances[2], &Instances[3], &Instances[4]};
-	TArray<FFoo*> ExpectedArray = {&Instances[4], &Instances[3], &Instances[2], &Instances[1], &Instances[0]};
+	const TArray<FFoo*> ExpectedArray = {&Instances[4], &Instances[3], &Instances[2], &Instances[1], &Instances[0]};
 
 	// Test
 	TestReverseIterator<TArray<FFoo*>, FFoo*>(*this, OriginArray, ExpectedArray, "TArray<FFoo*>");

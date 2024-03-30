@@ -3,7 +3,6 @@
 #pragma once
 
 #include "AbilitySystemComponent.h"
-#include "Containers/CircularQueue.h"
 #include "Templates/CircularArrayAdaptor.h"
 
 #include "OUUAbilitySystemComponent.generated.h"

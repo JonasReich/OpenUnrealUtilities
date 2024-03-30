@@ -17,7 +17,6 @@ UINTERFACE(Blueprintable)
 class OUURUNTIME_API UOUUPoolableActor : public UInterface
 {
 	GENERATED_BODY()
-public:
 };
 
 class OUURUNTIME_API IOUUPoolableActor : public IInterface
@@ -156,7 +155,7 @@ public:
 	using FSpawnRequestHandle = FOUUActorPoolSpawnRequestHandle;
 	using ESpawnRequestStatus = EOUUActorPoolSpawnRequestStatus;
 
-	static UOUUActorPool* Get(UObject& WorldContext);
+	static UOUUActorPool* Get(const UObject& WorldContext);
 
 	FSpawnRequestHandle RequestActorSpawn(const FSpawnRequest& InSpawnRequest);
 	void RetryActorSpawnRequest(const FSpawnRequestHandle SpawnRequestHandle);
@@ -172,7 +171,7 @@ public:
 	FSpawnRequest& GetMutableSpawnRequest(const FSpawnRequestHandle SpawnRequestHandle);
 
 	// - USubsystem
-	bool ShouldCreateSubsystem(UObject* Outer) const;
+	bool ShouldCreateSubsystem(UObject* Outer) const override;
 	// - FTickableGameObject
 	void Tick(float DeltaTime) override;
 	TStatId GetStatId() const override;

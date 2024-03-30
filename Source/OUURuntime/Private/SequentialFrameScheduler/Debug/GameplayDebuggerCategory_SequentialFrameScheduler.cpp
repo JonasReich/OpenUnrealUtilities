@@ -233,7 +233,7 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
 					&DebugScheduler->DebugData.TaskHistory,
 					[&](const void* ContainerPtr, int32 Idx) -> float {
 						auto HistoryEntry = static_cast<const TaskHistoryType*>(ContainerPtr)->operator[](Idx);
-						auto EntryTaskHandle = HistoryEntry.Get<FSequentialFrameTask::FTaskHandle>();
+						const auto EntryTaskHandle = HistoryEntry.Get<FSequentialFrameTask::FTaskHandle>();
 						static float LastCachedValue = -1.f;
 						if (Idx == 0)
 						{
@@ -256,7 +256,7 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
 					&DebugScheduler->DebugData.TaskHistory,
 					[&](const void* ContainerPtr, int32 Idx) -> float {
 						auto HistoryEntry = static_cast<const TaskHistoryType*>(ContainerPtr)->operator[](Idx);
-						auto EntryTaskHandle = HistoryEntry.Get<FSequentialFrameTask::FTaskHandle>();
+						const auto EntryTaskHandle = HistoryEntry.Get<FSequentialFrameTask::FTaskHandle>();
 						static float LastCachedValue = -1.f;
 						if (Idx == 0)
 						{
@@ -302,6 +302,7 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::ToggleDummyTask()
 	bToggleDummyTask = true;
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 void FGameplayDebuggerCategory_SequentialFrameScheduler::ExecuteDummyTask(int32 TaskId)
 {
 	FPlatformProcess::Sleep(

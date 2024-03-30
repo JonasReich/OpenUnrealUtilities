@@ -38,7 +38,7 @@ public:
 	static void OpenMaterialEditorAndJumpToExpression(UMaterialExpression* MaterialExpression);
 
 private:
-	static void CopyInputConnection(FExpressionInput* From, FExpressionInput* To);
+	static void CopyInputConnection(const FExpressionInput* From, FExpressionInput* To);
 	static void CopyMaterialAttributeConnections(
 		UMaterial* SourceMaterial,
 		UMaterialExpressionMakeMaterialAttributes* TargetMakeMaterialAttributes);

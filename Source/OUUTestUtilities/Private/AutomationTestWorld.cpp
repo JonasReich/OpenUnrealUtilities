@@ -22,7 +22,7 @@
 		#include "Online/CoreOnline.h"
 	#endif
 
-FOUUAutomationTestWorld::FOUUAutomationTestWorld(FString InWorldName) :
+FOUUAutomationTestWorld::FOUUAutomationTestWorld(const FString& InWorldName) :
 	URL(TEXT("/OpenUnrealUtilities/Runtime/EmptyWorld")), WorldName(InWorldName)
 {
 }
@@ -55,6 +55,7 @@ FTimerManager& FOUUAutomationTestWorld::GetTimerManager() const
 	return World->GetTimerManager();
 }
 
+// ReSharper disable once CppMemberFunctionMayBeConst
 void FOUUAutomationTestWorld::BeginPlay()
 {
 	if (!IsValid(World))
@@ -77,12 +78,12 @@ bool FOUUAutomationTestWorld::InitializeGame()
 {
 	if (!IsValid(World))
 	{
-		UE_LOG(LogOpenUnrealUtilities, Error, TEXT("Could not InitiailizeGame invalid world!"));
+		UE_LOG(LogOpenUnrealUtilities, Error, TEXT("Could not InitializeGame invalid world!"));
 		return false;
 	}
 
 	// Set game mode
-	bool bIsGameModeSet = World->SetGameMode(URL);
+	const bool bIsGameModeSet = World->SetGameMode(URL);
 	CHECK_INIT_GAME_CONDITION(!bIsGameModeSet, "Failed to set game mode");
 	GameMode = World->GetAuthGameMode();
 
@@ -137,13 +138,13 @@ void FOUUAutomationTestWorld::CreateWorldImplementation(const FString& WorldSuff
 
 	const FString NewWorldName = "OUUAutomationTestWorld_" + WorldName + WorldSuffix;
 
-	auto* GameMapSettings = GetMutableDefault<UGameMapsSettings>();
+	const auto* GameMapSettings = GetMutableDefault<UGameMapsSettings>();
 	PreviousDefaultMap = GameMapSettings->GetGameDefaultMap();
 	GameMapSettings->SetGameDefaultMap(URL.Map);
 
 	// Create and initialize game instance
 	GameInstance = NewObject<UGameInstance>(GEngine);
-	GameInstance->InitializeStandalone(*NewWorldName); // -> indiretly calls GameInstance->Init();
+	GameInstance->InitializeStandalone(*NewWorldName); // -> indirectly calls GameInstance->Init();
 
 	World = GameInstance->GetWorld();
 	World->GetWorldSettings()->DefaultGameMode = AGameModeBase::StaticClass();
@@ -182,7 +183,7 @@ void FOUUAutomationTestWorld::DestroyWorldImplementation()
 	World->DestroyWorld(true);
 	GEngine->DestroyWorldContext(World);
 
-	auto* GameMapSettings = GetMutableDefault<UGameMapsSettings>();
+	const auto* GameMapSettings = GetMutableDefault<UGameMapsSettings>();
 	GameMapSettings->SetGameDefaultMap(PreviousDefaultMap);
 
 	World = nullptr;
@@ -194,7 +195,7 @@ void FOUUAutomationTestWorld::DestroyWorldImplementation()
 	bHasWorld = false;
 }
 
-FOUUScopedAutomationTestWorld::FOUUScopedAutomationTestWorld(FString InWorldName) : FOUUAutomationTestWorld(InWorldName)
+FOUUScopedAutomationTestWorld::FOUUScopedAutomationTestWorld(const FString& InWorldName) : FOUUAutomationTestWorld(InWorldName)
 {
 	CreateWorldImplementation("_SCOPED");
 }

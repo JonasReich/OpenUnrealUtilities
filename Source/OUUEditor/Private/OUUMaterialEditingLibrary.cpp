@@ -7,7 +7,6 @@
 #include "MaterialEditor/Public/MaterialEditingLibrary.h"
 #include "MaterialEditorUtilities.h"
 #include "Materials/Material.h"
-#include "Materials/MaterialExpressionBreakMaterialAttributes.h"
 #include "Materials/MaterialExpressionMakeMaterialAttributes.h"
 #include "Materials/MaterialFunction.h"
 #include "Materials/MaterialFunctionInterface.h"
@@ -99,7 +98,7 @@ void UOUUMaterialEditingLibrary::InsertMaterialFunctionBeforeResult(
 
 void UOUUMaterialEditingLibrary::OpenMaterialEditorAndJumpToExpression(UMaterialExpression* Expression)
 {
-	auto* Outer = Expression->GetOuter();
+	const auto* Outer = Expression->GetOuter();
 
 	if (Outer->IsA<UMaterialInterface>())
 	{
@@ -125,7 +124,7 @@ void UOUUMaterialEditingLibrary::OpenMaterialEditorAndJumpToExpression(UMaterial
 	}
 }
 
-void UOUUMaterialEditingLibrary::CopyInputConnection(FExpressionInput* From, FExpressionInput* To)
+void UOUUMaterialEditingLibrary::CopyInputConnection(const FExpressionInput* From, FExpressionInput* To)
 {
 	if (From && From->IsConnected())
 	{
@@ -149,7 +148,7 @@ void UOUUMaterialEditingLibrary::CopyMaterialAttributeConnections(
 		&TargetMakeMaterialAttributes->CustomizedUVs[CustomUV])
 
 	// clang-format off
-	const int32 LineBefore = __LINE__;
+	constexpr int32 LineBefore = __LINE__;
 	COPY_INPUT_CONNECTION_SIMPLE(EmissiveColor);
 	COPY_INPUT_CONNECTION_SIMPLE(Opacity);
 	COPY_INPUT_CONNECTION_SIMPLE(OpacityMask);
@@ -182,11 +181,11 @@ void UOUUMaterialEditingLibrary::CopyMaterialAttributeConnections(
 	COPY_INPUT_CONNECTION_SIMPLE(ShadingModel);
 	// MP_FrontMaterial -> not exposed in material attributes
 	// MP_SurfaceThickness -> not exposed in material attributes
-	const int32 LineAfter = __LINE__;
+	constexpr int32 LineAfter = __LINE__;
 	// clang-format on
 
 #undef COPY_INPUT_CONNECTION_SIMPLE
-#undef COPY_INPUT_CONNECTION_CUSTOMUV
+#undef COPY_INPUT_CONNECTION_CUSTOM_UV
 
 	static_assert(
 		MP_EmissiveColor == 0 && MP_SurfaceThickness == 31 && MP_MaterialAttributes == 32,

@@ -15,7 +15,7 @@
 #include "Widgets/SNullWidget.h"
 #include "Widgets/Text/STextBlock.h"
 
-FTypedGameplayTagContainer* GetContainerFromPropertyHandle(TSharedPtr<IPropertyHandle> Handle)
+FTypedGameplayTagContainer* GetContainerFromPropertyHandle(const TSharedPtr<IPropertyHandle>& Handle)
 {
 	if (Handle.IsValid() == false || Handle->IsValidHandle() == false)
 		return nullptr;
@@ -40,9 +40,9 @@ void FTypedGameplayTagContainer_PropertyTypeCustomization::CustomizeHeader(
 
 	HeaderRow.NameContent()[PropertyHandle->CreatePropertyNameWidget()];
 
-	TArray<void*> RawDataPtrs;
-	PropertyHandle->AccessRawData(OUT RawDataPtrs);
-	if (RawDataPtrs.Num() != 1)
+	TArray<void*> RawDataPointers;
+	PropertyHandle->AccessRawData(OUT RawDataPointers);
+	if (RawDataPointers.Num() != 1)
 	{
 		HeaderRow
 			.ValueContent()[SNew(STextBlock).Text(INVTEXT("Multi-editing not supported for typed tag containers"))];
@@ -50,14 +50,14 @@ void FTypedGameplayTagContainer_PropertyTypeCustomization::CustomizeHeader(
 	}
 
 	// The class we're editing
-	auto OuterBaseClass = PropertyHandle->GetOuterBaseClass();
+	auto* OuterBaseClass = PropertyHandle->GetOuterBaseClass();
 	// The class where the property was first created
-	auto PropertyOwnerClass = PropertyHandle->GetProperty()->GetOwnerClass();
+	const auto* PropertyOwnerClass = PropertyHandle->GetProperty()->GetOwnerClass();
 
 	const bool bIsTypedTagNameEditable = OuterBaseClass == PropertyOwnerClass;
 
-	UStruct* ParentStruct = FTypedGameplayTag_Base::StaticStruct();
-	for (auto* Struct : TObjectRange<UScriptStruct>())
+	const UStruct* ParentStruct = FTypedGameplayTag_Base::StaticStruct();
+	for (const auto* Struct : TObjectRange<UScriptStruct>())
 	{
 		// Exclude the parent struct itself from the results.
 		if (Struct == ParentStruct)

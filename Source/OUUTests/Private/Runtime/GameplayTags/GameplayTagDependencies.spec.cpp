@@ -99,7 +99,7 @@ void FTagDependenciesSpec::Define()
 	Describe("OnTagsChanged", [this]() {
 		BeforeEach([this]() {
 			EventHandler = NewObject<UGameplayTagDependency_TestEventHandler>();
-			auto Event = CreateDynamic(
+			const auto Event = CreateDynamic(
 				FGameplayTagDependencyEvent,
 				EventHandler,
 				&UGameplayTagDependency_TestEventHandler::HandleOnTagsChanged);
@@ -181,7 +181,7 @@ void FTagDependenciesSpec::Define()
 			ExpectedResult.Add(FSampleGameplayTags::Bar::Get(), ObjectB);
 			ExpectedResult.Add(FSampleGameplayTags::Baz::Get(), ObjectC);
 
-			auto ActualResult = ObjectC->GetImmediateTagSources();
+			const auto ActualResult = ObjectC->GetImmediateTagSources();
 			SPEC_TEST_TRUE(ActualResult.OrderIndependentCompareEqual(ExpectedResult));
 		});
 	});
@@ -205,7 +205,7 @@ void FTagDependenciesSpec::Define()
 			for (auto& ExpectedEntry : ExpectedResult)
 			{
 				auto& ExpectedObjectSet = ExpectedEntry.Value;
-				if (auto* ActualObjectSet = ActualResult.Find(ExpectedEntry.Key))
+				if (const auto* ActualObjectSet = ActualResult.Find(ExpectedEntry.Key))
 				{
 					SPEC_TEST_TRUE(ActualObjectSet->Intersect(ExpectedObjectSet).Num() == ExpectedObjectSet.Num());
 				}

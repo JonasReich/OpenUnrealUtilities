@@ -37,7 +37,7 @@ namespace OUU::TestUtilities
 	public:
 		FLatentAutomationPIEWorldLoader(
 			FAutomationSpecBase& OwningSpec,
-			FString MapName = TEXT("/OpenUnrealUtilities/Runtime/EmptyWorld"),
+			const FString& MapName = TEXT("/OpenUnrealUtilities/Runtime/EmptyWorld"),
 			bool bIgnoreLoadErrors = true);
 
 		void LatentLoad(const FDoneDelegate& Done);
@@ -55,9 +55,7 @@ namespace OUU::TestUtilities
 		const FString MapName;
 		bool bIgnoreLoadErrors;
 
-		bool Update_WaitForShaderToFinishCompiling();
-
-		bool IsGameStartComplete();
+		bool IsGameStartComplete() const;
 
 		void Update_MapLoaded();
 	};

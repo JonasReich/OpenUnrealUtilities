@@ -2,7 +2,6 @@
 
 #include "OUUMapsToCookSettings.h"
 
-#include "GameMapsSettings.h"
 #include "GenericPlatform/GenericPlatformFile.h"
 #include "HAL/PlatformFileManager.h"
 #include "ISourceControlModule.h"

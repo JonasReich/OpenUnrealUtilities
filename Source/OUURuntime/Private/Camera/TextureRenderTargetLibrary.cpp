@@ -78,7 +78,7 @@ FLinearColor UTextureRenderTargetLibrary::GetAverageColor(
 	TArray<FLinearColor> LinearSamples;
 	FLinearColor Average = FLinearColor::Black;
 
-	float TotalPixelCount = TextureRenderTarget->SizeX * TextureRenderTarget->SizeY;
+	const float TotalPixelCount = TextureRenderTarget->SizeX * TextureRenderTarget->SizeY;
 	switch (ReadRenderTargetHelper(
 		Samples,
 		LinearSamples,

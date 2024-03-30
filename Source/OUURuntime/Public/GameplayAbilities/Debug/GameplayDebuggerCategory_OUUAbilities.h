@@ -56,7 +56,7 @@ protected:
 
 	float NumColumns = 4;
 
-	void DrawBackground(
+	static void DrawBackground(
 		FGameplayDebuggerCanvasContext& CanvasContext,
 		const FVector2D& BackgroundLocation,
 		const FVector2D& BackgroundSize);

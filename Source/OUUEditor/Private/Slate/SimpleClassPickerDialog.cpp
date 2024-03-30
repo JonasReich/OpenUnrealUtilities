@@ -38,9 +38,9 @@ public:
 
 namespace OUU::Editor
 {
-	UClass* OpenSimpleClassPickerDialog(UClass* ParentClass, EClassFlags DisallowedClassFlags, const FText TitleText)
+	UClass* OpenSimpleClassPickerDialog(UClass* ParentClass, EClassFlags DisallowedClassFlags, const FText& TitleText)
 	{
-		TSharedRef<FAssetClassParentFilter> Filter = MakeShareable(new FAssetClassParentFilter);
+		const TSharedRef<FAssetClassParentFilter> Filter = MakeShareable(new FAssetClassParentFilter);
 		Filter->DisallowedClassFlags = DisallowedClassFlags;
 		Filter->AllowedChildrenOfClasses = {ParentClass};
 

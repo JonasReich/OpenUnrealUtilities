@@ -50,5 +50,5 @@ public:
 		FText Message);
 
 private:
-	static const FText* GetOptionalTitlePtr(FText& Text);
+	static const FText* GetOptionalTitlePtr(const FText& Text);
 };

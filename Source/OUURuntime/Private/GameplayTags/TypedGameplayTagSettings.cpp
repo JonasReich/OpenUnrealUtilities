@@ -5,7 +5,8 @@
 #include "GameplayTagsManager.h"
 #include "Misc/CoreDelegates.h"
 
-void UTypedGameplayTagSettings::GetAdditionalRootTags(FGameplayTagContainer& OutRootTags, UStruct* BlueprintStruct)
+void UTypedGameplayTagSettings::GetAdditionalRootTags(FGameplayTagContainer& OutRootTags,
+	const UStruct* BlueprintStruct)
 {
 	GetAdditionalRootTags(OutRootTags, *BlueprintStruct->GetName());
 }
@@ -23,11 +24,11 @@ void UTypedGameplayTagSettings::GetAdditionalRootTags(
 	}
 }
 
-void UTypedGameplayTagSettings::AddNativeRootTags(const FGameplayTagContainer& RootTags, UStruct* BlueprintStruct)
+void UTypedGameplayTagSettings::AddNativeRootTags(const FGameplayTagContainer& RootTags, const UStruct* BlueprintStruct)
 {
 	auto* Settings = GetMutableDefault<UTypedGameplayTagSettings>();
 	check(Settings);
-	FName StructName = *BlueprintStruct->GetName();
+	const FName StructName = *BlueprintStruct->GetName();
 	Settings->NativeRootTags.Add(StructName, FGameplayTagContainer(RootTags));
 
 	// also add an entry for additional tags if not already present
@@ -38,7 +39,7 @@ void UTypedGameplayTagSettings::AddNativeRootTags(const FGameplayTagContainer& R
 #endif
 }
 
-void UTypedGameplayTagSettings::GetAllRootTags(FGameplayTagContainer& OutRootTags, UStruct* BlueprintStruct)
+void UTypedGameplayTagSettings::GetAllRootTags(FGameplayTagContainer& OutRootTags, const UStruct* BlueprintStruct)
 
 {
 	GetAllRootTags(OutRootTags, *BlueprintStruct->GetName());
@@ -56,7 +57,7 @@ void UTypedGameplayTagSettings::GetAllRootTags(FGameplayTagContainer& OutRootTag
 	GetAdditionalRootTags(OutRootTags, BlueprintStructName);
 }
 
-void UTypedGameplayTagSettings::GetAllLeafTags(FGameplayTagContainer& OutLeafTags, UStruct* BlueprintStruct)
+void UTypedGameplayTagSettings::GetAllLeafTags(FGameplayTagContainer& OutLeafTags, const UStruct* BlueprintStruct)
 {
 	const auto& GameplayTagManager = UGameplayTagsManager::Get();
 
@@ -147,7 +148,7 @@ void UTypedGameplayTagSettings::UpdateTooltips()
 		auto StructShortName = Entry.Key.ToString();
 		auto StructPathName = UClass::TryConvertShortTypeNameToPathName(UStruct::StaticClass(), StructShortName);
 
-		if (UStruct* Struct = UClass::TryFindTypeSlow<UStruct>(StructPathName.ToString()))
+		if (const UStruct* Struct = UClass::TryFindTypeSlow<UStruct>(StructPathName.ToString()))
 		{
 			Entry.Value.Comment = Struct->GetMetaData(TEXT("Tooltip"));
 		}

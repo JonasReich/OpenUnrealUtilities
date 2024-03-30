@@ -15,7 +15,7 @@ public:
 	static void Define(InterfaceUtilsSpecType& Test)
 	{
 		Test.It("should return false if called on a valid object that doesn't implement the interface", [&]() {
-			UOUUTestObject* Object = NewObject<UOUUTestObject>();
+			const UOUUTestObject* Object = NewObject<UOUUTestObject>();
 
 			Test.SPEC_TEST_TRUE(IsValid(Object));
 			Test.SPEC_TEST_FALSE(IsValidInterface<TestInterface>(Object));
@@ -75,7 +75,7 @@ void FInterfaceUtilsSpec::Define()
 	Describe("IsValidInterface", [this]() {
 		Describe("when operating on interfaces that can only implemented in C++", [this]() {
 			BeforeEach([this]() {
-				auto CppImplObject = NewObject<UInterfaceUtilsTests_CppInterface_Impl>();
+				const auto CppImplObject = NewObject<UInterfaceUtilsTests_CppInterface_Impl>();
 				TargetObject = CppImplObject;
 				InterfacePtr = CppImplObject;
 			});
@@ -119,7 +119,7 @@ void FInterfaceUtilsSpec::Define()
 
 		Describe("when operating on hybrid interfaces that are implemented in Blueprint", [this]() {
 			BeforeEach([this]() {
-				UClass* BlueprintClass = StaticLoadClass(
+				const UClass* BlueprintClass = StaticLoadClass(
 					UObject::StaticClass(),
 					nullptr,
 					TEXT("/OpenUnrealUtilities/Editor/Tests/BP_BpInterface_BpImpl.BP_BpInterface_BpImpl_C"),
@@ -144,12 +144,12 @@ void FInterfaceUtilsSpec::Define()
 				CALL_INTERFACE(IInterfaceUtilsTests_BpInterface, SetNumber, ScriptInterface, 42.f);
 			}
 
-			float Result = CALL_INTERFACE(IInterfaceUtilsTests_BpInterface, GetNumber, ScriptInterface);
+			const float Result = CALL_INTERFACE(IInterfaceUtilsTests_BpInterface, GetNumber, ScriptInterface);
 			SPEC_TEST_EQUAL(Result, 42.f);
 		});
 
 		It("should call a Blueprint implementation of a hybrid interface", [this]() {
-			UClass* BlueprintClass = StaticLoadClass(
+			const UClass* BlueprintClass = StaticLoadClass(
 				UObject::StaticClass(),
 				nullptr,
 				TEXT("/OpenUnrealUtilities/Editor/Tests/BP_BpInterface_BpImpl.BP_BpInterface_BpImpl_C"),
@@ -165,7 +165,7 @@ void FInterfaceUtilsSpec::Define()
 				CALL_INTERFACE(IInterfaceUtilsTests_BpInterface, SetNumber, ScriptInterface, 42.f);
 			}
 
-			float Result = CALL_INTERFACE(IInterfaceUtilsTests_BpInterface, GetNumber, ScriptInterface);
+			const float Result = CALL_INTERFACE(IInterfaceUtilsTests_BpInterface, GetNumber, ScriptInterface);
 			SPEC_TEST_EQUAL(Result, 42.f);
 		});
 	});

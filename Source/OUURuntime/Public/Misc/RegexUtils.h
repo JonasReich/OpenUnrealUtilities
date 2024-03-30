@@ -17,7 +17,7 @@ struct OUURUNTIME_API FRegexMatch
 public:
 	FRegexMatch() = default;
 
-	FRegexMatch(int32 Beginning, int32 Ending, FString InMatchString) :
+	FRegexMatch(int32 Beginning, int32 Ending, const FString& InMatchString) :
 		MatchBeginning(Beginning), MatchEnding(Ending), MatchString(InMatchString)
 	{
 	}
@@ -53,7 +53,7 @@ struct OUURUNTIME_API FRegexGroups
 public:
 	FRegexGroups() = default;
 
-	FRegexGroups(TArray<FRegexMatch> InCaptureGroups) : CaptureGroups(InCaptureGroups) {}
+	FRegexGroups(const TArray<FRegexMatch>& InCaptureGroups) : CaptureGroups(InCaptureGroups) {}
 
 	FRegexGroups(FRegexMatch InMatch) : CaptureGroups({InMatch}) {}
 

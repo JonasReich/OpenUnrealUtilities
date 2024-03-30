@@ -59,72 +59,73 @@ void FStringUtilsSpec::Define()
 {
 	Describe("LexToString", [this]() {
 		It("should work on enums if it's overloaded", [this]() {
-			EStringUtilsTestEnum e = EStringUtilsTestEnum::Beta;
-			FString S = LexToString(e);
-			TestEqual("Stringified enum", S, "Beta");
+			constexpr EStringUtilsTestEnum e = EStringUtilsTestEnum::Beta;
+			const FString S = LexToString(e);
+			TestEqual("String converted enum", S, "Beta");
 		});
 
 		It("should work on int32 values", [this]() {
-			int32 I = 42;
-			FString S = LexToString(I);
-			TestEqual("Stringified int32 value", S, "42");
+			constexpr int32 I = 42;
+			const FString S = LexToString(I);
+			TestEqual("String converted int32 value", S, "42");
 		});
 
 		Describe("executed on int32 pointers", [this]() {
 			It("should return the string 'nullptr' if the pointer is null", [this]() {
-				int32* IPtr = nullptr;
-				FString S = LexToString(IPtr);
-				TestEqual("Stringified int32 pointer", S, "nullptr");
+				const int32* IPtr = nullptr;
+				const FString S = LexToString(IPtr);
+				TestEqual("String converted int32 pointer", S, "nullptr");
 			});
 
 			It("should return a string conversion of the target value if the pointer is valid", [this]() {
-				int32 I = 42;
-				int32* IPtr = &I;
-				FString S = LexToString(IPtr);
-				TestEqual("Stringified int32 pointer", S, "42");
+				constexpr int32 I = 42;
+				const int32* IPtr = &I;
+				const FString S = LexToString(IPtr);
+				TestEqual("String converted int32 pointer", S, "42");
 			});
 		});
 
 		Describe("executed on UObject pointers", [this]() {
 			It("should return the string 'None' if the pointer is null or otherwise fails an IsValid() check",
 			   [this]() {
-				   UObject* Object = nullptr;
-				   FString S = LexToString(Object);
-				   TestEqual("Stringified Object pointer", S, "None");
+				   const UObject* Object = nullptr;
+				   const FString S = LexToString(Object);
+				   TestEqual("String converted Object pointer", S, "None");
 			   });
 
 			It("should return the object name if the pointer is valid", [this]() {
-				FName UniqueObjectName = MakeUniqueObjectName(GetTransientPackage(), UOUUTestObject::StaticClass());
-				UObject* Object = NewObject<UOUUTestObject>(
+				const FName UniqueObjectName =
+					MakeUniqueObjectName(GetTransientPackage(), UOUUTestObject::StaticClass());
+				const UObject* Object = NewObject<UOUUTestObject>(
 					(UObject*)GetTransientPackage(),
 					UOUUTestObject::StaticClass(),
 					UniqueObjectName);
-				FString S = LexToString(Object);
-				TestEqual("Stringified Object pointer", S, UniqueObjectName.ToString());
+				const FString S = LexToString(Object);
+				TestEqual("String converted Object pointer", S, UniqueObjectName.ToString());
 			});
 		});
 
 		Describe("executed on pointers/references of types that have a ToString() member function", [this]() {
 			It("should return the string 'nullptr' if it's passed as pointer that is nullptr", [this]() {
-				FStringUtilsTestStruct* StructPtr = nullptr;
-				FString S = LexToString(StructPtr);
-				TestEqual("Stringified Struct", S, "nullptr");
+				const FStringUtilsTestStruct* StructPtr = nullptr;
+				const FString S = LexToString(StructPtr);
+				TestEqual("String converted Struct", S, "nullptr");
 			});
 
 			It("should return the result of a ToString() call on the object if it's passed as valid pointer", [this]() {
 				FStringUtilsTestStruct Struct;
 				Struct.S = "test_string";
-				FStringUtilsTestStruct* StructPtr = &Struct;
-				FString S = LexToString(StructPtr);
-				TestEqual("Stringified Struct", S, Struct.S);
+				const FStringUtilsTestStruct* StructPtr = &Struct;
+				const FString S = LexToString(StructPtr);
+				TestEqual("String converted Struct", S, Struct.S);
 			});
 
 			It("should return the result of a ToString() call on the object if it's passed as const reference",
 			   [this]() {
 				   FStringUtilsTestStruct Struct;
 				   Struct.S = "test_string";
-				   FString S = LexToString(Struct);
-				   TestEqual("Stringified Struct", S, Struct.S);
+				   const FString S = LexToString(Struct);
+				   TestEqual("String converted Struct", S, Struct.S);
 			   });
 		});
 	});

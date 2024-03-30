@@ -18,7 +18,7 @@ bool UOUUSceneProjectionLibrary::GetViewProjectionData(
 	APlayerController const* Player,
 	FSceneViewProjectionData& OutProjectionData)
 {
-	ULocalPlayer* const LocalPlayer = Player ? Player->GetLocalPlayer() : nullptr;
+	const ULocalPlayer* LocalPlayer = Player ? Player->GetLocalPlayer() : nullptr;
 	if (!LocalPlayer || !LocalPlayer->ViewportClient)
 	{
 		return false;
@@ -46,7 +46,7 @@ bool UOUUSceneProjectionLibrary::GetViewProjectionData(
 	uint32 SizeX = FMath::TruncToInt(LocalPlayer->Size.X * SizeXY.X);
 	uint32 SizeY = FMath::TruncToInt(LocalPlayer->Size.Y * SizeXY.Y);
 
-	FIntRect UnconstrainedRectangle = FIntRect(X, Y, X + SizeX, Y + SizeY);
+	const FIntRect UnconstrainedRectangle = FIntRect(X, Y, X + SizeX, Y + SizeY);
 
 	OutProjectionData.SetViewRectangle(UnconstrainedRectangle);
 
@@ -66,7 +66,7 @@ bool UOUUSceneProjectionLibrary::GetViewProjectionData(
 	const bool bNeedStereo = (StereoPass != EStereoscopicPass::eSSP_FULL) && GEngine->IsStereoscopic3D();
 	const bool bIsHeadTrackingAllowed = GEngine->XRSystem.IsValid() && GEngine->XRSystem->IsHeadTrackingAllowed();
 	// #TODO-OUU Adjust ViewIndex
-	int32 ViewIndex = 0;
+	constexpr int32 ViewIndex = 0;
 	if (bNeedStereo)
 	{
 		GEngine->StereoRenderingDevice->AdjustViewRect(ViewIndex, X, Y, SizeX, SizeY);
@@ -81,10 +81,10 @@ bool UOUUSceneProjectionLibrary::GetViewProjectionData(
 	FVector StereoViewLocation = ViewInfo.Location;
 	if (bNeedStereo || bIsHeadTrackingAllowed)
 	{
-		auto XRCamera = GEngine->XRSystem.IsValid() ? GEngine->XRSystem->GetXRCamera() : nullptr;
+		const auto XRCamera = GEngine->XRSystem.IsValid() ? GEngine->XRSystem->GetXRCamera() : nullptr;
 		if (XRCamera.IsValid())
 		{
-			AActor* ViewTarget = LocalPlayer->PlayerController->GetViewTarget();
+			const AActor* ViewTarget = LocalPlayer->PlayerController->GetViewTarget();
 			const bool bHasActiveCamera = ViewTarget && ViewTarget->HasActiveCameraComponent();
 			XRCamera->UseImplicitHMDPosition(bHasActiveCamera);
 		}
@@ -118,7 +118,7 @@ bool UOUUSceneProjectionLibrary::GetViewProjectionData(
 			Viewport,
 			IN OUT OutProjectionData);
 
-		FSceneViewExtensionContext ViewExtensionContext(Viewport);
+		const FSceneViewExtensionContext ViewExtensionContext(Viewport);
 		for (auto& ViewExt : GEngine->ViewExtensions->GatherActiveExtensions(ViewExtensionContext))
 		{
 			ViewExt->SetupViewProjectionMatrix(OutProjectionData);
@@ -151,7 +151,7 @@ bool UOUUSceneProjectionLibrary::ProjectWorldToScreen(
 	if (GetViewProjectionData(TargetCamera, Player, ProjectionData))
 	{
 		FMatrix const ViewProjectionMatrix = ProjectionData.ComputeViewProjectionMatrix();
-		bool bResult = FSceneView::ProjectWorldToScreen(
+		const bool bResult = FSceneView::ProjectWorldToScreen(
 			WorldPosition,
 			ProjectionData.GetConstrainedViewRect(),
 			ViewProjectionMatrix,

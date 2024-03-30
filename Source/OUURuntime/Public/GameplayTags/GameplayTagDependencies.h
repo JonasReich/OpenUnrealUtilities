@@ -4,15 +4,10 @@
 
 #include "CoreMinimal.h"
 
-#include "GameplayEffectTypes.h"
 #include "GameplayTagContainer.h"
-#include "Templates/ReferenceWrapper.h"
 #include "UObject/WeakInterfacePtr.h"
 
 #include "GameplayTagDependencies.generated.h"
-
-struct FGameplayTagDependencyHandle;
-struct FGameplayTagDependencyChange;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

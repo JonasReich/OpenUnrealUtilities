@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 
+// ReSharper disable once CppUnusedIncludeDirective
 #include "Misc/EngineVersionComparison.h"
 #include "Templates/RWLockedVariable.h"
 #include "Traits/ConditionalType.h"

@@ -37,7 +37,7 @@ bool FSemVerBuildMetadata::TryParseString(const FString& SourceString, ESemVerPa
 	else if (Strictness == ESemVerParsingStrictness::Regular)
 	{
 		FString StringCopy = SourceString.TrimStartAndEnd();
-		int32 WhitespaceIdx = StringCopy.FindLastCharByPredicate(FChar::IsWhitespace);
+		const int32 WhitespaceIdx = StringCopy.FindLastCharByPredicate(FChar::IsWhitespace);
 		if (WhitespaceIdx == INDEX_NONE)
 		{
 			Metadata = MoveTemp(StringCopy);

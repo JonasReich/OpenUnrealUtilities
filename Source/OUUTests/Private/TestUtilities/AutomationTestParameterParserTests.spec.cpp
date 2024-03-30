@@ -50,7 +50,7 @@ void FAutomationTestParameterParserSpec::Define()
 		It("should return the number of parameters contained in the parameter string that were separated by '|'",
 		   [this]() {
 			   const FAutomationTestParameterParser Parser("1|2|3|4|5");
-			   TestEqual("Number of parameters", Parser.GetNumParamters(), 5);
+			   TestEqual("Number of parameters", Parser.GetNumParameters(), 5);
 		   });
 	});
 

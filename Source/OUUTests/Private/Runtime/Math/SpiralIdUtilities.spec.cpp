@@ -56,7 +56,7 @@ void FSpiralIdUtilitiesSpec::Define()
 		   {
 			   const int32 ExpectedSpiralId = Entry.Key;
 			   const FVector2D ExpectedLocation = Entry.Value;
-			   const float GridSize = 15000;
+			   constexpr float GridSize = 15000;
 			   const FVector2D ResultLocation = USpiralIdUtilities::ConvertSpiralIdToCenterLocation(
 				   ExpectedSpiralId,
 				   GridSize,

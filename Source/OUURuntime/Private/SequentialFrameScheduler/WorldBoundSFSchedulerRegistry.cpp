@@ -97,10 +97,10 @@ void AWorldBoundSFSchedulerRegistry::TickActor(
 	if (auto* QueuePtr = TickGroupToSchedulerPriorityList.Find(ThisTickFunction.TickGroup))
 	{
 		TArray<FSchedulerPtr>& Queue = *QueuePtr;
-		Queue.RemoveAll([](const FSchedulerPtr Scheduler) -> bool { return !Scheduler.IsValid(); });
-		Queue.Sort([](const FSchedulerPtr A, const FSchedulerPtr B) -> bool { return A.Get() < B.Get(); });
+		Queue.RemoveAll([](const FSchedulerPtr& Scheduler) -> bool { return !Scheduler.IsValid(); });
+		Queue.Sort([](const FSchedulerPtr& A, const FSchedulerPtr& B) -> bool { return A.Get() < B.Get(); });
 
-		for (FSchedulerPtr Scheduler : Queue)
+		for (const FSchedulerPtr& Scheduler : Queue)
 		{
 			Scheduler->Tick(DeltaTime);
 		}

@@ -1,7 +1,6 @@
 // Copyright (c) 2023 Jonas Reich & Contributors
 
 #include "OUUTestUtilities.h"
-#include "Templates/ScopedMultiRWLock.h"
 
 #if WITH_AUTOMATION_WORKER
 

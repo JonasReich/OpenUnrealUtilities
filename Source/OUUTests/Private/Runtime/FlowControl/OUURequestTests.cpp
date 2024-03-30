@@ -65,7 +65,7 @@ OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(Raise)
 	const FAutomationTestParameterParser Parser{Parameters};
 	const FOUURequestTestEnvironment Env;
 	const bool bExpectSuccess = Parser.GetValue<bool>(0);
-	Env.Responder->bCompleteRequestSuccesfully = bExpectSuccess;
+	Env.Responder->bCompleteRequestSuccessfully = bExpectSuccess;
 	const bool bResetAfterCompletion = Parser.GetValue<bool>(1);
 	Env.Request->bResetAfterCompletion = bResetAfterCompletion;
 	const bool bRaiseAndWait = Parser.GetValue<bool>(2);
@@ -108,7 +108,7 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(RaiseTwice, DEFAULT_OUU_TEST_FLAGS)
 {
 	// Arrange
 	const FOUURequestTestEnvironment Env;
-	Env.Responder->bCompleteRequestSuccesfully = true;
+	Env.Responder->bCompleteRequestSuccessfully = true;
 	Env.Request->bResetAfterCompletion = true;
 	Env.Request->OnCompleted.AddDynamic(Env.Owner, &UOUURequestTests_Owner::HandleRequestCompleted);
 
@@ -131,7 +131,7 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(Cancel, DEFAULT_OUU_TEST_FLAGS)
 {
 	// Arrange
 	const FOUURequestTestEnvironment Env;
-	Env.Responder->bCompleteRequestSuccesfully = true;
+	Env.Responder->bCompleteRequestSuccessfully = true;
 	Env.Request->bResetAfterCompletion = true;
 	Env.Request->OnCompleted.AddDynamic(Env.Owner, &UOUURequestTests_Owner::HandleRequestCompleted);
 
@@ -154,7 +154,7 @@ OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(OnStatusChanged, DEFAULT_OUU_TEST_FLAGS)
 {
 	// Arrange
 	const FOUURequestTestEnvironment Env;
-	Env.Responder->bCompleteRequestSuccesfully = true;
+	Env.Responder->bCompleteRequestSuccessfully = true;
 	Env.Request->bResetAfterCompletion = false;
 	Env.Request->OnStatusChanged.AddDynamic(Env.Owner, &UOUURequestTests_Owner::HandleStateChanged);
 

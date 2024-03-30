@@ -3,7 +3,6 @@
 #include "LatentAutomationPIEWorldLoader.h"
 
 #include "Engine/StaticMeshActor.h"
-#include "EngineUtils.h"
 #include "OUUTestUtilities.h"
 
 #if WITH_AUTOMATION_WORKER
@@ -19,7 +18,7 @@ void FLatentAutomationPIEWorldLoaderSpec::Define()
 	Describe("LatentLoad", [this]() {
 		LatentBeforeEach([this](const FDoneDelegate& Done) { WorldLoader.LatentLoad(Done); });
 		It("should load a valid OUU-empty-world map", [this]() {
-			auto* LoadedWorld = WorldLoader.GetLoadedWorld();
+			const auto* LoadedWorld = WorldLoader.GetLoadedWorld();
 			if (!SPEC_TEST_NOT_NULL(LoadedWorld))
 				return;
 
@@ -35,7 +34,7 @@ void FLatentAutomationPIEWorldLoaderSpec::Define()
 			}
 
 			const int32 OriginalActorCount = LoadedWorld->GetActorCount();
-			auto* MeshActor = LoadedWorld->SpawnActor<AStaticMeshActor>();
+			const auto* MeshActor = LoadedWorld->SpawnActor<AStaticMeshActor>();
 			const int32 ActorCountAfterSpawn = LoadedWorld->GetActorCount();
 
 			SPEC_TEST_NOT_NULL(MeshActor);
@@ -46,7 +45,7 @@ void FLatentAutomationPIEWorldLoaderSpec::Define()
 			}
 
 			WorldLoader.LatentLoad(FDoneDelegate::CreateLambda([this, OriginalActorCount, Done]() {
-				auto* Loaded2ndWorld = WorldLoader.GetLoadedWorld();
+				const auto* Loaded2ndWorld = WorldLoader.GetLoadedWorld();
 				if (!SPEC_TEST_NOT_NULL(Loaded2ndWorld))
 				{
 					Done.Execute();
@@ -66,7 +65,7 @@ void FLatentAutomationPIEWorldLoaderSpec::Define()
 		WorldLoader.LatentLoadBeforeEach();
 
 		It("should load a valid OUU-empty-world map", [this]() {
-			auto* LoadedWorld = WorldLoader.GetLoadedWorld();
+			const auto* LoadedWorld = WorldLoader.GetLoadedWorld();
 			if (!SPEC_TEST_NOT_NULL(LoadedWorld))
 				return;
 

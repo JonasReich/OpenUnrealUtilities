@@ -17,7 +17,7 @@ struct FOUUMaterialAnalyzer_ParameterData
 	GENERATED_BODY()
 public:
 	FOUUMaterialAnalyzer_ParameterData() = default;
-	FOUUMaterialAnalyzer_ParameterData(FMaterialParameterInfo InInfo, int32 InSortPriority) :
+	FOUUMaterialAnalyzer_ParameterData(const FMaterialParameterInfo& InInfo, int32 InSortPriority) :
 		Info(InInfo), SortPriority(InSortPriority)
 	{
 	}
