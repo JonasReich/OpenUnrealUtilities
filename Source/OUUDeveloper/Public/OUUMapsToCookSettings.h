@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 
 #include "Engine/DeveloperSettings.h"
-#include "Engine/EngineTypes.h"
 
 #include "OUUMapsToCookSettings.generated.h"
 

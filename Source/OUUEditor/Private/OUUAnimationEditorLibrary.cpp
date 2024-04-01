@@ -6,7 +6,6 @@
 #include "Animation/AnimInstance.h"
 #include "Animation/BoneChainRange.h"
 #include "Animation/TraverseBoneTree.h"
-#include "LODUtilities.h"
 #include "MeshUtilities.h"
 #include "Misc/RegexUtils.h"
 #include "Modules/ModuleManager.h"

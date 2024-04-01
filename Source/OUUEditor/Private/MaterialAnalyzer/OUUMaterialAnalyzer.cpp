@@ -3,12 +3,12 @@
 #include "MaterialAnalyzer/OUUMaterialAnalyzer.h"
 
 #include "Brushes/SlateColorBrush.h"
-#include "EdGraph/EdGraph.h"
 #include "MaterialAnalyzer/OUUMaterialAnalyzer_EditorObject.h"
 #include "MaterialAnalyzer/OUUMaterialAnalyzer_ParametersList.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialExpressionParameter.h"
 #include "Materials/MaterialExpressionTextureSampleParameter.h"
+#include "Materials/MaterialLayersFunctions.h"
 #include "PropertyCustomizationHelpers.h"
 #include "Slate/SplitterColumnSizeData.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"

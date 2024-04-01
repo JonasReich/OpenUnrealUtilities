@@ -17,7 +17,6 @@
 #include "GameFramework/PlayerController.h"
 #include "GameplayTagContainer.h"
 #include "GameplayTags/GameplayTagQueryParser.h"
-#include "Misc/EngineVersionComparison.h"
 #include "Misc/RegexUtils.h"
 #include "TextureResource.h"
 #include "Widgets/Docking/SDockTab.h"
@@ -394,9 +393,9 @@ namespace OUU::Developer::ActorMapWindow
 					if (bFollowCamera)
 					{
 						bool bSetLocalCameraLocation = false;
-						if (auto* LocalPlayerController = TargetWorld->GetFirstPlayerController())
+						if (const auto* LocalPlayerController = TargetWorld->GetFirstPlayerController())
 						{
-							if (APlayerCameraManager* Camera = LocalPlayerController->PlayerCameraManager.Get())
+							if (const APlayerCameraManager* Camera = LocalPlayerController->PlayerCameraManager.Get())
 							{
 								bSetLocalCameraLocation = true;
 								LocalCameraLocation = Camera->GetCameraLocation();

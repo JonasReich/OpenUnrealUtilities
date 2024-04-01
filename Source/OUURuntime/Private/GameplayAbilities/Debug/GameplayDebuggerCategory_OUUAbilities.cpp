@@ -648,14 +648,14 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 				}
 				else if (Cast<AGameplayCueNotify_Actor>(CueClass->ClassDefaultObject) != nullptr)
 				{
-					AActor* LocalAvatarActor = AbilitySystem->GetAvatarActor_Direct();
-					AActor* LocalOwnerActor = AbilitySystem->GetOwnerActor();
 					if (Info.Canvas)
 					{
 						Info.Canvas->SetDrawColor(FColorList::White);
 					}
 					DebugLine(Info, FString::Printf(TEXT("%s -> actor"), *CueTagString), 0.f, 0.f);
 	#if UE_VERSION_OLDER_THAN(5, 3, 0)
+					AActor* LocalAvatarActor = AbilitySystem->GetAvatarActor_Direct();
+					AActor* LocalOwnerActor = AbilitySystem->GetOwnerActor();
 					for (auto CueEntry : CueManager->NotifyMapActor)
 					{
 						FGCNotifyActorKey Key = CueEntry.Key;
@@ -736,7 +736,7 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 
 void FGameplayDebuggerCategory_OUUAbilities::GetAttributeAggregatorSnapshot(
 	UOUUAbilitySystemComponent* AbilitySystem,
-	FGameplayAttribute& Attribute,
+	const FGameplayAttribute& Attribute,
 	FAggregator SnapshotAggregator)
 {
 	// NOTE: As of writing this code, this is how I understand the usage of CaptureSource and bSnapshot.
@@ -749,11 +749,11 @@ void FGameplayDebuggerCategory_OUUAbilities::GetAttributeAggregatorSnapshot(
 	// We pick snapshot, because we do not want any future updates of the values, just a single snapshot.
 	constexpr bool bSnapshot = true;
 
-	FGameplayEffectAttributeCaptureDefinition CaptureDefinition{Attribute, CaptureSource, bSnapshot};
+	const FGameplayEffectAttributeCaptureDefinition CaptureDefinition{Attribute, CaptureSource, bSnapshot};
 	FGameplayEffectAttributeCaptureSpec CaptureSpec{CaptureDefinition};
 	AbilitySystem->CaptureAttributeForGameplayEffect(IN OUT CaptureSpec);
 
-	bool bGotSnapshot = CaptureSpec.AttemptGetAttributeAggregatorSnapshot(OUT SnapshotAggregator);
+	const bool bGotSnapshot = CaptureSpec.AttemptGetAttributeAggregatorSnapshot(OUT SnapshotAggregator);
 	ensureAlwaysMsgf(
 		bGotSnapshot,
 		TEXT("Snapshots should always be successful! "

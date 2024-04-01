@@ -6,7 +6,6 @@
 #include "HAL/PlatformFileManager.h"
 #include "ISourceControlModule.h"
 #include "LogOpenUnrealUtilities.h"
-#include "Misc/CommandLine.h"
 #include "Misc/ConfigCacheIni.h"
 #include "SourceControlHelpers.h"
 

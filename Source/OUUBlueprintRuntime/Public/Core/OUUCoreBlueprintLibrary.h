@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Templates/SubclassOf.h"
 
 #include "OUUCoreBlueprintLibrary.generated.h"
 

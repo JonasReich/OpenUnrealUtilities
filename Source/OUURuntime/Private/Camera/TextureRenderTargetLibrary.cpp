@@ -3,7 +3,6 @@
 #include "Camera/TextureRenderTargetLibrary.h"
 
 #include "Engine/TextureRenderTarget2D.h"
-#include "RHI.h"
 #include "TextureResource.h"
 #include "UnrealClient.h"
 

@@ -119,7 +119,7 @@ void UOUUEditorLibrary::FocusOnBlueprintContent(const FOUUBlueprintEditorFocusCo
 	}
 	else if (AssetObject != nullptr)
 	{
-		TArray<UObject*> Objects{AssetObject};
+		const TArray<UObject*> Objects{AssetObject};
 		GEditor->SyncBrowserToObjects(Objects);
 	}
 }

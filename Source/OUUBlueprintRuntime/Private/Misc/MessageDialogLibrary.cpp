@@ -6,7 +6,14 @@
 
 void UMessageDialogLibrary::ShowMessageDialogueNotification(FText OptionalTitle, FText Message)
 {
-	FMessageDialog::Debugf(Message, GetOptionalTitlePtr(OptionalTitle));
+	if (OptionalTitle.IsEmpty())
+	{
+		FMessageDialog::Debugf(Message, OptionalTitle);
+	}
+	else
+	{
+		FMessageDialog::Debugf(Message);
+	}
 }
 
 TEnumAsByte<EAppReturnType::Type> UMessageDialogLibrary::OpenMessageDialog(
@@ -14,7 +21,11 @@ TEnumAsByte<EAppReturnType::Type> UMessageDialogLibrary::OpenMessageDialog(
 	FText OptionalTitle,
 	FText Message)
 {
-	return FMessageDialog::Open(MessageType, Message, GetOptionalTitlePtr(OptionalTitle));
+	if (OptionalTitle.IsEmpty())
+	{
+		return FMessageDialog::Open(MessageType, Message, OptionalTitle);
+	}
+	return FMessageDialog::Open(MessageType, Message);
 }
 
 TEnumAsByte<EAppReturnType::Type> UMessageDialogLibrary::OpenMessageDialogWithDefaultValue(
@@ -23,15 +34,10 @@ TEnumAsByte<EAppReturnType::Type> UMessageDialogLibrary::OpenMessageDialogWithDe
 	FText OptionalTitle,
 	FText Message)
 {
-	return FMessageDialog::Open(
-		StaticCast<EAppMsgType::Type>(MessageType),
-		DefaultValue,
-		Message,
-		GetOptionalTitlePtr(OptionalTitle));
-}
+	if (OptionalTitle.IsEmpty())
+	{
+		return FMessageDialog::Open(StaticCast<EAppMsgType::Type>(MessageType), DefaultValue, Message, OptionalTitle);
+	}
 
-const FText* UMessageDialogLibrary::GetOptionalTitlePtr(const FText& Text)
-{
-	const int32 TitleLength = Text.ToString().Len();
-	return (TitleLength > 0) ? &Text : nullptr;
+	return FMessageDialog::Open(StaticCast<EAppMsgType::Type>(MessageType), DefaultValue, Message);
 }

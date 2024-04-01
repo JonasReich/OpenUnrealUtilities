@@ -4,7 +4,7 @@
 
 #include "IMaterialEditor.h"
 #include "LogOpenUnrealUtilities.h"
-#include "MaterialEditor/Public/MaterialEditingLibrary.h"
+#include "MaterialEditingLibrary.h"
 #include "MaterialEditorUtilities.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialExpressionMakeMaterialAttributes.h"

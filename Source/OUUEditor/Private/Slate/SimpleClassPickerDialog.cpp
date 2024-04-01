@@ -5,7 +5,6 @@
 #include "ClassViewerFilter.h"
 #include "ClassViewerModule.h"
 #include "Kismet2/SClassPickerDialog.h"
-#include "Modules/ModuleManager.h"
 
 class FAssetClassParentFilter : public IClassViewerFilter
 {

@@ -19,7 +19,6 @@
 	#include "Engine/StaticMesh.h"
 	#include "GameFramework/PlayerController.h"
 	#include "GameplayDebugger/GameplayDebugger_DisplayDebugManager.h"
-	#include "Misc/EngineVersionComparison.h"
 	#include "Rendering/SkeletalMeshRenderData.h"
 	#include "SkeletalRenderPublic.h"
 	#include "Templates/StringUtils.h"
@@ -565,9 +564,9 @@ void FGameplayDebuggerCategory_Animation::OutputTickRecords(
 			Player.EffectiveBlendWeight * 100.f);
 
 		// See if we have access to SequenceLength
-		if (UAnimSequenceBase* AnimSeqBase = Cast<UAnimSequenceBase>(Player.SourceAsset))
+		if (const auto* AnimSeqBase = Cast<UAnimSequenceBase>(Player.SourceAsset))
 		{
-			float SequenceLength = AnimSeqBase->GetPlayLength();
+			const float SequenceLength = AnimSeqBase->GetPlayLength();
 			PlayerEntry += FString::Printf(
 				TEXT(" P(%.2f/%.2f)"),
 				Player.TimeAccumulator != nullptr ? *Player.TimeAccumulator : 0.f,
@@ -592,7 +591,7 @@ void FGameplayDebuggerCategory_Animation::OutputTickRecords(
 
 		DisplayDebugManager.DrawString(PlayerEntry, Indent);
 
-		if (UBlendSpace* BlendSpace = Cast<UBlendSpace>(Player.SourceAsset))
+		if (const auto* BlendSpace = Cast<UBlendSpace>(Player.SourceAsset))
 		{
 			if (bFullBlendSpaceDisplay && Player.BlendSpace.BlendSampleDataCache
 				&& Player.BlendSpace.BlendSampleDataCache->Num() > 0)

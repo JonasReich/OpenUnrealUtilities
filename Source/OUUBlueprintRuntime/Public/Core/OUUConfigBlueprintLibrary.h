@@ -3,7 +3,6 @@
 #pragma once
 
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Templates/SubclassOf.h"
 
 #include "OUUConfigBlueprintLibrary.generated.h"
 

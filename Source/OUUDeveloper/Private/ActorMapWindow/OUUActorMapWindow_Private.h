@@ -4,7 +4,6 @@
 
 #include "ActorMapWindow/OUUActorMapWindow.h"
 #include "Slate/SplitterColumnSizeData.h"
-#include "Tickable.h"
 #include "Widgets/SWidget.h"
 #include "Widgets/Views/SListView.h"
 

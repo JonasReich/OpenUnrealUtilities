@@ -71,7 +71,7 @@ protected:
 
 	static void GetAttributeAggregatorSnapshot(
 		UOUUAbilitySystemComponent* AbilitySystem,
-		FGameplayAttribute& Attribute,
+		const FGameplayAttribute& Attribute,
 		FAggregator SnapshotAggregator);
 	void DrawTitle(FAbilitySystemComponentDebugInfo& Info, const FString& DebugTitle) const;
 	void DrawDebugHeader(FAbilitySystemComponentDebugInfo& Info, const UOUUAbilitySystemComponent* AbilitySystem) const;

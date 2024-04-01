@@ -4,7 +4,6 @@
 
 #if WITH_AUTOMATION_WORKER
 
-	#include "Misc/EngineVersionComparison.h"
 	#include "Engine/EngineTypes.h"
 	#include "Engine/GameInstance.h"
 	#include "Engine/LocalPlayer.h"
@@ -100,7 +99,7 @@ bool FOUUAutomationTestWorld::InitializeGame()
 	BeginPlay();
 
 	// Create a new unique net ID to spawn the local play actor = PlayerController
-	FUniqueNetIdRepl NetIdRepl = GameInstance->GetPrimaryPlayerUniqueIdRepl();
+	const FUniqueNetIdRepl NetIdRepl = GameInstance->GetPrimaryPlayerUniqueIdRepl();
 
 	PlayerController = World->SpawnPlayActor(LocalPlayer, ENetRole::ROLE_Authority, URL, NetIdRepl, OUT ErrorString);
 	CHECK_INIT_GAME_CONDITION(ErrorString.Len() > 0, ErrorString);

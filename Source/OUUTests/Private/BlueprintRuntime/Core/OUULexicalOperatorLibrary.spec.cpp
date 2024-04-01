@@ -27,19 +27,19 @@ BEGIN_DEFINE_SPEC(
 			   *LexToString(AB_Result),
 			   *LexToString(A),
 			   *LexToString(B)),
-		   [=]() { SPEC_TEST_EQUAL(OperatorFunc(A, B), AB_Result); });
+		   [=, this]() { SPEC_TEST_EQUAL(OperatorFunc(A, B), AB_Result); });
 		It(FString::Printf(
 			   TEXT("should return %s for strings A (%s) and A (%s)"),
 			   *LexToString(AA_Result),
 			   *LexToString(A),
 			   *LexToString(A)),
-		   [=]() { SPEC_TEST_EQUAL(OperatorFunc(A, A), AA_Result); });
+		   [=, this]() { SPEC_TEST_EQUAL(OperatorFunc(A, A), AA_Result); });
 		It(FString::Printf(
 			   TEXT("should return %s for strings B (%s) and A (%s)"),
 			   *LexToString(BA_Result),
 			   *LexToString(B),
 			   *LexToString(A)),
-		   [=]() { SPEC_TEST_EQUAL(OperatorFunc(B, A), BA_Result); });
+		   [=, this]() { SPEC_TEST_EQUAL(OperatorFunc(B, A), BA_Result); });
 	}
 
 	template <typename TargetType>
@@ -51,10 +51,10 @@ BEGIN_DEFINE_SPEC(
 		TOperatorType<TargetType> LessEqualOperator,
 		TOperatorType<TargetType> GreaterEqualOperator)
 	{
-		Describe("<", [=]() { DescribeSingleOperatorTestCases(A, B, LessOperator, true, false, false); });
-		Describe(">", [=]() { DescribeSingleOperatorTestCases(A, B, GreaterOperator, false, false, true); });
-		Describe("<=", [=]() { DescribeSingleOperatorTestCases(A, B, LessEqualOperator, true, true, false); });
-		Describe(">=", [=]() { DescribeSingleOperatorTestCases(A, B, GreaterEqualOperator, false, true, true); });
+		Describe("<", [=, this]() { DescribeSingleOperatorTestCases(A, B, LessOperator, true, false, false); });
+		Describe(">", [=, this]() { DescribeSingleOperatorTestCases(A, B, GreaterOperator, false, false, true); });
+		Describe("<=", [=, this]() { DescribeSingleOperatorTestCases(A, B, LessEqualOperator, true, true, false); });
+		Describe(">=", [=, this]() { DescribeSingleOperatorTestCases(A, B, GreaterEqualOperator, false, true, true); });
 	}
 END_DEFINE_SPEC(FOUULexicalOperatorLibrarySpec)
 
@@ -68,7 +68,7 @@ void FOUULexicalOperatorLibrarySpec::Define()
 
 	for (int32 i = 0; i < TestStrings.Num() - 2; i++)
 	{
-		Describe("String", [=]() {
+		Describe("String", [=, this]() {
 			const FString AString = TestStrings[i];
 			const FString BString = TestStrings[i + 1];
 			DescribeAllOperatorsForType<FString>(
@@ -79,7 +79,7 @@ void FOUULexicalOperatorLibrarySpec::Define()
 				&UOUULexicalOperatorLibrary::LessEqual_StringString,
 				&UOUULexicalOperatorLibrary::GreaterEqual_StringString);
 		});
-		Describe("Name", [=]() {
+		Describe("Name", [=, this]() {
 			const FName AName = *TestStrings[i];
 			const FName BName = *TestStrings[i + 1];
 			DescribeAllOperatorsForType<FName>(

@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 
 #include "MaterialAnalyzer/OUUMaterialAnalyzer.h"
-#include "Materials/MaterialLayersFunctions.h"
 
 #include "OUUMaterialAnalyzer_ParameterData.generated.h"
 
