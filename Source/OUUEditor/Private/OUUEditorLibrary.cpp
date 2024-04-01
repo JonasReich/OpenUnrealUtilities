@@ -10,6 +10,7 @@
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "LevelEditor.h"
+#include "Misc/EngineVersionComparison.h"
 #include "Modules/ModuleManager.h"
 
 void UOUUEditorLibrary::InvokeSessionFrontend(FName Panel)
@@ -112,14 +113,19 @@ void UOUUEditorLibrary::FocusOnBlueprintContent(const FOUUBlueprintEditorFocusCo
 	if (Blueprint != nullptr)
 	{
 		// Try to grab guid
-		if (const UEdGraphNode* GraphNode = FBlueprintEditorUtils::GetNodeByGUID(Blueprint, FGuid(FocusContent.NodeGUID)))
+		if (const UEdGraphNode* GraphNode =
+				FBlueprintEditorUtils::GetNodeByGUID(Blueprint, FGuid(FocusContent.NodeGUID)))
 		{
 			FKismetEditorUtilities::BringKismetToFocusAttentionOnObject(GraphNode, false);
 		}
 	}
 	else if (AssetObject != nullptr)
 	{
+#if UE_VERSION_OLDER_THAN(5, 3, 0)
+		TArray<UObject*> Objects{AssetObject};
+#else
 		const TArray<UObject*> Objects{AssetObject};
+#endif
 		GEditor->SyncBrowserToObjects(Objects);
 	}
 }

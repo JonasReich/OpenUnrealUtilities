@@ -108,7 +108,7 @@ void USlateNotificationLibrary::SetSlateNotificationHyperlink(
 	if (auto* Notification = FindNotification(NotificationHandle))
 	{
 		// ReSharper disable once CppExpressionWithoutSideEffects
-		const FSimpleDelegate Delegate = FSimpleDelegate::CreateLambda([=]() { HyperlinkDelegate.ExecuteIfBound(); });
+		const FSimpleDelegate Delegate = FSimpleDelegate::CreateLambda([HyperlinkDelegate]() { HyperlinkDelegate.ExecuteIfBound(); });
 		Notification->SetHyperlink(Delegate, HyperlinkText);
 	}
 }
