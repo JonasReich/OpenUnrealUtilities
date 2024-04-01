@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 
+#include "Misc/EngineVersionComparison.h"
 #include "SequentialFrameScheduler/SequentialFrameTask.h"
 #include "Templates/RingAggregator.h"
 
@@ -64,7 +65,11 @@ public:
 	template <class UserClass>
 	FORCEINLINE FTaskHandle AddTask(
 		UserClass* InObj,
+#if UE_VERSION_OLDER_THAN(5, 3, 0)
 		typename FTaskDelegate::TUObjectMethodDelegate<UserClass>::FMethodPtr InTaskMethod,
+#else
+		FTimerDelegate::TMethodPtr<UserClass> InTaskMethod,
+#endif
 		float InPeriod,
 		bool bTickAsOftenAsPossible = true)
 	{
@@ -77,7 +82,11 @@ public:
 	template <class UserClass>
 	FORCEINLINE FTaskHandle AddTask(
 		UserClass* InObj,
+#if UE_VERSION_OLDER_THAN(5, 3, 0)
 		typename FTaskDelegate::TUObjectMethodDelegate_Const<UserClass>::FMethodPtr InTaskMethod,
+#else
+		FTimerDelegate::TConstMethodPtr<UserClass> InTaskMethod,
+#endif
 		float InPeriod,
 		bool bTickAsOftenAsPossible = true)
 	{

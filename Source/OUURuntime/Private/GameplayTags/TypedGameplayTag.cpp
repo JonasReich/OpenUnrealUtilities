@@ -3,6 +3,7 @@
 #include "GameplayTags/TypedGameplayTag.h"
 
 #include "GameplayTagsManager.h"
+#include "Misc/EngineVersionComparison.h"
 #include "Misc/RegexUtils.h"
 #include "Modules/ModuleManager.h"
 #include "UObject/UObjectIterator.h"
@@ -64,8 +65,12 @@ void FTypedGameplayTag_Base::RegisterAllDerivedPropertyTypeLayouts()
 
 		if (const FStructProperty* StructProperty = CastField<FStructProperty>(Property))
 		{
-			// only generate filter string for typed gameplay tags
+	// only generate filter string for typed gameplay tags
+	#if UE_VERSION_OLDER_THAN(5, 3, 0)
 			const auto* Struct = StructProperty->Struct;
+	#else
+			const auto* Struct = StructProperty->Struct.Get();
+	#endif
 			if (Struct->IsChildOf(FTypedGameplayTag_Base::StaticStruct()))
 			{
 				FGameplayTagContainer AllRootTags;
@@ -75,7 +80,8 @@ void FTypedGameplayTag_Base::RegisterAllDerivedPropertyTypeLayouts()
 			}
 		}
 
-		const auto CategoriesString = UGameplayTagsManager::Get().StaticGetCategoriesMetaFromPropertyHandle(PropertyHandle);
+		const auto CategoriesString =
+			UGameplayTagsManager::Get().StaticGetCategoriesMetaFromPropertyHandle(PropertyHandle);
 		auto Matches = OUU::Runtime::RegexUtils::GetRegexMatchesAndGroups("TypedTag\\{(.*)\\}", 1, CategoriesString);
 
 		if (Matches.Num() > 1)

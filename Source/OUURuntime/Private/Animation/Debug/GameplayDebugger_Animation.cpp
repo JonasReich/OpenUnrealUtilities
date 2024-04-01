@@ -23,7 +23,7 @@
 	#include "Rendering/SkeletalMeshRenderData.h"
 	#include "SkeletalRenderPublic.h"
 	#include "Templates/StringUtils.h"
-		#include "Animation/BlendSpace.h"
+	#include "Animation/BlendSpace.h"
 
 namespace OUU::Runtime::Animation::GameplayDebugger::Private
 {
@@ -182,7 +182,8 @@ void FGameplayDebuggerCategory_Animation::DrawSceneComponentTree(
 			}
 			else if (const auto* SkeletalMeshComponent = Cast<USkeletalMeshComponent>(SceneComponent))
 			{
-				OptionalMeshString = FString::Printf(TEXT("(%s)"), *LexToString(SkeletalMeshComponent->GetSkeletalMeshAsset()));
+				OptionalMeshString =
+					FString::Printf(TEXT("(%s)"), *LexToString(SkeletalMeshComponent->GetSkeletalMeshAsset()));
 			}
 
 			return FString::Printf(

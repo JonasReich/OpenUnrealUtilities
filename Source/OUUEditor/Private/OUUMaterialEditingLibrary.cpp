@@ -10,6 +10,7 @@
 #include "Materials/MaterialExpressionMakeMaterialAttributes.h"
 #include "Materials/MaterialFunction.h"
 #include "Materials/MaterialFunctionInterface.h"
+#include "Misc/EngineVersionComparison.h"
 #include "ScopedTransaction.h"
 #include "Toolkits/IToolkit.h"
 #include "Toolkits/ToolkitManager.h"
@@ -152,8 +153,8 @@ void UOUUMaterialEditingLibrary::CopyMaterialAttributeConnections(
 	COPY_INPUT_CONNECTION_SIMPLE(EmissiveColor);
 	COPY_INPUT_CONNECTION_SIMPLE(Opacity);
 	COPY_INPUT_CONNECTION_SIMPLE(OpacityMask);
-	// MP_DiffuseColor -> used in Lightmass, not exposed to user, computed from: BaseColor, Metallic
-	// MP_SpecularColor -> used in Lightmass, not exposed to user, derived from: SpecularColor, Metallic, Specular
+	// COPY_INPUT_CONNECTION_SIMPLE(DiffuseColor); -> not exposed in UMaterialExpressionMakeMaterialAttributes
+	// COPY_INPUT_CONNECTION_SIMPLE(SpecularColor); -> not exposed in UMaterialExpressionMakeMaterialAttributes
 	COPY_INPUT_CONNECTION_SIMPLE(BaseColor);
 	COPY_INPUT_CONNECTION_SIMPLE(Metallic);
 	COPY_INPUT_CONNECTION_SIMPLE(Specular);
@@ -165,8 +166,8 @@ void UOUUMaterialEditingLibrary::CopyMaterialAttributeConnections(
 	// MP_WorldDisplacement_DEPRECATED
 	// MP_TessellationMultiplier_DEPRECATED
 	COPY_INPUT_CONNECTION_SIMPLE(SubsurfaceColor);
-	// MP_CustomData0 -> not exposed in material attributes
-	// MP_CustomData1 -> not exposed in material attributes
+	// COPY_INPUT_CONNECTION_SIMPLE(CustomData0); -> not exposed in UMaterialExpressionMakeMaterialAttributes
+	// COPY_INPUT_CONNECTION_SIMPLE(CustomData1); -> not exposed in UMaterialExpressionMakeMaterialAttributes
 	COPY_INPUT_CONNECTION_SIMPLE(AmbientOcclusion);
 	COPY_INPUT_CONNECTION_SIMPLE(Refraction);
 	COPY_INPUT_CONNECTION_CUSTOM_UV(0);
@@ -179,8 +180,9 @@ void UOUUMaterialEditingLibrary::CopyMaterialAttributeConnections(
 	COPY_INPUT_CONNECTION_CUSTOM_UV(7);
 	COPY_INPUT_CONNECTION_SIMPLE(PixelDepthOffset);
 	COPY_INPUT_CONNECTION_SIMPLE(ShadingModel);
-	// MP_FrontMaterial -> not exposed in material attributes
-	// MP_SurfaceThickness -> not exposed in material attributes
+	// COPY_INPUT_CONNECTION_SIMPLE(FrontMaterial); -> not exposed in UMaterialExpressionMakeMaterialAttributes
+	// COPY_INPUT_CONNECTION_SIMPLE(SurfaceThickness); -> not exposed in UMaterialExpressionMakeMaterialAttributes
+	COPY_INPUT_CONNECTION_SIMPLE(Displacement);
 	constexpr int32 LineAfter = __LINE__;
 	// clang-format on
 
@@ -188,7 +190,11 @@ void UOUUMaterialEditingLibrary::CopyMaterialAttributeConnections(
 #undef COPY_INPUT_CONNECTION_CUSTOM_UV
 
 	static_assert(
+#if UE_VERSION_OLDER_THAN(5, 3, 0)
 		MP_EmissiveColor == 0 && MP_SurfaceThickness == 31 && MP_MaterialAttributes == 32,
+#else
+		MP_EmissiveColor == 0 && MP_SurfaceThickness == 31 && MP_MaterialAttributes == 33,
+#endif
 		"The material property enum has changed, so this conversion probably misses some material property. Please "
 		"check the engine source and fix this.");
 	static_assert(
