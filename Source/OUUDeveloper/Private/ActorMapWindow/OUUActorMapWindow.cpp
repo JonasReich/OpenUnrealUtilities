@@ -396,11 +396,7 @@ namespace OUU::Developer::ActorMapWindow
 						bool bSetLocalCameraLocation = false;
 						if (auto* LocalPlayerController = TargetWorld->GetFirstPlayerController())
 						{
-#if UE_VERSION_OLDER_THAN(5, 0, 0)
-							if (auto* Camera = LocalPlayerController->PlayerCameraManager)
-#else
 							if (APlayerCameraManager* Camera = LocalPlayerController->PlayerCameraManager.Get())
-#endif
 							{
 								bSetLocalCameraLocation = true;
 								LocalCameraLocation = Camera->GetCameraLocation();

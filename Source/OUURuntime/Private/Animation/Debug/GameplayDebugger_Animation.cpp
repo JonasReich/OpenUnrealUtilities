@@ -23,12 +23,7 @@
 	#include "Rendering/SkeletalMeshRenderData.h"
 	#include "SkeletalRenderPublic.h"
 	#include "Templates/StringUtils.h"
-
-	#if UE_VERSION_OLDER_THAN(5, 0, 0)
-		#include "Animation/BlendSpaceBase.h"
-	#else
 		#include "Animation/BlendSpace.h"
-	#endif
 
 namespace OUU::Runtime::Animation::GameplayDebugger::Private
 {
@@ -518,11 +513,7 @@ void FGameplayDebuggerCategory_Animation::DisplayDebugInstance(
 
 	FString DebugText = FString::Printf(
 		TEXT("LOD(%d/%d) UpdateCounter(%d) EvalCounter(%d) CacheBoneCounter(%d) InitCounter(%d) DeltaSeconds(%.3f)"),
-	#if UE_VERSION_OLDER_THAN(5, 0, 0)
-		SkelMeshComp->PredictedLODLevel,
-	#else
 		SkeletalMeshComponent->GetPredictedLODLevel(),
-	#endif
 		MaxLODIndex,
 		Proxy.GetUpdateCounter().Get(),
 		Proxy.GetEvaluationCounter().Get(),
@@ -575,12 +566,7 @@ void FGameplayDebuggerCategory_Animation::OutputTickRecords(
 		// See if we have access to SequenceLength
 		if (UAnimSequenceBase* AnimSeqBase = Cast<UAnimSequenceBase>(Player.SourceAsset))
 		{
-	#if UE_VERSION_OLDER_THAN(5, 0, 0)
-			float SequenceLength = AnimSeqBase->SequenceLength;
-	#else
 			float SequenceLength = AnimSeqBase->GetPlayLength();
-	#endif
-
 			PlayerEntry += FString::Printf(
 				TEXT(" P(%.2f/%.2f)"),
 				Player.TimeAccumulator != nullptr ? *Player.TimeAccumulator : 0.f,
@@ -605,11 +591,7 @@ void FGameplayDebuggerCategory_Animation::OutputTickRecords(
 
 		DisplayDebugManager.DrawString(PlayerEntry, Indent);
 
-	#if UE_VERSION_OLDER_THAN(5, 0, 0)
-		if (UBlendSpaceBase* BlendSpace = Cast<UBlendSpaceBase>(Player.SourceAsset))
-	#else
 		if (UBlendSpace* BlendSpace = Cast<UBlendSpace>(Player.SourceAsset))
-	#endif
 		{
 			if (bFullBlendSpaceDisplay && Player.BlendSpace.BlendSampleDataCache
 				&& Player.BlendSpace.BlendSampleDataCache->Num() > 0)
@@ -642,11 +624,7 @@ void FGameplayDebuggerCategory_Animation::OutputTickRecords(
 						FBlendSampleData& WeightedSample = SampleData[WeightedSampleIndex];
 						if (WeightedSample.SampleDataIndex == SampleIndex)
 						{
-	#if UE_VERSION_OLDER_THAN(5, 0, 0)
-							Weight += WeightedSample.GetWeight();
-	#else
 							Weight += WeightedSample.GetClampedWeight();
-	#endif
 						}
 						else if (WeightedSample.SampleDataIndex > SampleIndex)
 						{
