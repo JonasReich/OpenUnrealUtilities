@@ -1,7 +1,7 @@
 ﻿{
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "1.2.1",
+	"VersionName": "1.3.0",
 	"FriendlyName": "OpenUnrealUtilities",
 	"Description": "Open source Unreal Engine utilities extending both C++ and Blueprint functionality.",
 	"Category": "Other",
