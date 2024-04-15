@@ -112,7 +112,8 @@ void UOUUEditorLibrary::FocusOnBlueprintContent(const FOUUBlueprintEditorFocusCo
 	if (Blueprint != nullptr)
 	{
 		// Try to grab guid
-		if (const UEdGraphNode* GraphNode = FBlueprintEditorUtils::GetNodeByGUID(Blueprint, FGuid(FocusContent.NodeGUID)))
+		if (const UEdGraphNode* GraphNode =
+				FBlueprintEditorUtils::GetNodeByGUID(Blueprint, FGuid(FocusContent.NodeGUID)))
 		{
 			FKismetEditorUtilities::BringKismetToFocusAttentionOnObject(GraphNode, false);
 		}
@@ -153,4 +154,28 @@ FGuid UOUUEditorLibrary::GetCurrentlySelectedBlueprintNodeGuid()
 	}
 
 	return FGuid();
+}
+
+UActorComponent* UOUUEditorLibrary::CreateInstanceComponent(AActor* Actor, TSubclassOf<UActorComponent> ComponentClass)
+{
+	if (!IsValid(Actor) || ComponentClass == nullptr)
+		return nullptr;
+
+	auto* Result = NewObject<UActorComponent>(Actor, ComponentClass);
+	Actor->AddInstanceComponent(Result);
+	Result->RegisterComponent();
+
+	return Result;
+}
+
+void UOUUEditorLibrary::DestroyInstanceComponent(UActorComponent* Component)
+{
+	if (!IsValid(Component))
+		return;
+
+	if (auto* AsSceneComponent = Cast<USceneComponent>(Component))
+	{
+		AsSceneComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	}
+	Component->DestroyComponent();
 }
