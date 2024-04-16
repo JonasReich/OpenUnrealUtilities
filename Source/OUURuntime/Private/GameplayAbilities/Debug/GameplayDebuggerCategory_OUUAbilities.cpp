@@ -134,135 +134,102 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 	// -------------------------------------------------------------
 
 	{
-		TSet<FGameplayAttribute> DrawAttributes;
 		DrawTitle(Info, "ATTRIBUTES");
 
 		TArray<FGameplayAttribute> AllAttributes;
 		AbilitySystem->GetAllAttributes(AllAttributes);
+		bool Colorswitch = true;
 		for (auto& Attribute : AllAttributes)
 		{
-			FAggregator SnapshotAggregator;
-			GetAttributeAggregatorSnapshot(AbilitySystem, Attribute, OUT SnapshotAggregator);
+			FGameplayEffectAttributeCaptureDefinition
+				CaptureDef(Attribute.GetUProperty(), EGameplayEffectAttributeCaptureSource::Source, false);
+			FGameplayEffectAttributeCaptureSpec CaptureSpec(CaptureDef);
+			AbilitySystem->CaptureAttributeForGameplayEffect(CaptureSpec);
 
-			FAggregatorEvaluateParameters EmptyParams;
-			SnapshotAggregator.EvaluateQualificationForAllMods(EmptyParams);
-			TMap<EGameplayModEvaluationChannel, const TArray<FAggregatorMod>*> ModMap;
-			SnapshotAggregator.GetAllAggregatorMods(ModMap);
+			// Source Tags
+			static FGameplayTagContainer QuerySourceTags;
+			QuerySourceTags.Reset();
 
-			if (ModMap.Num() == 0)
+			AbilitySystem->GetOwnedGameplayTags(QuerySourceTags);
+			// QuerySourceTags.AppendTags(_SourceTags);
+
+			// Target Tags
+			static FGameplayTagContainer QueryTargetTags;
+			QueryTargetTags.Reset();
+
+			// QueryTargetTags.AppendTags(_TargetTags);
+
+			// Define parameters
+			FAggregatorEvaluateParameters Params;
+			Params.SourceTags = &QuerySourceTags;
+			Params.TargetTags = &QueryTargetTags;
+			Params.IncludePredictiveMods = true;
+
+			float FinalValue = 0.f;
+			float BaseValue = AbilitySystem->GetNumericAttributeBase(Attribute);
+			float QualifiedValue = AbilitySystem->GetNumericAttribute(Attribute);
+
+			FAggregator Aggregator;
+			if (CaptureSpec.AttemptGetAttributeAggregatorSnapshot(Aggregator))
 			{
-				continue;
-			}
+				// Evaluate
+				float Add = GameplayEffectUtilities::GetModifierBiasByModifierOp(EGameplayModOp::Additive);
+				float AddBias = Add;
+				float Mul = GameplayEffectUtilities::GetModifierBiasByModifierOp(EGameplayModOp::Multiplicitive);
+				float MulBias = Mul;
+				float Div = GameplayEffectUtilities::GetModifierBiasByModifierOp(EGameplayModOp::Division);
+				float DivBias = Div;
 
-			float FinalValue = AbilitySystem->GetNumericAttribute(Attribute);
-			float BaseValue = SnapshotAggregator.GetBaseValue();
+				Aggregator.EvaluateQualificationForAllMods(Params);
+				Aggregator.ForEachMod([&](const FAggregatorModInfo& Info) -> void {
+					if (Info.Mod)
+					{
+						switch (Info.Op)
+						{
+						case EGameplayModOp::Additive: Add += (Info.Mod->EvaluatedMagnitude - AddBias); break;
+						case EGameplayModOp::Multiplicitive: Mul += (Info.Mod->EvaluatedMagnitude - MulBias); break;
+						case EGameplayModOp::Division: Div += (Info.Mod->EvaluatedMagnitude - DivBias); break;
+						default:;
+						}
+					}
+				});
+
+				FinalValue = (BaseValue + Add) * Mul / Div;
+			}
+			
 
 			FString PaddedAttributeName = Attribute.GetName();
 			while (PaddedAttributeName.Len() < 30)
 				PaddedAttributeName += " ";
 
-			FString AttributeString =
-				FString::Printf(TEXT("%s %.2f "), *PaddedAttributeName, AbilitySystem->GetNumericAttribute(Attribute));
-			if (FMath::Abs<float>(BaseValue - FinalValue) > SMALL_NUMBER)
-			{
-				AttributeString += FString::Printf(TEXT(" (Base: %.2f)"), BaseValue);
-			}
+			FString AttributeString = FString::Printf(
+				TEXT("%s %.2f (Base: %.2f, Qualified: %.2f)"),
+				*PaddedAttributeName,
+				FinalValue,
+				BaseValue,
+				QualifiedValue);
 
 			if (Info.Canvas)
 			{
-				Info.Canvas->SetDrawColor(FColor::White);
+				if (Colorswitch)
+				{
+					Info.Canvas->SetDrawColor(FColor::White);
+				}
+				else
+				{
+					Info.Canvas->SetDrawColor(FColor::Emerald);
+				}
+				Colorswitch = !Colorswitch;
 			}
 
 			DebugLine(Info, AttributeString, 4.f, 0.f);
-
-			DrawAttributes.Add(Attribute);
-
-			for (const auto& CurMapElement : ModMap)
-			{
-				const EGameplayModEvaluationChannel Channel = CurMapElement.Key;
-				const TArray<FAggregatorMod>* ModArrays = CurMapElement.Value;
-
-				const FString ChannelNameString =
-					UAbilitySystemGlobals::Get().GetGameplayModEvaluationChannelAlias(Channel).ToString();
-				for (int32 ModOpIdx = 0; ModOpIdx < EGameplayModOp::Max; ++ModOpIdx)
-				{
-					const TArray<FAggregatorMod>& CurModArray = ModArrays[ModOpIdx];
-					for (const FAggregatorMod& Mod : CurModArray)
-					{
-						bool IsActivelyModifyingAttribute = Mod.Qualifies();
-						if (Info.Canvas)
-						{
-							Info.Canvas->SetDrawColor(
-								IsActivelyModifyingAttribute ? FColor::Yellow : FColor(128, 128, 128));
-						}
-
-						FActiveGameplayEffect* ActiveGE =
-							AbilitySystem->ActiveGameplayEffects.GetActiveGameplayEffect(Mod.ActiveHandle);
-						FString SrcName = ActiveGE ? ActiveGE->Spec.Def->GetName() : FString(TEXT(""));
-
-						if (IsActivelyModifyingAttribute == false)
-						{
-							if (Mod.SourceTagReqs)
-							{
-								SrcName += FString::Printf(TEXT(" SourceTags: [%s] "), *Mod.SourceTagReqs->ToString());
-							}
-							if (Mod.TargetTagReqs)
-							{
-								SrcName += FString::Printf(TEXT("TargetTags: [%s]"), *Mod.TargetTagReqs->ToString());
-							}
-						}
-
-						DebugLine(
-							Info,
-							FString::Printf(
-								TEXT("   %s %s\t %.2f - %s"),
-								*ChannelNameString,
-								*EGameplayModOpToString(ModOpIdx),
-								Mod.EvaluatedMagnitude,
-								*SrcName),
-							7.f,
-							0.f);
-						Info.NewColumnYPadding = FMath::Max<float>(Info.NewColumnYPadding, Info.YPos + Info.YL);
-					}
-				}
-			}
-
-			AccumulateScreenPos(Info);
 		}
-
+		
 		if (Info.Canvas)
 		{
 			Info.Canvas->SetDrawColor(FColor::White);
 		}
-		for (UAttributeSet* Set : AbilitySystem->GetSpawnedAttributes())
-		{
-			if (!Set)
-			{
-				continue;
-			}
-
-			for (FProperty* Property : TFieldRange<FProperty>(Set->GetClass()))
-			{
-				auto NumericProperty = CastField<FNumericProperty>(Property);
-
-				// to prevent crashes with AttributeSet properties that are not actually attributes
-				if (NumericProperty != nullptr && !NumericProperty->IsFloatingPoint())
-				{
-					continue;
-				}
-
-				FGameplayAttribute Attribute(Property);
-				if (Attribute.IsValid() == false)
-					continue;
-
-				float Value = AbilitySystem->GetNumericAttribute(Attribute);
-				FString PaddedAttributeName = Attribute.GetName();
-				while (PaddedAttributeName.Len() < 30)
-					PaddedAttributeName += " ";
-
-				DebugLine(Info, FString::Printf(TEXT("%s %.2f"), *PaddedAttributeName, Value), 4.f, 0.f);
-			}
-		}
+		
 		AccumulateScreenPos(Info);
 
 		NewColumnForCategory_Optional(Info);
@@ -736,7 +703,7 @@ void FGameplayDebuggerCategory_OUUAbilities::GetAttributeAggregatorSnapshot(
 
 	// We pick target, because we pretend that we build this capture for an effect that modifies the attributes on this
 	// ASC.
-	constexpr EGameplayEffectAttributeCaptureSource CaptureSource = EGameplayEffectAttributeCaptureSource::Target;
+	constexpr EGameplayEffectAttributeCaptureSource CaptureSource = EGameplayEffectAttributeCaptureSource::Source;
 	// We pick snapshot, because we do not want any future updates of the values, just a single snapshot.
 	constexpr bool bSnapshot = true;
 
