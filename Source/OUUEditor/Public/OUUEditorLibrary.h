@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 
+#include "Components/ActorComponent.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "OUUEditorLibrary.generated.h"
