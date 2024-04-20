@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 
+#include "Components/ActorComponent.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "OUUEditorLibrary.generated.h"
@@ -48,4 +49,18 @@ public:
 	/** Get the GUID for the currently selected blueprint node. Only works if a single node is selected in Editor. */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Editor")
 	static FGuid GetCurrentlySelectedBlueprintNodeGuid();
+
+	/** Add a component to an actor in the edited level WITHOUT registering it a construction script added. */
+	UFUNCTION(
+		BlueprintCallable,
+		Category = "Open Unreal Utilities|Editor",
+		meta = (DeterminesOutputType = "ComponentClass"))
+	static UActorComponent* CreateInstanceComponent(AActor* Actor, TSubclassOf<UActorComponent> ComponentClass);
+
+	/** Destroy an instance component of an actor in the edited level. */
+	UFUNCTION(
+		BlueprintCallable,
+		Category = "Open Unreal Utilities|Editor",
+		meta = (DeterminesOutputType = "ComponentClass"))
+	static void DestroyInstanceComponent(UActorComponent* Component);
 };
