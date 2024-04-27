@@ -56,7 +56,7 @@ protected:
 
 	float NumColumns = 4;
 
-	void DrawBackground(
+	static void DrawBackground(
 		FGameplayDebuggerCanvasContext& CanvasContext,
 		const FVector2D& BackgroundLocation,
 		const FVector2D& BackgroundSize);
@@ -71,7 +71,7 @@ protected:
 
 	static void GetAttributeAggregatorSnapshot(
 		UOUUAbilitySystemComponent* AbilitySystem,
-		FGameplayAttribute& Attribute,
+		const FGameplayAttribute& Attribute,
 		FAggregator SnapshotAggregator);
 	void DrawTitle(FAbilitySystemComponentDebugInfo& Info, const FString& DebugTitle) const;
 	void DrawDebugHeader(FAbilitySystemComponentDebugInfo& Info, const UOUUAbilitySystemComponent* AbilitySystem) const;

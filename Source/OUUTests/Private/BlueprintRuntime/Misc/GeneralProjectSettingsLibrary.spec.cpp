@@ -15,19 +15,19 @@ END_DEFINE_SPEC(FGeneralProjectSettingsLibrarySpec)
 void FGeneralProjectSettingsLibrarySpec::Define()
 {
 	It("should return a valid GUID as project ID", [this]() {
-		FGuid ProjectId = UGeneralProjectSettingsLibrary::GetProjectID();
+		const FGuid ProjectId = UGeneralProjectSettingsLibrary::GetProjectID();
 		SPEC_TEST_TRUE(ProjectId.IsValid());
 	});
 
 	It("should return a non-empty string as project version", [this]() {
-		FString ProjectVersion = UGeneralProjectSettingsLibrary::GetProjectVersion();
+		const FString ProjectVersion = UGeneralProjectSettingsLibrary::GetProjectVersion();
 		SPEC_TEST_TRUE(ProjectVersion.Len() > 0);
 	});
 
 	It("should return the same project version that is set in the ini", [this]() {
-		FString ProjectVersionFromLibrary = UGeneralProjectSettingsLibrary::GetProjectVersion();
+		const FString ProjectVersionFromLibrary = UGeneralProjectSettingsLibrary::GetProjectVersion();
 		FString ProjectVersionFromIni;
-		bool bValueWasFoundInIni = GConfig->GetString(
+		const bool bValueWasFoundInIni = GConfig->GetString(
 			TEXT("/Script/EngineSettings.GeneralProjectSettings"),
 			TEXT("ProjectVersion"),
 			ProjectVersionFromIni,

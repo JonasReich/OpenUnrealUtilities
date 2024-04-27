@@ -5,7 +5,6 @@
 #include "ClassViewerFilter.h"
 #include "ClassViewerModule.h"
 #include "Kismet2/SClassPickerDialog.h"
-#include "Modules/ModuleManager.h"
 
 class FAssetClassParentFilter : public IClassViewerFilter
 {
@@ -38,9 +37,9 @@ public:
 
 namespace OUU::Editor
 {
-	UClass* OpenSimpleClassPickerDialog(UClass* ParentClass, EClassFlags DisallowedClassFlags, const FText TitleText)
+	UClass* OpenSimpleClassPickerDialog(UClass* ParentClass, EClassFlags DisallowedClassFlags, const FText& TitleText)
 	{
-		TSharedRef<FAssetClassParentFilter> Filter = MakeShareable(new FAssetClassParentFilter);
+		const TSharedRef<FAssetClassParentFilter> Filter = MakeShareable(new FAssetClassParentFilter);
 		Filter->DisallowedClassFlags = DisallowedClassFlags;
 		Filter->AllowedChildrenOfClasses = {ParentClass};
 

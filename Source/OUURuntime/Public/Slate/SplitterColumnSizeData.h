@@ -17,13 +17,13 @@ struct OUURUNTIME_API FSplitterColumnSizeData : public TSharedFromThis<FSplitter
 	SSplitter::FOnSlotResized OnWidthChanged;
 
 	TSharedRef<SWidget> MakeSimpleSplitter(
-		TSharedRef<SWidget> LeftWidget,
-		TSharedRef<SWidget> RightWidget,
+		const TSharedRef<SWidget>& LeftWidget,
+		const TSharedRef<SWidget>& RightWidget,
 		const EOrientation Orientation = EOrientation::Orient_Horizontal) const;
 	TSharedRef<SWidget> MakeSimpleDetailsSplitter(
 		const FText& Label,
 		const FText& Tooltip,
-		TSharedRef<SWidget> RightWidget,
+		const TSharedRef<SWidget>& RightWidget,
 		const EOrientation Orientation = EOrientation::Orient_Horizontal) const;
 
 private:

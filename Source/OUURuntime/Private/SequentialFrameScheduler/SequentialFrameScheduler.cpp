@@ -25,7 +25,7 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 #endif
 	for (auto& KeyValuePair : TaskHandlesToTaskInfos)
 	{
-		auto Task = KeyValuePair.Value.ToSharedRef();
+		const auto Task = KeyValuePair.Value.ToSharedRef();
 		Task->Tick(Now);
 
 #if WITH_GAMEPLAY_DEBUGGER
@@ -73,7 +73,7 @@ void FSequentialFrameScheduler::Tick(float DeltaTime)
 			break;
 
 		auto& TaskHandle = TaskQueue[QueueIndex];
-		TSharedRef<FSequentialFrameTask> CurrentTask = TaskHandlesToTaskInfos[TaskHandle].ToSharedRef();
+		const TSharedRef<FSequentialFrameTask> CurrentTask = TaskHandlesToTaskInfos[TaskHandle].ToSharedRef();
 
 		// Skip stale tasks
 		if (CurrentTask->Delegate.IsBound() == false)
@@ -185,7 +185,7 @@ FSequentialFrameTask::FTaskHandle FSequentialFrameScheduler::InternalAddTask(
 	TasksPendingForAdd.Add(NewHandle);
 	TasksPendingForRemoval.Remove(NewHandle);
 
-	TSharedRef<FSequentialFrameTask> Task = MakeShared<FSequentialFrameTask>();
+	const TSharedRef<FSequentialFrameTask> Task = MakeShared<FSequentialFrameTask>();
 	Task->Delegate = MoveTemp(Delegate);
 	Task->Handle = NewHandle;
 	Task->Period = InPeriod;
@@ -201,7 +201,7 @@ void FSequentialFrameScheduler::AddPendingTasksToQueue()
 	{
 		TaskQueue.Add(TaskHandle);
 		// Pretend the task needs immediate invocation when initially adding it to the queue.
-		// This mainly ensures that tasks being added after minutes/hours of play don't get unproportionally large
+		// This mainly ensures that tasks being added after minutes/hours of play don't get disproportionally large
 		// overtime and tasks added as bTickAsOftenAsPossible=false at least get the initial tick as soon as possible.
 		GetTask(TaskHandle).LastInvocationTime = -1.0f * GetTask(TaskHandle).Period;
 	}

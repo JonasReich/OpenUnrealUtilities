@@ -41,14 +41,14 @@ namespace OUU::BlueprintRuntime::Private::BlueprintObjectFlags
 
 	EObjectFlags ConvertToNativeFlag(EOUUBlueprintObjectFlags Flag)
 	{
-		if (auto* FlagPtr = BlueprintToNativeFlags.Find(Flag))
+		if (const auto* FlagPtr = BlueprintToNativeFlags.Find(Flag))
 			return *FlagPtr;
 		return RF_NoFlags;
 	}
 
 	EOUUBlueprintObjectFlags ToBlueprintFlag(EObjectFlags Flag)
 	{
-		if (auto* FlagPtr = NativeToBlueprintFlags.Find(Flag))
+		if (const auto* FlagPtr = NativeToBlueprintFlags.Find(Flag))
 			return *FlagPtr;
 		return EOUUBlueprintObjectFlags::NoFlags;
 	}
@@ -77,7 +77,7 @@ namespace OUU::BlueprintRuntime::Private::BlueprintObjectFlags
 	}
 } // namespace OUU::BlueprintRuntime::Private::BlueprintObjectFlags
 
-int64 UOUUBlueprintObjectFlagsLibrary::CreateObjectFlagsMask(TSet<EOUUBlueprintObjectFlags> Flags)
+int64 UOUUBlueprintObjectFlagsLibrary::CreateObjectFlagsMask(const TSet<EOUUBlueprintObjectFlags>& Flags)
 {
 	return static_cast<int64>(OUU::BlueprintRuntime::Private::BlueprintObjectFlags::ToNativeFlags(Flags));
 }
@@ -99,14 +99,16 @@ int64 UOUUBlueprintObjectFlagsLibrary::GetObjectFlagsMask(const UObject* Object)
 	return IsValid(Object) ? static_cast<int64>(Object->GetFlags()) : 0;
 }
 
-bool UOUUBlueprintObjectFlagsLibrary::ObjectHasAnyFlags(const UObject* Object, TSet<EOUUBlueprintObjectFlags> Flags)
+bool UOUUBlueprintObjectFlagsLibrary::ObjectHasAnyFlags(const UObject* Object,
+	const TSet<EOUUBlueprintObjectFlags>& Flags)
 {
 	return IsValid(Object)
 		? Object->HasAnyFlags(OUU::BlueprintRuntime::Private::BlueprintObjectFlags::ToNativeFlags(Flags))
 		: false;
 }
 
-bool UOUUBlueprintObjectFlagsLibrary::ObjectHasAllFlags(const UObject* Object, TSet<EOUUBlueprintObjectFlags> Flags)
+bool UOUUBlueprintObjectFlagsLibrary::ObjectHasAllFlags(const UObject* Object,
+	const TSet<EOUUBlueprintObjectFlags>& Flags)
 {
 	return IsValid(Object)
 		? Object->HasAllFlags(OUU::BlueprintRuntime::Private::BlueprintObjectFlags::ToNativeFlags(Flags))

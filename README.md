@@ -82,7 +82,7 @@ The **bold** features are the big ones that I most reccommend you to try the plu
 
 Plugin versions are flagged with tags. Check the [GitHub Releases](https://github.com/JonasReich/OpenUnrealUtilities/releases) for a brief summary of changes between versions. [master](https://github.com/JonasReich/OpenUnrealUtilities/tree/master) always points to the latest release.
 
-> Latest plugin release: [v1.2.1](https://github.com/JonasReich/OpenUnrealUtilities/tree/v1.2.1) on [master](https://github.com/JonasReich/OpenUnrealUtilities/tree/master)
+> Latest plugin release: [v1.3.0](https://github.com/JonasReich/OpenUnrealUtilities/tree/v1.3.0) on [master](https://github.com/JonasReich/OpenUnrealUtilities/tree/master)
 
 If you want stable versions, you should stick to the labeled release commits on the master branch.
 
@@ -94,6 +94,7 @@ Multiple version branches may receive updates at the same time, e.g. even after 
 
 > **active development:**
 > **[ue5.2](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue5.2)**
+> **[ue5.3](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue5.3)**
 >
 > old versions (not supported anymore):
 > [ue4.25](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue4.25),
@@ -102,7 +103,7 @@ Multiple version branches may receive updates at the same time, e.g. even after 
 > [ue5.0](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue5.0),
 > [ue5.1](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue5.1)
 
-Features should never be merged back from higher engine versions to lower versions to guarantee asset compatibility. I'm generally trying to adopt a fast-forward merge philosophy, but as soon as version branches diverge, I have to resort to regular merges.
+I'm generally avoiding to merge back from higher engine version branches to lower engine version branches to guarantee asset compatibility.
 
 ### Deprecation
 
@@ -112,20 +113,6 @@ Deprecations are phased out alongside with new minor version upgrades of Unreal 
 For example, changes introduced for UE5 that deprecate old types were marked with ``UE_DEPRECATED(5.0, "...")``.
 These warnings may be removed as soon as I upgrade the plugin to support UE5.1, so at that point any code referencing the
 deprecated symbols or headers will no longer compile.  
-
-### Increasing Plugin Version
-
-Follow the following steps to promote changes from develop to master:
-
-1. Increase version number to the next desired version in the following three files:
-	- [README.md](./README.md) _(this file)_ - Plugin Version section
-	- [OpenUnrealUtilities.uplugin](./OpenUnrealUtilities.uplugin) VersionName field
-	- [.version](./.version)
-2. Summarize the most important changes included with the new version in the history summary section above
-3. Submit only these changes (no functional code changes included) with message "Increased version to major.minor.patch", e.g. "Increased version to 0.6.0"
-4. Tag the submit with annotated tag that matches the version number: Tag and annotation message should match exactly, e.g. both could be "v0.6.0"
-5. Fast-forward merge develop into master
-6. Push develop, master _and(!)_ tags
 
 ## Automated Testing
 

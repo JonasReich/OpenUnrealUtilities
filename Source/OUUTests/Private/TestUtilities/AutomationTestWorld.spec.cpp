@@ -28,7 +28,7 @@ void FAutomationTestWorldSpec::Define()
 		Describe("GetWorldContext", [this]() {
 			It("should point to the same world as the World pointer member", [this]() {
 				TestWorld->CreateWorld(SPEC_BASE_NAME ".GetWorldContext");
-				FWorldContext& WorldContext = TestWorld->GetWorldContext();
+				const FWorldContext& WorldContext = TestWorld->GetWorldContext();
 				TestEqual("World", TestWorld->World, WorldContext.World());
 			});
 		});
@@ -50,11 +50,11 @@ void FAutomationTestWorldSpec::Define()
 			});
 		});
 
-		Describe("InitiailizeGame", [this]() {
+		Describe("InitializeGame", [this]() {
 			Describe("when called after world creation", [this]() {
 				BeforeEach([this]() {
 					TestWorld->CreateWorld(SPEC_BASE_NAME ".InitializeGame");
-					bool bInitializeResult = TestWorld->InitializeGame();
+					const bool bInitializeResult = TestWorld->InitializeGame();
 					TestTrue("initialization successful", bInitializeResult);
 				});
 
@@ -72,7 +72,7 @@ void FAutomationTestWorldSpec::Define()
 			It("should fail without crash and throw an error if the world was not created prior", [this]() {
 				TSharedPtr<FOUUAutomationTestWorld> LocalTempWorldContext =
 					MakeShared<FOUUAutomationTestWorld>("FAutomationTestWorldSpec_NestedSpec");
-				AddExpectedError("Could not InitiailizeGame invalid world!", EAutomationExpectedErrorFlags::Exact, 1);
+				AddExpectedError("Could not InitializeGame invalid world!", EAutomationExpectedErrorFlags::Exact, 1);
 				LocalTempWorldContext->InitializeGame();
 				LocalTempWorldContext->DestroyWorld();
 				LocalTempWorldContext.Reset();
@@ -88,7 +88,7 @@ void FAutomationTestWorldSpec::Define()
 		});
 
 		It("should reset the pointers to game framework objects that were created with InitializeGame()", [this]() {
-			TestWorld->CreateWorld(SPEC_BASE_NAME "DestoryWorld.02");
+			TestWorld->CreateWorld(SPEC_BASE_NAME "DestroyWorld.02");
 			TestWorld->InitializeGame();
 			TestWorld->DestroyWorld();
 			TestNull("GameInstance", TestWorld->GameInstance);

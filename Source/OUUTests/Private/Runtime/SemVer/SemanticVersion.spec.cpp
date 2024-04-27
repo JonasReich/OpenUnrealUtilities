@@ -7,6 +7,8 @@
 	#include "Runtime/SemVer/SemVerTests.h"
 	#include "SemVer/SemanticVersion.h"
 
+// ReSharper disable StringLiteralTypo
+
 BEGIN_DEFINE_SPEC(FSemanticVersionSpec, "OpenUnrealUtilities.Runtime.SemVer.SemanticVersion", DEFAULT_OUU_TEST_FLAGS)
 END_DEFINE_SPEC(FSemanticVersionSpec)
 
@@ -14,47 +16,47 @@ void FSemanticVersionSpec::Define()
 {
 	Describe("Constructing a SemVer", [this]() {
 		It("should return 0-1-0 when default initializing", [this]() {
-			FSemanticVersion SemVer;
+			const FSemanticVersion SemVer;
 			SPEC_TEST_EQUAL(SemVer.ToString(), "0.1.0");
 		});
 
 		Describe("from three integers", [this]() {
 			It("should initialize the major, minor and patch version", [this]() {
-				FSemanticVersion SemVer(42, 69, 404);
+				const FSemanticVersion SemVer(42, 69, 404);
 				SPEC_TEST_EQUAL(SemVer.ToString(), "42.69.404");
 			});
 
 			It("should throw an error when there is a negative number in the arguments and return 0-1-0", [this]() {
 				AddExpectedError("No negative numbers allowed");
-				FSemanticVersion SemVer(42, -1, 404);
+				const FSemanticVersion SemVer(42, -1, 404);
 				SPEC_TEST_EQUAL(SemVer.ToString(), "0.1.0");
 			});
 
 			It("should throw an error when all numbers are zero and return 0-1-0", [this]() {
 				AddExpectedError("must not all be zero");
-				FSemanticVersion SemVer(0, 0, 0);
+				const FSemanticVersion SemVer(0, 0, 0);
 				SPEC_TEST_EQUAL(SemVer.ToString(), "0.1.0");
 			});
 		});
 
 		It("should add a pre-release suffix if it's specified", [this]() {
-			FSemanticVersion SemVer(42, 69, 404, {"alpha"});
+			const FSemanticVersion SemVer(42, 69, 404, {"alpha"});
 			SPEC_TEST_EQUAL(SemVer.ToString(), "42.69.404-alpha");
 		});
 
 		It("should add build metadata if it's specified", [this]() {
-			FSemanticVersion SemVer(42, 69, 404, {"alpha"}, {"build1234.6789"});
+			const FSemanticVersion SemVer(42, 69, 404, {"alpha"}, {"build1234.6789"});
 			SPEC_TEST_EQUAL(SemVer.ToString(), "42.69.404-alpha+build1234.6789");
 		});
 
 		It("should initialize the SemVer from a valid SemVer string", [this]() {
-			FString SourceString = "42.69.404-alpha+build1234.6789";
-			FSemanticVersion SemVer(SourceString);
+			const FString SourceString = "42.69.404-alpha+build1234.6789";
+			const FSemanticVersion SemVer(SourceString);
 			SPEC_TEST_EQUAL(SemVer.ToString(), SourceString);
 		});
 
 		It("should initialize all members correctly so they are available via Get_Version getters", [this]() {
-			FSemanticVersion SemVer(42, 69, 404);
+			const FSemanticVersion SemVer(42, 69, 404);
 			SPEC_TEST_EQUAL(SemVer.GetMajorVersion(), 42);
 			SPEC_TEST_EQUAL(SemVer.GetMinorVersion(), 69);
 			SPEC_TEST_EQUAL(SemVer.GetPatchVersion(), 404);
@@ -118,21 +120,21 @@ void FSemanticVersionSpec::Define()
 	Describe("TryIncrementPrereleaseVersion", [this]() {
 		It("should increase the pre-release version if it's a simple number", [this]() {
 			FSemanticVersion SemVer(1, 0, 0, {"4"});
-			bool bSuccess = SemVer.TryIncrementPreReleaseVersion();
+			const bool bSuccess = SemVer.TryIncrementPreReleaseVersion();
 			SPEC_TEST_TRUE(bSuccess);
 			SPEC_TEST_EQUAL(SemVer, (FSemanticVersion{1, 0, 0, {"5"}}));
 		});
 
 		It("should fail to increase the pre-release version if it's a string", [this]() {
 			FSemanticVersion SemVer(1, 0, 0, {"alpha"});
-			bool bSuccess = SemVer.TryIncrementPreReleaseVersion();
+			const bool bSuccess = SemVer.TryIncrementPreReleaseVersion();
 			SPEC_TEST_FALSE(bSuccess);
 			SPEC_TEST_EQUAL(SemVer, (FSemanticVersion{1, 0, 0, {"alpha"}}));
 		});
 
 		It("should increase the pre-release version if the last identifier in it is a number", [this]() {
 			FSemanticVersion SemVer(1, 0, 0, {"alpha.2"});
-			bool bSuccess = SemVer.TryIncrementPreReleaseVersion();
+			const bool bSuccess = SemVer.TryIncrementPreReleaseVersion();
 			SPEC_TEST_TRUE(bSuccess);
 			SPEC_TEST_EQUAL(SemVer, (FSemanticVersion{1, 0, 0, {"alpha.3"}}));
 		});
@@ -141,7 +143,7 @@ void FSemanticVersionSpec::Define()
 		   "identifier is a string",
 		   [this]() {
 			   FSemanticVersion SemVer(1, 0, 0, {"alpha.2.x"});
-			   bool bSuccess = SemVer.TryIncrementPreReleaseVersion();
+			   const bool bSuccess = SemVer.TryIncrementPreReleaseVersion();
 			   SPEC_TEST_FALSE(bSuccess);
 			   SPEC_TEST_EQUAL(SemVer, (FSemanticVersion{1, 0, 0, {"alpha.2.x"}}));
 		   });
@@ -154,8 +156,8 @@ void FSemanticVersionSpec::Define()
 				   TEXT("should return the semver string that was used to construct it (%s)"),
 				   *SemVerString)),
 			   [this, SemVerString]() {
-				   FSemanticVersion SemVer(SemVerString);
-				   FString ResultString = SemVer.ToString();
+				   const FSemanticVersion SemVer(SemVerString);
+				   const FString ResultString = SemVer.ToString();
 				   SPEC_TEST_EQUAL(ResultString, SemVerString);
 			   });
 		}
@@ -171,8 +173,8 @@ void FSemanticVersionSpec::Define()
 						It(EscapeTestName(FString::Printf(TEXT("%s"), *SemVerString)),
 						   [this, Strictness, SemVerString]() {
 							   FSemanticVersion SemVer;
-							   bool bResult = SemVer.TryParseString(SemVerString, Strictness);
-							   FString ResultString = SemVer.ToString();
+							   const bool bResult = SemVer.TryParseString(SemVerString, Strictness);
+							   const FString ResultString = SemVer.ToString();
 							   SPEC_TEST_TRUE(bResult);
 							   SPEC_TEST_EQUAL(ResultString, SemVerString);
 						   });
@@ -182,12 +184,12 @@ void FSemanticVersionSpec::Define()
 		}
 
 		Describe("with Strictness level Strict", [this]() {
-			Describe("should fail on spec incompliant semver", [this]() {
+			Describe("should fail on spec non-compliant semver", [this]() {
 				for (auto SemVerString : InvalidSemVers)
 				{
 					It(EscapeTestName(FString::Printf(TEXT("%s"), *SemVerString)), [this, SemVerString]() {
 						FSemanticVersion SemVer;
-						bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Strict);
+						const bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Strict);
 						FString ResultString = SemVer.ToString();
 						SPEC_TEST_FALSE(bResult);
 					});
@@ -197,43 +199,43 @@ void FSemanticVersionSpec::Define()
 
 		Describe("with Strictness level Regular", [this]() {
 			It("should succeed with semvers that have leading zeroes", [this]() {
-				FString SemVerString = "01.006.010-01.0build.02";
+				const FString SemVerString = "01.006.010-01.0build.02";
 				FSemanticVersion SemVer;
-				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Regular);
-				FString ResultString = SemVer.ToString();
+				const bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Regular);
+				const FString ResultString = SemVer.ToString();
 				SPEC_TEST_TRUE(bResult);
 				SPEC_TEST_EQUAL(ResultString, "1.6.10-1.0build.2");
 			});
 
 			It("should succeed with semvers that have special characters in the build metadata", [this]() {
-				FString SemVerString = "1.0.5+build@meta#data";
+				const FString SemVerString = "1.0.5+build@meta#data";
 				FSemanticVersion SemVer;
-				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Regular);
-				FString ResultString = SemVer.ToString();
+				const bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Regular);
+				const FString ResultString = SemVer.ToString();
 				SPEC_TEST_TRUE(bResult);
 				SPEC_TEST_EQUAL(ResultString, "1.0.5+build@meta#data");
 			});
 
 			It("should fail with semvers that have less than three digits", [this]() {
-				FString SemVerString = "4.0";
+				const FString SemVerString = "4.0";
 				FSemanticVersion SemVer;
-				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Regular);
+				const bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Regular);
 				FString ResultString = SemVer.ToString();
 				SPEC_TEST_FALSE(bResult);
 			});
 
 			It("should fail with semvers that have more than three digits", [this]() {
-				FString SemVerString = "1.2.3.4";
+				const FString SemVerString = "1.2.3.4";
 				FSemanticVersion SemVer;
-				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Regular);
+				const bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Regular);
 				FString ResultString = SemVer.ToString();
 				SPEC_TEST_FALSE(bResult);
 			});
 
 			It("should fail with semvers that contain whitespace", [this]() {
-				FString SemVerString = "1.2.3.4 ";
+				const FString SemVerString = "1.2.3.4 ";
 				FSemanticVersion SemVer;
-				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Regular);
+				const bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Regular);
 				FString ResultString = SemVer.ToString();
 				SPEC_TEST_FALSE(bResult);
 			});
@@ -241,73 +243,73 @@ void FSemanticVersionSpec::Define()
 
 		Describe("with Strictness level Liberal", [this]() {
 			It("should succeed with semvers that have leading zeroes", [this]() {
-				FString SemVerString = "01.006.010-01.0build.02";
+				const FString SemVerString = "01.006.010-01.0build.02";
 				FSemanticVersion SemVer;
-				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
-				FString ResultString = SemVer.ToString();
+				const bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
+				const FString ResultString = SemVer.ToString();
 				SPEC_TEST_TRUE(bResult);
 				SPEC_TEST_EQUAL(ResultString, "1.6.10-1.0build.2");
 			});
 
 			It("should succeed with semvers that have special characters in the build metadata", [this]() {
-				FString SemVerString = "1.0.5+build@meta#data";
+				const FString SemVerString = "1.0.5+build@meta#data";
 				FSemanticVersion SemVer;
-				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
-				FString ResultString = SemVer.ToString();
+				const bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
+				const FString ResultString = SemVer.ToString();
 				SPEC_TEST_TRUE(bResult);
 				SPEC_TEST_EQUAL(ResultString, "1.0.5+build@meta#data");
 			});
 
 			It("should succeed with semvers that have a single digits", [this]() {
-				FString SemVerString = "42";
+				const FString SemVerString = "42";
 				FSemanticVersion SemVer;
-				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
-				FString ResultString = SemVer.ToString();
+				const bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
+				const FString ResultString = SemVer.ToString();
 				SPEC_TEST_TRUE(bResult);
 				SPEC_TEST_EQUAL(ResultString, "42.0.0");
 			});
 
 			It("should succeed with semvers that have two digits", [this]() {
-				FString SemVerString = "4.3";
+				const FString SemVerString = "4.3";
 				FSemanticVersion SemVer;
-				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
-				FString ResultString = SemVer.ToString();
+				const bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
+				const FString ResultString = SemVer.ToString();
 				SPEC_TEST_TRUE(bResult);
 				SPEC_TEST_EQUAL(ResultString, "4.3.0");
 			});
 
 			It("should succeed with semvers that have more than three digits", [this]() {
-				FString SemVerString = "1.2.3.4";
+				const FString SemVerString = "1.2.3.4";
 				FSemanticVersion SemVer;
-				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
-				FString ResultString = SemVer.ToString();
+				const bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
+				const FString ResultString = SemVer.ToString();
 				SPEC_TEST_TRUE(bResult);
 				SPEC_TEST_EQUAL(ResultString, "1.2.3-4");
 			});
 
 			It("should succeed with semvers that contain whitespace", [this]() {
-				FString SemVerString = "1.2.3 -build-metadata";
+				const FString SemVerString = "1.2.3 -build-metadata";
 				FSemanticVersion SemVer;
-				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
-				FString ResultString = SemVer.ToString();
+				const bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
+				const FString ResultString = SemVer.ToString();
 				SPEC_TEST_TRUE(bResult);
 				SPEC_TEST_EQUAL(ResultString, "1.2.3");
 			});
 
 			It("should succeed with semvers that have arbitrary prefixes", [this]() {
-				FString SemVerString = "Version#=1.2.3-alpha+build";
+				const FString SemVerString = "Version#=1.2.3-alpha+build";
 				FSemanticVersion SemVer;
-				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
-				FString ResultString = SemVer.ToString();
+				const bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
+				const FString ResultString = SemVer.ToString();
 				SPEC_TEST_TRUE(bResult);
 				SPEC_TEST_EQUAL(ResultString, "1.2.3-alpha+build");
 			});
 
 			It("should succeed with semvers that have arbitrary prefixes or suffixes", [this]() {
-				FString SemVerString = "The version 1.2.3-alpha+build is the version we need";
+				const FString SemVerString = "The version 1.2.3-alpha+build is the version we need";
 				FSemanticVersion SemVer;
-				bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
-				FString ResultString = SemVer.ToString();
+				const bool bResult = SemVer.TryParseString(SemVerString, ESemVerParsingStrictness::Liberal);
+				const FString ResultString = SemVer.ToString();
 				SPEC_TEST_TRUE(bResult);
 				SPEC_TEST_EQUAL(ResultString, "1.2.3-alpha+build");
 			});
@@ -315,29 +317,29 @@ void FSemanticVersionSpec::Define()
 
 		Describe("EqualsPrecedence", [this]() {
 			It("should return false for semvers with different build numbers", [this]() {
-				FSemanticVersion A("1.2.3");
-				FSemanticVersion B("2.3.4");
+				const FSemanticVersion A("1.2.3");
+				const FSemanticVersion B("2.3.4");
 				SPEC_TEST_FALSE(A.EqualsPrecedence(B));
 				SPEC_TEST_FALSE(B.EqualsPrecedence(A));
 			});
 
 			It("should return false for semvers with different pre-release identifier", [this]() {
-				FSemanticVersion A("1.2.3-alpha");
-				FSemanticVersion B("1.2.3-beta");
+				const FSemanticVersion A("1.2.3-alpha");
+				const FSemanticVersion B("1.2.3-beta");
 				SPEC_TEST_FALSE(A.EqualsPrecedence(B));
 				SPEC_TEST_FALSE(B.EqualsPrecedence(A));
 			});
 
 			It("should return true for matching semvers", [this]() {
-				FSemanticVersion A("1.2.3-alpha+build2");
-				FSemanticVersion B("1.2.3-alpha+build2");
+				const FSemanticVersion A("1.2.3-alpha+build2");
+				const FSemanticVersion B("1.2.3-alpha+build2");
 				SPEC_TEST_TRUE(A.EqualsPrecedence(B));
 				SPEC_TEST_TRUE(B.EqualsPrecedence(A));
 			});
 
 			It("should ignore differences in build number", [this]() {
-				FSemanticVersion A("1.2.3-alpha+build2");
-				FSemanticVersion B("1.2.3-alpha+build3");
+				const FSemanticVersion A("1.2.3-alpha+build2");
+				const FSemanticVersion B("1.2.3-alpha+build3");
 				SPEC_TEST_TRUE(A.EqualsPrecedence(B));
 				SPEC_TEST_TRUE(B.EqualsPrecedence(A));
 			});
@@ -347,29 +349,29 @@ void FSemanticVersionSpec::Define()
 	Describe("comparison operators", [this]() {
 		Describe("==", [this]() {
 			It("should return false for semvers with different build numbers", [this]() {
-				FSemanticVersion A("1.2.3");
-				FSemanticVersion B("2.3.4");
+				const FSemanticVersion A("1.2.3");
+				const FSemanticVersion B("2.3.4");
 				SPEC_TEST_FALSE(A == B);
 				SPEC_TEST_FALSE(B == A);
 			});
 
 			It("should return false for semvers with different pre-release identifier", [this]() {
-				FSemanticVersion A("1.2.3-alpha");
-				FSemanticVersion B("1.2.3-beta");
+				const FSemanticVersion A("1.2.3-alpha");
+				const FSemanticVersion B("1.2.3-beta");
 				SPEC_TEST_FALSE(A == B);
 				SPEC_TEST_FALSE(B == A);
 			});
 
 			It("should return true for matching semvers", [this]() {
-				FSemanticVersion A("1.2.3-alpha+build2");
-				FSemanticVersion B("1.2.3-alpha+build2");
+				const FSemanticVersion A("1.2.3-alpha+build2");
+				const FSemanticVersion B("1.2.3-alpha+build2");
 				SPEC_TEST_TRUE(A == B);
 				SPEC_TEST_TRUE(B == A);
 			});
 
 			It("should NOT ignore differences in build number", [this]() {
-				FSemanticVersion A("1.2.3-alpha+build2");
-				FSemanticVersion B("1.2.3-alpha+build3");
+				const FSemanticVersion A("1.2.3-alpha+build2");
+				const FSemanticVersion B("1.2.3-alpha+build3");
 				SPEC_TEST_FALSE(A == B);
 				SPEC_TEST_FALSE(B == A);
 			});

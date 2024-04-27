@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 
-#include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetTree.h"
 
 class UWidget;

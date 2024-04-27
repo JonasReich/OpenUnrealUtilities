@@ -24,7 +24,7 @@ public:
 	static USkeleton* GetAnimInstanceClassTargetSkeleton(TSubclassOf<UAnimInstance> AnimInstanceClass);
 
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Animation")
-	static USkeleton* GetAnimInstanceTargetSkeleton(UAnimInstance* AnimInstance);
+	static USkeleton* GetAnimInstanceTargetSkeleton(const UAnimInstance* AnimInstance);
 
 	/**
 	 * Remove bones without any skin weights from a skeletal mesh.

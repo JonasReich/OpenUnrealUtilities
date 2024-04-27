@@ -45,7 +45,7 @@ void UOUUWindow::CloseWindow()
 	}
 }
 
-void UOUUWindow::Initialize(UWidget* InRootWidget, FOUUWindowParameters InWindowParameters)
+void UOUUWindow::Initialize(UWidget* InRootWidget, const FOUUWindowParameters& InWindowParameters)
 {
 	UE_CLOG(
 		bIsInitialized,

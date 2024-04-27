@@ -10,8 +10,8 @@ FSemanticVersion::FSemanticVersion(
 	int32 Major,
 	int32 Minor,
 	int32 Patch,
-	FSemVerPreReleaseIdentifier PreRelease /*= {}*/,
-	FSemVerBuildMetadata Metadata /*= {}*/) :
+	const FSemVerPreReleaseIdentifier& PreRelease /*= {}*/,
+	const FSemVerBuildMetadata& Metadata /*= {}*/) :
 	MajorVersion(Major),
 	MinorVersion(Minor),
 	PatchVersion(Patch),

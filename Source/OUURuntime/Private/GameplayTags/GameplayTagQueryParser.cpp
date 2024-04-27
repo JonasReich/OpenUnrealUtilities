@@ -155,49 +155,49 @@ namespace OUU::Runtime::Private::GameplayTagQueryParser
 	/** FQueryExprHelper subclass for ANY() operations */
 	struct FQueryExpr_AnyExpr : FQueryExprHelper
 	{
-		virtual void InitNativeExpressionForTags(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
+		void InitNativeExpressionForTags(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
 		{
 			InNativeExpr->AnyTagsMatch();
 		}
 
-		virtual void InitNativeExpressionForExpressions(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
+		void InitNativeExpressionForExpressions(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
 		{
 			InNativeExpr->AnyExprMatch();
 		}
 
-		virtual FString GetOpString() const override { return OpStrings::Any; }
+		FString GetOpString() const override { return OpStrings::Any; }
 	};
 
 	/** FQueryExprHelper subclass for ALL() operations */
 	struct FQueryExpr_AllExpr : FQueryExprHelper
 	{
-		virtual void InitNativeExpressionForTags(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
+		void InitNativeExpressionForTags(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
 		{
 			InNativeExpr->AllTagsMatch();
 		}
 
-		virtual void InitNativeExpressionForExpressions(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
+		void InitNativeExpressionForExpressions(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
 		{
 			InNativeExpr->AllExprMatch();
 		}
 
-		virtual FString GetOpString() const override { return OpStrings::All; }
+		FString GetOpString() const override { return OpStrings::All; }
 	};
 
 	/** FQueryExprHelper subclass for NONE() operations */
 	struct FQueryExpr_NoExpr : FQueryExprHelper
 	{
-		virtual void InitNativeExpressionForTags(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
+		void InitNativeExpressionForTags(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
 		{
 			InNativeExpr->NoTagsMatch();
 		}
 
-		virtual void InitNativeExpressionForExpressions(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
+		void InitNativeExpressionForExpressions(TSharedRef<FGameplayTagQueryExpression> InNativeExpr) override
 		{
 			InNativeExpr->NoExprMatch();
 		}
 
-		virtual FString GetOpString() const override { return OpStrings::None; }
+		FString GetOpString() const override { return OpStrings::None; }
 	};
 
 	/**
@@ -337,8 +337,6 @@ FGameplayTagQuery FGameplayTagQueryParser::ParseQuery(const FString& SourceStrin
 		auto Result = FGameplayTagQuery::BuildQuery(NativeExpr, SourceString);
 		return Result;
 	}
-	else
-	{
-		return FGameplayTagQuery::EmptyQuery;
-	}
+
+	return FGameplayTagQuery::EmptyQuery;
 }

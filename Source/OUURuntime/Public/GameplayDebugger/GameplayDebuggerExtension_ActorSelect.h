@@ -34,7 +34,7 @@ private:
 	void SelectPlayerPawn_3();
 	void SelectPlayerPawn_4();
 
-	void SelectPlayerPawn_X(int32 X);
+	void SelectPlayerPawn_X(int32 X) const;
 };
 
 #endif

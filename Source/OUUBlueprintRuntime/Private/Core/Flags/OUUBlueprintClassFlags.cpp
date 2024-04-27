@@ -41,14 +41,14 @@ namespace OUU::BlueprintRuntime::Private::BlueprintClassFlags
 
 	EClassFlags ConvertToNativeFlag(EOUUBlueprintClassFlags Flag)
 	{
-		if (auto* FlagPtr = BlueprintToNativeFlags.Find(Flag))
+		if (const auto* FlagPtr = BlueprintToNativeFlags.Find(Flag))
 			return *FlagPtr;
 		return EClassFlags::CLASS_None;
 	}
 
 	EOUUBlueprintClassFlags ToBlueprintFlag(EClassFlags Flag)
 	{
-		if (auto* FlagPtr = NativeToBlueprintFlags.Find(Flag))
+		if (const auto* FlagPtr = NativeToBlueprintFlags.Find(Flag))
 			return *FlagPtr;
 		return EOUUBlueprintClassFlags::None;
 	}
@@ -77,7 +77,7 @@ namespace OUU::BlueprintRuntime::Private::BlueprintClassFlags
 	}
 } // namespace OUU::BlueprintRuntime::Private::BlueprintClassFlags
 
-int64 UOUUBlueprintClassFlagsLibrary::CreateClassFlagsMask(TSet<EOUUBlueprintClassFlags> Flags)
+int64 UOUUBlueprintClassFlagsLibrary::CreateClassFlagsMask(const TSet<EOUUBlueprintClassFlags>& Flags)
 {
 	return static_cast<int64>(OUU::BlueprintRuntime::Private::BlueprintClassFlags::ToNativeFlags(Flags));
 }
@@ -99,14 +99,14 @@ int64 UOUUBlueprintClassFlagsLibrary::GetClassFlagsMask(const UClass* Class)
 	return IsValid(Class) ? Class->GetClassFlags() : 0;
 }
 
-bool UOUUBlueprintClassFlagsLibrary::ClassHasAnyFlags(const UClass* Class, TSet<EOUUBlueprintClassFlags> Flags)
+bool UOUUBlueprintClassFlagsLibrary::ClassHasAnyFlags(const UClass* Class, const TSet<EOUUBlueprintClassFlags>& Flags)
 {
 	return IsValid(Class)
 		? Class->HasAnyClassFlags(OUU::BlueprintRuntime::Private::BlueprintClassFlags::ToNativeFlags(Flags))
 		: false;
 }
 
-bool UOUUBlueprintClassFlagsLibrary::ClassHasAllFlags(const UClass* Class, TSet<EOUUBlueprintClassFlags> Flags)
+bool UOUUBlueprintClassFlagsLibrary::ClassHasAllFlags(const UClass* Class, const TSet<EOUUBlueprintClassFlags>& Flags)
 {
 	return IsValid(Class)
 		? Class->HasAllClassFlags(OUU::BlueprintRuntime::Private::BlueprintClassFlags::ToNativeFlags(Flags))

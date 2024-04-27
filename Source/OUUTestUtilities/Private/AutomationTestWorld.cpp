@@ -4,7 +4,6 @@
 
 #if WITH_AUTOMATION_WORKER
 
-	#include "Misc/EngineVersionComparison.h"
 	#include "Engine/EngineTypes.h"
 	#include "Engine/GameInstance.h"
 	#include "Engine/LocalPlayer.h"
@@ -15,14 +14,9 @@
 	#include "Traits/IteratorTraits.h"
 	#include "GameMapsSettings.h"
 	#include "Engine/GameViewportClient.h"
+	#include "Online/CoreOnline.h"
 
-	#if UE_VERSION_OLDER_THAN(5, 0, 0)
-		#include "UObject/CoreOnline.h"
-	#else
-		#include "Online/CoreOnline.h"
-	#endif
-
-FOUUAutomationTestWorld::FOUUAutomationTestWorld(FString InWorldName) :
+FOUUAutomationTestWorld::FOUUAutomationTestWorld(const FString& InWorldName) :
 	URL(TEXT("/OpenUnrealUtilities/Runtime/EmptyWorld")), WorldName(InWorldName)
 {
 }
@@ -55,6 +49,7 @@ FTimerManager& FOUUAutomationTestWorld::GetTimerManager() const
 	return World->GetTimerManager();
 }
 
+// ReSharper disable once CppMemberFunctionMayBeConst
 void FOUUAutomationTestWorld::BeginPlay()
 {
 	if (!IsValid(World))
@@ -77,12 +72,12 @@ bool FOUUAutomationTestWorld::InitializeGame()
 {
 	if (!IsValid(World))
 	{
-		UE_LOG(LogOpenUnrealUtilities, Error, TEXT("Could not InitiailizeGame invalid world!"));
+		UE_LOG(LogOpenUnrealUtilities, Error, TEXT("Could not InitializeGame invalid world!"));
 		return false;
 	}
 
 	// Set game mode
-	bool bIsGameModeSet = World->SetGameMode(URL);
+	const bool bIsGameModeSet = World->SetGameMode(URL);
 	CHECK_INIT_GAME_CONDITION(!bIsGameModeSet, "Failed to set game mode");
 	GameMode = World->GetAuthGameMode();
 
@@ -104,13 +99,7 @@ bool FOUUAutomationTestWorld::InitializeGame()
 	BeginPlay();
 
 	// Create a new unique net ID to spawn the local play actor = PlayerController
-
-	#if UE_VERSION_OLDER_THAN(5, 0, 0)
-	TSharedPtr<const FUniqueNetId> UniqueNetId = GameInstance->GetPrimaryPlayerUniqueId();
-	FUniqueNetIdRepl NetIdRepl = UniqueNetId;
-	#else
-	FUniqueNetIdRepl NetIdRepl = GameInstance->GetPrimaryPlayerUniqueIdRepl();
-	#endif
+	const FUniqueNetIdRepl NetIdRepl = GameInstance->GetPrimaryPlayerUniqueIdRepl();
 
 	PlayerController = World->SpawnPlayActor(LocalPlayer, ENetRole::ROLE_Authority, URL, NetIdRepl, OUT ErrorString);
 	CHECK_INIT_GAME_CONDITION(ErrorString.Len() > 0, ErrorString);
@@ -137,13 +126,13 @@ void FOUUAutomationTestWorld::CreateWorldImplementation(const FString& WorldSuff
 
 	const FString NewWorldName = "OUUAutomationTestWorld_" + WorldName + WorldSuffix;
 
-	auto* GameMapSettings = GetMutableDefault<UGameMapsSettings>();
+	const auto* GameMapSettings = GetMutableDefault<UGameMapsSettings>();
 	PreviousDefaultMap = GameMapSettings->GetGameDefaultMap();
 	GameMapSettings->SetGameDefaultMap(URL.Map);
 
 	// Create and initialize game instance
 	GameInstance = NewObject<UGameInstance>(GEngine);
-	GameInstance->InitializeStandalone(*NewWorldName); // -> indiretly calls GameInstance->Init();
+	GameInstance->InitializeStandalone(*NewWorldName); // -> indirectly calls GameInstance->Init();
 
 	World = GameInstance->GetWorld();
 	World->GetWorldSettings()->DefaultGameMode = AGameModeBase::StaticClass();
@@ -182,7 +171,7 @@ void FOUUAutomationTestWorld::DestroyWorldImplementation()
 	World->DestroyWorld(true);
 	GEngine->DestroyWorldContext(World);
 
-	auto* GameMapSettings = GetMutableDefault<UGameMapsSettings>();
+	const auto* GameMapSettings = GetMutableDefault<UGameMapsSettings>();
 	GameMapSettings->SetGameDefaultMap(PreviousDefaultMap);
 
 	World = nullptr;
@@ -194,7 +183,8 @@ void FOUUAutomationTestWorld::DestroyWorldImplementation()
 	bHasWorld = false;
 }
 
-FOUUScopedAutomationTestWorld::FOUUScopedAutomationTestWorld(FString InWorldName) : FOUUAutomationTestWorld(InWorldName)
+FOUUScopedAutomationTestWorld::FOUUScopedAutomationTestWorld(const FString& InWorldName) :
+	FOUUAutomationTestWorld(InWorldName)
 {
 	CreateWorldImplementation("_SCOPED");
 }

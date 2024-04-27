@@ -3,24 +3,16 @@
 #include "MaterialAnalyzer/OUUMaterialAnalyzer.h"
 
 #include "Brushes/SlateColorBrush.h"
-#include "Curves/CurveLinearColor.h"
-#include "EdGraph/EdGraph.h"
-#include "EditorStyleSet.h"
-#include "IContentBrowserSingleton.h"
-#include "IDetailTreeNode.h"
-#include "IMaterialEditor.h"
 #include "MaterialAnalyzer/OUUMaterialAnalyzer_EditorObject.h"
 #include "MaterialAnalyzer/OUUMaterialAnalyzer_ParametersList.h"
-#include "MaterialEditorUtilities.h"
-#include "MaterialPropertyHelpers.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialExpressionParameter.h"
 #include "Materials/MaterialExpressionTextureSampleParameter.h"
+#include "Materials/MaterialLayersFunctions.h"
 #include "PropertyCustomizationHelpers.h"
 #include "Slate/SplitterColumnSizeData.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/Docking/SDockTab.h"
-#include "Widgets/Input/SSearchBox.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/Views/STableRow.h"
@@ -69,8 +61,8 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 		}
 
 		void RegenerateList(
-			TSharedPtr<Widgets::SOUUMaterialAnalyzer_ParametersList> ParametersList,
-			FString FilterString)
+			const TSharedPtr<Widgets::SOUUMaterialAnalyzer_ParametersList>& ParametersList,
+			const FString& FilterString)
 		{
 			ParametersList->RequestListRefresh();
 
@@ -116,9 +108,9 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 	namespace Widgets
 	{
 		TSharedRef<SWidget> Splitter(
-			TSharedPtr<FSplitterColumnSizeData> ColumnSizeData,
-			TSharedRef<SWidget> LeftWidget,
-			TSharedRef<SWidget> RightWidget)
+			const TSharedPtr<FSplitterColumnSizeData>& ColumnSizeData,
+			const TSharedRef<SWidget>& LeftWidget,
+			const TSharedRef<SWidget>& RightWidget)
 		{
 			// clang-format off
 			return SNew(SSplitter)
@@ -141,11 +133,11 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 		}
 
 		TSharedRef<SWidget> ListWrapper(
-			TSharedPtr<FSplitterColumnSizeData> ColumnSizeData,
-			TSharedRef<SScrollBar> ScrollBar,
-			FText LeftColumnLabel,
-			FText RightColumnLabel,
-			TSharedRef<SWidget> Content)
+			const TSharedPtr<FSplitterColumnSizeData>& ColumnSizeData,
+			const TSharedRef<SScrollBar>& ScrollBar,
+			const FText& LeftColumnLabel,
+			const FText& RightColumnLabel,
+			const TSharedRef<SWidget>& Content)
 		{
 			// clang-format off
 			return SNew(SBorder)
@@ -222,7 +214,7 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 			TSharedPtr<FSplitterColumnSizeData> ColumnSizeData;
 
 			void HandleAssetSelected(const FAssetData& InAssetData);
-			void RefreshParamtersList();
+			void RefreshParametersList() const;
 		};
 
 		////////////////////////////
@@ -276,10 +268,10 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 			];
 			// clang-format on
 
-			RefreshParamtersList();
+			RefreshParametersList();
 		}
 
-		void SOUUMaterialAnalyzer::RefreshParamtersList()
+		void SOUUMaterialAnalyzer::RefreshParametersList() const
 		{
 			Parameter::RegenerateList(ParametersList, ParameterFilterString);
 
@@ -316,7 +308,7 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 		void SOUUMaterialAnalyzer::HandleParameterFilterTextChanged(const FText& Text)
 		{
 			ParameterFilterString = Text.ToString();
-			RefreshParamtersList();
+			RefreshParametersList();
 		}
 
 		void SOUUMaterialAnalyzer::HandleAssetSelected(const FAssetData& InAssetData)
@@ -327,7 +319,7 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 			{
 				EditorObject->TargetMaterial = Material;
 			}
-			RefreshParamtersList();
+			RefreshParametersList();
 		}
 
 		TSharedRef<SDockTab> SpawnTab(const FSpawnTabArgs& Args)

@@ -50,20 +50,20 @@ void FSemVerPreReleaseIdentifierSpec::Define()
 
 	Describe("equality operator ==", [this]() {
 		It("should return true if two semvers are the same", [this]() {
-			FSemVerPreReleaseIdentifier A("1.2.alpha");
-			FSemVerPreReleaseIdentifier B("1.2.alpha");
+			const FSemVerPreReleaseIdentifier A("1.2.alpha");
+			const FSemVerPreReleaseIdentifier B("1.2.alpha");
 			SPEC_TEST_TRUE(A == B);
 		});
 
 		It("should return false if two semvers are not the same (1)", [this]() {
-			FSemVerPreReleaseIdentifier A("1.2.alpha");
-			FSemVerPreReleaseIdentifier B("1.3.alpha");
+			const FSemVerPreReleaseIdentifier A("1.2.alpha");
+			const FSemVerPreReleaseIdentifier B("1.3.alpha");
 			SPEC_TEST_FALSE(A == B);
 		});
 
 		It("should return false if two semvers are not the same (2)", [this]() {
-			FSemVerPreReleaseIdentifier A("1.2.alpha");
-			FSemVerPreReleaseIdentifier B("1.2.beta");
+			const FSemVerPreReleaseIdentifier A("1.2.alpha");
+			const FSemVerPreReleaseIdentifier B("1.2.beta");
 			SPEC_TEST_FALSE(A == B);
 		});
 	});

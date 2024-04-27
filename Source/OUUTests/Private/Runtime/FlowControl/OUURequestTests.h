@@ -13,10 +13,11 @@ class UOUURequestTests_Responder : public UObject
 {
 	GENERATED_BODY()
 public:
-	bool bCompleteRequestSuccesfully = false;
+	bool bCompleteRequestSuccessfully = false;
 
 	UFUNCTION()
-	void HandleRequestRaised(UOUURequest* Request) { Request->Complete(bCompleteRequestSuccesfully); }
+	// ReSharper disable once CppMemberFunctionMayBeConst
+	void HandleRequestRaised(UOUURequest* Request) { Request->Complete(bCompleteRequestSuccessfully); }
 };
 
 UCLASS(meta = (Hidden, HideDropDown))

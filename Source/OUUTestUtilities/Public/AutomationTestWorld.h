@@ -19,7 +19,7 @@
 struct OUUTESTUTILITIES_API FOUUAutomationTestWorld
 {
 public:
-	explicit FOUUAutomationTestWorld(FString InWorldName);
+	explicit FOUUAutomationTestWorld(const FString& InWorldName);
 	virtual ~FOUUAutomationTestWorld();
 
 	// Travel URL that will be used for game BeginPlay()
@@ -94,7 +94,7 @@ struct OUUTESTUTILITIES_API FOUUScopedAutomationTestWorld : public FOUUAutomatio
 {
 public:
 	using Super = FOUUAutomationTestWorld;
-	explicit FOUUScopedAutomationTestWorld(FString InWorldName);
+	explicit FOUUScopedAutomationTestWorld(const FString& InWorldName);
 	virtual ~FOUUScopedAutomationTestWorld() override;
 
 	// - FAutomationTestWorld

@@ -9,7 +9,7 @@ float UOUUMathLibrary::AngleBetweenVectors(FVector A, FVector B)
 	return FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(A, B)));
 }
 
-float UOUUMathLibrary::SignedAngleBetweenVectors(FVector A, FVector B, FVector Up)
+float UOUUMathLibrary::SignedAngleBetweenVectors(const FVector& A, const FVector& B, const FVector& Up)
 {
 	const float Angle = AngleBetweenVectors(A, B);
 	return (FVector::DotProduct(Up, FVector::CrossProduct(A, B)) < 0) ? Angle : -Angle;

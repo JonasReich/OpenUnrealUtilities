@@ -2,11 +2,23 @@
 
 #include "Misc/MessageDialogLibrary.h"
 
+#include "Misc/EngineVersionComparison.h"
 #include "Misc/MessageDialog.h"
 
 void UMessageDialogLibrary::ShowMessageDialogueNotification(FText OptionalTitle, FText Message)
 {
-	FMessageDialog::Debugf(Message, GetOptionalTitlePtr(OptionalTitle));
+	if (OptionalTitle.IsEmpty())
+	{
+		FMessageDialog::Debugf(Message);
+	}
+	else
+	{
+#if UE_VERSION_OLDER_THAN(5, 3, 0)
+		FMessageDialog::Debugf(Message, &OptionalTitle);
+#else
+		FMessageDialog::Debugf(Message, OptionalTitle);
+#endif
+	}
 }
 
 TEnumAsByte<EAppReturnType::Type> UMessageDialogLibrary::OpenMessageDialog(
@@ -14,7 +26,15 @@ TEnumAsByte<EAppReturnType::Type> UMessageDialogLibrary::OpenMessageDialog(
 	FText OptionalTitle,
 	FText Message)
 {
-	return FMessageDialog::Open(MessageType, Message, GetOptionalTitlePtr(OptionalTitle));
+	if (OptionalTitle.IsEmpty())
+	{
+		return FMessageDialog::Open(MessageType, Message);
+	}
+#if UE_VERSION_OLDER_THAN(5, 3, 0)
+	return FMessageDialog::Open(MessageType, Message, &OptionalTitle);
+#else
+	return FMessageDialog::Open(MessageType, Message, OptionalTitle);
+#endif
 }
 
 TEnumAsByte<EAppReturnType::Type> UMessageDialogLibrary::OpenMessageDialogWithDefaultValue(
@@ -23,15 +43,14 @@ TEnumAsByte<EAppReturnType::Type> UMessageDialogLibrary::OpenMessageDialogWithDe
 	FText OptionalTitle,
 	FText Message)
 {
-	return FMessageDialog::Open(
-		StaticCast<EAppMsgType::Type>(MessageType),
-		DefaultValue,
-		Message,
-		GetOptionalTitlePtr(OptionalTitle));
-}
+	if (OptionalTitle.IsEmpty())
+	{
+		return FMessageDialog::Open(StaticCast<EAppMsgType::Type>(MessageType), DefaultValue, Message);
+	}
 
-const FText* UMessageDialogLibrary::GetOptionalTitlePtr(FText& Text)
-{
-	const int32 TitleLength = Text.ToString().Len();
-	return (TitleLength > 0) ? &Text : nullptr;
+#if UE_VERSION_OLDER_THAN(5, 3, 0)
+	return FMessageDialog::Open(StaticCast<EAppMsgType::Type>(MessageType), DefaultValue, Message, &OptionalTitle);
+#else
+	return FMessageDialog::Open(StaticCast<EAppMsgType::Type>(MessageType), DefaultValue, Message, OptionalTitle);
+#endif
 }

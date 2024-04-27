@@ -26,7 +26,7 @@ void FReferenceWrapperSpec::Define()
 			Describe("to primitive types", [this]() {
 				It("should be possible from value object", [this]() {
 					int32 i = 0;
-					auto iRefWrapper = TReferenceWrapper<int32>(i);
+					const auto iRefWrapper = TReferenceWrapper<int32>(i);
 					i = 42;
 					SPEC_TEST_EQUAL(iRefWrapper, 42);
 				});
@@ -78,7 +78,7 @@ void FReferenceWrapperSpec::Define()
 			Describe("to primitive types", [this]() {
 				It("should be possible from value object", [this]() {
 					int32 i = 0;
-					auto iRefWrapper = MakeRef<int32>(i);
+					const auto iRefWrapper = MakeRef<int32>(i);
 					i = 42;
 					SPEC_TEST_EQUAL(iRefWrapper, 42);
 				});
@@ -130,14 +130,14 @@ void FReferenceWrapperSpec::Define()
 			Describe("to primitive types", [this]() {
 				It("should be possible from value object", [this]() {
 					int32 i = 0;
-					auto iRefWrapper = MakeConstRef<int32>(i);
+					const auto iRefWrapper = MakeConstRef<int32>(i);
 					i = 42;
 					SPEC_TEST_EQUAL(iRefWrapper, 42);
 				});
 
 				It("should be possible from reference", [this]() {
 					int32 i = 0;
-					int32& iRef = i;
+					const int32& iRef = i;
 					const auto iRefWrapper = MakeConstRef<int32>(iRef);
 					i = 42;
 					SPEC_TEST_EQUAL(iRefWrapper, 42);
@@ -170,7 +170,7 @@ void FReferenceWrapperSpec::Define()
 
 				It("should be possible from reference", [this]() {
 					FRefWrapFoo Foo;
-					FRefWrapFoo& FooRef = Foo;
+					const FRefWrapFoo& FooRef = Foo;
 					const auto FooRefWrapper = MakeConstRef<FRefWrapFoo>(FooRef);
 					Foo.Number = 42;
 					SPEC_TEST_EQUAL(FooRefWrapper.Get().Number, 42);

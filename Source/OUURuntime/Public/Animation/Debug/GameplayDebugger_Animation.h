@@ -6,7 +6,6 @@
 
 #if WITH_GAMEPLAY_DEBUGGER
 	#include "CoreMinimal.h"
-	#include "Animation/AnimInstance.h"
 	#include "GameplayDebuggerCategory.h"
 
 class APlayerController;
@@ -38,10 +37,10 @@ private:
 	void CycleDebugMesh();
 	void CycleDebugInstance();
 
-	void DrawSceneComponentTree(
+	static void DrawSceneComponentTree(
 		FGameplayDebuggerCanvasContext& CanvasContext,
 		const AActor* DebugActor,
-		USkeletalMeshComponent* DebugMeshComponent) const;
+		const USkeletalMeshComponent* DebugMeshComponent);
 
 	void DisplayDebug(
 		FGameplayDebuggerCanvasContext& CanvasContext,
@@ -49,13 +48,13 @@ private:
 		UOUUDebuggableAnimInstance* AnimInstance,
 		UCanvas* Canvas);
 
-	void DisplayDebugInstance(
+	static void DisplayDebugInstance(
 		FGameplayDebugger_DisplayDebugManager& DisplayDebugManager,
-		USkeletalMeshComponent* SkeletalMeshComponent,
+		const USkeletalMeshComponent* SkeletalMeshComponent,
 		UOUUDebuggableAnimInstance* AnimInstance,
-		float& Indent);
+		const float& Indent);
 
-	void OutputTickRecords(
+	static void OutputTickRecords(
 		const TArray<FAnimTickRecord>& Records,
 		UCanvas* Canvas,
 		float Indent,
@@ -64,9 +63,9 @@ private:
 		FLinearColor HighlightColor,
 		FLinearColor InactiveColor,
 		FGameplayDebugger_DisplayDebugManager& DisplayDebugManager,
-		bool bFullBlendspaceDisplay);
+		bool bFullBlendSpaceDisplay);
 
-	void OutputCurveMap(
+	static void OutputCurveMap(
 		TMap<FName, float>& CurveMap,
 		FGameplayDebugger_DisplayDebugManager& DisplayDebugManager,
 		float Indent);

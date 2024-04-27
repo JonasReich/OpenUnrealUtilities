@@ -33,7 +33,7 @@ int32 USpiralIdUtilities::ConvertWorldLocation2DToSpiralId(
 	float GridSize,
 	ESpiralCoordinateSystemType CoordinateSystem)
 {
-	int32 X = FMath::FloorToInt(Location.X / GridSize);
+	const int32 X = FMath::FloorToInt(Location.X / GridSize);
 	int32 Y = 0;
 	switch (CoordinateSystem)
 	{
@@ -50,7 +50,7 @@ int32 USpiralIdUtilities::ConvertWorldLocationToSpiralId(
 	float GridSize,
 	ESpiralCoordinateSystemType CoordinateSystem)
 {
-	int32 X = FMath::FloorToInt(Location.X / GridSize);
+	const int32 X = FMath::FloorToInt(Location.X / GridSize);
 	int32 Y = 0;
 	switch (CoordinateSystem)
 	{

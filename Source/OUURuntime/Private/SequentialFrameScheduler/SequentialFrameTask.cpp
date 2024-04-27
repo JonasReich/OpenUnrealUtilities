@@ -6,10 +6,9 @@
 
 void FSequentialFrameTask::FTaskHandle::Cancel()
 {
-	auto pScheduler = pWeakScheduler.Pin();
-	if (pScheduler)
+	if (const auto Scheduler = pWeakScheduler.Pin())
 	{
-		pScheduler->RemoveTask(*this);
+		Scheduler->RemoveTask(*this);
 	}
 
 	Reset();

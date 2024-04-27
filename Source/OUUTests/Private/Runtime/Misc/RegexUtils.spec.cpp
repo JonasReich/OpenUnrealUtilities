@@ -2,6 +2,8 @@
 
 #include "OUUTestUtilities.h"
 
+// ReSharper disable StringLiteralTypo
+
 #if WITH_AUTOMATION_WORKER
 
 	#include "Misc/RegexUtils.h"
@@ -56,24 +58,24 @@ void FRegexUtilsSpec::Define()
 
 	Describe("GetRegexMatches", [this]() {
 		It("should return an empty list if no matches were found", [this]() {
-			auto Matches = OUU::Runtime::RegexUtils::GetRegexMatches("[a-z]*", "1234");
+			const auto Matches = OUU::Runtime::RegexUtils::GetRegexMatches("[a-z]*", "1234");
 			SPEC_TEST_ARRAYS_EQUAL(Matches, {});
 		});
 
 		It("should return a list of all matches when one or more matches were found", [this]() {
-			TArray<FRegexMatch> ExpectedMatches = {
+			const TArray<FRegexMatch> ExpectedMatches = {
 				FRegexMatch{0, 8, "alphabet"},
 				FRegexMatch{14, 20, "noodle"},
 				FRegexMatch{21, 25, "soup"},
 			};
-			auto Matches = OUU::Runtime::RegexUtils::GetRegexMatches("[a-z]*", "alphabet 1234 noodle soup");
+			const auto Matches = OUU::Runtime::RegexUtils::GetRegexMatches("[a-z]*", "alphabet 1234 noodle soup");
 			SPEC_TEST_ARRAYS_EQUAL(Matches, ExpectedMatches);
 		});
 	});
 
 	Describe("GetRegexMatchesAndGroups", [this]() {
 		It("should return an empty list if no matches were found", [this]() {
-			auto Matches = OUU::Runtime::RegexUtils::GetRegexMatches("[a-z]*", "1234");
+			const auto Matches = OUU::Runtime::RegexUtils::GetRegexMatches("[a-z]*", "1234");
 			SPEC_TEST_ARRAYS_EQUAL(Matches, {});
 		});
 
@@ -113,10 +115,10 @@ void FRegexUtilsSpec::Define()
 			{
 				It(*FString::Printf(TEXT("should parse '%s' correctly"), *EscapeTestName(TestCase.Get<0>())),
 				   [this, TestCase]() {
-					   FString Pattern = "([\\w-]+)\\.(\\w+)";
-					   FString TestString = TestCase.Get<0>();
-					   TArray<FRegexGroups> ExpectedResult = TestCase.Get<1>();
-					   auto MatchesAndGroups =
+					   const FString Pattern = "([\\w-]+)\\.(\\w+)";
+					   const FString TestString = TestCase.Get<0>();
+					   const TArray<FRegexGroups> ExpectedResult = TestCase.Get<1>();
+					   const auto MatchesAndGroups =
 						   OUU::Runtime::RegexUtils::GetRegexMatchesAndGroups(Pattern, 2, TestString);
 					   SPEC_TEST_ARRAYS_EQUAL(MatchesAndGroups, ExpectedResult);
 				   });

@@ -146,7 +146,7 @@ void UOUUMultiplayerTestController::OnTick(float TimeDelta)
 
 IOnlineSessionPtr UOUUMultiplayerTestController::GetSessions() const
 {
-	auto* OnlineSubsystem = Online::GetSubsystem(GetWorld());
+	const auto* OnlineSubsystem = Online::GetSubsystem(GetWorld());
 	auto Sessions = OnlineSubsystem->GetSessionInterface();
 	return Sessions;
 }

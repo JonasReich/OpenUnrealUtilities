@@ -33,8 +33,8 @@ namespace OUU::Runtime::CanvasGraphPlottingUtils
 
 			FValueRangeRef(
 				const void* InValueContainer,
-				TFunction<float(const void*, int32)> InGetValueDelegate,
-				TFunction<float(const void*)> InGetNumDelegate) :
+				const TFunction<float(const void*, int32)>& InGetValueDelegate,
+				const TFunction<float(const void*)>& InGetNumDelegate) :
 				ValueContainer(InValueContainer),
 				GetValueDelegate(InGetValueDelegate),
 				GetNumDelegate(InGetNumDelegate){};
@@ -47,7 +47,7 @@ namespace OUU::Runtime::CanvasGraphPlottingUtils
 			int32 Num() const { return GetNumDelegate(ValueContainer); }
 		};
 
-		FGraphStatData(FValueRangeRef InValueRangeRef, FLinearColor InColor, FString InTitle) :
+		FGraphStatData(const FValueRangeRef& InValueRangeRef, FLinearColor InColor, const FString& InTitle) :
 			ValueAggregator(InValueRangeRef), Color(InColor), Title(InTitle)
 		{
 		}
@@ -62,7 +62,7 @@ namespace OUU::Runtime::CanvasGraphPlottingUtils
 		float GraphLeftXPos,
 		float GraphBottomYPos,
 		const TArray<FGraphStatData>& StatsToDraw,
-		const FString GraphTitle,
+		const FString& GraphTitle,
 		float HighestValue,
 		bool bUseLogarithmicYAxis = false);
 } // namespace OUU::Runtime::CanvasGraphPlottingUtils

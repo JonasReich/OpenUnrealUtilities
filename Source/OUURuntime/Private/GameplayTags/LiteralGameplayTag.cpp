@@ -24,7 +24,7 @@ namespace OUU::Editor::Private
 		FName PluginName,
 		FName ModuleName)
 	{
-		FTagSource Source{PluginName, ModuleName};
+		const FTagSource Source{PluginName, ModuleName};
 
 		checkf(
 			GLiteralTagFlags.Contains(Tag) == false,

@@ -20,7 +20,7 @@ public:
 
 	/** Get the signed angle between two vectors A and B, determining the sign with an Up vector. */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Math")
-	static float SignedAngleBetweenVectors(FVector A, FVector B, FVector Up);
+	static float SignedAngleBetweenVectors(const FVector& A, const FVector& B, const FVector& Up);
 
 	/** Clamp a value into a range, using the fallback values if the range is not bound at the respective end. */
 	template <typename T>
@@ -44,7 +44,7 @@ public:
 
 	static float LinearValueToNormalizedLogScale(float Value, float ValueRangeMin, float ValueRangeMax)
 	{
-		float offset = FMath::Loge(ValueRangeMin);
-		return (FMath::Loge(Value) - offset) / (FMath::Loge(ValueRangeMax) - offset);
+		const float Offset = FMath::Loge(ValueRangeMin);
+		return (FMath::Loge(Value) - Offset) / (FMath::Loge(ValueRangeMax) - Offset);
 	}
 };

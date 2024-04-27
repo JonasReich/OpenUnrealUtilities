@@ -5,7 +5,6 @@
 
 #if WITH_AUTOMATION_WORKER
 
-	#include "LocalizationModule.h"
 	#include "Localization/OUUTextLibrary.h"
 
 	#define OUU_TEST_CATEGORY OpenUnrealUtilities.Runtime.Localization

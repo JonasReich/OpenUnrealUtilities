@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 
-#include "UObject/StrongObjectPtr.h"
 #include "WorldPartition/WorldPartitionBuilder.h"
 #include "WorldPartition/WorldPartitionMiniMap.h"
 

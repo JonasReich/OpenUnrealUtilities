@@ -164,7 +164,7 @@ class UOUUBlueprintPropertyFlagsLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Property Flags")
-	static int64 CreatePropertyFlagsMask(TSet<EOUUBlueprintPropertyFlags> Flags);
+	static int64 CreatePropertyFlagsMask(const TSet<EOUUBlueprintPropertyFlags>& Flags);
 
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Property Flags")
 	static TSet<EOUUBlueprintPropertyFlags> BreakPropertyFlagsMask(int64 Flags);

@@ -3,13 +3,13 @@
 #pragma once
 
 #include "Misc/AutomationTest.h"
+#include "Traits/StringConversionTraits.h"
 
 #if WITH_AUTOMATION_WORKER
 
 	#include "LogOpenUnrealUtilities.h"
 	#include "Templates/IsEnumClass.h"
 	#include "Templates/UnrealTypeTraits.h"
-	#include "Templates/StringUtils.h"
 
 namespace OUU::TestUtilities::Private
 {
@@ -77,23 +77,26 @@ private:
 	int32 NumParameters = 0;
 
 public:
-	FAutomationTestParameterParser(FString ParametersString, FString InParameterDelimiter, FString InArrayDelimiter) :
+	FAutomationTestParameterParser(
+		const FString& ParametersString,
+		const FString& InParameterDelimiter,
+		const FString& InArrayDelimiter) :
 		ParameterDelimiter(InParameterDelimiter), ArrayDelimiter(InArrayDelimiter)
 	{
 		NumParameters = ParametersString.ParseIntoArray(Parameters, *ParameterDelimiter);
 	}
 
-	FAutomationTestParameterParser(FString ParametersString, FString InParameterDelimiter) :
+	FAutomationTestParameterParser(const FString& ParametersString, const FString& InParameterDelimiter) :
 		FAutomationTestParameterParser(ParametersString, InParameterDelimiter, TEXT(";"))
 	{
 	}
 
-	FAutomationTestParameterParser(FString ParametersString) :
+	FAutomationTestParameterParser(const FString& ParametersString) :
 		FAutomationTestParameterParser(ParametersString, TEXT("|"))
 	{
 	}
 
-	FORCEINLINE int32 GetNumParamters() const { return NumParameters; }
+	FORCEINLINE int32 GetNumParameters() const { return NumParameters; }
 
 	template <typename T>
 	T GetValue(int32 Index) const

@@ -19,17 +19,10 @@
 	#include "Engine/StaticMesh.h"
 	#include "GameFramework/PlayerController.h"
 	#include "GameplayDebugger/GameplayDebugger_DisplayDebugManager.h"
-	#include "Misc/EngineVersionComparison.h"
 	#include "Rendering/SkeletalMeshRenderData.h"
 	#include "SkeletalRenderPublic.h"
-	#include "Templates/InterfaceUtils.h"
 	#include "Templates/StringUtils.h"
-
-	#if UE_VERSION_OLDER_THAN(5, 0, 0)
-		#include "Animation/BlendSpaceBase.h"
-	#else
-		#include "Animation/BlendSpace.h"
-	#endif
+	#include "Animation/BlendSpace.h"
 
 namespace OUU::Runtime::Animation::GameplayDebugger::Private
 {
@@ -92,7 +85,7 @@ void FGameplayDebuggerCategory_Animation::DrawData(
 	if (!IsValid(Canvas))
 		return;
 
-	auto* DebugActor = Cast<AActor>(FindLocalDebugActor());
+	const auto* DebugActor = Cast<AActor>(FindLocalDebugActor());
 	if (!IsValid(DebugActor))
 		return;
 
@@ -117,7 +110,7 @@ void FGameplayDebuggerCategory_Animation::DrawData(
 		static_cast<const USkeletalMeshComponent*>(DebugMeshComponent)->GetLinkedAnimInstances();
 
 	const int32 NumLinkedInstances = LinkedAnimInstances.Num();
-	const int32 Offset = 1;
+	constexpr int32 Offset = 1;
 	DebugInstanceIndex =
 		NumLinkedInstances > 0 ? (((DebugInstanceIndex + Offset) % (NumLinkedInstances + Offset)) - Offset) : -1;
 
@@ -161,7 +154,7 @@ void FGameplayDebuggerCategory_Animation::CycleDebugInstance()
 void FGameplayDebuggerCategory_Animation::DrawSceneComponentTree(
 	FGameplayDebuggerCanvasContext& CanvasContext,
 	const AActor* DebugActor,
-	USkeletalMeshComponent* DebugMeshComponent) const
+	const USkeletalMeshComponent* DebugMeshComponent)
 {
 	float Indent = 0;
 
@@ -172,7 +165,7 @@ void FGameplayDebuggerCategory_Animation::DrawSceneComponentTree(
 		// GetNumNodeChildren
 		[](const USceneComponent* SceneComp) -> int32 { return SceneComp->GetNumChildrenComponents(); },
 		// OnGetChildByIndex
-		[](USceneComponent* SceneComponent, int32 ChildIdx) -> USceneComponent* {
+		[](const USceneComponent* SceneComponent, int32 ChildIdx) -> USceneComponent* {
 			return SceneComponent->GetChildComponent(ChildIdx);
 		},
 		// OnGetDebugString
@@ -182,13 +175,14 @@ void FGameplayDebuggerCategory_Animation::DrawSceneComponentTree(
 			const FString ColorString = SceneComponent == DebugMeshComponent ? "{green}" : "{white}";
 			const FString SceneComponentName = SceneComponent->GetName();
 			FString OptionalMeshString = "";
-			if (auto* StaticMeshComponent = Cast<UStaticMeshComponent>(SceneComponent))
+			if (const auto* StaticMeshComponent = Cast<UStaticMeshComponent>(SceneComponent))
 			{
 				OptionalMeshString = FString::Printf(TEXT("(%s)"), *LexToString(StaticMeshComponent->GetStaticMesh()));
 			}
-			else if (auto* SkelMeshComp = Cast<USkeletalMeshComponent>(SceneComponent))
+			else if (const auto* SkeletalMeshComponent = Cast<USkeletalMeshComponent>(SceneComponent))
 			{
-				OptionalMeshString = FString::Printf(TEXT("(%s)"), *LexToString(SkelMeshComp->GetSkeletalMeshAsset()));
+				OptionalMeshString =
+					FString::Printf(TEXT("(%s)"), *LexToString(SkeletalMeshComponent->GetSkeletalMeshAsset()));
 			}
 
 			return FString::Printf(
@@ -226,7 +220,7 @@ void FGameplayDebuggerCategory_Animation::DisplayDebug(
 	const bool bShowCurves = GetInputBoolSwitchValue(GameplayDebuggerSwitches::Curves);
 	const bool bShowNotifies = GetInputBoolSwitchValue(GameplayDebuggerSwitches::Notifies);
 	const bool bFullGraph = GetInputBoolSwitchValue(GameplayDebuggerSwitches::FullGraphDisplay);
-	const bool bFullBlendspaceDisplay = GetInputBoolSwitchValue(GameplayDebuggerSwitches::FullBlendspaceDisplay);
+	const bool bFullBlendSpaceDisplay = GetInputBoolSwitchValue(GameplayDebuggerSwitches::FullBlendspaceDisplay);
 
 	FString Heading = FString::Printf(TEXT("Animation: %s"), *AnimInstance->GetName());
 
@@ -249,9 +243,9 @@ void FGameplayDebuggerCategory_Animation::DisplayDebug(
 		Heading = FString::Printf(TEXT("Anim Node Tree"));
 		DisplayDebugManager.DrawString(Heading, Indent);
 
-		const float NodeIndent = 8.f;
-		const float LineIndent = 4.f;
-		const float AttachLineLength = NodeIndent - LineIndent;
+		constexpr float NodeIndent = 8.f;
+		constexpr float LineIndent = 4.f;
+		constexpr float AttachLineLength = NodeIndent - LineIndent;
 
 		FIndenter AnimNodeTreeIndent(Indent);
 
@@ -364,7 +358,7 @@ void FGameplayDebuggerCategory_Animation::DisplayDebug(
 					ActiveColor,
 					InactiveColor,
 					DisplayDebugManager,
-					bFullBlendspaceDisplay);
+					bFullBlendSpaceDisplay);
 			}
 		}
 
@@ -384,7 +378,7 @@ void FGameplayDebuggerCategory_Animation::DisplayDebug(
 			ActiveColor,
 			InactiveColor,
 			DisplayDebugManager,
-			bFullBlendspaceDisplay);
+			bFullBlendSpaceDisplay);
 	}
 
 	if (bShowMontages)
@@ -494,11 +488,11 @@ void FGameplayDebuggerCategory_Animation::DisplayDebug(
 
 void FGameplayDebuggerCategory_Animation::DisplayDebugInstance(
 	FGameplayDebugger_DisplayDebugManager& DisplayDebugManager,
-	USkeletalMeshComponent* SkelMeshComp,
+	const USkeletalMeshComponent* SkeletalMeshComponent,
 	UOUUDebuggableAnimInstance* AnimInstance,
-	float& Indent)
+	const float& Indent)
 {
-	auto* ProxyPtr =
+	const auto* ProxyPtr =
 		UOUUDebuggableAnimInstance::GetProxyOnGameThreadStatic<FOUUDebuggableAnimInstanceProxy>(AnimInstance);
 	if (!ProxyPtr)
 	{
@@ -511,19 +505,15 @@ void FGameplayDebuggerCategory_Animation::DisplayDebugInstance(
 
 	DisplayDebugManager.SetLinearDrawColor(FLinearColor::Green);
 
-	const int32 MaxLODIndex = SkelMeshComp->MeshObject
-		? (SkelMeshComp->MeshObject->GetSkeletalMeshRenderData().LODRenderData.Num() - 1)
+	const int32 MaxLODIndex = SkeletalMeshComponent->MeshObject
+		? (SkeletalMeshComponent->MeshObject->GetSkeletalMeshRenderData().LODRenderData.Num() - 1)
 		: INDEX_NONE;
 
-	FOUUDebuggableAnimInstanceProxy& Proxy = *ProxyPtr;
+	const FOUUDebuggableAnimInstanceProxy& Proxy = *ProxyPtr;
 
 	FString DebugText = FString::Printf(
 		TEXT("LOD(%d/%d) UpdateCounter(%d) EvalCounter(%d) CacheBoneCounter(%d) InitCounter(%d) DeltaSeconds(%.3f)"),
-	#if UE_VERSION_OLDER_THAN(5, 0, 0)
-		SkelMeshComp->PredictedLODLevel,
-	#else
-		SkelMeshComp->GetPredictedLODLevel(),
-	#endif
+		SkeletalMeshComponent->GetPredictedLODLevel(),
 		MaxLODIndex,
 		Proxy.GetUpdateCounter().Get(),
 		Proxy.GetEvaluationCounter().Get(),
@@ -533,9 +523,9 @@ void FGameplayDebuggerCategory_Animation::DisplayDebugInstance(
 
 	DisplayDebugManager.DrawString(DebugText, Indent);
 
-	if (SkelMeshComp->ShouldUseUpdateRateOptimizations())
+	if (SkeletalMeshComponent->ShouldUseUpdateRateOptimizations())
 	{
-		if (FAnimUpdateRateParameters* UROParams = SkelMeshComp->AnimUpdateRateParams)
+		if (const FAnimUpdateRateParameters* UROParams = SkeletalMeshComponent->AnimUpdateRateParams)
 		{
 			DebugText = FString::Printf(
 				TEXT("URO Rate(%d) SkipUpdate(%d) SkipEval(%d) Interp(%d)"),
@@ -558,7 +548,7 @@ void FGameplayDebuggerCategory_Animation::OutputTickRecords(
 	FLinearColor HighlightColor,
 	FLinearColor InactiveColor,
 	FGameplayDebugger_DisplayDebugManager& DisplayDebugManager,
-	bool bFullBlendspaceDisplay)
+	bool bFullBlendSpaceDisplay)
 {
 	for (int32 PlayerIndex = 0; PlayerIndex < Records.Num(); ++PlayerIndex)
 	{
@@ -574,14 +564,9 @@ void FGameplayDebuggerCategory_Animation::OutputTickRecords(
 			Player.EffectiveBlendWeight * 100.f);
 
 		// See if we have access to SequenceLength
-		if (UAnimSequenceBase* AnimSeqBase = Cast<UAnimSequenceBase>(Player.SourceAsset))
+		if (const auto* AnimSeqBase = Cast<UAnimSequenceBase>(Player.SourceAsset))
 		{
-	#if UE_VERSION_OLDER_THAN(5, 0, 0)
-			float SequenceLength = AnimSeqBase->SequenceLength;
-	#else
-			float SequenceLength = AnimSeqBase->GetPlayLength();
-	#endif
-
+			const float SequenceLength = AnimSeqBase->GetPlayLength();
 			PlayerEntry += FString::Printf(
 				TEXT(" P(%.2f/%.2f)"),
 				Player.TimeAccumulator != nullptr ? *Player.TimeAccumulator : 0.f,
@@ -606,13 +591,9 @@ void FGameplayDebuggerCategory_Animation::OutputTickRecords(
 
 		DisplayDebugManager.DrawString(PlayerEntry, Indent);
 
-	#if UE_VERSION_OLDER_THAN(5, 0, 0)
-		if (UBlendSpaceBase* BlendSpace = Cast<UBlendSpaceBase>(Player.SourceAsset))
-	#else
-		if (UBlendSpace* BlendSpace = Cast<UBlendSpace>(Player.SourceAsset))
-	#endif
+		if (const auto* BlendSpace = Cast<UBlendSpace>(Player.SourceAsset))
 		{
-			if (bFullBlendspaceDisplay && Player.BlendSpace.BlendSampleDataCache
+			if (bFullBlendSpaceDisplay && Player.BlendSpace.BlendSampleDataCache
 				&& Player.BlendSpace.BlendSampleDataCache->Num() > 0)
 			{
 				TArray<FBlendSampleData> SampleData = *Player.BlendSpace.BlendSampleDataCache;
@@ -620,14 +601,14 @@ void FGameplayDebuggerCategory_Animation::OutputTickRecords(
 					return L.SampleDataIndex < R.SampleDataIndex;
 				});
 
-				FIndenter BlendspaceIndent(Indent);
+				FIndenter BlendSpaceIndent(Indent);
 				const FVector BlendSpacePosition(
 					Player.BlendSpace.BlendSpacePositionX,
 					Player.BlendSpace.BlendSpacePositionY,
 					0.f);
-				FString BlendspaceHeader =
+				FString BlendSpaceHeader =
 					FString::Printf(TEXT("Blendspace Input (%s)"), *BlendSpacePosition.ToString());
-				DisplayDebugManager.DrawString(BlendspaceHeader, Indent);
+				DisplayDebugManager.DrawString(BlendSpaceHeader, Indent);
 
 				const TArray<FBlendSample>& BlendSamples = BlendSpace->GetBlendSamples();
 
@@ -643,11 +624,7 @@ void FGameplayDebuggerCategory_Animation::OutputTickRecords(
 						FBlendSampleData& WeightedSample = SampleData[WeightedSampleIndex];
 						if (WeightedSample.SampleDataIndex == SampleIndex)
 						{
-	#if UE_VERSION_OLDER_THAN(5, 0, 0)
-							Weight += WeightedSample.GetWeight();
-	#else
 							Weight += WeightedSample.GetClampedWeight();
-	#endif
 						}
 						else if (WeightedSample.SampleDataIndex > SampleIndex)
 						{

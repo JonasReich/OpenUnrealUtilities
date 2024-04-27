@@ -25,8 +25,8 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 	namespace Widgets
 	{
 		TSharedRef<SWidget> Splitter(
-			TSharedPtr<FSplitterColumnSizeData> ColumnSizeData,
-			TSharedRef<SWidget> LeftWidget,
-			TSharedRef<SWidget> RightWidget);
+			const TSharedPtr<FSplitterColumnSizeData>& ColumnSizeData,
+			const TSharedRef<SWidget>& LeftWidget,
+			const TSharedRef<SWidget>& RightWidget);
 	}
 } // namespace OUU::Editor::Private::MaterialAnalyzer

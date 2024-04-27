@@ -6,8 +6,6 @@
 #include "DetailLayoutBuilder.h"
 #include "IContentBrowserSingleton.h"
 #include "IDetailChildrenBuilder.h"
-#include "Kismet2/KismetEditorUtilities.h"
-#include "Kismet2/SClassPickerDialog.h"
 #include "LogOpenUnrealUtilities.h"
 #include "ObjectEditorUtils.h"
 #include "UObject/UObjectIterator.h"
@@ -30,32 +28,6 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 				ChildrenBuilder,
 				ThumbnailPool,
 				OnShouldFilterAsset);
-		}
-
-		// Helper to support both meta=(TagName) and meta=(TagName=true) syntaxes
-		static bool GetTagOrBoolMetadata(const FProperty* Property, const TCHAR* TagName, bool bDefault)
-		{
-			bool bResult = bDefault;
-
-			if (Property->HasMetaData(TagName))
-			{
-				bResult = true;
-
-				const FString ValueString = Property->GetMetaData(TagName);
-				if (!ValueString.IsEmpty())
-				{
-					if (ValueString == TEXT("true"))
-					{
-						bResult = true;
-					}
-					else if (ValueString == TEXT("false"))
-					{
-						bResult = false;
-					}
-				}
-			}
-
-			return bResult;
 		}
 	} // namespace Private
 
@@ -328,8 +300,6 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 			OutAllowedClassFilters.Add(ObjectClass);
 			return;
 		}
-
-		bool bExactClass = Private::GetTagOrBoolMetadata(MetadataProperty, TEXT("ExactClass"), false);
 
 		auto FindClass = [](const FString& InClassName) {
 			UClass* Class = UClass::TryFindTypeSlow<UClass>(InClassName, EFindFirstObjectOptions::EnsureIfAmbiguous);

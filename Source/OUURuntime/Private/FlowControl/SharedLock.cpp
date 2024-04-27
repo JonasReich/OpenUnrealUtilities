@@ -8,7 +8,7 @@
 
 void USharedLock::Lock(UObject* Key)
 {
-	bool bWasLockedBefore = IsLocked();
+	const bool bWasLockedBefore = IsLocked();
 	if (IsValid(Key))
 	{
 		ActiveKeys.AddUnique(Key);
@@ -21,7 +21,7 @@ void USharedLock::Lock(UObject* Key)
 
 void USharedLock::LockForDuration(UObject* Key, float Duration)
 {
-	UWorld* World = GetWorld();
+	const UWorld* World = GetWorld();
 	if (!IsValid(World))
 	{
 		UE_LOG(
@@ -43,9 +43,9 @@ void USharedLock::LockForDuration(UObject* Key, float Duration)
 
 bool USharedLock::TryUnlock(UObject* Key)
 {
-	bool bWasLockedBefore = IsLocked();
+	const bool bWasLockedBefore = IsLocked();
 	ActiveKeys.RemoveSwap(Key);
-	bool bIsUnlocked = !CheckIsLocked();
+	const bool bIsUnlocked = !CheckIsLocked();
 	if (bWasLockedBefore && bIsUnlocked)
 	{
 		OnLockStateChanged.Broadcast(this, false);

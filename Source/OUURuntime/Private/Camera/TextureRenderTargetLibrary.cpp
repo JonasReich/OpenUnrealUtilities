@@ -3,7 +3,6 @@
 #include "Camera/TextureRenderTargetLibrary.h"
 
 #include "Engine/TextureRenderTarget2D.h"
-#include "RHI.h"
 #include "TextureResource.h"
 #include "UnrealClient.h"
 
@@ -78,7 +77,7 @@ FLinearColor UTextureRenderTargetLibrary::GetAverageColor(
 	TArray<FLinearColor> LinearSamples;
 	FLinearColor Average = FLinearColor::Black;
 
-	float TotalPixelCount = TextureRenderTarget->SizeX * TextureRenderTarget->SizeY;
+	const float TotalPixelCount = TextureRenderTarget->SizeX * TextureRenderTarget->SizeY;
 	switch (ReadRenderTargetHelper(
 		Samples,
 		LinearSamples,

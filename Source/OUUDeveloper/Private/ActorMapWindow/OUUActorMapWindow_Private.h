@@ -4,7 +4,6 @@
 
 #include "ActorMapWindow/OUUActorMapWindow.h"
 #include "Slate/SplitterColumnSizeData.h"
-#include "Tickable.h"
 #include "Widgets/SWidget.h"
 #include "Widgets/Views/SListView.h"
 
@@ -179,8 +178,8 @@ namespace OUU::Developer::ActorMapWindow::Private
 
 		void Construct(
 			const FArguments& InArgs,
-			TSharedRef<STableViewBase> InOwnerTableView,
-			TSharedPtr<FActorQuery>& InActorQuery);
+			const TSharedRef<STableViewBase>& InOwnerTableView,
+			const TSharedPtr<FActorQuery>& InActorQuery);
 
 	private:
 		TSharedPtr<FActorQuery> ActorQuery;

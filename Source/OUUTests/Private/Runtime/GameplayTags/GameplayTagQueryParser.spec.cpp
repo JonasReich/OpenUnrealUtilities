@@ -27,21 +27,21 @@ void FGameplayTagQueryParserSpec::Define()
 {
 	Describe("ParseQuery", [this]() {
 		It("should create a query from a single tag without any operator", [this]() {
-			auto Query = FGameplayTagQueryParser::ParseQuery("OUUTestTags.Foo");
+			const auto Query = FGameplayTagQueryParser::ParseQuery("OUUTestTags.Foo");
 			TestTrue(
 				"Query matches [OUUTestTags.Foo]",
 				Query.Matches(FGameplayTagContainer(FSampleGameplayTags::Foo::Get())));
 		});
 
 		It("should create a query from a single ANY tag query", [this]() {
-			auto Query = FGameplayTagQueryParser::ParseQuery("ANY(OUUTestTags.Foo)");
+			const auto Query = FGameplayTagQueryParser::ParseQuery("ANY(OUUTestTags.Foo)");
 			TestTrue(
 				"Query matches [OUUTestTags.Foo]",
 				Query.Matches(FGameplayTagContainer(FSampleGameplayTags::Foo::Get())));
 		});
 
 		It("should create a query that behaves as expected with nested queries", [this]() {
-			auto Query = FGameplayTagQueryParser::ParseQuery(
+			const auto Query = FGameplayTagQueryParser::ParseQuery(
 				"ANY(ALL(OUUTestTags.Foo, OUUTestTags.Bar.Alpha), ANY(OUUTestTags.Bar.Beta, OUUTestTags.Bar.Gamma))");
 
 			// Single tags not sufficient

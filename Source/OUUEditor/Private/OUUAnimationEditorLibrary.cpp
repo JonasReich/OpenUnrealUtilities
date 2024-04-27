@@ -6,7 +6,6 @@
 #include "Animation/AnimInstance.h"
 #include "Animation/BoneChainRange.h"
 #include "Animation/TraverseBoneTree.h"
-#include "LODUtilities.h"
 #include "MeshUtilities.h"
 #include "Misc/RegexUtils.h"
 #include "Modules/ModuleManager.h"
@@ -41,14 +40,14 @@ USkeleton* UOUUAnimationEditorLibrary::GetAnimInstanceClassTargetSkeleton(TSubcl
 	if (!ensure(IsValid(AnimInstanceClass)))
 		return nullptr;
 
-	UAnimBlueprint* AnimationBlueprint = Cast<UAnimBlueprint>(AnimInstanceClass->ClassGeneratedBy);
+	const UAnimBlueprint* AnimationBlueprint = Cast<UAnimBlueprint>(AnimInstanceClass->ClassGeneratedBy);
 	if (!ensure(IsValid(AnimationBlueprint)))
 		return nullptr;
 
 	return AnimationBlueprint->TargetSkeleton;
 }
 
-USkeleton* UOUUAnimationEditorLibrary::GetAnimInstanceTargetSkeleton(UAnimInstance* AnimInstance)
+USkeleton* UOUUAnimationEditorLibrary::GetAnimInstanceTargetSkeleton(const UAnimInstance* AnimInstance)
 {
 	if (!ensure(IsValid(AnimInstance)))
 		return nullptr;

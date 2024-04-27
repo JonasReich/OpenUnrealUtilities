@@ -4,13 +4,13 @@
 
 #include "IMaterialEditor.h"
 #include "LogOpenUnrealUtilities.h"
-#include "MaterialEditor/Public/MaterialEditingLibrary.h"
+#include "MaterialEditingLibrary.h"
 #include "MaterialEditorUtilities.h"
 #include "Materials/Material.h"
-#include "Materials/MaterialExpressionBreakMaterialAttributes.h"
 #include "Materials/MaterialExpressionMakeMaterialAttributes.h"
 #include "Materials/MaterialFunction.h"
 #include "Materials/MaterialFunctionInterface.h"
+#include "Misc/EngineVersionComparison.h"
 #include "ScopedTransaction.h"
 #include "Toolkits/IToolkit.h"
 #include "Toolkits/ToolkitManager.h"
@@ -99,7 +99,7 @@ void UOUUMaterialEditingLibrary::InsertMaterialFunctionBeforeResult(
 
 void UOUUMaterialEditingLibrary::OpenMaterialEditorAndJumpToExpression(UMaterialExpression* Expression)
 {
-	auto* Outer = Expression->GetOuter();
+	const auto* Outer = Expression->GetOuter();
 
 	if (Outer->IsA<UMaterialInterface>())
 	{
@@ -125,7 +125,7 @@ void UOUUMaterialEditingLibrary::OpenMaterialEditorAndJumpToExpression(UMaterial
 	}
 }
 
-void UOUUMaterialEditingLibrary::CopyInputConnection(FExpressionInput* From, FExpressionInput* To)
+void UOUUMaterialEditingLibrary::CopyInputConnection(const FExpressionInput* From, FExpressionInput* To)
 {
 	if (From && From->IsConnected())
 	{
@@ -149,12 +149,12 @@ void UOUUMaterialEditingLibrary::CopyMaterialAttributeConnections(
 		&TargetMakeMaterialAttributes->CustomizedUVs[CustomUV])
 
 	// clang-format off
-	const int32 LineBefore = __LINE__;
+	constexpr int32 LineBefore = __LINE__;
 	COPY_INPUT_CONNECTION_SIMPLE(EmissiveColor);
 	COPY_INPUT_CONNECTION_SIMPLE(Opacity);
 	COPY_INPUT_CONNECTION_SIMPLE(OpacityMask);
-	// MP_DiffuseColor -> used in Lightmass, not exposed to user, computed from: BaseColor, Metallic
-	// MP_SpecularColor -> used in Lightmass, not exposed to user, derived from: SpecularColor, Metallic, Specular
+	// COPY_INPUT_CONNECTION_SIMPLE(DiffuseColor); -> not exposed in UMaterialExpressionMakeMaterialAttributes
+	// COPY_INPUT_CONNECTION_SIMPLE(SpecularColor); -> not exposed in UMaterialExpressionMakeMaterialAttributes
 	COPY_INPUT_CONNECTION_SIMPLE(BaseColor);
 	COPY_INPUT_CONNECTION_SIMPLE(Metallic);
 	COPY_INPUT_CONNECTION_SIMPLE(Specular);
@@ -166,8 +166,8 @@ void UOUUMaterialEditingLibrary::CopyMaterialAttributeConnections(
 	// MP_WorldDisplacement_DEPRECATED
 	// MP_TessellationMultiplier_DEPRECATED
 	COPY_INPUT_CONNECTION_SIMPLE(SubsurfaceColor);
-	// MP_CustomData0 -> not exposed in material attributes
-	// MP_CustomData1 -> not exposed in material attributes
+	// COPY_INPUT_CONNECTION_SIMPLE(CustomData0); -> not exposed in UMaterialExpressionMakeMaterialAttributes
+	// COPY_INPUT_CONNECTION_SIMPLE(CustomData1); -> not exposed in UMaterialExpressionMakeMaterialAttributes
 	COPY_INPUT_CONNECTION_SIMPLE(AmbientOcclusion);
 	COPY_INPUT_CONNECTION_SIMPLE(Refraction);
 	COPY_INPUT_CONNECTION_CUSTOM_UV(0);
@@ -180,19 +180,35 @@ void UOUUMaterialEditingLibrary::CopyMaterialAttributeConnections(
 	COPY_INPUT_CONNECTION_CUSTOM_UV(7);
 	COPY_INPUT_CONNECTION_SIMPLE(PixelDepthOffset);
 	COPY_INPUT_CONNECTION_SIMPLE(ShadingModel);
-	// MP_FrontMaterial -> not exposed in material attributes
-	// MP_SurfaceThickness -> not exposed in material attributes
-	const int32 LineAfter = __LINE__;
+	// COPY_INPUT_CONNECTION_SIMPLE(FrontMaterial); -> not exposed in UMaterialExpressionMakeMaterialAttributes
+	// COPY_INPUT_CONNECTION_SIMPLE(SurfaceThickness); -> not exposed in UMaterialExpressionMakeMaterialAttributes
+	#if !UE_VERSION_OLDER_THAN(5, 3, 0)
+	COPY_INPUT_CONNECTION_SIMPLE(Displacement);
+	#endif
+	constexpr int32 LineAfter = __LINE__;
 	// clang-format on
 
 #undef COPY_INPUT_CONNECTION_SIMPLE
-#undef COPY_INPUT_CONNECTION_CUSTOMUV
+#undef COPY_INPUT_CONNECTION_CUSTOM_UV
 
 	static_assert(
+#if UE_VERSION_OLDER_THAN(5, 3, 0)
 		MP_EmissiveColor == 0 && MP_SurfaceThickness == 31 && MP_MaterialAttributes == 32,
+#else
+		MP_EmissiveColor == 0 && MP_SurfaceThickness == 31 && MP_MaterialAttributes == 33,
+#endif
 		"The material property enum has changed, so this conversion probably misses some material property. Please "
 		"check the engine source and fix this.");
+
 	static_assert(
-		LineBefore + static_cast<int32>(MP_MaterialAttributes) + 1 == LineAfter,
+		LineBefore + static_cast<int32>(MP_MaterialAttributes)
+				+ 1
+				// #if / #endif
+				+ 2
+#if UE_VERSION_OLDER_THAN(5, 3, 0)
+				// Displacement not in UE 5.2
+				+ 1
+#endif
+			== LineAfter,
 		"Number of CopyInputConnection() calls does not match the number of material properties.");
 }

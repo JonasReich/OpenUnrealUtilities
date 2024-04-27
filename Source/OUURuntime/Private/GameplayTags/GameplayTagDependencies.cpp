@@ -14,7 +14,7 @@ void IGameplayTagDependencyInterface::AppendTags(FGameplayTagContainer& OutTags)
 
 void IGameplayTagDependencyInterface::BroadcastTagsChanged()
 {
-	FGameplayTagContainer AllTagsBefore = CachedTags_All;
+	const FGameplayTagContainer AllTagsBefore = CachedTags_All;
 	UpdateCachedTags(EGameplayTagDependencyGetMode::OwnTags);
 	UpdateCachedTags(EGameplayTagDependencyGetMode::AllTags);
 
@@ -116,6 +116,7 @@ FGameplayTagContainer& IGameplayTagDependencyInterface::GetTagCache(EGameplayTag
 	{
 	case EGameplayTagDependencyGetMode::OwnTags: return CachedTags_Own;
 	case EGameplayTagDependencyGetMode::DependencyTags: return CachedTags_Dependencies;
+	case EGameplayTagDependencyGetMode::AllTags: break;
 	}
 	return CachedTags_All;
 }
@@ -146,6 +147,7 @@ void IGameplayTagDependencyInterface::AppendTags_Internal(
 	}
 
 	const bool bIncludeDependencyTags = Mode != EGameplayTagDependencyGetMode::OwnTags;
+	// ReSharper disable once CppTooWideScope
 	const bool bIncludeOwnTags = Mode != EGameplayTagDependencyGetMode::DependencyTags;
 
 	if (bIncludeOwnTags)

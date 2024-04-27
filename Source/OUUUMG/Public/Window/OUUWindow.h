@@ -71,7 +71,7 @@ protected:
 	FOUUWindowParameters WindowParameters;
 
 	/** Initialization. Should only be called from OpenWindow() */
-	void Initialize(UWidget* InRootWidget, FOUUWindowParameters InWindowParameters);
+	void Initialize(UWidget* InRootWidget, const FOUUWindowParameters& InWindowParameters);
 
 	/** Function bound to the internal window closed event of the slate widget */
 	void HandleSlateWindowClosed(const TSharedRef<SWindow>& ClosedSlateWindow);

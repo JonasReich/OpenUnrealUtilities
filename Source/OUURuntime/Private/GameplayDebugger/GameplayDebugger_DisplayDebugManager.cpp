@@ -46,7 +46,7 @@ void FGameplayDebugger_DisplayDebugManager::DrawString(const FString& InDebugStr
 	AddColumnIfNeeded();
 }
 
-void FGameplayDebugger_DisplayDebugManager::AddColumnIfNeeded()
+void FGameplayDebugger_DisplayDebugManager::AddColumnIfNeeded() const
 {
 	const float YStep = GetYStep();
 	if (CanvasContext.Canvas.IsValid() && (CanvasContext.CursorY + YStep * 2) > CanvasContext.Canvas->ClipY)

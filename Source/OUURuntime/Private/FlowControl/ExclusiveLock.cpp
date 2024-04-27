@@ -27,7 +27,7 @@ bool UExclusiveLock::TryLock(UObject* Key)
 
 bool UExclusiveLock::TryLockForDuration(UObject* Key, float Duration)
 {
-	UWorld* World = GetWorld();
+	const UWorld* World = GetWorld();
 	if (!IsValid(World))
 	{
 		UE_LOG(

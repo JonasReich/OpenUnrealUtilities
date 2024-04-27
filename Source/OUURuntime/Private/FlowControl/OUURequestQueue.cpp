@@ -11,7 +11,7 @@ UOUURequestQueue::UOUURequestQueue()
 
 UOUURequest* UOUURequestQueue::CreateNewRequest()
 {
-	UClass* RequestClassToUse = ensure(*RequestClass) ? *RequestClass : UOUURequest::StaticClass();
+	const UClass* RequestClassToUse = ensure(*RequestClass) ? *RequestClass : UOUURequest::StaticClass();
 	UOUURequest* Request = NewObject<UOUURequest>(GetTransientPackage(), RequestClassToUse);
 	RequestQueue.Add(Request);
 	Request->OnCompleted.AddDynamic(this, &UOUURequestQueue::HandleRequestCompleted);
@@ -53,6 +53,7 @@ UOUURequest* UOUURequestQueue::GetOldestRequestWithState(EOUURequestState State)
 	return nullptr;
 }
 
+// ReSharper disable once CppMemberFunctionMayBeConst
 void UOUURequestQueue::HandleRequestRaised(UOUURequest* Request)
 {
 	// Forward newly raised requests

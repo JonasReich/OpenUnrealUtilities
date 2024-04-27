@@ -48,7 +48,4 @@ public:
 		TEnumAsByte<EAppReturnType::Type> DefaultValue,
 		FText OptionalTitle,
 		FText Message);
-
-private:
-	static const FText* GetOptionalTitlePtr(FText& Text);
 };

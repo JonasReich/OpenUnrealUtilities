@@ -45,7 +45,7 @@ namespace OUU::TestUtilities
 
 	FLatentAutomationPIEWorldLoader::FLatentAutomationPIEWorldLoader(
 		FAutomationSpecBase& OwningSpec,
-		FString MapName,
+		const FString& MapName,
 		bool bIgnoreLoadErrors) :
 		OwningSpec(OwningSpec), MapName(MapName), bIgnoreLoadErrors(bIgnoreLoadErrors)
 	{
@@ -74,8 +74,10 @@ namespace OUU::TestUtilities
 		OwningSpec.LatentBeforeEach([this](const FDoneDelegate& Done) { LatentLoad(Done); });
 	}
 
+	// ReSharper disable once CppMemberFunctionMayBeStatic
 	UWorld* FLatentAutomationPIEWorldLoader::GetLoadedWorld() const { return Private::GetAnyGameWorld(); }
 
+	// ReSharper disable once CppMemberFunctionMayBeStatic
 	void FLatentAutomationPIEWorldLoader::ClosePIE()
 	{
 	#if WITH_EDITOR
@@ -86,20 +88,13 @@ namespace OUU::TestUtilities
 	#endif
 	}
 
-	bool FLatentAutomationPIEWorldLoader::Update_WaitForShaderToFinishCompiling()
+	bool FLatentAutomationPIEWorldLoader::IsGameStartComplete() const
 	{
-		// GShaderCompilingManager->FinishAllCompilation();
-		// FAssetCompilingManager::Get().FinishAllCompilation();
-		return false;
-	}
-
-	bool FLatentAutomationPIEWorldLoader::IsGameStartComplete()
-	{
-		UWorld* TestWorld = GetLoadedWorld();
+		const UWorld* TestWorld = GetLoadedWorld();
 
 		if (TestWorld && TestWorld->AreActorsInitialized())
 		{
-			AGameStateBase* GameState = TestWorld->GetGameState();
+			const AGameStateBase* GameState = TestWorld->GetGameState();
 			if (GameState && GameState->HasMatchStarted())
 			{
 				// remove any paths or extensions to match the name of the world
@@ -119,7 +114,7 @@ namespace OUU::TestUtilities
 
 	void FLatentAutomationPIEWorldLoader::Update_MapLoaded()
 	{
-		if (UWorld* GameWorld = GetLoadedWorld())
+		if (const UWorld* GameWorld = GetLoadedWorld())
 		{
 			GameWorld->GetTimerManager().SetTimerForNextTick([this]() {
 				if (IsGameStartComplete())

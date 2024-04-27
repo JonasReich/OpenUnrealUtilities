@@ -17,7 +17,6 @@
 #include "GameFramework/PlayerController.h"
 #include "GameplayTagContainer.h"
 #include "GameplayTags/GameplayTagQueryParser.h"
-#include "Misc/EngineVersionComparison.h"
 #include "Misc/RegexUtils.h"
 #include "TextureResource.h"
 #include "Widgets/Docking/SDockTab.h"
@@ -183,7 +182,7 @@ namespace OUU::Developer::ActorMapWindow
 						1.f - RelativeLocation2D_Normalized.X};
 					const FVector2D WidgetSpaceLocation = Position + WidgetSpaceLocationNormalized * Size;
 
-					const float MarkerSize = 6.f;
+					constexpr float MarkerSize = 6.f;
 					FSlateDrawElement::MakeBox(
 						OutDrawElements,
 						RetLayerId++,
@@ -237,8 +236,8 @@ namespace OUU::Developer::ActorMapWindow
 
 		void SActorQueryRow::Construct(
 			const FArguments& InArgs,
-			TSharedRef<STableViewBase> InOwnerTableView,
-			TSharedPtr<FActorQuery>& InActorQuery)
+			const TSharedRef<STableViewBase>& InOwnerTableView,
+			const TSharedPtr<FActorQuery>& InActorQuery)
 		{
 			ActorQuery = InActorQuery;
 			ensure(ActorQuery.IsValid());
@@ -394,13 +393,9 @@ namespace OUU::Developer::ActorMapWindow
 					if (bFollowCamera)
 					{
 						bool bSetLocalCameraLocation = false;
-						if (auto* LocalPlayerController = TargetWorld->GetFirstPlayerController())
+						if (const auto* LocalPlayerController = TargetWorld->GetFirstPlayerController())
 						{
-#if UE_VERSION_OLDER_THAN(5, 0, 0)
-							if (auto* Camera = LocalPlayerController->PlayerCameraManager)
-#else
-							if (APlayerCameraManager* Camera = LocalPlayerController->PlayerCameraManager.Get())
-#endif
+							if (const APlayerCameraManager* Camera = LocalPlayerController->PlayerCameraManager.Get())
 							{
 								bSetLocalCameraLocation = true;
 								LocalCameraLocation = Camera->GetCameraLocation();
@@ -409,7 +404,7 @@ namespace OUU::Developer::ActorMapWindow
 						if (!bSetLocalCameraLocation)
 						{
 #if WITH_EDITOR
-							for (FLevelEditorViewportClient* LevelVC : GEditor->GetLevelViewportClients())
+							for (const FLevelEditorViewportClient* LevelVC : GEditor->GetLevelViewportClients())
 							{
 								if (LevelVC && LevelVC->IsPerspective())
 								{
@@ -787,7 +782,7 @@ namespace OUU::Developer::ActorMapWindow
 		if (!ActorTagQuery.IsEmpty())
 		{
 			bAtLeastOneFilterActive = true;
-			if (UAbilitySystemComponent* AbilitySystemComponent =
+			if (const UAbilitySystemComponent* AbilitySystemComponent =
 					Actor->FindComponentByClass<UAbilitySystemComponent>())
 			{
 				FGameplayTagContainer OwnedTags;

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 
+// ReSharper disable once CppUnusedIncludeDirective
 #include "Misc/EngineVersionComparison.h"
 #include "Templates/RWLockedVariable.h"
 #include "Traits/ConditionalType.h"
@@ -200,11 +201,7 @@ public:
 		static auto Do(const ThisType& TypedThis)
 		{
 			// Call &TypedThis.GetByIdx<Indices>() for every Index in the parameter pack
-#if UE_VERSION_OLDER_THAN(5, 0, 0)
-			return UE4Tuple_Private::MakeTupleImpl(&TypedThis.GetByIdx<Indices>()...);
-#else
 			return MakeTuple(&TypedThis.GetByIdx<Indices>()...);
-#endif
 		}
 	};
 

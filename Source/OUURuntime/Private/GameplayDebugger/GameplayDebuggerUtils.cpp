@@ -12,7 +12,7 @@
 
 FString OUU::Runtime::GameplayDebuggerUtils::WrapStringToWidth(
 	const FString& InString,
-	FGameplayDebuggerCanvasContext& CanvasContext,
+	const FGameplayDebuggerCanvasContext& CanvasContext,
 	float TargetWidth)
 {
 	FString OutString;
@@ -26,7 +26,7 @@ FString OUU::Runtime::GameplayDebuggerUtils::WrapStringToWidth(
 bool OUU::Runtime::GameplayDebuggerUtils::TryWrapStringToWidth(
 	const FString& InString,
 	FString& OutString,
-	FGameplayDebuggerCanvasContext& CanvasContext,
+	const FGameplayDebuggerCanvasContext& CanvasContext,
 	float TargetWidth)
 {
 	if (!InString.IsEmpty())
@@ -38,7 +38,7 @@ bool OUU::Runtime::GameplayDebuggerUtils::TryWrapStringToWidth(
 		// Calculate the length (in pixel) of the string
 		CanvasContext.MeasureString(InString, StrWidth, StrHeight);
 
-		int32 SubDivision = FMath::CeilToInt(StrWidth / TargetWidth);
+		const int32 SubDivision = FMath::CeilToInt(StrWidth / TargetWidth);
 		if (SubDivision > 1)
 		{
 			// Copy the string
@@ -71,7 +71,7 @@ FString OUU::Runtime::GameplayDebuggerUtils::GetColoredBoolString(bool bBoolValu
 
 void OUU::Runtime::GameplayDebuggerUtils::SetCategoryEnabled(
 	AGameplayDebuggerCategoryReplicator& InCategoryReplicator,
-	FGameplayDebuggerCategory& InCategoryToClose,
+	const FGameplayDebuggerCategory& InCategoryToClose,
 	bool bEnabled)
 {
 	const int32 NumCategories = InCategoryReplicator.GetNumCategories();

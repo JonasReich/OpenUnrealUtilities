@@ -23,7 +23,7 @@ public:
 
 	void DrawString(const FString& InDebugString, const float& OptionalXOffset = 0.f);
 
-	void AddColumnIfNeeded();
+	void AddColumnIfNeeded() const;
 
 	float GetYStep() const;
 
@@ -43,7 +43,7 @@ public:
 		int32 Indent = 0;
 		int32 ChainID = 0;
 
-		FFlattenedDebugData(FString InDebugString, int32 InIndent, int32 InChainID) :
+		FFlattenedDebugData(const FString& InDebugString, int32 InIndent, int32 InChainID) :
 			DebugString(InDebugString), Indent(InIndent), ChainID(InChainID)
 		{
 		}

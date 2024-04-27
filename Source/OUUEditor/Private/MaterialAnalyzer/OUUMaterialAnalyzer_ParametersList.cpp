@@ -3,10 +3,8 @@
 #include "MaterialAnalyzer/OUUMaterialAnalyzer_ParametersList.h"
 
 #include "Brushes/SlateColorBrush.h"
-#include "IMaterialEditor.h"
 #include "MaterialAnalyzer/OUUMaterialAnalyzer.h"
 #include "MaterialAnalyzer/OUUMaterialAnalyzer_EditorObject.h"
-#include "MaterialEditorUtilities.h"
 #include "OUUMaterialEditingLibrary.h"
 #include "Widgets/Input/SButton.h"
 
@@ -81,6 +79,7 @@ namespace OUU::Editor::Private::MaterialAnalyzer::Widgets
 	}
 
 	TSharedRef<ITableRow> SOUUMaterialAnalyzer_ParametersList::GenerateRowWidget(
+		// ReSharper disable once CppPassValueParameterByConstReference
 		TSharedPtr<FOUUMaterialAnalyzer_ParameterData> Item,
 		const TSharedRef<STableViewBase>& OwnerTable) const
 	{

@@ -26,7 +26,7 @@ enum class ENaturalTestEnum : uint8
 DECLARE_ENUM_SEQUENCE(ENaturalTestEnum, EEnumSequenceType::Natural);
 
 // Shared bitmask used for all TestAllBits_* and TestAnyBits_* tests
-const int32 TestMultipleNaturalBits_Bitmask = 7;
+constexpr int32 TestMultipleNaturalBits_Bitmask = 7;
 
 enum class EPow2TestEnum : uint8
 {
@@ -40,7 +40,7 @@ enum class EPow2TestEnum : uint8
 DECLARE_BITMASK_OPERATORS(EPow2TestEnum);
 
 // Shared bitmask used for all TestAllBits_* and TestAnyBits_* tests
-const int32 TestMultiplePow2Bits_Bitmask = 7;
+constexpr int32 TestMultiplePow2Bits_Bitmask = 7;
 
 //////////////////////////////////////////////////////////////////////////
 // Statically test bitmask operators
@@ -78,7 +78,7 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("false|16|16")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(EnumValueAsBitmask)
 {
 	// Arrange
-	FAutomationTestParameterParser Parser{Parameters};
+	const FAutomationTestParameterParser Parser{Parameters};
 	const bool bNaturalEnum = Parser.GetValue<bool>(0);
 	const int32 ExpectedBitmask = Parser.GetValue<int32>(2);
 
@@ -99,12 +99,12 @@ OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(EnumValueAsBitmask)
 OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(EnumValuesAsBitmask, DEFAULT_OUU_TEST_FLAGS)
 {
 	// Arrange
-	const int32 ExpectedBitmask = 3;
+	constexpr int32 ExpectedBitmask = 3;
 
 	// Act
-	const int32 NaturalBitmask =
+	constexpr int32 NaturalBitmask =
 		OUU::Runtime::BitmaskUtils::EnumValuesAsBitmask({ENaturalTestEnum::Zero, ENaturalTestEnum::One});
-	const int32 Pow2Bitmask =
+	constexpr int32 Pow2Bitmask =
 		OUU::Runtime::BitmaskUtils::EnumValuesAsBitmask({EPow2TestEnum::FirstBit, EPow2TestEnum::SecondBit});
 
 	// Assert
@@ -138,7 +138,7 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("false|4|1|5")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(SetBit)
 {
 	// Arrange
-	FAutomationTestParameterParser Parser{Parameters};
+	const FAutomationTestParameterParser Parser{Parameters};
 	const bool bNaturalEnum = Parser.GetValue<bool>(0);
 	int32 Bitmask = Parser.GetValue<int32>(1);
 	const int32 ExpectedResult = Parser.GetValue<int32>(3);
@@ -161,7 +161,7 @@ OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(SetBit)
 OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(SetBits, DEFAULT_OUU_TEST_FLAGS)
 {
 	// Arrange
-	const int32 ExpectedBitmask = 7;
+	constexpr int32 ExpectedBitmask = 7;
 	int32 NaturalBitmask = 4;
 	int32 Pow2Bitmask = 4;
 
@@ -199,7 +199,7 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("false|3|2|1")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(ClearBit)
 {
 	// Arrange
-	FAutomationTestParameterParser Parser{Parameters};
+	const FAutomationTestParameterParser Parser{Parameters};
 	const bool bNaturalEnum = Parser.GetValue<bool>(0);
 	int32 Bitmask = Parser.GetValue<int32>(1);
 	const int32 ExpectedResult = Parser.GetValue<int32>(3);
@@ -222,7 +222,7 @@ OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(ClearBit)
 OUU_IMPLEMENT_SIMPLE_AUTOMATION_TEST(ClearBits, DEFAULT_OUU_TEST_FLAGS)
 {
 	// Arrange
-	const int32 ExpectedBitmask = 4;
+	constexpr int32 ExpectedBitmask = 4;
 	int32 NaturalBitmask = 7;
 	int32 Pow2Bitmask = 7;
 
@@ -265,13 +265,13 @@ OUU_COMPLEX_AUTOMATION_TESTCASE("false|3|4|false")
 OUU_IMPLEMENT_COMPLEX_AUTOMATION_TEST_END(TestBit)
 {
 	// Arrange
-	FAutomationTestParameterParser Parser{Parameters};
+	const FAutomationTestParameterParser Parser{Parameters};
 	const bool bNaturalEnum = Parser.GetValue<bool>(0);
-	int32 Bitmask = Parser.GetValue<int32>(1);
+	const int32 Bitmask = Parser.GetValue<int32>(1);
 	const bool ExpectedResult = Parser.GetValue<bool>(3);
 
 	// Act
-	bool ActualResult = bNaturalEnum
+	const bool ActualResult = bNaturalEnum
 		? OUU::Runtime::BitmaskUtils::TestBit(Bitmask, Parser.GetValue<ENaturalTestEnum>(2))
 		: OUU::Runtime::BitmaskUtils::TestBit(Bitmask, Parser.GetValue<EPow2TestEnum>(2));
 

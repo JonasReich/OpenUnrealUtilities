@@ -10,6 +10,7 @@
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "LevelEditor.h"
+#include "Misc/EngineVersionComparison.h"
 #include "Modules/ModuleManager.h"
 
 void UOUUEditorLibrary::InvokeSessionFrontend(FName Panel)
@@ -99,9 +100,9 @@ void UOUUEditorLibrary::FocusOnBlueprintContent(const FOUUBlueprintEditorFocusCo
 		else
 		{
 			// fallback to trying the main level editor tab manager
-			FLevelEditorModule& LevelEditorModule =
+			const FLevelEditorModule& LevelEditorModule =
 				FModuleManager::GetModuleChecked<FLevelEditorModule>(TEXT("LevelEditor"));
-			TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule.GetLevelEditorTabManager();
+			const TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule.GetLevelEditorTabManager();
 			LevelEditorTabManager->TryInvokeTab(FName(*FocusContent.TabToFocusOrOpen));
 		}
 	}
@@ -120,7 +121,11 @@ void UOUUEditorLibrary::FocusOnBlueprintContent(const FOUUBlueprintEditorFocusCo
 	}
 	else if (AssetObject != nullptr)
 	{
+#if UE_VERSION_OLDER_THAN(5, 3, 0)
 		TArray<UObject*> Objects{AssetObject};
+#else
+		const TArray<UObject*> Objects{AssetObject};
+#endif
 		GEditor->SyncBrowserToObjects(Objects);
 	}
 }

@@ -28,7 +28,7 @@ void UMessageLogBlueprintLibrary::AddTokenizedMessageLogMessage(
 		MessageTokens.Add(FMessageLogToken::CreateTextMessageLogToken(FText::FromString("<empty message>")));
 	}
 
-	TSharedRef<FTokenizedMessage> Message = FTokenizedMessage::Create(StaticCast<EMessageSeverity::Type>(Severity));
+	const TSharedRef<FTokenizedMessage> Message = FTokenizedMessage::Create(StaticCast<EMessageSeverity::Type>(Severity));
 	for (auto& Token : MessageTokens)
 	{
 		Message->AddToken(Token.CreateNativeMessageToken());
@@ -59,23 +59,26 @@ void UMessageLogBlueprintLibrary::NewMessageLogPage(FName MessageLogName, const 
 }
 
 FMessageLogToken UMessageLogBlueprintLibrary::CreateAssetNameMessageLogToken(
-	FString AssetName,
-	FText OptionalLabelOverride)
+	const FString& AssetName,
+	const FText& OptionalLabelOverride)
 {
 	return FMessageLogToken::CreateAssetNameMessageLogToken(AssetName, OptionalLabelOverride);
 }
 
-FMessageLogToken UMessageLogBlueprintLibrary::CreateObjectMessageLogToken(UObject* Object, FText OptionalLabelOverride)
+FMessageLogToken UMessageLogBlueprintLibrary::CreateObjectMessageLogToken(
+	const UObject* Object,
+	const FText& OptionalLabelOverride)
 {
 	return FMessageLogToken::CreateObjectMessageLogToken(Object, OptionalLabelOverride);
 }
 
-FMessageLogToken UMessageLogBlueprintLibrary::CreateTextMessageLogToken(FText Text)
+FMessageLogToken UMessageLogBlueprintLibrary::CreateTextMessageLogToken(const FText& Text)
 {
 	return FMessageLogToken::CreateTextMessageLogToken(Text);
 }
 
-FMessageLogToken UMessageLogBlueprintLibrary::CreateURLMessageLogToken(FString URL, FText OptionalLabelOverride)
+FMessageLogToken UMessageLogBlueprintLibrary::CreateURLMessageLogToken(const FString& URL,
+	const FText& OptionalLabelOverride)
 {
 	return FMessageLogToken::CreateURLMessageLogToken(URL, OptionalLabelOverride);
 }

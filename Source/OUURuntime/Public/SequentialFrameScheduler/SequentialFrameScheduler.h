@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 
+#include "Misc/EngineVersionComparison.h"
 #include "SequentialFrameScheduler/SequentialFrameTask.h"
 #include "Templates/RingAggregator.h"
 
@@ -64,7 +65,11 @@ public:
 	template <class UserClass>
 	FORCEINLINE FTaskHandle AddTask(
 		UserClass* InObj,
+#if UE_VERSION_OLDER_THAN(5, 3, 0)
 		typename FTaskDelegate::TUObjectMethodDelegate<UserClass>::FMethodPtr InTaskMethod,
+#else
+		FTimerDelegate::TMethodPtr<UserClass> InTaskMethod,
+#endif
 		float InPeriod,
 		bool bTickAsOftenAsPossible = true)
 	{
@@ -77,7 +82,11 @@ public:
 	template <class UserClass>
 	FORCEINLINE FTaskHandle AddTask(
 		UserClass* InObj,
+#if UE_VERSION_OLDER_THAN(5, 3, 0)
 		typename FTaskDelegate::TUObjectMethodDelegate_Const<UserClass>::FMethodPtr InTaskMethod,
+#else
+		FTimerDelegate::TConstMethodPtr<UserClass> InTaskMethod,
+#endif
 		float InPeriod,
 		bool bTickAsOftenAsPossible = true)
 	{
@@ -139,7 +148,7 @@ protected:
 	TArray<FTaskHandle> TasksPendingForRemoval;
 
 	// Store the delta times of last 60 frames to better predict delta time for next frame
-	static const int32 NumFramesBufferSize = 60;
+	static constexpr int32 NumFramesBufferSize = 60;
 	TFixedSizeCircularAggregator<float, NumFramesBufferSize> DeltaTimeRingBuffer;
 
 #if WITH_GAMEPLAY_DEBUGGER

@@ -14,7 +14,7 @@ void OUU::Runtime::CanvasGraphPlottingUtils::DrawCanvasGraph(
 	float GraphLeftXPos,
 	float GraphBottomYPos,
 	const TArray<OUU::Runtime::CanvasGraphPlottingUtils::FGraphStatData>& StatsToDraw,
-	const FString GraphTitle,
+	const FString& GraphTitle,
 	float HighestValue,
 	bool bUseLogarithmicYAxis)
 {
@@ -28,10 +28,10 @@ void OUU::Runtime::CanvasGraphPlottingUtils::DrawCanvasGraph(
 
 	// Graph layout
 
-	const float GraphBackgroundMarginSize = 8.0f;
-	const float GraphTotalWidth = 200.f;
+	constexpr float GraphBackgroundMarginSize = 8.0f;
+	constexpr float GraphTotalWidth = 200.f;
 	const float GraphHorizPixelsPerFrame = GraphTotalWidth / NumberOfSamples;
-	const float GraphTotalHeight = 200.f;
+	constexpr float GraphTotalHeight = 200.f;
 
 	// Draw background.
 	{
@@ -58,7 +58,7 @@ void OUU::Runtime::CanvasGraphPlottingUtils::DrawCanvasGraph(
 
 	// Draw timing graph frame.
 	{
-		const FLinearColor GraphBorderColor(0.1f, 0.1f, 0.1f);
+		constexpr FLinearColor GraphBorderColor(0.1f, 0.1f, 0.1f);
 
 		// Left
 		BatchedElements->AddLine(

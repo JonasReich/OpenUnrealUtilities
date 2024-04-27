@@ -108,7 +108,7 @@ void USlateNotificationLibrary::SetSlateNotificationHyperlink(
 	if (auto* Notification = FindNotification(NotificationHandle))
 	{
 		// ReSharper disable once CppExpressionWithoutSideEffects
-		const FSimpleDelegate Delegate = FSimpleDelegate::CreateLambda([=]() { HyperlinkDelegate.ExecuteIfBound(); });
+		const FSimpleDelegate Delegate = FSimpleDelegate::CreateLambda([HyperlinkDelegate]() { HyperlinkDelegate.ExecuteIfBound(); });
 		Notification->SetHyperlink(Delegate, HyperlinkText);
 	}
 }
@@ -146,7 +146,7 @@ void USlateNotificationLibrary::SetSlateNotificationFadeOutDuration(
 ESlateNotificationState USlateNotificationLibrary::GetSlateNotificationCompletionState(
 	const FSlateNotificationHandle& NotificationHandle)
 {
-	if (auto* Notification = FindNotification(NotificationHandle))
+	if (const auto* Notification = FindNotification(NotificationHandle))
 	{
 		return SlateNotificationState_ConvertSlateToBlueprint(Notification->GetCompletionState());
 	}
@@ -202,7 +202,7 @@ USlateNotificationLibrary::FNotificationMap& USlateNotificationLibrary::GetNotif
 SNotificationItem* USlateNotificationLibrary::FindNotification(const FSlateNotificationHandle& Handle)
 {
 	UE_CLOG(!Handle.IsValid(), LogOpenUnrealUtilities, Warning, TEXT("Slate notification handle is invalid"));
-	if (auto* Ptr = GetNotificationMap().Find(Handle))
+	if (const auto* Ptr = GetNotificationMap().Find(Handle))
 	{
 		return Ptr->Get();
 	}

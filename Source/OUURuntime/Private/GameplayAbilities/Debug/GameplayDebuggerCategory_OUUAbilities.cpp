@@ -2,10 +2,10 @@
 
 #include "GameplayAbilities/Debug/GameplayDebuggerCategory_OUUAbilities.h"
 
-#include "TimerManager.h"
-
 #if WITH_GAMEPLAY_DEBUGGER
 
+	#include "Misc/EngineVersionComparison.h"
+	#include "TimerManager.h"
 	#include "AbilitySystemComponent.h"
 	#include "AbilitySystemGlobals.h"
 	#include "AbilitySystemLog.h"
@@ -271,19 +271,24 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 			}
 
 			FString StackString;
-			if (ActiveGE.Spec.StackCount > 1)
+	#if UE_VERSION_OLDER_THAN(5, 3, 0)
+			const int32 ActiveGE_StackCount = ActiveGE.Spec.StackCount;
+	#else
+			const int32 ActiveGE_StackCount = ActiveGE.Spec.GetStackCount();
+	#endif
+			if (ActiveGE_StackCount > 1)
 			{
 				if (ActiveGE.Spec.Def->StackingType == EGameplayEffectStackingType::AggregateBySource)
 				{
 					StackString = FString::Printf(
 						TEXT("(Stacks: %d. From: %s) "),
-						ActiveGE.Spec.StackCount,
+						ActiveGE_StackCount,
 						*GetNameSafe(
 							ActiveGE.Spec.GetContext().GetInstigatorAbilitySystemComponent()->GetAvatarActor_Direct()));
 				}
 				else
 				{
-					StackString = FString::Printf(TEXT("(Stacks: %d) "), ActiveGE.Spec.StackCount);
+					StackString = FString::Printf(TEXT("(Stacks: %d) "), ActiveGE_StackCount);
 				}
 			}
 
@@ -610,13 +615,14 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 				}
 				else if (Cast<AGameplayCueNotify_Actor>(CueClass->ClassDefaultObject) != nullptr)
 				{
-					AActor* LocalAvatarActor = AbilitySystem->GetAvatarActor_Direct();
-					AActor* LocalOwnerActor = AbilitySystem->GetOwnerActor();
 					if (Info.Canvas)
 					{
 						Info.Canvas->SetDrawColor(FColorList::White);
 					}
 					DebugLine(Info, FString::Printf(TEXT("%s -> actor"), *CueTagString), 0.f, 0.f);
+	#if UE_VERSION_OLDER_THAN(5, 3, 0)
+					AActor* LocalAvatarActor = AbilitySystem->GetAvatarActor_Direct();
+					AActor* LocalOwnerActor = AbilitySystem->GetOwnerActor();
 					for (auto CueEntry : CueManager->NotifyMapActor)
 					{
 						FGCNotifyActorKey Key = CueEntry.Key;
@@ -637,6 +643,9 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 							7.f,
 							0.f);
 					}
+	#else
+					DebugLine(Info, TEXT("no NotifyMapActor since UE 5.3.0"), 7.f, 0.f);
+	#endif
 				}
 			}
 			else if (bPrintUnmappedCues)
@@ -694,7 +703,7 @@ void FGameplayDebuggerCategory_OUUAbilities::Debug_Custom(
 
 void FGameplayDebuggerCategory_OUUAbilities::GetAttributeAggregatorSnapshot(
 	UOUUAbilitySystemComponent* AbilitySystem,
-	FGameplayAttribute& Attribute,
+	const FGameplayAttribute& Attribute,
 	FAggregator SnapshotAggregator)
 {
 	// NOTE: As of writing this code, this is how I understand the usage of CaptureSource and bSnapshot.
@@ -707,11 +716,11 @@ void FGameplayDebuggerCategory_OUUAbilities::GetAttributeAggregatorSnapshot(
 	// We pick snapshot, because we do not want any future updates of the values, just a single snapshot.
 	constexpr bool bSnapshot = true;
 
-	FGameplayEffectAttributeCaptureDefinition CaptureDefinition{Attribute, CaptureSource, bSnapshot};
+	const FGameplayEffectAttributeCaptureDefinition CaptureDefinition{Attribute, CaptureSource, bSnapshot};
 	FGameplayEffectAttributeCaptureSpec CaptureSpec{CaptureDefinition};
 	AbilitySystem->CaptureAttributeForGameplayEffect(IN OUT CaptureSpec);
 
-	bool bGotSnapshot = CaptureSpec.AttemptGetAttributeAggregatorSnapshot(OUT SnapshotAggregator);
+	const bool bGotSnapshot = CaptureSpec.AttemptGetAttributeAggregatorSnapshot(OUT SnapshotAggregator);
 	ensureAlwaysMsgf(
 		bGotSnapshot,
 		TEXT("Snapshots should always be successful! "
@@ -719,7 +728,8 @@ void FGameplayDebuggerCategory_OUUAbilities::GetAttributeAggregatorSnapshot(
 			 "See docs of FGameplayEffectAttributeCaptureSpec::AttemptGetAttributeAggregatorSnapshot."));
 }
 
-void FGameplayDebuggerCategory_OUUAbilities::DrawTitle(FAbilitySystemComponentDebugInfo& Info,
+void FGameplayDebuggerCategory_OUUAbilities::DrawTitle(
+	FAbilitySystemComponentDebugInfo& Info,
 	const FString& DebugTitle) const
 {
 	if (Info.Canvas)

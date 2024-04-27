@@ -20,7 +20,8 @@ namespace OUU::Runtime::GameplayDebuggerUtils
 	 * Returns a copy of the the InString that is wrapped to fit the TargetWidth when displayed on the CanvasContext.
 	 */
 	FString OUURUNTIME_API
-		WrapStringToWidth(const FString& InString, FGameplayDebuggerCanvasContext& CanvasContext, float TargetWidth);
+		WrapStringToWidth(const FString& InString,
+		const FGameplayDebuggerCanvasContext& CanvasContext, float TargetWidth);
 
 	/**
 	 * Returns a copy of the the InString that is wrapped to fit the TargetWidth when displayed on the CanvasContext.
@@ -30,7 +31,7 @@ namespace OUU::Runtime::GameplayDebuggerUtils
 	bool OUURUNTIME_API TryWrapStringToWidth(
 		const FString& InString,
 		FString& OutString,
-		FGameplayDebuggerCanvasContext& CanvasContext,
+		const FGameplayDebuggerCanvasContext& CanvasContext,
 		float TargetWidth);
 
 	/**
@@ -47,7 +48,7 @@ namespace OUU::Runtime::GameplayDebuggerUtils
 	 */
 	void OUURUNTIME_API SetCategoryEnabled(
 		AGameplayDebuggerCategoryReplicator& InCategoryReplicator,
-		FGameplayDebuggerCategory& InCategoryToClose,
+		const FGameplayDebuggerCategory& InCategoryToClose,
 		bool bEnabled);
 
 } // namespace OUU::Runtime::GameplayDebuggerUtils

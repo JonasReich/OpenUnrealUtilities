@@ -66,7 +66,7 @@ namespace OUU::Runtime::UMGUtils
 			TArray<FName> SlotNames;
 			NamedSlotHost->GetSlotNames(SlotNames);
 
-			for (FName SlotName : SlotNames)
+			for (const FName& SlotName : SlotNames)
 			{
 				if (WidgetClass* SlotContent = NamedSlotHost->GetContentForSlot(SlotName))
 				{
@@ -101,7 +101,7 @@ namespace OUU::Runtime::UMGUtils
 			TArray<FName> SlotNames;
 			NamedSlotHost->GetSlotNames(SlotNames);
 
-			for (FName SlotName : SlotNames)
+			for (const FName& SlotName : SlotNames)
 			{
 				if (WidgetClass* SlotContent = NamedSlotHost->GetContentForSlot(SlotName))
 				{
@@ -135,7 +135,7 @@ namespace OUU::Runtime::UMGUtils
 
 	bool IsFocusable(const UWidget* Widget)
 	{
-		TSharedPtr<SWidget> SlateWidget = Widget->GetCachedWidget();
+		const TSharedPtr<SWidget> SlateWidget = Widget->GetCachedWidget();
 		if (!SlateWidget.IsValid())
 		{
 			UE_LOG(
@@ -152,7 +152,7 @@ namespace OUU::Runtime::UMGUtils
 
 	bool IsInputVisible(const UWidget* UmgWidget)
 	{
-		TSharedPtr<SWidget> Widget = UmgWidget->GetCachedWidget();
+		const TSharedPtr<SWidget> Widget = UmgWidget->GetCachedWidget();
 		if (!Widget.IsValid())
 			return false;
 

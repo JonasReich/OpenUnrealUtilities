@@ -8,7 +8,6 @@
 #include "ImageWriteQueue.h"
 #include "ImageWriteTask.h"
 #include "Modules/ModuleManager.h"
-#include "Serialization/BufferArchive.h"
 #include "WorldPartition/WorldPartitionMiniMapHelper.h"
 
 // Use custom implementation until we find a fix for the following issue:
@@ -53,7 +52,7 @@ namespace OUU::Editor::Private
 		return OutPixels;
 	}
 
-	bool ExportTexture(UTexture* Texture, const FString ExportPath, FImageWriteOptions InOptions)
+	bool ExportTexture(UTexture* Texture, const FString& ExportPath, const FImageWriteOptions& InOptions)
 	{
 		FTextureSource& TextureSource = Texture->Source;
 
@@ -68,7 +67,7 @@ namespace OUU::Editor::Private
 
 		auto& ImageWriteQueue =
 			FModuleManager::Get().LoadModuleChecked<IImageWriteQueueModule>("ImageWriteQueue").GetWriteQueue();
-		TFuture<bool> ImageWriteTask = ImageWriteQueue.Enqueue(MoveTemp(ImageTask));
+		const TFuture<bool> ImageWriteTask = ImageWriteQueue.Enqueue(MoveTemp(ImageTask));
 
 		// Block until task is finished
 		check(!InOptions.bAsync);

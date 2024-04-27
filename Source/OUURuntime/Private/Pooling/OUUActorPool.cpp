@@ -26,7 +26,7 @@ namespace OUU::Runtime::ActorPool
 		TEXT("The desired budget in seconds allowed to do pooled actor destruction per frame"));
 } // namespace OUU::Runtime::ActorPool
 
-UOUUActorPool* UOUUActorPool::Get(UObject& WorldContext)
+UOUUActorPool* UOUUActorPool::Get(const UObject& WorldContext)
 {
 	return WorldContext.GetWorld()->GetSubsystem<UOUUActorPool>();
 }
@@ -50,7 +50,7 @@ UOUUActorPool::FSpawnRequestHandle UOUUActorPool::RequestActorSpawn(const UOUUAc
 		SpawnRequests[Index] = InSpawnRequest;
 	}
 
-	UWorld* World = GetWorld();
+	const UWorld* World = GetWorld();
 	check(World);
 
 	// Initialize the spawn request status
@@ -70,7 +70,7 @@ void UOUUActorPool::RetryActorSpawnRequest(const UOUUActorPool::FSpawnRequestHan
 	FSpawnRequest& SpawnRequest = SpawnRequests[SpawnRequestHandle.GetIndex()];
 	if (ensureMsgf(SpawnRequest.Status == ESpawnRequestStatus::Failed, TEXT("Can only retry failed spawn requests")))
 	{
-		UWorld* World = GetWorld();
+		const UWorld* World = GetWorld();
 		check(World);
 
 		SpawnRequest.Status = ESpawnRequestStatus::RetryPending;
@@ -371,12 +371,12 @@ void UOUUActorPool::ProcessPendingDestruction(const double MaxTimeSlicePerTick)
 	UWorld* World = GetWorld();
 	check(World);
 
-	const ENetMode CurrentWorldNetMode = World->GetNetMode();
-	const double HasToDestroyAllActorsOnServerSide =
-		CurrentWorldNetMode != NM_Client && CurrentWorldNetMode != NM_Standalone;
-	const double TimeSliceEnd = FPlatformTime::Seconds() + MaxTimeSlicePerTick;
-
 	{
+		const ENetMode CurrentWorldNetMode = World->GetNetMode();
+		const double HasToDestroyAllActorsOnServerSide =
+			CurrentWorldNetMode != NM_Client && CurrentWorldNetMode != NM_Standalone;
+		const double TimeSliceEnd = FPlatformTime::Seconds() + MaxTimeSlicePerTick;
+
 		// Try release to pool actors or destroy them
 		TRACE_CPUPROFILER_EVENT_SCOPE(DestroyActors);
 		while ((DeactivatedActorsToDestroy.Num() || ActorsToDestroy.Num())
@@ -419,7 +419,7 @@ bool UOUUActorPool::TryReleaseActorToPool(AActor* Actor)
 	{
 		TArray<AActor*>& Pool = PooledActors.FindOrAdd(Actor->GetClass());
 
-		int32 MaxPoolSize = CALL_INTERFACE(IOUUPoolableActor, GetMaxPoolSize, Actor);
+		const int32 MaxPoolSize = CALL_INTERFACE(IOUUPoolableActor, GetMaxPoolSize, Actor);
 		if (Pool.Num() >= MaxPoolSize)
 			return false;
 

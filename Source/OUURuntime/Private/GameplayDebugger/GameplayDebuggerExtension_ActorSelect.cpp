@@ -66,6 +66,7 @@ void FGameplayDebuggerExtension_ActorSelect::OnActivated()
 		.BindSP(this, &FGameplayDebuggerExtension_ActorSelect::SelectClosestNPC);
 }
 
+// ReSharper disable once CppMemberFunctionMayBeConst
 void FGameplayDebuggerExtension_ActorSelect::SelectLocalPlayerPawn()
 {
 	if (auto* LocalController = UGameplayStatics::GetPlayerController(GetWorldFromReplicator(), 0))
@@ -76,13 +77,14 @@ void FGameplayDebuggerExtension_ActorSelect::SelectLocalPlayerPawn()
 	}
 }
 
+// ReSharper disable once CppMemberFunctionMayBeConst
 void FGameplayDebuggerExtension_ActorSelect::SelectClosestNPC()
 {
 	if (auto* LocalController = UGameplayStatics::GetPlayerController(GetWorldFromReplicator(), 0))
 	{
 		auto* LocalPawn = LocalController->GetPawn();
-		auto* ReferenceActor = LocalPawn ? ImplicitConv<AActor*>(LocalPawn) : ImplicitConv<AActor*>(LocalController);
-		FVector ReferenceLocation = ReferenceActor->GetActorLocation();
+		const auto* ReferenceActor = LocalPawn ? ImplicitConv<AActor*>(LocalPawn) : ImplicitConv<AActor*>(LocalController);
+		const FVector ReferenceLocation = ReferenceActor->GetActorLocation();
 		APawn* ClosestPawn = nullptr;
 		float ClosestDist = TNumericLimits<float>::Max();
 		for (APawn* Pawn : TActorRange<APawn>(GetWorldFromReplicator()))
@@ -90,7 +92,7 @@ void FGameplayDebuggerExtension_ActorSelect::SelectClosestNPC()
 			if (Pawn->IsPlayerControlled())
 				continue;
 
-			float DistSquared = FVector::DistSquared(ReferenceLocation, Pawn->GetActorLocation());
+			const float DistSquared = FVector::DistSquared(ReferenceLocation, Pawn->GetActorLocation());
 			if (DistSquared > ClosestDist)
 				continue;
 
@@ -112,7 +114,7 @@ DEF_SELECT_PLAYER_X(3)
 DEF_SELECT_PLAYER_X(4)
 	#undef DEF_SELECT_PLAYER_X
 
-void FGameplayDebuggerExtension_ActorSelect::SelectPlayerPawn_X(int32 X)
+void FGameplayDebuggerExtension_ActorSelect::SelectPlayerPawn_X(int32 X) const
 {
 	// Convert from "normal" counting to 0 based indices
 	const int32 PlayerStateIndex = X - 1;

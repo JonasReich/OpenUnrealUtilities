@@ -12,7 +12,7 @@
 	#include "UMG/UMGUtils.h"
 	#include "PropertyPathHelpers.h"
 
-void CreateComplexUserWidget(FOUUAutomationTestWorld& TestWorld, UOUUTestWidget* Widget, UWidgetTree* WidgetTree)
+void CreateComplexUserWidget(const FOUUAutomationTestWorld& TestWorld, UWidgetTree* WidgetTree)
 {
 	UHorizontalBox* HorizontalBox = WidgetTree->ConstructWidget<UHorizontalBox>();
 	WidgetTree->RootWidget = HorizontalBox;
@@ -61,7 +61,7 @@ void FUMGUtilsSpec::Define()
 		Describe("called on a UserWidget with child widgets added to the widget tree", [this]() {
 			It("should call the predicate once for every widget in the tree if the predicate always returns false",
 			   [this]() {
-				   CreateComplexUserWidget(*TestWorld, Widget, WidgetTree);
+				   CreateComplexUserWidget(*TestWorld, WidgetTree);
 				   OUU::Runtime::UMGUtils::ForEachWidget<UWidget>(Widget, [&](UWidget* LambdaWidget) -> bool {
 					   PredicateCallCount++;
 					   return false;
@@ -70,7 +70,7 @@ void FUMGUtilsSpec::Define()
 			   });
 
 			It("should stop iterating the widgets as soon as one predicate returns true", [this]() {
-				CreateComplexUserWidget(*TestWorld, Widget, WidgetTree);
+				CreateComplexUserWidget(*TestWorld, WidgetTree);
 				OUU::Runtime::UMGUtils::ForEachWidget<UWidget>(Widget, [&](UWidget* LambdaWidget) -> bool {
 					PredicateCallCount++;
 					return PredicateCallCount >= 2;
@@ -84,7 +84,7 @@ void FUMGUtilsSpec::Define()
 		It("should call the predicate on all widgets in the tree including nested user widgets excluding the root "
 		   "widget if bIncludingRootWidget is false",
 		   [this]() {
-			   CreateComplexUserWidget(*TestWorld, Widget, WidgetTree);
+			   CreateComplexUserWidget(*TestWorld, WidgetTree);
 			   OUU::Runtime::UMGUtils::ForEachWidgetAndDescendants<UWidget>(
 				   Widget,
 				   false,
@@ -96,7 +96,7 @@ void FUMGUtilsSpec::Define()
 		   });
 
 		It("should call the predicate on all widgets in the tree including nested user widgets", [this]() {
-			CreateComplexUserWidget(*TestWorld, Widget, WidgetTree);
+			CreateComplexUserWidget(*TestWorld,  WidgetTree);
 			OUU::Runtime::UMGUtils::ForEachWidgetAndDescendants<UWidget>(
 				Widget,
 				true,
@@ -108,7 +108,7 @@ void FUMGUtilsSpec::Define()
 		});
 
 		It("should stop iterating the widgets as soon as one predicate returns true", [this]() {
-			CreateComplexUserWidget(*TestWorld, Widget, WidgetTree);
+			CreateComplexUserWidget(*TestWorld,  WidgetTree);
 			OUU::Runtime::UMGUtils::ForEachWidgetAndDescendants<UWidget>(
 				Widget,
 				true,
@@ -122,7 +122,7 @@ void FUMGUtilsSpec::Define()
 
 	Describe("ForChildWidgets", [this]() {
 		It("should not call the predicate on a user widget that does not have any named slots", [this]() {
-			CreateComplexUserWidget(*TestWorld, Widget, WidgetTree);
+			CreateComplexUserWidget(*TestWorld,  WidgetTree);
 			OUU::Runtime::UMGUtils::ForChildWidgets<UWidget>(Widget, [&](UWidget* LambdaWidget) -> bool {
 				PredicateCallCount++;
 				return false;
@@ -218,7 +218,7 @@ void FUMGUtilsSpec::Define()
 
 			It("should return false when the widget has a nested UserWidget that has a focusable/clickable button",
 			   [this]() {
-				   CreateComplexUserWidget(*TestWorld, Widget, WidgetTree);
+				   CreateComplexUserWidget(*TestWorld,  WidgetTree);
 				   auto SlateWidget = Widget->TakeWidget();
 				   SPEC_TEST_FALSE(OUU::Runtime::UMGUtils::IsInputVisible(Widget));
 			   });
@@ -246,7 +246,7 @@ void FUMGUtilsSpec::Define()
 
 			It("should return true when the widget has a nested UserWidget that has a focusable/clickable button",
 			   [this]() {
-				   CreateComplexUserWidget(*TestWorld, Widget, WidgetTree);
+				   CreateComplexUserWidget(*TestWorld, WidgetTree);
 				   auto SlateWidget = Widget->TakeWidget();
 				   SPEC_TEST_TRUE(OUU::Runtime::UMGUtils::HasInputVisibleDescendantsExcludingSelf(Widget));
 			   });
@@ -300,7 +300,7 @@ void FUMGUtilsSpec::Define()
 
 			It("should return true when the widget has a nested UserWidget that has a focusable/clickable button",
 			   [this]() {
-				   CreateComplexUserWidget(*TestWorld, Widget, WidgetTree);
+				   CreateComplexUserWidget(*TestWorld, WidgetTree);
 				   auto SlateWidget = Widget->TakeWidget();
 				   SPEC_TEST_TRUE(OUU::Runtime::UMGUtils::HasInputVisibleDescendantsIncludingSelf(Widget));
 			   });
@@ -318,7 +318,7 @@ void FUMGUtilsSpec::Define()
 				HorizontalBox->AddChildToHorizontalBox(WidgetTree->ConstructWidget<UButton>());
 			}
 			auto SlateWidget = Widget->TakeWidget();
-			UWidget* FirstFocusableDescendant =
+			const UWidget* FirstFocusableDescendant =
 				OUU::Runtime::UMGUtils::GetFirstFocusableDescendantIncludingSelf(Widget);
 			SPEC_TEST_TRUE(FirstFocusableDescendant == FirstButton);
 		});
@@ -327,14 +327,14 @@ void FUMGUtilsSpec::Define()
 			WidgetTree->RootWidget = WidgetTree->ConstructWidget<UButton>();
 			Widget->SetIsFocusable(true);
 			auto SlateWidget = Widget->TakeWidget();
-			UWidget* FirstFocusableDescendant =
+			const UWidget* FirstFocusableDescendant =
 				OUU::Runtime::UMGUtils::GetFirstFocusableDescendantIncludingSelf(Widget);
 			SPEC_TEST_TRUE(FirstFocusableDescendant == Widget);
 		});
 
 		It("should return nullptr if there are no focusable descendants", [this]() {
 			auto SlateWidget = Widget->TakeWidget();
-			UWidget* FirstFocusableDescendant =
+			const UWidget* FirstFocusableDescendant =
 				OUU::Runtime::UMGUtils::GetFirstFocusableDescendantIncludingSelf(Widget);
 			SPEC_TEST_NULL(FirstFocusableDescendant);
 		});
