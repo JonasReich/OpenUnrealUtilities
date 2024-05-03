@@ -50,6 +50,11 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 		const TSharedPtr<FAssetThumbnailPool>& ThumbnailPool,
 		const FOnShouldFilterAsset& OnShouldFilterAsset)
 	{
+		if (auto* SoftClass = CastField<FSoftClassProperty>(PropertyHandle->GetProperty()))
+		{
+			// Soft class props don't work properly with SObjectPropertyEntryBox
+			return nullptr;
+		}
 		if (const auto* ObjectProperty = CastField<FObjectPropertyBase>(PropertyHandle->GetProperty()))
 		{
 			return MakeFilteredObjectPropertyWidget(PropertyHandle, ObjectProperty, ThumbnailPool, OnShouldFilterAsset);
