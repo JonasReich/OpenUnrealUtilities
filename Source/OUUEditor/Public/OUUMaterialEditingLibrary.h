@@ -17,7 +17,7 @@ struct FExpressionInput;
 
 /** Library to make some more advanced material edits than the base set provided in UMaterialEditingLibrary */
 UCLASS()
-class UOUUMaterialEditingLibrary : public UBlueprintFunctionLibrary
+class OUUEDITOR_API UOUUMaterialEditingLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
