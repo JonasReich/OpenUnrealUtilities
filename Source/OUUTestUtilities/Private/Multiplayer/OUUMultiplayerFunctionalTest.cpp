@@ -3,6 +3,7 @@
 #include "Multiplayer/OUUMultiplayerFunctionalTest.h"
 
 #include "Animation/BoneChainRange.h"
+#include "LogOpenUnrealUtilities.h"
 #include "Multiplayer/OUUMultiplayerTestClientSignal.h"
 #include "Multiplayer/OUUMultiplayerTestController.h"
 #include "Net/UnrealNetwork.h"
@@ -75,9 +76,8 @@ void AOUUMultiplayerFunctionalTest::ServerNotifyClientSyncMarkerReached(
 		{
 			LastClientAcknowledgedMarker = FMath::Min(Entry.Value, LastClientAcknowledgedMarker);
 		}
-		UE_LOG(LogTemp, Log, TEXT("%i"), Entry.Value);
 	}
-	UE_LOG(LogTemp, Log, TEXT("Last ACK Marker %i"), LastClientAcknowledgedMarker);
+	UE_LOG(LogOpenUnrealUtilities, Log, TEXT("Last Client ACK Marker %i"), LastClientAcknowledgedMarker);
 
 	if (LastClientAcknowledgedMarker == LastLocalSyncMarker)
 	{

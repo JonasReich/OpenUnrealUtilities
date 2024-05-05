@@ -7,6 +7,7 @@
 #include "ImageWriteBlueprintLibrary.h"
 #include "ImageWriteQueue.h"
 #include "ImageWriteTask.h"
+#include "LogOpenUnrealUtilities.h"
 #include "Modules/ModuleManager.h"
 #include "WorldPartition/WorldPartitionMiniMapHelper.h"
 
@@ -98,7 +99,7 @@ bool UExportWorldPartitionMiniMapBuilder::RunInternal(
 	Options.bOverwriteFile = true;
 	Options.bAsync = false;
 	Options.NativeOnComplete = [](bool bSuccess) {
-		UE_LOG(LogTemp, Log, TEXT("MinimapExport completed -> successful: %s"), *LexToString(bSuccess));
+		UE_LOG(LogOpenUnrealUtilities, Log, TEXT("MinimapExport completed -> successful: %s"), *LexToString(bSuccess));
 	};
 
 #if USE_CUSTOM_EXPORT_IMPL
