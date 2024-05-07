@@ -13,6 +13,7 @@
 #include "Slate/SplitterColumnSizeData.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/Docking/SDockTab.h"
+#include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Layout/SWidgetSwitcher.h"
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/Views/STableRow.h"

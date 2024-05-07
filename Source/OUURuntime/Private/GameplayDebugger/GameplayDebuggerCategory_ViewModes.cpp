@@ -4,6 +4,7 @@
 
 #if WITH_GAMEPLAY_DEBUGGER
 	#include "BufferVisualizationData.h"
+	#include "Engine.h"
 	#include "Engine/DebugCameraControllerSettings.h"
 	#include "Engine/Font.h"
 	#include "Engine/GameViewportClient.h"
@@ -151,7 +152,8 @@ void FGameplayDebuggerCategory_ViewModes::CycleViewMode()
 
 		if (NextViewModeIndex != CurrViewModeIndex)
 		{
-			FString NextViewModeName = OUU::Runtime::Private::GetViewModeName(StaticCast<EViewModeIndex>(NextViewModeIndex));
+			FString NextViewModeName =
+				OUU::Runtime::Private::GetViewModeName(StaticCast<EViewModeIndex>(NextViewModeIndex));
 
 			if (!NextViewModeName.IsEmpty())
 			{

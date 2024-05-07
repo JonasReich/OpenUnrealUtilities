@@ -1,10 +1,11 @@
-﻿// Copyright (c) 2023 Jonas Reich & Contributors
+// Copyright (c) 2023 Jonas Reich & Contributors
 
 #pragma once
 
 #include "CoreMinimal.h"
 
 #include "MaterialAnalyzer/OUUMaterialAnalyzer.h"
+#include "Materials/MaterialLayersFunctions.h"
 
 #include "OUUMaterialAnalyzer_ParameterData.generated.h"
 

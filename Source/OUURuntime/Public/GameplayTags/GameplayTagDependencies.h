@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 
 #include "GameplayTagContainer.h"
+#include "UObject/Interface.h"
 #include "UObject/WeakInterfacePtr.h"
 
 #include "GameplayTagDependencies.generated.h"

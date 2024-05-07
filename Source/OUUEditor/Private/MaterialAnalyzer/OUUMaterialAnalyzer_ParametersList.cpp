@@ -5,6 +5,7 @@
 #include "Brushes/SlateColorBrush.h"
 #include "MaterialAnalyzer/OUUMaterialAnalyzer.h"
 #include "MaterialAnalyzer/OUUMaterialAnalyzer_EditorObject.h"
+#include "Materials/MaterialExpression.h"
 #include "OUUMaterialEditingLibrary.h"
 #include "Widgets/Input/SButton.h"
 
@@ -43,7 +44,8 @@ namespace OUU::Editor::Private::MaterialAnalyzer::Widgets
 					],
 					// right
 					SNew(STextBlock)
-					.Text(ParameterData->Source == FOUUMaterialAnalyzer_ParameterData::ESource::MaterialFunction ? FText::FromString(ParameterData->Expression->GetOuter()->GetName()) : FText::GetEmpty())
+					.Text(ParameterData->Source == FOUUMaterialAnalyzer_ParameterData::ESource::MaterialFunction
+						? FText::FromString(ParameterData->Expression->GetOuter()->GetName()) : FText::GetEmpty())
 				)
 			]
 		];
