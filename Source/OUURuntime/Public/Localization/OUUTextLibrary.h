@@ -23,7 +23,7 @@ public:
 	 * - ["foo", "bar", "foobar"] -> "foo, bar and foobar"
 	 * Supports an arbitrary number of items.
 	 *
-	 * @param	Texts							List of texts components to combine into a list. 
+	 * @param	Texts							List of texts components to combine into a list.
 	 * @param	bFormatWithFinalAndSeparator	If true, the last two items in the list are combined with a special word
 	 *											("and" if untranslated). If false, the final two items also use the
 	 *											generic separator ("," if untranslated).
@@ -42,4 +42,45 @@ public:
 	/** Combine an arbitrary number of texts with a given separator */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Text")
 	static FText JoinBy(const TArray<FText>& Texts, FText Separator);
+
+	// Load all CSV files from a given folder as polyglot data.
+	// The culture is assumed to be added as a suffix to the file names, i.e. filename_culture.csv,
+	// e.g. translations_de.csv, or translations_en-US.csv
+	// The culture codes must be registered for the project for this to load correctly into translation memory.
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Text")
+	static void LoadLocalizedTextsFromCSV(const FString& CsvDirectoryPath);
+
+private:
+	struct FOUUTextIdentity
+	{
+	public:
+		FOUUTextIdentity(FString Namespace, FString Key)
+			: Namespace(MoveTemp(Namespace))
+			, Key(MoveTemp(Key))
+		{
+		}
+
+		FString Namespace;
+		FString Key;
+
+		FORCEINLINE bool operator==(const FOUUTextIdentity& Other) const
+		{
+			return Namespace == Other.Namespace && Key == Other.Key;
+		}
+
+		FORCEINLINE bool operator!=(const FOUUTextIdentity& Other) const
+		{
+			return Other != *this;
+		}
+
+		friend inline uint32 GetTypeHash(const FOUUTextIdentity& Id)
+		{
+			return HashCombine(GetTypeHash(Id.Namespace), GetTypeHash(Id.Key));
+		}
+	};
+
+	static void LoadLocalizedTextsFromCSV(
+		const FString& CsvFilePath,
+		const FString& Culture,
+		TMap<FOUUTextIdentity, FPolyglotTextData>& InOutPolyglotTextData);
 };

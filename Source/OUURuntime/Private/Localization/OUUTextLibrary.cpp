@@ -2,6 +2,11 @@
 
 #include "Localization/OUUTextLibrary.h"
 
+#include "Internationalization/PolyglotTextData.h"
+#include "LogOpenUnrealUtilities.h"
+#include "Misc/FileHelper.h"
+#include "Serialization/Csv/CsvParser.h"
+
 #define LOCTEXT_NAMESPACE "OUUTextLibrary"
 
 FText UOUUTextLibrary::FormatListText(const TArray<FText>& Texts, bool bFormatWithFinalAndSeparator)
@@ -52,6 +57,107 @@ FText UOUUTextLibrary::JoinBy(const TArray<FText>& Texts, FText Separator)
 		CombinedText = FText::FormatOrdered(INVTEXT("{0}{1}{2}"), CombinedText, Separator, Texts[i]);
 	}
 	return CombinedText;
+}
+
+void UOUUTextLibrary::LoadLocalizedTextsFromCSV(const FString& CsvDirectoryPath)
+{
+	auto& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+	TMap<FOUUTextIdentity, FPolyglotTextData> PolyglotData;
+	PlatformFile.IterateDirectory(*CsvDirectoryPath, [&](const TCHAR* IteratePath, bool IsDirectory) -> bool {
+		if (IsDirectory)
+		{
+			return true;
+		}
+		FString PathPart, NamePart, ExtensionPart;
+		FPaths::Split(IteratePath, PathPart, NamePart, ExtensionPart);
+		FString BaseNamePart, CulturePart;
+		NamePart.Split(TEXT("_"), &BaseNamePart, &CulturePart);
+		LoadLocalizedTextsFromCSV(IteratePath, CulturePart, PolyglotData);
+		return true;
+	});
+
+	TArray<FPolyglotTextData> PolyglotDataArray;
+	for (auto& Entry : PolyglotData)
+	{
+		PolyglotDataArray.Add(Entry.Value);
+	}
+
+	// Register the polyglot data with the localization manager
+	FTextLocalizationManager::Get().RegisterPolyglotTextData(PolyglotDataArray);
+}
+
+void UOUUTextLibrary::LoadLocalizedTextsFromCSV(
+	const FString& CsvFilePath,
+	const FString& Culture,
+	TMap<FOUUTextIdentity, FPolyglotTextData>& InOutPolyglotTextData)
+{
+	FString CSVData;
+	const bool bLoadedFile = FFileHelper::LoadFileToString(CSVData, *CsvFilePath);
+	if (bLoadedFile == false)
+	{
+		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("Failed to load csv file %s"), *CsvFilePath);
+		return;
+	}
+
+	const FCsvParser CsvParser{CSVData};
+	const FCsvParser::FRows& Rows = CsvParser.GetRows();
+	if (Rows.Num() == 0)
+	{
+		UE_LOG(LogOpenUnrealUtilities, Warning, TEXT("Failed to parse rows in csv file %s"), *CsvFilePath);
+		return;
+	}
+
+	// Determine column indices
+	auto& KeyRow = Rows[0];
+
+	auto GetKeyIdx = [&KeyRow](const TCHAR* SearchKeyName) -> int32 {
+		for (int32 HeaderIdx = 0; HeaderIdx < KeyRow.Num(); ++HeaderIdx)
+		{
+			const TCHAR* HeaderKey = KeyRow[HeaderIdx];
+			if (FCString::Stricmp(HeaderKey, SearchKeyName) == 0)
+			{
+				return HeaderIdx;
+			}
+		}
+		return INDEX_NONE;
+	};
+
+#define GET_KEY_IDX(KeyName)                                                                                           \
+	int32 KeyName##Idx = INDEX_NONE;                                                                                   \
+	{                                                                                                                  \
+		KeyName##Idx = GetKeyIdx(TEXT(PREPROCESSOR_TO_STRING(KeyName)));                                               \
+		if (KeyName##Idx == INDEX_NONE)                                                                                \
+		{                                                                                                              \
+			UE_LOG(                                                                                                    \
+				LogOpenUnrealUtilities,                                                                                \
+				Warning,                                                                                               \
+				TEXT("Failed to load column %s of csv file %s"),                                                       \
+				TEXT(PREPROCESSOR_TO_STRING(KeyName)),                                                                 \
+				*CsvFilePath);                                                                                         \
+			return;                                                                                                    \
+		}                                                                                                              \
+	}
+
+	GET_KEY_IDX(Namespace)
+	GET_KEY_IDX(Key)
+	GET_KEY_IDX(SourceString)
+	GET_KEY_IDX(LocalizedString)
+#undef GET_KEY_IDX
+
+	// Read all columns as polyglot data
+	for (int32 RowIdx = 1; Rows.IsValidIndex(RowIdx); RowIdx++)
+	{
+		auto& ImportRow = Rows[RowIdx];
+		auto& Namespace = ImportRow[NamespaceIdx];
+		auto& Key = ImportRow[KeyIdx];
+		auto& SourceString = ImportRow[SourceStringIdx];
+		auto& LocalizedString = ImportRow[LocalizedStringIdx];
+
+		auto& NewEntry = InOutPolyglotTextData.FindOrAdd(
+			FOUUTextIdentity{Namespace, Key},
+			FPolyglotTextData{ELocalizedTextSourceCategory::Editor, Namespace, Key, SourceString});
+		NewEntry.AddLocalizedString(Culture, LocalizedString);
+	}
 }
 
 #undef LOCTEXT_NAMESPACE
