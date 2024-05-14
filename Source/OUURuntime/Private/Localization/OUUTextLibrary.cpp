@@ -2,9 +2,11 @@
 
 #include "Localization/OUUTextLibrary.h"
 
+#include "HAL/PlatformFilemanager.h"
 #include "Internationalization/PolyglotTextData.h"
 #include "LogOpenUnrealUtilities.h"
 #include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
 #include "Serialization/Csv/CsvParser.h"
 
 #define LOCTEXT_NAMESPACE "OUUTextLibrary"
