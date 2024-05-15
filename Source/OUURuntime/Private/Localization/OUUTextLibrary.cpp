@@ -152,8 +152,10 @@ void UOUUTextLibrary::LoadLocalizedTextsFromCSV(
 		auto& ImportRow = Rows[RowIdx];
 		auto& Namespace = ImportRow[NamespaceIdx];
 		auto& Key = ImportRow[KeyIdx];
-		auto& SourceString = ImportRow[SourceStringIdx];
-		auto& LocalizedString = ImportRow[LocalizedStringIdx];
+		FString SourceString = ImportRow[SourceStringIdx];
+		SourceString = SourceString.ReplaceEscapedCharWithChar();
+		FString LocalizedString = ImportRow[LocalizedStringIdx];
+		LocalizedString = LocalizedString.ReplaceEscapedCharWithChar();
 
 		auto& NewEntry = InOutPolyglotTextData.FindOrAdd(
 			FOUUTextIdentity{Namespace, Key},
