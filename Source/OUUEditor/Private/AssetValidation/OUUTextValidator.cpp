@@ -4,7 +4,77 @@
 
 #include "AssetValidation/OUUAssetValidationSettings.h"
 #include "Components/Widget.h"
+#include "Kismet2/BlueprintEditorUtils.h"
+#include "Serialization/PropertyLocalizationDataGathering.h"
 #include "WidgetBlueprint.h"
+
+void GatherBlueprintForLocalization(const UBlueprint* const Blueprint)
+{
+	// Force non-data-only blueprints to set the HasScript flag, as they may not currently have bytecode due to a
+	// compilation error
+	bool bForceHasScript = !FBlueprintEditorUtils::IsDataOnlyBlueprint(Blueprint);
+	if (bForceHasScript)
+		return;
+
+	// Also do this for blueprints that derive from something containing text properties, as these may propagate default
+	// values from their parent class on load
+	if (UClass* BlueprintParentClass = Blueprint->ParentClass.Get())
+	{
+		TArray<UStruct*> TypesToCheck;
+		TypesToCheck.Add(BlueprintParentClass);
+
+		TSet<UStruct*> TypesChecked;
+		while (!bForceHasScript && TypesToCheck.Num() > 0)
+		{
+			UStruct* TypeToCheck = TypesToCheck.Pop(/*bAllowShrinking*/ false);
+			TypesChecked.Add(TypeToCheck);
+
+			for (TFieldIterator<const FProperty> PropIt(
+					 TypeToCheck,
+					 EFieldIteratorFlags::IncludeSuper,
+					 EFieldIteratorFlags::ExcludeDeprecated,
+					 EFieldIteratorFlags::IncludeInterfaces);
+				 !bForceHasScript && PropIt;
+				 ++PropIt)
+			{
+				auto ProcessInnerProperty =
+					[&bForceHasScript, &TypesToCheck, &TypesChecked](const FProperty* InProp) -> bool {
+					if (const FTextProperty* TextProp = CastField<const FTextProperty>(InProp))
+					{
+						bForceHasScript = true;
+						return true;
+					}
+					if (const FStructProperty* StructProp = CastField<const FStructProperty>(InProp))
+					{
+						if (!TypesChecked.Contains(StructProp->Struct))
+						{
+							TypesToCheck.Add(StructProp->Struct);
+						}
+						return true;
+					}
+					return false;
+				};
+
+				if (!ProcessInnerProperty(*PropIt))
+				{
+					if (const FArrayProperty* ArrayProp = CastField<const FArrayProperty>(*PropIt))
+					{
+						ProcessInnerProperty(ArrayProp->Inner);
+					}
+					if (const FMapProperty* MapProp = CastField<const FMapProperty>(*PropIt))
+					{
+						ProcessInnerProperty(MapProp->KeyProp);
+						ProcessInnerProperty(MapProp->ValueProp);
+					}
+					if (const FSetProperty* SetProp = CastField<const FSetProperty>(*PropIt))
+					{
+						ProcessInnerProperty(SetProp->ElementProp);
+					}
+				}
+			}
+		}
+	}
+}
 
 bool UOUUTextValidator::CanValidateAsset_Implementation(UObject* InAsset) const
 {
@@ -17,7 +87,8 @@ bool UOUUTextValidator::CanValidateAsset_Implementation(UObject* InAsset) const
 	}
 
 	return IsValid(InAsset)
-		&& UOUUAssetValidationSettings::Get().ValidateNoLocalizedTextsClasses.Contains(InAsset->GetClass());
+		&& UOUUAssetValidationSettings::Get().ValidateNoLocalizedTextsClasses.ContainsByPredicate(
+			[InAsset](TSoftClassPtr<UObject> Entry) { return InAsset->IsA(Entry.LoadSynchronous()); });
 }
 
 EDataValidationResult UOUUTextValidator::ValidateLoadedAsset_Implementation(
@@ -26,44 +97,46 @@ EDataValidationResult UOUUTextValidator::ValidateLoadedAsset_Implementation(
 {
 	EDataValidationResult Result = EDataValidationResult::Valid;
 
-	UClass* Class = InAsset->GetClass();
-	UObject* Asset = InAsset;
-	if (auto* Blueprint = Cast<UBlueprint>(InAsset))
-	{
-		Class = Blueprint->GeneratedClass;
-		Asset = Blueprint->GeneratedClass->GetDefaultObject();
+	const auto* Package = InAsset->GetPackage();
 
-		if (auto* WidgetBlueprint = Cast<UWidgetBlueprint>(InAsset))
-		{
-			for (UWidget* Widget : WidgetBlueprint->GetAllSourceWidgets())
-			{
-				Result = CombineDataValidationResults(Result, ValidateLoadedAsset(Widget, IN OUT ValidationErrors));
-			}
-		}
-	}
-	for (auto& PropPair : TPropertyValueRange<FTextProperty>(Class, Asset))
+	TArray<UObject*> Objects;
+	constexpr bool bIncludeNestedObjects = true;
+	GetObjectsWithPackage(Package, OUT Objects, bIncludeNestedObjects);
+
+	auto OwnerStructsToIgnore =
+		TArray<UStruct*>{FBPVariableDescription::StaticStruct(), FBPEditorBookmarkNode::StaticStruct()};
+
+	TArray<FGatherableTextData> GatherableTextDataArray;
+	EPropertyLocalizationGathererResultFlags ResultFlags;
+	FPropertyLocalizationDataGatherer Gatherer{OUT GatherableTextDataArray, Package, OUT ResultFlags};
+
+	for (auto& Entry : GatherableTextDataArray)
 	{
-		if (PropPair.Key->HasAnyPropertyFlags(CPF_Edit) == false)
+		FString SiteDescription;
+		bool bEditorOnly = true;
+		for (auto& Context : Entry.SourceSiteContexts)
 		{
-			// Skip properties that are not editable.
-			continue;
+			if (Context.IsEditorOnly == false)
+				bEditorOnly = false;
+
+			SiteDescription += TEXT(" ") + Context.SiteDescription;
 		}
-		const FText& Text = PropPair.Key->GetPropertyValue(PropPair.Value);
-		if (Text.IsCultureInvariant() || Text.IsFromStringTable() || Text.IsEmpty())
+
+		if (bEditorOnly)
 			continue;
 
 		Result = EDataValidationResult::Invalid;
 		AssetFails(
 			InAsset,
 			FText::Format(
-				INVTEXT("Text \"{0}\" from property {1} in {2} is neither a culture invariant nor linked from a string "
-						"table"),
-				Text,
-				FText::FromName(PropPair.Key->GetFName()),
-				FText::FromName(InAsset->GetFName())),
+				INVTEXT("Text \"{0}\" is neither a culture invariant nor linked "
+						"from a string table. Source: {1}"),
+				FText::FromString(Entry.SourceData.SourceString),
+				FText::FromString(SiteDescription)),
 			IN OUT ValidationErrors);
 	}
-	if (Result != EDataValidationResult::Valid)
+
+	if (Result == EDataValidationResult::Valid)
 	{
 		AssetPasses(InAsset);
 	}

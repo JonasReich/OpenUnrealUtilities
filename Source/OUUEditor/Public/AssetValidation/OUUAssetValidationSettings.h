@@ -17,6 +17,6 @@ public:
 
 	// Assets of these classes must not have any properties with any localized FTexts.
 	// FTexts from string tables and culture invariants are permitted.
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(Config, EditDefaultsOnly)
 	TArray<TSoftClassPtr<UObject>> ValidateNoLocalizedTextsClasses;
 };
