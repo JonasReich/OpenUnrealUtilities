@@ -2,6 +2,7 @@
 
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "GameplayTagsManager.h"
+#include "HAL/IConsoleManager.h"
 #include "LogOpenUnrealUtilities.h"
 
 namespace OUU::Editor::GameplayTagAudit
