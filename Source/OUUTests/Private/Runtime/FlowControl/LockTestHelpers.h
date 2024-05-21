@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
+#include "Misc/AutomationTest.h"
 #include "AutomationTestWorld.h"
 #include "FlowControl/ExclusiveLock.h"
 #include "FlowControl/SharedLock.h"

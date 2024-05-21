@@ -70,7 +70,7 @@ private:
 
 		FORCEINLINE bool operator!=(const FOUUTextIdentity& Other) const
 		{
-			return Other != *this;
+			return !(Other == *this);
 		}
 
 		friend inline uint32 GetTypeHash(const FOUUTextIdentity& Id)
