@@ -38,8 +38,6 @@
 	#include "WorkspaceMenuStructureModule.h"
 #endif
 
-UE_DISABLE_OPTIMIZATION
-
 namespace OUU::Developer::ActorMapWindow
 {
 	namespace Private
@@ -828,5 +826,3 @@ namespace OUU::Developer::ActorMapWindow
 		FConsoleCommandDelegate::CreateStatic(TryInvokeTab));
 
 } // namespace OUU::Developer::ActorMapWindow
-
-UE_DISABLE_OPTIMIZATION
