@@ -11,6 +11,7 @@
 #include "HAL/FileManager.h"
 #include "HAL/IConsoleManager.h"
 #include "Interfaces/IPluginManager.h"
+#include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/CompilerResultsLog.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "KismetCompilerModule.h"
@@ -439,7 +440,8 @@ namespace OUU::Editor::CompileBlueprints
 
 	void FOUUCompileBlueprintsCommandHelper::CompileBlueprint(UBlueprint* Blueprint)
 	{
-		if (KismetBlueprintCompilerModule && Blueprint)
+		if (KismetBlueprintCompilerModule && Blueprint
+			&& FBlueprintEditorUtils::IsDataOnlyBlueprint(Blueprint) == false)
 		{
 			// Have to create a new MessageLog for each asset as the warning / error counts are cumulative
 			FCompilerResultsLog MessageLog;
