@@ -23,6 +23,8 @@ public:
 		EventTag(SourcePayload.EventTag),
 		Instigator(SourcePayload.Instigator),
 		Target(SourcePayload.Target),
+		// InstigatorTags(SourcePayload.InstigatorTags),
+		// TargetTags(SourcePayload.TargetTags),
 		EventMagnitude(SourcePayload.EventMagnitude)
 	{
 	}
@@ -45,6 +47,15 @@ public:
 	/** The target of the event */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GameplayAbilityTriggerPayload)
 	const AActor* Target = nullptr;
+
+	// #TODO figure out why the gameplay tag containers cause crashes when reallocating for circular event queue
+	/** Tags that the instigator has */
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GameplayAbilityTriggerPayload)
+	// FGameplayTagContainer InstigatorTags;
+
+	/** Tags that the target has */
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GameplayAbilityTriggerPayload)
+	// FGameplayTagContainer TargetTags;
 
 	/** The magnitude of the triggering event */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GameplayAbilityTriggerPayload)
