@@ -14,11 +14,10 @@ class UCanvas;
 class UOUUDebuggableAnimInstance;
 
 struct FAnimInstanceProxy;
-struct FGameplayDebugger_DisplayDebugManager;
 
 /**
  * Gameplay debugger for animation system.
- * Extracted/extended functionality from "ShowDebug Animation" command.
+ * Extended functionality from "ShowDebug Animation" command.
  */
 class OUURUNTIME_API FGameplayDebuggerCategory_Animation : public FOUUGameplayDebuggerCategory_Base
 {
@@ -45,31 +44,8 @@ private:
 
 	void DisplayDebug(
 		FGameplayDebuggerCanvasContext& CanvasContext,
-		USkeletalMeshComponent* SkeletalMeshComponent,
 		UOUUDebuggableAnimInstance* AnimInstance,
 		UCanvas* Canvas);
-
-	static void DisplayDebugInstance(
-		FGameplayDebugger_DisplayDebugManager& DisplayDebugManager,
-		const USkeletalMeshComponent* SkeletalMeshComponent,
-		UOUUDebuggableAnimInstance* AnimInstance,
-		const float& Indent);
-
-	static void OutputTickRecords(
-		const TArray<FAnimTickRecord>& Records,
-		UCanvas* Canvas,
-		float Indent,
-		const int32 HighlightIndex,
-		FLinearColor TextColor,
-		FLinearColor HighlightColor,
-		FLinearColor InactiveColor,
-		FGameplayDebugger_DisplayDebugManager& DisplayDebugManager,
-		bool bFullBlendSpaceDisplay);
-
-	static void OutputCurveMap(
-		TMap<FName, float>& CurveMap,
-		FGameplayDebugger_DisplayDebugManager& DisplayDebugManager,
-		float Indent);
 };
 
 #endif // WITH_GAMEPLAY_DEBUGGER

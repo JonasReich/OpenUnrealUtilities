@@ -9,33 +9,13 @@
 class FGameplayDebuggerCanvasContext;
 
 /**
- * Copy of FDisplayDebugManager that is DLL exported and therefore usable in gameplay debuggers.
- * Should be used sparingly, e.g. to convert existing ShowDebug commands into gameplay debuggers.
+ * An extended version of FDisplayDebugManager that can be used to draw an expanded tree list of arbitrary data items to
+ * the debug canvas, similar to the animation-graph view drawn by the "showdebug animation" command.
  */
-struct OUURUNTIME_API FGameplayDebugger_DisplayDebugManager
+struct OUURUNTIME_API FGameplayDebugger_TreeView
 {
 public:
-	explicit FGameplayDebugger_DisplayDebugManager(FGameplayDebuggerCanvasContext& InCanvasContext);
-
-	void SetDrawColor(const FColor& NewColor);
-
-	void SetLinearDrawColor(const FLinearColor& NewColor);
-
-	void DrawString(const FString& InDebugString, const float& OptionalXOffset = 0.f);
-
-	void AddColumnIfNeeded() const;
-
-	float GetYStep() const;
-
-	float GetXPos() const;
-
-	float GetYPos() const;
-
-	void SetYPos(const float NewYPos);
-
-	float GetMaxCharHeight() const;
-
-	void ShiftYDrawPosition(const float& YOffset);
+	explicit FGameplayDebugger_TreeView(FGameplayDebuggerCanvasContext& InCanvasContext, FColor InDrawColor = FColor::White);
 
 	struct FFlattenedDebugData
 	{
@@ -75,8 +55,6 @@ public:
 				int32 ChildIndent = bMultiBranch ? InIndent + 1 : InIndent;
 				if (bMultiBranch)
 				{
-					// If we only have one branch we treat it as the same really
-					// as we may have only changed active status
 					++InChainID;
 				}
 				RecursivelyFlattenDebugData(
@@ -96,7 +74,6 @@ public:
 	 * drawn by the "showdebug animation" command.
 	 *
 	 * @param	RootNode				Root data item
-	 * @param	Indent					Horizontal indent from left in pixels
 	 * @param	OnGetNumChildren		Delegate to get the number of child items beneath a node
 	 * @param	OnGetChildByIndex		Delegate to retrieve a child node from its parent node and
 	 *									child index
@@ -111,15 +88,14 @@ public:
 	template <typename NodeType, typename OnGetNumChildrenType, typename OnGetChildType, typename OnGetDebugStringType>
 	void DrawTree(
 		NodeType* RootNode,
-		float& Indent,
 		OnGetNumChildrenType OnGetNumChildren,
 		OnGetChildType OnGetChildByIndex,
 		OnGetDebugStringType OnGetDebugString)
 	{
-		TArray<FFlattenedDebugData> LineHelpers;
+		TArray<FFlattenedDebugData> FlattenedDebugData;
 		int32 ChainId = 0;
 		FFlattenedDebugData::RecursivelyFlattenDebugData(
-			OUT LineHelpers,
+			OUT FlattenedDebugData,
 			0,
 			OUT ChainId,
 			RootNode,
@@ -127,11 +103,17 @@ public:
 			OnGetChildByIndex,
 			OnGetDebugString);
 
-		DrawTree_Impl(LineHelpers, OUT Indent);
+		DrawTree_Impl(FlattenedDebugData);
 	}
 
 private:
-	void DrawTree_Impl(TArray<FFlattenedDebugData> LineHelpers, float& Indent);
+	void DrawString(const FString& InDebugString, const float& OptionalXOffset = 0.f);
+
+	void AddColumnIfNeeded();
+
+	float GetLineHeight() const;
+
+	void DrawTree_Impl(TArray<FFlattenedDebugData> FlattenedDebugData);
 
 	float NextColumnXPos = 0.f;
 	FColor DrawColor;
@@ -139,6 +121,9 @@ private:
 	float MaxCursorY = 0.f;
 
 	FGameplayDebuggerCanvasContext& CanvasContext;
+
+	// The index represents indent level
+	TArray<FVector2D> StartingPointsForIndentLevels;
 };
 
 #endif
