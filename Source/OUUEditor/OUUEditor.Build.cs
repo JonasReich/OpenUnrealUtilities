@@ -56,6 +56,7 @@ public class OUUEditor : OUUModuleRules
 			"DeveloperSettings",
 			"GameplayTags",
 			"GameplayTagsEditor",
+			"Json",
 
             // OUU
             "OUURuntime",
