@@ -8,6 +8,7 @@
 #include "LogOpenUnrealUtilities.h"
 #include "Misc/FileHelper.h"
 #include "Serialization/JsonSerializer.h"
+#include "Editor.h"
 
 int32 UOUUValidateAssetListCommandlet::Main(const FString& FullCommandLine)
 {
