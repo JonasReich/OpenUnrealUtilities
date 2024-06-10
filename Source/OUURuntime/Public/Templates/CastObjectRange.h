@@ -19,12 +19,7 @@ private:
 	using PointerType = typename TIteratorTraits<IteratorType>::PointerType;
 	using ReferenceType = typename TIteratorTraits<IteratorType>::ReferenceType;
 
-	// #TODO-OUU Rephrase individual checks into single condition
-	// These requirements stem from the usage of Cast<T> in the operator*():
-	static_assert(TIsPointer<ElementType>::Value == true, "Array ElementType must be a pointer type");
 	static_assert(TIsPointer<CastTargetType>::Value == false, "TargetType must not be a pointer type");
-	// static_assert(TIsCastable<typename TRemoveReference<ElementType>::Type>::Value, "ElementType must be a castable
-	// UObject type!");
 	static_assert(UECasts_Private::TIsCastable<CastTargetType>::Value, "TargetType must be a castable UObject type!");
 
 	IteratorType WrappedIterator;
