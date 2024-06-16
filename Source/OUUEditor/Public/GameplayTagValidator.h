@@ -48,16 +48,20 @@ public:
 	UPROPERTY(Config, EditAnywhere)
 	bool bDefaultAllowContentTagChildren = false;
 
-	// If true, run gameplay tag validation after every change of the gameplay tags tree.
-	// This means both after editor start and every edit of the tags list.
-	UPROPERTY(Config, EditAnywhere)
+	// If true, run gameplay tag validation during editor startup after all the native tags were added.
+	UPROPERTY(Config, EditAnywhere, Category = "Validation Triggers")
+	bool bValidateTagsAfterStartup = true;
+
+	// If true, run gameplay tag validation after every change of the gameplay tags tree in the editor.
+	// (i.e. after every edit of the tags list in editor).
+	UPROPERTY(Config, EditAnywhere, Category = "Validation Triggers")
 	bool bValidateTagsAfterTagTreeChange = true;
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category = "Validation Triggers")
 	bool bValidateTagsDuringCook = true;
 
 	// If true, run gameplay tag validation after every change of settings in this settings class.
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category = "Validation Triggers")
 	bool bValidateTagsAfterSettingsChange = true;
 
 	// Issues underneath these gameplay tags will always only cause warnings instead of errors.
