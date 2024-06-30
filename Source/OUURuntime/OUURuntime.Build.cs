@@ -64,7 +64,8 @@ public class OUURuntime : OUUModuleRules
 			"AIModule",
 			"JsonUtilities",
 			"Json",
-			"Projects"
+			"Projects",
+			"NetCore"
 		});
 
 		// - Editor only dependencies
