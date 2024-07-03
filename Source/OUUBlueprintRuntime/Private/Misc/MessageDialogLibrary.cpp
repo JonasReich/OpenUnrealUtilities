@@ -2,6 +2,7 @@
 
 #include "Misc/MessageDialogLibrary.h"
 
+#include "HAL/IConsoleManager.h"
 #include "Misc/EngineVersionComparison.h"
 #include "Misc/MessageDialog.h"
 
