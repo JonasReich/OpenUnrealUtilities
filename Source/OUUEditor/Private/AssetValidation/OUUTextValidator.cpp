@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2024 Jonas Reich & Contributors
+// Copyright (c) 2024 Jonas Reich & Contributors
 
 #include "AssetValidation/OUUTextValidator.h"
 
@@ -7,74 +7,6 @@
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Serialization/PropertyLocalizationDataGathering.h"
 #include "WidgetBlueprint.h"
-
-void GatherBlueprintForLocalization(const UBlueprint* const Blueprint)
-{
-	// Force non-data-only blueprints to set the HasScript flag, as they may not currently have bytecode due to a
-	// compilation error
-	bool bForceHasScript = !FBlueprintEditorUtils::IsDataOnlyBlueprint(Blueprint);
-	if (bForceHasScript)
-		return;
-
-	// Also do this for blueprints that derive from something containing text properties, as these may propagate default
-	// values from their parent class on load
-	if (UClass* BlueprintParentClass = Blueprint->ParentClass.Get())
-	{
-		TArray<UStruct*> TypesToCheck;
-		TypesToCheck.Add(BlueprintParentClass);
-
-		TSet<UStruct*> TypesChecked;
-		while (!bForceHasScript && TypesToCheck.Num() > 0)
-		{
-			UStruct* TypeToCheck = TypesToCheck.Pop(/*bAllowShrinking*/ false);
-			TypesChecked.Add(TypeToCheck);
-
-			for (TFieldIterator<const FProperty> PropIt(
-					 TypeToCheck,
-					 EFieldIteratorFlags::IncludeSuper,
-					 EFieldIteratorFlags::ExcludeDeprecated,
-					 EFieldIteratorFlags::IncludeInterfaces);
-				 !bForceHasScript && PropIt;
-				 ++PropIt)
-			{
-				auto ProcessInnerProperty =
-					[&bForceHasScript, &TypesToCheck, &TypesChecked](const FProperty* InProp) -> bool {
-					if (const FTextProperty* TextProp = CastField<const FTextProperty>(InProp))
-					{
-						bForceHasScript = true;
-						return true;
-					}
-					if (const FStructProperty* StructProp = CastField<const FStructProperty>(InProp))
-					{
-						if (!TypesChecked.Contains(StructProp->Struct))
-						{
-							TypesToCheck.Add(StructProp->Struct);
-						}
-						return true;
-					}
-					return false;
-				};
-
-				if (!ProcessInnerProperty(*PropIt))
-				{
-					if (const FArrayProperty* ArrayProp = CastField<const FArrayProperty>(*PropIt))
-					{
-						ProcessInnerProperty(ArrayProp->Inner);
-					}
-					if (const FMapProperty* MapProp = CastField<const FMapProperty>(*PropIt))
-					{
-						ProcessInnerProperty(MapProp->KeyProp);
-						ProcessInnerProperty(MapProp->ValueProp);
-					}
-					if (const FSetProperty* SetProp = CastField<const FSetProperty>(*PropIt))
-					{
-						ProcessInnerProperty(SetProp->ElementProp);
-					}
-				}
-			}
-		}
-	}
-}
 
 bool UOUUTextValidator::CanValidateAsset_Implementation(UObject* InAsset) const
 {
@@ -103,9 +35,6 @@ EDataValidationResult UOUUTextValidator::ValidateLoadedAsset_Implementation(
 	constexpr bool bIncludeNestedObjects = true;
 	GetObjectsWithPackage(Package, OUT Objects, bIncludeNestedObjects);
 
-	auto OwnerStructsToIgnore =
-		TArray<UStruct*>{FBPVariableDescription::StaticStruct(), FBPEditorBookmarkNode::StaticStruct()};
-
 	TArray<FGatherableTextData> GatherableTextDataArray;
 	EPropertyLocalizationGathererResultFlags ResultFlags;
 	FPropertyLocalizationDataGatherer Gatherer{OUT GatherableTextDataArray, Package, OUT ResultFlags};
@@ -116,6 +45,13 @@ EDataValidationResult UOUUTextValidator::ValidateLoadedAsset_Implementation(
 		bool bEditorOnly = true;
 		for (auto& Context : Entry.SourceSiteContexts)
 		{
+			// Unreal sometimes keeps old meta data around. Also the Context.IsEditorOnly is kinda unreliable for these.
+			// We just filter categories by string, because at least that works.
+			if (Context.SiteDescription.Contains(TEXT("MetaData.Category")))
+			{
+				continue;
+			}
+
 			if (Context.IsEditorOnly == false)
 				bEditorOnly = false;
 
