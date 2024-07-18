@@ -25,6 +25,14 @@ EActiveTimerReturnType TSOUUCreditsList<ElementType>::RollCredits(double InCurre
 //---------------------------------------------------------------------------------------------------------------------
 // UOUUCreditsWidget
 //---------------------------------------------------------------------------------------------------------------------
+UOUUCreditsWidget::UOUUCreditsWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+{
+	WheelScrollMultiplier = 0.f;
+	AllowOverscroll = false;
+	bEnableRightClickScrolling = false;
+	bAllowDragging = false;
+}
+
 void UOUUCreditsWidget::SetScrollSpeedPixelsPerSecond(float InScrollSpeedPixelsPerSecond)
 {
 	ScrollSpeedPixelsPerSecond = InScrollSpeedPixelsPerSecond;

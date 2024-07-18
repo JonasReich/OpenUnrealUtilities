@@ -31,7 +31,7 @@ public:
 		"ElementType must be TSharedRef<FOUUCreditsBlock>");
 
 	TWeakPtr<FActiveTimerHandle> TimerHandle;
-	float ScrollSpeedPixelsPerSecond = 50.0f;
+	float ScrollSpeedPixelsPerSecond = 0.0f;
 
 	void Construct(const FArguments& InArgs);
 	EActiveTimerReturnType RollCredits(double InCurrentTime, float InDeltaTime);
@@ -68,6 +68,8 @@ class UOUUCreditsWidget : public UListViewBase, public ITypedUMGListView<TShared
 	IMPLEMENT_TYPED_UMG_LIST(TSharedPtr<FOUUCreditsBlockListItem>, CreditsListView)
 
 public:
+	UOUUCreditsWidget(const FObjectInitializer& ObjectInitializer);
+
 	UFUNCTION(BlueprintCallable)
 	void SetCredits(const FOUUCredits& Credits);
 
@@ -116,7 +118,7 @@ protected:
 	EOUUCreditsSortMode PeopleSortMode;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float ScrollSpeedPixelsPerSecond;
+	float ScrollSpeedPixelsPerSecond = 100.f;
 
 
 private:
