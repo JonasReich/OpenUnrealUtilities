@@ -2,6 +2,7 @@
 
 #include "Misc/MessageDialogLibrary.h"
 
+#include "HAL/IConsoleManager.h"
 #include "Misc/EngineVersionComparison.h"
 #include "Misc/MessageDialog.h"
 
@@ -54,3 +55,18 @@ TEnumAsByte<EAppReturnType::Type> UMessageDialogLibrary::OpenMessageDialogWithDe
 	return FMessageDialog::Open(StaticCast<EAppMsgType::Type>(MessageType), DefaultValue, Message, OptionalTitle);
 #endif
 }
+
+//------------------------------------------------------------------------
+// Console command
+//------------------------------------------------------------------------
+
+static FAutoConsoleCommand OpenActorMapCommand(
+	TEXT("ouu.Modal.OpenSimpleModal"),
+	TEXT("Open a simple modal window that displays a default text"),
+	FConsoleCommandDelegate::CreateStatic([]() {
+		TEnumAsByte<EAppMsgType::Type> MyType(EAppMsgType::Ok);
+		UMessageDialogLibrary::OpenMessageDialog(
+			MyType,
+			FText::FromString("Default Title"),
+			FText::FromString("Default Message"));
+	}));
