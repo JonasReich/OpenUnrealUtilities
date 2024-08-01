@@ -110,18 +110,17 @@ void UGameplayTagValidatorSubsystem::ValidateGameplayTagTree()
 	TArray<FText> Warnings, Errors;
 	ValidationContext.SplitIssues(OUT Warnings, OUT Errors);
 
-#define MESSAGE_LOG_CAT AssetCheck
-	const auto MessageLogName = GetMessageLogName(EMessageLogName::MESSAGE_LOG_CAT);
+	const auto MessageLogName = TEXT("GameplayTagValidation");
 
 	UMessageLogBlueprintLibrary::NewMessageLogPage(MessageLogName, INVTEXT("Gameplay Tag Validation"));
 
 	for (const auto& Error : Errors)
 	{
-		UE_MESSAGELOG(MESSAGE_LOG_CAT, Error, Error);
+		UMessageLogBlueprintLibrary::AddTextMessageLogMessage(MessageLogName, Error, EMessageLogSeverity::Error);
 	}
 	for (const auto& Warning : Warnings)
 	{
-		UE_MESSAGELOG(MESSAGE_LOG_CAT, Warning, Warning);
+		UMessageLogBlueprintLibrary::AddTextMessageLogMessage(MessageLogName, Warning, EMessageLogSeverity::Warning);
 	}
 
 	if (Errors.Num() > 0)
@@ -140,9 +139,11 @@ void UGameplayTagValidatorSubsystem::ValidateGameplayTagTree()
 	}
 	else
 	{
-		UE_MESSAGELOG(MESSAGE_LOG_CAT, Info, "No GameplayTag validation issues found.");
+		UMessageLogBlueprintLibrary::AddTextMessageLogMessage(
+			MessageLogName,
+			INVTEXT("No GameplayTag validation issues found."),
+			EMessageLogSeverity::Info);
 	}
-#undef MESSAGE_LOG_CAT
 }
 
 void UGameplayTagValidatorSubsystem::Initialize(FSubsystemCollectionBase& Collection)

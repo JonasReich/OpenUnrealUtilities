@@ -10,6 +10,7 @@
 #include "GameplayTags/TypedGameplayTag.h"
 #include "GameplayTags/TypedGameplayTagContainerCustomization.h"
 #include "MaterialAnalyzer/OUUMaterialAnalyzer.h"
+#include "MessageLogModule.h"
 #include "Modules/ModuleManager.h"
 #include "OUUContentBrowserExtensions.h"
 #include "PropertyEditorUtils.h"
@@ -41,6 +42,9 @@ namespace OUU::Editor
 			OUU::Editor::PropertyEditorUtils::RegisterCustomPropertyTypeLayout<
 				FTypedGameplayTagContainer,
 				FTypedGameplayTagContainer_PropertyTypeCustomization>();
+
+			auto& MessageLogModule = FModuleManager::LoadModuleChecked<FMessageLogModule>("MessageLog");
+			MessageLogModule.RegisterLogListing(TEXT("GameplayTagValidation"), INVTEXT("Gameplay Tag Validation"));
 		}
 
 		void ShutdownModule() override
