@@ -57,10 +57,11 @@ public class OUUEditor : OUUModuleRules
 			"GameplayTags",
 			"GameplayTagsEditor",
 			"Json",
+			"MessageLog",
 
             // OUU
             "OUURuntime",
-			"OUUDeveloper"
+			"OUUDeveloper",
 		});
 	}
 }

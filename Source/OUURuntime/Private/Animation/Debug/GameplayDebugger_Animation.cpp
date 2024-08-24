@@ -221,13 +221,15 @@ void FGameplayDebuggerCategory_Animation::DisplayDebug(
 	SwitchAnimDebugCat(bFullGraph, TEXT("FullGraph"), false);
 	SwitchAnimDebugCat(bFullBlendSpaceDisplay, TEXT("FullBlendspaceDisplay"), true);
 
-	FDebugDisplayInfo DisplayInfo{TArray<FName>{}, ToggledCategories};
+	AnimInstance->AddGameplayDebuggerInfo(CanvasContext);
 
+	FDebugDisplayInfo DisplayInfo{TArray<FName>{}, ToggledCategories};
 	float YL = CanvasContext.CursorY;
 	float YPos = CanvasContext.CursorY;
 
 	Canvas->DisplayDebugManager
 		.Initialize(Canvas, GEngine->GetTinyFont(), {CanvasContext.CursorX, CanvasContext.CursorY});
+
 	AnimInstance->DisplayDebug(Canvas, DisplayInfo, YL, YPos);
 }
 

@@ -13,14 +13,17 @@ bool UOUUTextValidator::CanValidateAsset_Implementation(UObject* InAsset) const
 	// For now: do not run this validator in cook.
 	// If you want validate from command-line explicitly, please run an asset validation commandlet on widget BPs
 	// instead.
-	if (IsRunningCookCommandlet())
+	if (IsRunningCookCommandlet() || IsValid(InAsset) == false)
 	{
 		return false;
 	}
 
-	return IsValid(InAsset)
-		&& UOUUAssetValidationSettings::Get().ValidateNoLocalizedTextsClasses.ContainsByPredicate(
-			[InAsset](TSoftClassPtr<UObject> Entry) { return InAsset->IsA(Entry.LoadSynchronous()); });
+	auto AssetIsClassPredicate = [InAsset](TSoftClassPtr<UObject> Entry) {
+		return InAsset->IsA(Entry.LoadSynchronous());
+	};
+	auto& Settings = UOUUAssetValidationSettings::Get();
+	return Settings.ValidateNoLocalizedTextsClasses.ContainsByPredicate(AssetIsClassPredicate)
+		&& (Settings.IgnoreNoLocalizedTextsClasses.ContainsByPredicate(AssetIsClassPredicate) == false);
 }
 
 EDataValidationResult UOUUTextValidator::ValidateLoadedAsset_Implementation(

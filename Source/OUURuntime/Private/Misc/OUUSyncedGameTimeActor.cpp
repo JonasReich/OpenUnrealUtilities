@@ -110,9 +110,11 @@ void AOUUSyncedGameTimeActor::SetOverrideTime(bool bEnableOverride, double NewOv
 
 void AOUUSyncedGameTimeActor::SetOverrideTimeScale(double NewTimeScale)
 {
-	const double UnScaledCurrentTime = GetCurrentTimeSeconds() * OverrideTimeScale;
+	const double PrevScale = FMath::IsNearlyZero(OverrideTimeScale) ? 1.0 : OverrideTimeScale;
+	const double UnScaledCurrentTime = GetCurrentTimeSeconds() * PrevScale;
 	OverrideTimeScale = NewTimeScale;
-	SetCurrentTimeSeconds(UnScaledCurrentTime / NewTimeScale);
+	const double NewScale = FMath::IsNearlyZero(OverrideTimeScale) ? 1.0 : OverrideTimeScale;
+	SetCurrentTimeSeconds(UnScaledCurrentTime / NewScale);
 }
 
 void AOUUSyncedGameTimeActor::BeginPlay()
