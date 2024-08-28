@@ -71,6 +71,14 @@
 		{
 			"Name": "OnlineSubsystemUtils",
 			"Enabled": true
+		},
+		{
+			"Name": "ModelViewViewModel",
+			"Enabled": true
+		},
+		{
+			"Name": "CommonUI",
+			"Enabled": true
 		}
 	]
 }

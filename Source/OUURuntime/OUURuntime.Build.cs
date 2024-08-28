@@ -53,7 +53,8 @@ public class OUURuntime : OUUModuleRules
 			"GameplayAbilities",
 			"GameplayTags",
 			"GameplayTasks",
-			"DeveloperSettings"
+			"DeveloperSettings",
+			"CommonUI"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {
