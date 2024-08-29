@@ -3,6 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#include "Kismet/BlueprintFunctionLibrary.h"
+#include "Styling/SlateBrush.h"
+
 #include "OUUCredits.generated.h"
 
 UENUM(BlueprintType)

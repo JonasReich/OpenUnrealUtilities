@@ -3,6 +3,7 @@
 #include "Credits/OUUCredits.h"
 
 #include "Algo/RandomShuffle.h"
+#include "Engine/Texture2D.h"
 #include "LogOpenUnrealUtilities.h"
 #include "Misc/RegexUtils.h"
 
