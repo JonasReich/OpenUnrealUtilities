@@ -1,14 +1,14 @@
-﻿// Copyright (c) 2023 Jonas Reich & Contributors
+// Copyright (c) 2023 Jonas Reich & Contributors
 
 #include "Commandlets/OUUValidateAssetListCommandlet.h"
 
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Dom/JsonObject.h"
+#include "Editor.h"
 #include "EditorValidatorSubsystem.h"
 #include "LogOpenUnrealUtilities.h"
 #include "Misc/FileHelper.h"
 #include "Serialization/JsonSerializer.h"
-#include "Editor.h"
 
 int32 UOUUValidateAssetListCommandlet::Main(const FString& FullCommandLine)
 {
@@ -32,6 +32,19 @@ int32 UOUUValidateAssetListCommandlet::Main(const FString& FullCommandLine)
 	FAssetRegistryModule& AssetRegistryModule =
 		FModuleManager::LoadModuleChecked<FAssetRegistryModule>(FName("AssetRegistry"));
 	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
+
+	// Make sure asset registry is fully loaded before validation, some assets may rely on that.
+	if (UE::AssetRegistry::ShouldSearchAllAssetsAtStart() == false)
+	{
+		AssetRegistry.SearchAllAssets(true);
+		// Note: OnFilesLoaded will never be broadcast if the asset registry doesn't search all assets right from the
+		// start, so we have to trigger that manually. Why?
+		AssetRegistry.OnFilesLoaded().Broadcast();
+	}
+	else
+	{
+		AssetRegistry.WaitForCompletion();
+	}
 
 	auto ReportObject = MakeShared<FJsonObject>();
 
