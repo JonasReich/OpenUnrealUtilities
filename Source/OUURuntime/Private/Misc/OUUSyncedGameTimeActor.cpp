@@ -77,7 +77,8 @@ void AOUUSyncedGameTimeActor::SetCurrentTimeSecondsWithBlend(
 
 double AOUUSyncedGameTimeActor::GetScaledCycleDurationSeconds() const
 {
-	return GetUnscaledCycleDurationSeconds() / OverrideTimeScale;
+	return FMath::IsNearlyZero(OverrideTimeScale) ? GetUnscaledCycleDurationSeconds()
+												  : (GetUnscaledCycleDurationSeconds() / OverrideTimeScale);
 }
 
 double AOUUSyncedGameTimeActor::GetUnscaledCycleDurationSeconds() const
@@ -110,11 +111,23 @@ void AOUUSyncedGameTimeActor::SetOverrideTime(bool bEnableOverride, double NewOv
 
 void AOUUSyncedGameTimeActor::SetOverrideTimeScale(double NewTimeScale)
 {
-	const double PrevScale = FMath::IsNearlyZero(OverrideTimeScale) ? 1.0 : OverrideTimeScale;
+	const bool bWasPaused = FMath::IsNearlyZero(OverrideTimeScale);
+	const bool bShouldPause = FMath::IsNearlyZero(NewTimeScale);
+
+	const double PrevScale = bWasPaused ? 1.0 : OverrideTimeScale;
 	const double UnScaledCurrentTime = GetCurrentTimeSeconds() * PrevScale;
 	OverrideTimeScale = NewTimeScale;
 	const double NewScale = FMath::IsNearlyZero(OverrideTimeScale) ? 1.0 : OverrideTimeScale;
-	SetCurrentTimeSeconds(UnScaledCurrentTime / NewScale);
+	const double NewTime = UnScaledCurrentTime / NewScale;
+	SetCurrentTimeSeconds(NewTime);
+	if (bShouldPause)
+	{
+		SetOverrideTime(true, NewTime);
+	}
+	else
+	{
+		SetOverrideTime(false, -1.0 /*discarded*/);
+	}
 }
 
 void AOUUSyncedGameTimeActor::BeginPlay()
