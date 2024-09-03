@@ -56,12 +56,22 @@ FOUUCredits UOUUCreditsLibrary::CreditsFromMarkdownString(const FString& Markdow
 				// We don't do anything with alt text at the moment
 				auto ImageAltText = Match.CaptureGroups[1].MatchString;
 				auto ImagePath = Match.CaptureGroups[2].MatchString;
-				auto* Image = TSoftObjectPtr<UTexture2D>(FSoftObjectPath(ImagePath)).LoadSynchronous();
-				Result.Blocks.Last().Image = FSlateBrush();
-				Result.Blocks.Last().Image.SetResourceObject(Image);
-				Result.Blocks.Last().Image.SetImageSize(UE::Slate::FDeprecateVector2DParameter{
-					static_cast<float>(Image->GetSizeX()),
-					static_cast<float>(Image->GetSizeY())});
+				if (auto* Image = TSoftObjectPtr<UTexture2D>(FSoftObjectPath(ImagePath)).LoadSynchronous())
+				{
+					Result.Blocks.Last().Image = FSlateBrush();
+					Result.Blocks.Last().Image.SetResourceObject(Image);
+					Result.Blocks.Last().Image.SetImageSize(UE::Slate::FDeprecateVector2DParameter{
+						static_cast<float>(Image->GetSizeX()),
+						static_cast<float>(Image->GetSizeY())});
+				}
+				else
+				{
+					UE_LOG(
+						LogOpenUnrealUtilities,
+						Warning,
+						TEXT("Image path %s could not be loaded for credits"),
+						*ImagePath);
+				}
 				continue;
 			}
 			else
