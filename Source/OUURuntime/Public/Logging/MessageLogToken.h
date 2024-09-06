@@ -37,7 +37,9 @@ enum class EMessageLogTokenType : uint8
 	// supported in BP: no
 	EdGraph = EMessageToken::EdGraph,
 	// supported in BP: no
-	DynamicText = EMessageToken::DynamicText
+	DynamicText = EMessageToken::DynamicText,
+	// supported in BP: no
+	ForwardNativeToken UMETA(Hidden)
 };
 
 static_assert(
@@ -107,6 +109,8 @@ public:
 
 	static FORCEINLINE FMessageLogToken Create(FMessageLogToken Token) { return Token; }
 
+	static FMessageLogToken Create(const TSharedRef<IMessageToken>& NativeToken);
+
 	static FText ListAsText(const TArray<FMessageLogToken>& MessageTokenList);
 
 	template <typename FirstType>
@@ -138,6 +142,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	const UObject* Object = nullptr;
+
+	TSharedPtr<IMessageToken> ForwardedNativeToken;
 
 	TSharedRef<IMessageToken> CreateNativeMessageToken() const;
 };
