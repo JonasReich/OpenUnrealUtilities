@@ -27,7 +27,10 @@ USTRUCT(BlueprintType)
 struct OUURUNTIME_API FOUUGameEntitlementModule : public FTypedGameplayTag_Base
 {
 	GENERATED_BODY()
-	IMPLEMENT_TYPED_GAMEPLAY_TAG(FOUUGameEntitlementModule, FOUUGameEntitlementTags::Module)
+	IMPLEMENT_TYPED_GAMEPLAY_TAG(
+		FOUUGameEntitlementModule,
+		FOUUGameEntitlementTags::Module,
+		FOUUGameEntitlementTags::Collection)
 };
 
 USTRUCT(BlueprintType)
