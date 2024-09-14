@@ -3,79 +3,32 @@
 #pragma once
 
 #include "Engine/DeveloperSettings.h"
-#include "GameplayTags/TypedGameplayTag.h"
+#include "GameEntitlements/OUUGameEntitlementsTags.h"
 #include "Subsystems/EngineSubsystem.h"
 
 #include "OUUGameEntitlements.generated.h"
 
-OUU_DECLARE_GAMEPLAY_TAGS_START(OUURUNTIME_API, FOUUGameEntitlementTags, "GameEntitlements", "")
-	OUU_GTAG(
-		Module,
-		"Inidividual modules that can be locked/unlocked",
-		ParentTagType::Flags | EFlags::AllowContentChildTags)
-	OUU_GTAG(
-		Collection,
-		"Meta combination of modules that can be controlled at once",
-		ParentTagType::Flags | EFlags::AllowContentChildTags)
-	OUU_GTAG(
-		Version,
-		"A 'version' of the game that has a predefined selection of modules that are available",
-		ParentTagType::Flags | EFlags::AllowContentChildTags)
-OUU_DECLARE_GAMEPLAY_TAGS_END(FOUUGameEntitlementTags)
-
-USTRUCT(BlueprintType)
-struct OUURUNTIME_API FOUUGameEntitlementModule : public FTypedGameplayTag_Base
-{
-	GENERATED_BODY()
-	IMPLEMENT_TYPED_GAMEPLAY_TAG(
-		FOUUGameEntitlementModule,
-		FOUUGameEntitlementTags::Module,
-		FOUUGameEntitlementTags::Collection)
-};
-
-USTRUCT(BlueprintType)
-struct OUURUNTIME_API FOUUGameEntitlementCollection : public FTypedGameplayTag_Base
-{
-	GENERATED_BODY()
-	IMPLEMENT_TYPED_GAMEPLAY_TAG(FOUUGameEntitlementCollection, FOUUGameEntitlementTags::Collection)
-};
-
-USTRUCT(BlueprintType)
-struct OUURUNTIME_API FOUUGameEntitlementVersion : public FTypedGameplayTag_Base
-{
-	GENERATED_BODY()
-	IMPLEMENT_TYPED_GAMEPLAY_TAG(FOUUGameEntitlementVersion, FOUUGameEntitlementTags::Version)
-};
-
-UCLASS(BlueprintType, Config = "Game", DefaultConfig)
-class OUURUNTIME_API UOUUGameEntitlementSettings : public UDeveloperSettings
-{
-	GENERATED_BODY()
-public:
-	static const UOUUGameEntitlementSettings& Get();
-
-	// Which version to apply if nothing is overridden from command line or console variables.
-	UPROPERTY(Config, EditAnywhere)
-	FOUUGameEntitlementVersion DefaultVersion;
-
-	UPROPERTY(Config, EditAnywhere, meta = (Categories = "TypedTag{OUUGameEntitlementModule}"))
-	TMap<FOUUGameEntitlementVersion, FGameplayTagContainer> EntitlementsPerVersion;
-
-	UPROPERTY(Config, EditAnywhere, meta = (Categories = "TypedTag{OUUGameEntitlementModule}"))
-	TMap<FOUUGameEntitlementCollection, FGameplayTagContainer> ModuleCollections;
-};
-
-// Central subsystem to track entitlements
-UCLASS()
+/** Central subsystem to track entitlements */
+UCLASS(BlueprintType)
 class OUURUNTIME_API UOUUGameEntitlementsSubsystem : public UEngineSubsystem
 {
 	GENERATED_BODY()
 public:
 	static UOUUGameEntitlementsSubsystem& Get();
 
+	UFUNCTION(BlueprintPure)
 	bool IsEntitled(const FOUUGameEntitlementModule& Module) const;
 	bool IsEntitled(const FOUUGameEntitlementModules_Ref& Modules) const;
 
+	FOUUGameEntitlementModules_Ref GetActiveEntitlements() const;
+
+	UFUNCTION(BlueprintPure, DisplayName = "GetActiveEntitlements")
+	FGameplayTagContainer K2_GetActiveEntitlements() const;
+
+	UFUNCTION(BlueprintPure)
+	FOUUGameEntitlementVersion GetActiveVersion() const;
+
+	// Restrict Blueprint access for now.
 	void SetOverrideVersion(const FOUUGameEntitlementVersion& Version);
 
 	// - USubsystem

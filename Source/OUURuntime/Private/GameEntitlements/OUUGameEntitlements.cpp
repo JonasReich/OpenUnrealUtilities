@@ -1,11 +1,8 @@
 ﻿// Copyright (c) 2024 Jonas Reich & Contributors
 
-#include "Gameentitlements/OUUGameEntitlements.h"
+#include "GameEntitlements/OUUGameEntitlements.h"
 
-OUU_DEFINE_GAMEPLAY_TAGS(FOUUGameEntitlementTags)
-DEFINE_TYPED_GAMEPLAY_TAG(FOUUGameEntitlementModule)
-DEFINE_TYPED_GAMEPLAY_TAG(FOUUGameEntitlementCollection)
-DEFINE_TYPED_GAMEPLAY_TAG(FOUUGameEntitlementVersion)
+#include "GameEntitlements/OUUGameEntitlementsSettings.h"
 
 extern TAutoConsoleVariable<FString> CVar_OverrideEntitlementVersion;
 
@@ -32,11 +29,6 @@ TAutoConsoleVariable<FString> CVar_OverrideEntitlementVersion{
 	FConsoleVariableDelegate::CreateLambda(
 		[](IConsoleVariable*) { OUU::Runtime::GameEntitlements::UpdateOverrideEntitlementFromCVar(); })};
 
-const UOUUGameEntitlementSettings& UOUUGameEntitlementSettings::Get()
-{
-	return *GetDefault<UOUUGameEntitlementSettings>();
-}
-
 UOUUGameEntitlementsSubsystem& UOUUGameEntitlementsSubsystem::Get()
 {
 	return *GEngine->GetEngineSubsystem<UOUUGameEntitlementsSubsystem>();
@@ -52,6 +44,21 @@ bool UOUUGameEntitlementsSubsystem::IsEntitled(const FOUUGameEntitlementModules_
 {
 	// Expected to return true if Modules is empty
 	return ActiveEntitlements.HasAll(Modules);
+}
+
+FOUUGameEntitlementModules_Ref UOUUGameEntitlementsSubsystem::GetActiveEntitlements() const
+{
+	return ActiveEntitlements;
+}
+
+FGameplayTagContainer UOUUGameEntitlementsSubsystem::K2_GetActiveEntitlements() const
+{
+	return ActiveEntitlements.Get();
+}
+
+FOUUGameEntitlementVersion UOUUGameEntitlementsSubsystem::GetActiveVersion() const
+{
+	return ActiveVersion;
 }
 
 void UOUUGameEntitlementsSubsystem::SetOverrideVersion(const FOUUGameEntitlementVersion& Version)
