@@ -6,6 +6,7 @@
 #include "Modules/ModuleManager.h"
 
 #if WITH_GAMEPLAY_DEBUGGER
+	#include "GameEntitlements/Debug/GameplayDebuggerCategory_GameEntitlements.h"
 	#include "GameplayAbilities/Debug/GameplayDebuggerCategory_OUUAbilities.h"
 	#include "GameplayDebugger/GameplayDebuggerCategoryTypeList.h"
 	#include "GameplayDebugger/GameplayDebuggerCategory_ViewModes.h"
@@ -16,6 +17,7 @@ using OUU_GameplayDebuggerCategories = TGameplayDebuggerCategoryTypeList<
 	FGameplayDebuggerCategory_OUUAbilities,
 	FGameplayDebuggerCategory_SequentialFrameScheduler,
 	FGameplayDebuggerCategory_Animation,
+	FGameplayDebuggerCategory_GameEntitlements,
 	FGameplayDebuggerCategory_ViewModes>;
 #endif
 
