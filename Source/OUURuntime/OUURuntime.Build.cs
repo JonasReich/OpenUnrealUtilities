@@ -22,11 +22,7 @@ public class OUUModuleRules : ModuleRules
 {
 	public OUUModuleRules(ReadOnlyTargetRules Target) : base(Target)
 	{
-		// Disable PCHs for debug configs to ensure the plugin modules are self-contained and stick to IWYU
-		PCHUsage = Target.Configuration == UnrealTargetConfiguration.DebugGame
-			? ModuleRules.PCHUsageMode.NoPCHs
-			: ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-
+		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		IWYUSupport = IWYUSupport.Full;
 
 		// Also disable unity builds.
