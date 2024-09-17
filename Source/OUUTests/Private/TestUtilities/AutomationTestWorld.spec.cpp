@@ -11,6 +11,9 @@
 	#define SPEC_BASE_NAME "OpenUnrealUtilities.TestUtilities.AutomationTestWorld"
 
 BEGIN_DEFINE_SPEC(FAutomationTestWorldSpec, SPEC_BASE_NAME, DEFAULT_OUU_TEST_FLAGS)
+	// Worlds often times come with too much baggage (subsystems) to allow reacting to errors
+	bool SuppressLogs() override { return true; }
+
 	TSharedPtr<FOUUAutomationTestWorld> TestWorld;
 END_DEFINE_SPEC(FAutomationTestWorldSpec)
 void FAutomationTestWorldSpec::Define()
