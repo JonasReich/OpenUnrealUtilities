@@ -37,6 +37,10 @@ class OUUDEVELOPER_API UOUUMapsToCookSettings : public UDeveloperSettings
 public:
 	UOUUMapsToCookSettings();
 
+#if WITH_EDITOR
+	const FOUUMapsToCookList* GetMapsToCook(const FString& IniSectionName) const;
+#endif
+
 	// Request the package on default cooks.
 	// Not used if commandline, AlwaysCookMaps, or MapsToCook are present.
 	UPROPERTY(Transient, EditAnywhere, meta = (EditCondition = bEnableAllMaps))

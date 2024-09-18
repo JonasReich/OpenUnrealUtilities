@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2024 Jonas Reich & Contributors
+// Copyright (c) 2024 Jonas Reich & Contributors
 
 #include "GameEntitlements/OUUGameEntitlements.h"
 
@@ -72,7 +72,19 @@ void UOUUGameEntitlementsSubsystem::Initialize(FSubsystemCollectionBase& Collect
 	Super::Initialize(Collection);
 	OUU::Runtime::GameEntitlements::UpdateOverrideEntitlementFromCVar();
 	RefreshActiveVersionAndEntitlements();
+
+#if WITH_EDITOR
+	GetMutableDefault<UOUUGameEntitlementSettings>()
+		->OnSettingsChanged.AddUObject(this, &UOUUGameEntitlementsSubsystem::OnSettingsChanged);
+#endif
 }
+
+#if WITH_EDITOR
+void UOUUGameEntitlementsSubsystem::OnSettingsChanged(FPropertyChangedChainEvent& _PropertyChangedEvent)
+{
+	RefreshActiveVersionAndEntitlements();
+}
+#endif
 
 void UOUUGameEntitlementsSubsystem::RefreshActiveVersionAndEntitlements()
 {

@@ -97,6 +97,31 @@ UOUUMapsToCookSettings::UOUUMapsToCookSettings()
 	AlwaysCookMaps.OwningConfigSection = TEXT("AlwaysCookMaps");
 }
 
+#if WITH_EDITOR
+const FOUUMapsToCookList* UOUUMapsToCookSettings::GetMapsToCook(const FString& IniSectionName) const
+{
+	if (IniSectionName == TEXT("AllMaps"))
+	{
+		return bEnableAllMaps ? &AllMaps : nullptr;
+	}
+
+	if (IniSectionName == TEXT("AlwaysCookMaps"))
+	{
+		return &AlwaysCookMaps;
+	}
+
+	for (const auto& List : MapLists)
+	{
+		if (List.OwningConfigSection == IniSectionName)
+		{
+			return &List;
+		}
+	}
+
+	return nullptr;
+}
+#endif
+
 void UOUUMapsToCookSettings::PostReloadConfig(FProperty* PropertyThatWasLoaded)
 {
 	Super::PostReloadConfig(PropertyThatWasLoaded);
@@ -171,9 +196,9 @@ void UOUUMapsToCookSettings::PostEditChangeProperty(FPropertyChangedEvent& Prope
 		}
 		AllMaps.UpdateDefaultConfigFile(ConfigPath);
 		AlwaysCookMaps.UpdateDefaultConfigFile(ConfigPath);
-#if WITH_EDITORONLY_DATA
+	#if WITH_EDITORONLY_DATA
 		bEnableAllMaps = AlwaysCookMaps.MapsToCook.Num() == 0;
-#endif
+	#endif
 	}
 
 	OUU::Developer::Private::CheckoutConfigFile(ConfigPath);

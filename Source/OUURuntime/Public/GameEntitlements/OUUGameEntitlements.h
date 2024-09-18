@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2024 Jonas Reich & Contributors
+// Copyright (c) 2024 Jonas Reich & Contributors
 
 #pragma once
 
@@ -35,6 +35,9 @@ public:
 	void Initialize(FSubsystemCollectionBase& Collection) override;
 
 private:
+#if WITH_EDITOR
+	void OnSettingsChanged(FPropertyChangedChainEvent& _PropertyChangedEvent);
+#endif
 	void RefreshActiveVersionAndEntitlements();
 
 	FOUUGameEntitlementVersion OverrideVersion;
