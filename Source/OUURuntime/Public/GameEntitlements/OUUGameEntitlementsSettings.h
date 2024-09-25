@@ -31,6 +31,10 @@ public:
 	UPROPERTY(Config, EditAnywhere)
 	FOUUGameEntitlementVersion DefaultVersion;
 
+	// Which version to apply in editor if nothing is overridden from command line or console variables.
+	UPROPERTY(Config, EditAnywhere)
+	FOUUGameEntitlementVersion DefaultEditorVersion;
+
 	UPROPERTY(Config, EditAnywhere, meta = (Categories = "TypedTag{OUUGameEntitlementModule}"))
 	TMap<FOUUGameEntitlementVersion, FGameplayTagContainer> EntitlementsPerVersion;
 

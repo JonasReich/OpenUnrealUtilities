@@ -89,7 +89,12 @@ void UOUUGameEntitlementsSubsystem::OnSettingsChanged(FPropertyChangedChainEvent
 void UOUUGameEntitlementsSubsystem::RefreshActiveVersionAndEntitlements()
 {
 	auto& Settings = UOUUGameEntitlementSettings::Get();
-	ActiveVersion = OverrideVersion.IsValid() ? OverrideVersion : Settings.DefaultVersion;
+#if WITH_EDITOR
+	auto& DefaultVersion = GIsEditor ? Settings.DefaultEditorVersion : Settings.DefaultVersion;
+#else
+	auto& DefaultVersion = Settings.DefaultVersion;
+#endif
+	ActiveVersion = OverrideVersion.IsValid() ? OverrideVersion : DefaultVersion;
 	ActiveEntitlements.Reset();
 	if (auto* EntitlementsPtr = Settings.EntitlementsPerVersion.Find(ActiveVersion))
 	{

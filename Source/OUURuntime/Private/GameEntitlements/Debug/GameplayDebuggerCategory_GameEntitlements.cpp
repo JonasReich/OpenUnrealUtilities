@@ -16,6 +16,9 @@ void FGameplayDebuggerCategory_GameEntitlements::DrawData(
 	auto& Subsystem = UOUUGameEntitlementsSubsystem::Get();
 	auto& Settings = UOUUGameEntitlementSettings::Get();
 	_CanvasContext.Printf(TEXT("Default Version: %s"), *Settings.DefaultVersion.ToShortDisplayString());
+	#if WITH_EDITOR
+	_CanvasContext.Printf(TEXT("Default Version (Editor): %s"), *Settings.DefaultEditorVersion.ToShortDisplayString());
+	#endif
 	_CanvasContext.Printf(TEXT("{green}Current Version: %s"), *Subsystem.GetActiveVersion().ToShortDisplayString());
 	_CanvasContext.Printf(
 		TEXT("Active Entitlements:\n\t%s"),
