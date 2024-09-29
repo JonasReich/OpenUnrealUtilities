@@ -82,6 +82,8 @@ UUserWidget& UOUUCreditsWidget::OnGenerateEntryWidgetInternal(
 
 void UOUUCreditsWidget::SetCredits(const FOUUCredits& Credits)
 {
+	ListItems_CopyForGC = Credits.Blocks;
+	ListItems.Empty();
 	for (auto& Block : Credits.Blocks)
 	{
 		auto BlockCopy = MakeShared<FOUUCreditsBlockListItem>(Block);

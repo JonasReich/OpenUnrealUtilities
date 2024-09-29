@@ -36,10 +36,7 @@ public:
 	void Construct(const FArguments& InArgs);
 	EActiveTimerReturnType RollCredits(double InCurrentTime, float InDeltaTime);
 
-	bool IsAtEndOfCredits() const
-	{
-		return (ScrollBar->DistanceFromBottom() < SMALL_NUMBER);
-	}
+	bool IsAtEndOfCredits() const { return (ScrollBar->DistanceFromBottom() < SMALL_NUMBER); }
 };
 
 using SOUUCreditsList = TSOUUCreditsList<TSharedPtr<FOUUCreditsBlockListItem>>;
@@ -112,6 +109,8 @@ public:
 	FOnEndOfCreditsReached OnEndOfCreditsReached;
 
 protected:
+	UPROPERTY(Transient)
+	TArray<FOUUCreditsBlock> ListItems_CopyForGC;
 	TArray<TSharedPtr<FOUUCreditsBlockListItem>> ListItems;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -119,7 +118,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float ScrollSpeedPixelsPerSecond = 100.f;
-
 
 private:
 	bool bReachedEndOfCredits = false;
