@@ -17,6 +17,10 @@ AWorldBoundSFSchedulerRegistry::AWorldBoundSFSchedulerRegistry()
 	PostPhysicsTickFunction.bCanEverTick = true;
 	PostPhysicsTickFunction.bStartWithTickEnabled = true;
 	PostPhysicsTickFunction.TickGroup = TG_PostPhysics;
+
+	#if WITH_BFG_TICK_OPTIMIZER
+	bNeverApplyTickOptimizations = true;
+	#endif
 }
 
 bool AWorldBoundSFSchedulerRegistry::FPrioritizedScheduler::operator<(const FPrioritizedScheduler& Other) const

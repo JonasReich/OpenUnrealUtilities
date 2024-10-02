@@ -80,6 +80,16 @@ public class OUURuntime : OUUModuleRules
 				"AssetRegistry"
 			});
 		}
+
+		if ( GetModuleDirectory("BFGTickOptimizer") != string.Empty )
+		{
+			PublicDefinitions.Add("WITH_BFG_TICK_OPTIMIZER=1");
+		}
+		else
+		{
+			PublicDefinitions.Add("WITH_BFG_TICK_OPTIMIZER=0");
+
+		}
 		// --
 	}
 }
