@@ -1,12 +1,15 @@
 // Copyright (c) 2023 Jonas Reich & Contributors
 
+using System;
+using EpicGames.Core;
 using UnrealBuildTool;
 
 public class OUUModuleRuleHelpers
 {
 	public static void AddGameplayDebuggerDependency(ModuleRules Rules, ReadOnlyTargetRules Target)
 	{
-		if (Target.bBuildDeveloperTools || (Target.Configuration != UnrealTargetConfiguration.Shipping && Target.Configuration != UnrealTargetConfiguration.Test))
+		if (Target.bBuildDeveloperTools || (Target.Configuration != UnrealTargetConfiguration.Shipping &&
+		                                    Target.Configuration != UnrealTargetConfiguration.Test))
 		{
 			Rules.PrivateDependencyModuleNames.Add("GameplayDebugger");
 			Rules.PublicDefinitions.Add("WITH_GAMEPLAY_DEBUGGER=1");
@@ -37,8 +40,8 @@ public class OUURuntime : OUUModuleRules
 {
 	public OUURuntime(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PublicDependencyModuleNames.AddRange(new string[] {
-
+		PublicDependencyModuleNames.AddRange(new string[]
+		{
 			// Engine
 			"CoreUObject",
 			"Engine",
@@ -53,8 +56,8 @@ public class OUURuntime : OUUModuleRules
 			"CommonUI"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] {
-
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
 			// Engine
 			"HeadMountedDisplay",
 			"Slate",
@@ -68,7 +71,8 @@ public class OUURuntime : OUUModuleRules
 		// - Editor only dependencies
 		if (Target.bBuildEditor)
 		{
-			PrivateDependencyModuleNames.AddRange(new string[] {
+			PrivateDependencyModuleNames.AddRange(new string[]
+			{
 				"UnrealEd",
 				"GameplayTagsEditor",
 				"PropertyEditor",
@@ -81,15 +85,32 @@ public class OUURuntime : OUUModuleRules
 			});
 		}
 
-		if ( GetModuleDirectory("BFGTickOptimizer") != string.Empty )
+		if (HasModule("BFGTickOptimizer"))
 		{
 			PublicDefinitions.Add("WITH_BFG_TICK_OPTIMIZER=1");
 		}
 		else
 		{
 			PublicDefinitions.Add("WITH_BFG_TICK_OPTIMIZER=0");
-
 		}
 		// --
+	}
+
+	bool HasModule(string ModuleName)
+	{
+		try
+		{
+			GetModuleDirectory(ModuleName);
+			return true;
+		}
+		catch (BuildException e)
+		{
+			if (e.Message.Contains("Could not find a module named"))
+			{
+				return false;
+			}
+
+			throw;
+		}
 	}
 }
