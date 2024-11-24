@@ -84,7 +84,7 @@ public:
 	 * Note that this uses grid coordinates as in grid cells, so the world coordinates will likely be different from X
 	 * and Y.
 	 */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure,Category="OUU|Math|SpiralIdUtilities")
 	static int32 ConvertCoordinatesToSpiralId(const int32 X, const int32 Y);
 
 	/**
@@ -92,7 +92,7 @@ public:
 	 * Note that this uses grid coordinates as in grid cells, so the world coordinates will likely be different from X
 	 * and Y.
 	 */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure,Category="OUU|Math|SpiralIdUtilities")
 	static int32 ConvertCoordinatePointToSpiralId(const FIntPoint& Point);
 
 	/**
@@ -102,7 +102,7 @@ public:
 	 * @param	GridSize			Width of the grid cells
 	 * @param	CoordinateSystem	The type of coordinate system that should be used
 	 */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure,Category="OUU|Math|SpiralIdUtilities")
 	static int32 ConvertWorldLocation2DToSpiralId(
 		const FVector2D& Location,
 		float GridSize,
@@ -116,7 +116,7 @@ public:
 	 * @param	GridSize			Width of the grid cells
 	 * @param	CoordinateSystem	The type of coordinate system that should be used
 	 */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure,Category="OUU|Math|SpiralIdUtilities")
 	static int32 ConvertWorldLocationToSpiralId(
 		const FVector& Location,
 		float GridSize,
@@ -126,7 +126,7 @@ public:
 	 * Convert a spiral ID to grid coordinates.
 	 * Note: This function is more expensive O(n) compared to the opposite conversion from coordinate to ID O(1).
 	 */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure,Category="OUU|Math|SpiralIdUtilities")
 	static FIntPoint ConvertSpiralIdToCoordinates(const int32 SpiralId);
 
 	/**
@@ -138,7 +138,7 @@ public:
 	 * @param	CoordinateSystem	The type of coordinate system that should be used
 	 * @returns						Center location of the cell in world space
 	 */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure,Category="OUU|Math|SpiralIdUtilities")
 	static FVector2D ConvertSpiralIdToCenterLocation(
 		const int32 SpiralId,
 		float GridSize,
@@ -153,7 +153,7 @@ public:
 	 * @param	CoordinateSystem	The type of coordinate system that should be used
 	 * @returns						Two dimensional bound of the cell
 	 */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure,Category="OUU|Math|SpiralIdUtilities")
 	static FBox2D ConvertSpiralIdToBounds(
 		const int32 SpiralId,
 		const float GridSize,
@@ -172,7 +172,7 @@ public:
 	 * @param	BoundsElevation		Distance between Z=0 and bottom surface of the grid cell
 	 * @returns						Two dimensional bound of the cell
 	 */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure,Category="OUU|Math|SpiralIdUtilities")
 	static FBox ConvertSpiralIdToBounds3D(
 		const int32 SpiralId,
 		const float GridSize,

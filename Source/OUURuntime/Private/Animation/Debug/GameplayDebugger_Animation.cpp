@@ -9,7 +9,7 @@
 	#include "Animation/AnimNodeBase.h"
 	#include "Animation/AnimNotifies/AnimNotifyState.h"
 	#include "Animation/AnimSequence.h"
-	#include "Animation/AnimTypes.h"
+	//#include "Animation/AnimTypes.h"
 	#include "Animation/Debug/DebuggableAnimInstance.h"
 	#include "Components/SkeletalMeshComponent.h"
 	#include "DisplayDebugHelpers.h"

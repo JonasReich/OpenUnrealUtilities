@@ -50,58 +50,58 @@ class OUURUNTIME_API UOUURequest : public UObject
 	GENERATED_BODY()
 public:
 	/** Called on every status transition of the request */
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable,Category="OUU|Flow Control")
 	FOnRequestStatusChanged OnStatusChanged;
 
 	/**
 	 * Called whenever the request is raised. Only called on the initial request.
 	 * Will not be called again for consecutive calls of Raise().
 	 */
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable,Category="OUU|Flow Control")
 	FOnRequestRaised OnRaised;
 
 	/** Called whenever the request is fulfilled or canceled */
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable,Category="OUU|Flow Control")
 	FOnRequestStatusChanged OnCompleted;
 
 	/**
 	 * Should the status be reset to Idle automatically after completion?
 	 * If this is unchecked, the request has to be reset manually via Reset();
 	 */
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly,Category="OUU|Flow Control")
 	bool bResetAfterCompletion = true;
 
 	/** Raises the request without binding a callback delegate */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Flow Control")
 	void Raise();
 
 	/** Raise the request and bind a callback delegate that will be called when the request is completed */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Flow Control")
 	void RaiseAndWait(FOnRequestStatusChangedDelegate CompletedCallback);
 
 	/**
 	 * Drop the request from the caller side. (i.e. "never mind, I don't need this anymore")
 	 * Doesn't do anything if the request is not in the pending state.
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Flow Control")
 	void Cancel();
 
 	/**
 	 * Mark the request as completed. Can be either success or failure.
 	 * Doesn't do anything if the request is not in the pending state.
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Flow Control")
 	void Complete(bool bSuccessful);
 
 	/** Reset the request status after completion. Doesn't do anything while the request is still pending. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Flow Control")
 	void Reset();
 
 	/**
 	 * Get the current state of the request. When multiple objects bind to the OnRaised event, it's useful to check if
 	 * the request has already been fulfilled by a third party.
 	 */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure,Category="OUU|Flow Control")
 	EOUURequestState GetState() const;
 
 private:

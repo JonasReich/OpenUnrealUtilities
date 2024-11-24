@@ -16,18 +16,18 @@ struct FTypedGameplayTagSettingsEntry
 public:
 #if WITH_EDITORONLY_DATA
 	// Comment from C++ code on what this type is used for.
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere,Category="OUU|Typed Gameplay Tag|Settings")
 	FString Comment;
 
 	// Gameplay tags declared in C++ code that are always available for this FTypedGameplayTag type.
 	// Can't be edited. Only here for reference.y
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere,Category="OUU|Typed Gameplay Tag|Settings")
 	FGameplayTagContainer NativeRootTags;
 
 	// Additional tags that are valid root tags for this gameplay tag type.
 	// These can be either content tags (tags from INI files) or native tags from other systems.
 	// This allows tag sharing between systems while still keeping separate FTypedGameplayTag types.
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere,Category="OUU|Typed Gameplay Tag|Settings")
 	FGameplayTagContainer AdditionalRootTags;
 #endif
 };
@@ -56,7 +56,7 @@ public:
 	 * This removes old config entries that do not have a matching struct anymore, e.g. after a struct was deleted or
 	 * renamed.
 	 */
-	UFUNCTION(CallInEditor)
+	UFUNCTION(CallInEditor,Category="OUU|Typed Gameplay Tag|Settings")
 	static void CleanAdditionalTags();
 
 	// - UObject
@@ -89,7 +89,7 @@ private:
 #if WITH_EDITORONLY_DATA
 	// These are not the settings stored in the ini file, but a copy that is better to read/edit in the UI.
 	// Updates are automatically propagated to AdditionalRootTags, which is saved to the INI file.
-	UPROPERTY(EditAnywhere, meta = (ForceInlineRow, ReadOnlyKeys, DisplayName = "Gameplay Tag Types"))
+	UPROPERTY(EditAnywhere, meta = (ForceInlineRow, ReadOnlyKeys, DisplayName = "Gameplay Tag Types"),Category="OUU|Typed Gameplay Tag|Settings")
 	TMap<FName, FTypedGameplayTagSettingsEntry> SettingsCopyForUI;
 #endif
 };

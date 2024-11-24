@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
+#include "UObject/Interface.h"
 #include "GameplayTagContainer.h"
 #include "UObject/WeakInterfacePtr.h"
 
@@ -47,28 +47,28 @@ public:
 	friend struct FGameplayTagDependencySource;
 
 	// This appends all tags (own + from dependencies)
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Runtime|GameplayTags")
 	virtual void AppendTags(FGameplayTagContainer& OutTags) const;
 
 	// Append tags introduced by this tag container.
 	// This is the only function that should be overriden in derived classes.
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Runtime|GameplayTags")
 	virtual void AppendOwnTags(FGameplayTagContainer& OutTags) const {}
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Runtime|GameplayTags")
 	virtual void BroadcastTagsChanged();
 
 	// Event for external consumers. Not intended for source chaining.
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Runtime|GameplayTags")
 	virtual void BindEventToOnTagsChanged(FGameplayTagDependencyEvent Event);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Runtime|GameplayTags")
 	virtual void UnbindEventFromOnTagsChanged(FGameplayTagDependencyEvent Event);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Runtime|GameplayTags")
 	virtual void AddDependency(TScriptInterface<IGameplayTagDependencyInterface> Dependency);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Runtime|GameplayTags")
 	virtual void RemoveDependency(TScriptInterface<IGameplayTagDependencyInterface> Dependency);
 
 	TMap<FGameplayTag, const UObject*> GetImmediateTagSources() const;

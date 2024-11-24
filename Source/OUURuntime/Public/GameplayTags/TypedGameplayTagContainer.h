@@ -66,7 +66,7 @@ private:
 	// Underlying tag container
 	// The "TypedGameplayTagContainer" filter tells our editor customization to look for the TypedTagName property on
 	// the owning struct property for tag filter info.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess, Categories = "TypedGameplayTagContainer"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess, Categories = "TypedGameplayTagContainer"),Category="OUU|Typed Gameplay Tag")
 	FGameplayTagContainer Tags;
 
 	// Name of a typed gameplay tag type, e.g. "OUUSampleBarTag" for the FOUUSampleBarTag type.
@@ -75,7 +75,7 @@ private:
 	// This is only editable at "construct time" on the class a container property is first introduced i.e. either in
 	// constructor (C++) or class defaults (Blueprint). Once it's actually used to store tags, the typed tag name should
 	// ideally not be edited anymore at all.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess),Category="OUU|Typed Gameplay Tag")
 	FName TypedTagName;
 
 	// -- Implicit info from typed tag name
@@ -91,29 +91,29 @@ class UTypedGameplayTagContainerLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Typed Gameplay Tag")
 	static void SetTypedContainerTags(
 		UPARAM(ref) FTypedGameplayTagContainer& Container,
 		const FGameplayTagContainer& Tags);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Typed Gameplay Tag")
 	static void AddTagToTypedContainer(UPARAM(ref) FTypedGameplayTagContainer& Container, const FGameplayTag& TagToAdd);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Typed Gameplay Tag")
 	static void AppendTagsToTypedContainer(
 		UPARAM(ref) FTypedGameplayTagContainer& Container,
 		FGameplayTagContainer const& TagsToAppend);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Typed Gameplay Tag")
 	static bool RemoveTagFromTypedContainer(
 		UPARAM(ref) FTypedGameplayTagContainer& Container,
 		const FGameplayTag& TagToRemove);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Typed Gameplay Tag")
 	static void RemoveTagsFromTypedContainer(
 		UPARAM(ref) FTypedGameplayTagContainer& Container,
 		const FGameplayTagContainer& TagsToRemove);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Typed Gameplay Tag")
 	static void ResetTypedContainer(UPARAM(ref) FTypedGameplayTagContainer& Container);
 };

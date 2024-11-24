@@ -14,15 +14,15 @@ struct FOUUBlueprintEditorFocusContent
 	GENERATED_BODY()
 public:
 	/* Tab on which to focus (e.g. 'My Blueprint' tab). */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="OUU|Editor")
 	FString TabToFocusOrOpen;
 
 	/* The GUID of a blueprint node */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="OUU|Editor")
 	FString NodeGUID;
 
 	/* Name of the outer object - should be the blueprint that 'owns' the node */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="OUU|Editor")
 	FString ObjectName;
 };
 

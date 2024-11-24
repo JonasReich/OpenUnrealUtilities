@@ -22,13 +22,13 @@ public:
 	{
 	}
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,Category="OUU|Misc|Regex")
 	int32 MatchBeginning = INDEX_NONE;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,Category="OUU|Misc|Regex")
 	int32 MatchEnding = INDEX_NONE;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,Category="OUU|Misc|Regex")
 	FString MatchString = "";
 
 	FORCEINLINE FString ToString() const
@@ -59,7 +59,7 @@ public:
 
 	static FRegexGroups Invalid() { return FRegexGroups(); }
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly,Category="OUU|Misc|Regex")
 	TArray<FRegexMatch> CaptureGroups;
 
 	FORCEINLINE FString ToString() const { return ArrayToString(CaptureGroups); }
