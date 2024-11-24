@@ -18,13 +18,13 @@ class UOUUCoreBlueprintLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
-	// /** @returns the mutable class default object of the specified class. Proceed with caution! */
-	// UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Class", Meta = (DeterminesOutputType = Class))
-	// static UObject* GetClassDefaultObject(TSubclassOf<UObject> Class);
-	//
-	// /** @returns the mutable class default object of the objects class. Proceed with caution! */
-	// UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Class")
-	// static UObject* GetClassDefaultObjectFromObject(const UObject* Object);
+	/** @returns the mutable class default object of the specified class. Proceed with caution! */
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Class", Meta = (DeterminesOutputType = Class))
+	static UObject* GetClassDefaultObject(TSubclassOf<UObject> Class);
+	
+	/** @returns the mutable class default object of the objects class. Proceed with caution! */
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Class")
+	static UObject* GetClassDefaultObjectFromObject(const UObject* Object);
 
 	/**
 	 * Attempts to get the world from a world context object.
