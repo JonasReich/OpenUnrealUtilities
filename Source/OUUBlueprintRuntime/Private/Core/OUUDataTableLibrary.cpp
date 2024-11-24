@@ -2,6 +2,8 @@
 
 #include "Core/OUUDataTableLibrary.h"
 
+#include "Blueprint/BlueprintExceptionInfo.h"
+
 bool UOUUDataTableLibrary::AddRowToDataTable(UDataTable* DataTable, FName RowName, FTableRowBase RowStruct)
 {
 	// We must never hit this! The real implementation is in Generic_AddRowToDataTable

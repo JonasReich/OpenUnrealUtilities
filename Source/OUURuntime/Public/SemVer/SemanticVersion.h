@@ -57,19 +57,19 @@ public:
 		const FString& SourceString,
 		ESemVerParsingStrictness Strictness = ESemVerParsingStrictness::Strict);
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite,Category="OUU|Runtime|SemVer")
 	int32 MajorVersion = 0;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite,Category="OUU|Runtime|SemVer")
 	int32 MinorVersion = 1;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite,Category="OUU|Runtime|SemVer")
 	int32 PatchVersion = 0;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite,Category="OUU|Runtime|SemVer")
 	FSemVerPreReleaseIdentifier PreReleaseIdentifier;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite,Category="OUU|Runtime|SemVer")
 	FSemVerBuildMetadata BuildMetadata;
 
 	FString ToString() const;

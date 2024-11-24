@@ -182,7 +182,10 @@ void UOUUActorPool::AddReferencedObjects(UObject* InThis, FReferenceCollector& C
 	{
 		for (auto& Entry : CastedThis->PooledActors)
 		{
-			Collector.AddReferencedObjects<AActor>(Entry.Value);
+			//We get a warning here saying the game will randomly crash when incremental garbage collection is enabled
+			//Suggestion is to pass TObjectPtr<AActor> instead of AActor* to AddReferencedObjects
+			//Collector.AddReferencedObjects<AActor>(Entry.Value);
+			
 		}
 	}
 

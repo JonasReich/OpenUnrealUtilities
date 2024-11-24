@@ -15,10 +15,10 @@ struct FGameplayTagValidationSettingsEntry
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere,Category="OUU|Validation")
 	bool bCanHaveContentChildren = true;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere,Category="OUU|Validation")
 	int32 AllowedChildDepth = 1;
 };
 
@@ -33,36 +33,36 @@ class UGameplayTagValidationSettings : public UDeveloperSettings
 public:
 	// Maximum nesting depth of tags including the root tags.
 	// e.g. 'Foo' has a nesting level of 1, 'Foo.Bar' has 2, 'Foo.Bar.Baz' has 3, etc.
-	UPROPERTY(Config, EditAnywhere, meta = (UIMin = 1, UIMax = 20))
+	UPROPERTY(Config, EditAnywhere, Category="OUU|Gameplay Tag", meta = (UIMin = 1, UIMax = 20))
 	int32 MaxGlobalTagDepth = 10;
 
 	// Default depth allowed for native tags that are marked as "allow child tags" from C++ code.
 	// You can always create tag overrides that supercede this setting for individual tags.
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category="OUU|Gameplay Tag")
 	int32 NativeTagAllowedChildDepth = 3;
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category="OUU|Gameplay Tag")
 	bool bAllowContentRootTags = false;
 
 	// If true, allow content tags as children anywhere they are not explicitly prohibited via TagOverrides.
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category="OUU|Gameplay Tag")
 	bool bDefaultAllowContentTagChildren = false;
 
 	// If true, run gameplay tag validation after every change of the gameplay tags tree.
 	// This means both after editor start and every edit of the tags list.
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category="OUU|Gameplay Tag")
 	bool bValidateTagsAfterTagTreeChange = true;
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category="OUU|Gameplay Tag")
 	bool bValidateTagsDuringCook = true;
 
 	// If true, run gameplay tag validation after every change of settings in this settings class.
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category="OUU|Gameplay Tag")
 	bool bValidateTagsAfterSettingsChange = true;
 
 	// Issues underneath these gameplay tags will always only cause warnings instead of errors.
 	// Only affects issues from UOUUGameplayTagValidator. Other validator classes may ignore this setting.
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category="OUU|Gameplay Tag")
 	FGameplayTagContainer WarnOnlyGameplayTags;
 
 	void RefreshNativeTagOverrides();
@@ -79,11 +79,11 @@ public:
 	// --
 
 private:
-	UPROPERTY(Config, EditAnywhere, meta = (ForceInlineRow))
+	UPROPERTY(Config, EditAnywhere, meta = (ForceInlineRow), Category="OUU|Gameplay Tag")
 	TMap<FGameplayTag, FGameplayTagValidationSettingsEntry> TagOverrides;
 
 	// Settings declared in code from literal gameplay tags
-	UPROPERTY(VisibleAnywhere, meta = (ForceInlineRow))
+	UPROPERTY(VisibleAnywhere, meta = (ForceInlineRow), Category="OUU|Gameplay Tag")
 	TMap<FGameplayTag, FGameplayTagValidationSettingsEntry> NativeTagOverrides;
 };
 
@@ -110,7 +110,7 @@ class OUUEDITOR_API UGameplayTagValidatorSubsystem : public UEditorSubsystem
 public:
 	static UGameplayTagValidatorSubsystem& Get();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="OUU|Gameplay Tag")
 	void ValidateGameplayTagTree();
 
 	// - UEngineSubsystem

@@ -3,6 +3,9 @@
 #pragma once
 
 #include "GameplayDebugger/GameplayDebuggerCategory_OUUBase.h"
+#include "Animation/AnimTypes.h"
+
+#include "Animation/AnimationAsset.h"
 
 #if WITH_GAMEPLAY_DEBUGGER
 	#include "CoreMinimal.h"
@@ -12,7 +15,7 @@ class APlayerController;
 class UCanvas;
 class UOUUDebuggableAnimInstance;
 
-struct FAnimInstanceProxy;
+//struct FAnimInstanceProxy;
 struct FGameplayDebugger_DisplayDebugManager;
 
 /**
@@ -26,7 +29,7 @@ public:
 
 	static auto GetCategoryName() { return TEXT("Animation"); }
 
-	void DrawData(APlayerController* OwnerPC, FGameplayDebuggerCanvasContext& CanvasContext) override;
+	virtual void DrawData(APlayerController* OwnerPC, FGameplayDebuggerCanvasContext& CanvasContext) override;
 
 private:
 	int32 DebugMeshComponentIndex = 0;

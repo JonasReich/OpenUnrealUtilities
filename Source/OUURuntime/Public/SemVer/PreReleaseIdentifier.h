@@ -70,11 +70,11 @@ public:
 	bool operator>=(const FSemVerPreReleaseIdentifier& Other) const;
 
 protected:
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly,Category="OUU|Runtime|SemVer")
 	TArray<FString> Identifiers;
 
 	/** How strictly this pre-release identifier adheres to the semver specification */
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly,Category="OUU|Runtime|SemVer")
 	ESemVerParsingStrictness Strictness = ESemVerParsingStrictness::Strict;
 
 	static bool CompareStringIdentifiersSmaller(const FString& A, const FString& B);

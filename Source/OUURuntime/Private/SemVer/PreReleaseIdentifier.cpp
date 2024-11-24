@@ -93,7 +93,7 @@ bool FSemVerPreReleaseIdentifier::TryIncrement()
 	if (LastIdentifierAsNumeric != INDEX_NONE)
 	{
 		LastIdentifierAsNumeric++;
-		LastIdentifier = LexToString<int32>(LastIdentifierAsNumeric);
+		//LastIdentifier = LexToString<int32>(LastIdentifierAsNumeric);
 		return true;
 	}
 

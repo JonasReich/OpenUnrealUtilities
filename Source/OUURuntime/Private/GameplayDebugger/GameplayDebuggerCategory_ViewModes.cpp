@@ -1,14 +1,15 @@
 // Copyright (c) 2023 Jonas Reich & Contributors
 
 #include "GameplayDebugger/GameplayDebuggerCategory_ViewModes.h"
+#include "Engine.h"
 
 #if WITH_GAMEPLAY_DEBUGGER
-	#include "BufferVisualizationData.h"
-	#include "Engine/DebugCameraControllerSettings.h"
-	#include "Engine/Font.h"
-	#include "Engine/GameViewportClient.h"
-	#include "GameFramework/PlayerController.h"
-	#include "LogOpenUnrealUtilities.h"
+#include "BufferVisualizationData.h"
+#include "Engine/DebugCameraControllerSettings.h"
+#include "Engine/Font.h"
+#include "Engine/GameViewportClient.h"
+#include "GameFramework/PlayerController.h"
+#include "LogOpenUnrealUtilities.h"
 
 namespace OUU::Runtime::Private
 {
@@ -52,7 +53,7 @@ namespace OUU::Runtime::Private
 		case VMI_VisualizeSubstrate: return TEXT("VisualizeSubstrate");
 		case VMI_VisualizeGroom: return TEXT("VisualizeGroom");
 		case VMI_Max: return TEXT("Max");
-		default:;
+		default: ;
 		}
 		return TEXT("");
 	}
@@ -70,7 +71,6 @@ namespace OUU::Runtime::Private
 
 		return TEXT("");
 	}
-
 } // namespace OUU::Runtime::Private
 
 FGameplayDebuggerCategory_ViewModes::FGameplayDebuggerCategory_ViewModes()
@@ -113,7 +113,10 @@ void FGameplayDebuggerCategory_ViewModes::DrawData(
 	FGameplayDebuggerCanvasContext& CanvasContext)
 {
 	CanvasContext.FontRenderInfo.bEnableShadow = true;
-	CanvasContext.Font = GEngine->GetSmallFont();
+	if (GEngine)
+	{
+		CanvasContext.Font = GEngine->GetSmallFont();
+	}
 
 	PrintKeyBinds(CanvasContext);
 
@@ -151,7 +154,8 @@ void FGameplayDebuggerCategory_ViewModes::CycleViewMode()
 
 		if (NextViewModeIndex != CurrViewModeIndex)
 		{
-			FString NextViewModeName = OUU::Runtime::Private::GetViewModeName(StaticCast<EViewModeIndex>(NextViewModeIndex));
+			FString NextViewModeName = OUU::Runtime::Private::GetViewModeName(
+				StaticCast<EViewModeIndex>(NextViewModeIndex));
 
 			if (!NextViewModeName.IsEmpty())
 			{
@@ -305,7 +309,8 @@ void FGameplayDebuggerCategory_ViewModes::GetNextBuffer(const TArray<FString>& O
 				Max += Incr;
 			}
 
-			auto Wrap = [&](int32 Index) {
+			auto Wrap = [&](int32 Index)
+			{
 				if (Index < Min)
 				{
 					Index = Max;
