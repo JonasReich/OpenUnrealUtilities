@@ -2,6 +2,7 @@
 
 #include "SemVer/PreReleaseIdentifier.h"
 
+#include "Misc/EngineVersionComparison.h"
 #include "Misc/RegexUtils.h"
 
 FSemVerPreReleaseIdentifier::FSemVerPreReleaseIdentifier(
@@ -93,7 +94,11 @@ bool FSemVerPreReleaseIdentifier::TryIncrement()
 	if (LastIdentifierAsNumeric != INDEX_NONE)
 	{
 		LastIdentifierAsNumeric++;
+#if UE_VERSION_OLDER_THAN(5, 4, 0)
 		LastIdentifier = LexToString<int32>(LastIdentifierAsNumeric);
+#else
+		LastIdentifier = LexToString<FString, int32>(LastIdentifierAsNumeric);
+#endif
 		return true;
 	}
 
