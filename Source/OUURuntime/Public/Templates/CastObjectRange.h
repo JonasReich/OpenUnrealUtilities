@@ -25,33 +25,33 @@ private:
 	IteratorType WrappedIterator;
 
 public:
-	CONSTEXPR TCastObjectIterator() : WrappedIterator() {}
-	CONSTEXPR explicit TCastObjectIterator(IteratorType It) : WrappedIterator(It) {}
+	constexpr TCastObjectIterator() : WrappedIterator() {}
+	constexpr explicit TCastObjectIterator(IteratorType It) : WrappedIterator(It) {}
 
-	CONSTEXPR CastElementType* operator*() const { return Cast<CastElementType>(*WrappedIterator); }
+	constexpr CastElementType* operator*() const { return Cast<CastElementType>(*WrappedIterator); }
 
 	// preincrement
-	CONSTEXPR TCastObjectIterator& operator++()
+	constexpr TCastObjectIterator& operator++()
 	{
 		++WrappedIterator;
 		return (*this);
 	}
 
 	// postincrement
-	CONSTEXPR TCastObjectIterator operator++(int)
+	constexpr TCastObjectIterator operator++(int)
 	{
 		TCastObjectIterator Temp = *this;
 		++WrappedIterator;
 		return Temp;
 	}
 
-	CONSTEXPR bool operator==(const TCastObjectIterator& Other) { return WrappedIterator == Other.WrappedIterator; }
+	constexpr bool operator==(const TCastObjectIterator& Other) { return WrappedIterator == Other.WrappedIterator; }
 
-	CONSTEXPR bool operator!=(const TCastObjectIterator& Other) { return WrappedIterator != Other.WrappedIterator; }
+	constexpr bool operator!=(const TCastObjectIterator& Other) { return WrappedIterator != Other.WrappedIterator; }
 };
 
 template <typename CastTargetType, typename IteratorType>
-CONSTEXPR auto CreateCastObjectIterator(IteratorType Iterator)
+constexpr auto CreateCastObjectIterator(IteratorType Iterator)
 {
 	return TCastObjectIterator<IteratorType, CastTargetType>(Iterator);
 }
@@ -67,7 +67,7 @@ private:
 	ContainerType Container;
 
 public:
-	CONSTEXPR explicit TCastObjectRangeAdaptor(ContainerType c) : Container(c) {}
+	constexpr explicit TCastObjectRangeAdaptor(ContainerType c) : Container(c) {}
 
 #define DECLARE_RANGED_FOR_OPERATOR(Operator, OptionalConst)                                                           \
 	auto Operator() OptionalConst noexcept                                                                             \
@@ -91,13 +91,13 @@ public:
  * }
  */
 template <class CastTargetType, typename ContainerType>
-CONSTEXPR auto CastObjectRange(ContainerType& Container)
+constexpr auto CastObjectRange(ContainerType& Container)
 {
 	return TCastObjectRangeAdaptor<ContainerType&, CastTargetType>(Container);
 }
 
 template <class CastTargetType, typename ContainerType>
-CONSTEXPR auto CastObjectRange(ContainerType&& Container)
+constexpr auto CastObjectRange(ContainerType&& Container)
 {
 	return TCastObjectRangeAdaptor<ContainerType, CastTargetType>(MoveTemp(Container));
 }
