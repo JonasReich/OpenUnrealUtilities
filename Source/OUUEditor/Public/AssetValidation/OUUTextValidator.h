@@ -16,7 +16,9 @@ class UOUUTextValidator : public UEditorValidatorBase
 public:
 	// - UEditorValidatorBase
 	bool CanValidateAsset_Implementation(UObject* InAsset) const override;
-	EDataValidationResult ValidateLoadedAsset_Implementation(UObject* InAsset, TArray<FText>& ValidationErrors)
-		override;
+	EDataValidationResult ValidateLoadedAsset_Implementation(
+		const FAssetData& InAssetData,
+		UObject* InAsset,
+		FDataValidationContext& Context) override;
 	// --
 };

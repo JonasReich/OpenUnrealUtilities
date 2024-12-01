@@ -3,10 +3,7 @@
 #include "AssetValidation/OUUTextValidator.h"
 
 #include "AssetValidation/OUUAssetValidationSettings.h"
-#include "Components/Widget.h"
-#include "Kismet2/BlueprintEditorUtils.h"
 #include "Serialization/PropertyLocalizationDataGathering.h"
-#include "WidgetBlueprint.h"
 
 bool UOUUTextValidator::CanValidateAsset_Implementation(UObject* InAsset) const
 {
@@ -18,7 +15,7 @@ bool UOUUTextValidator::CanValidateAsset_Implementation(UObject* InAsset) const
 		return false;
 	}
 
-	auto AssetIsClassPredicate = [InAsset](TSoftClassPtr<UObject> Entry) {
+	auto AssetIsClassPredicate = [InAsset](const TSoftClassPtr<UObject>& Entry) {
 		return InAsset->IsA(Entry.LoadSynchronous());
 	};
 	auto& Settings = UOUUAssetValidationSettings::Get();
@@ -27,8 +24,9 @@ bool UOUUTextValidator::CanValidateAsset_Implementation(UObject* InAsset) const
 }
 
 EDataValidationResult UOUUTextValidator::ValidateLoadedAsset_Implementation(
+	const FAssetData& InAssetData,
 	UObject* InAsset,
-	TArray<FText>& ValidationErrors)
+	FDataValidationContext& Context)
 {
 	EDataValidationResult Result = EDataValidationResult::Valid;
 
@@ -46,19 +44,19 @@ EDataValidationResult UOUUTextValidator::ValidateLoadedAsset_Implementation(
 	{
 		FString SiteDescription;
 		bool bEditorOnly = true;
-		for (auto& Context : Entry.SourceSiteContexts)
+		for (auto& SourceSiteContext : Entry.SourceSiteContexts)
 		{
 			// Unreal sometimes keeps old meta data around. Also the Context.IsEditorOnly is kinda unreliable for these.
 			// We just filter categories by string, because at least that works.
-			if (Context.SiteDescription.Contains(TEXT("MetaData.Category")))
+			if (SourceSiteContext.SiteDescription.Contains(TEXT("MetaData.Category")))
 			{
 				continue;
 			}
 
-			if (Context.IsEditorOnly == false)
+			if (SourceSiteContext.IsEditorOnly == false)
 				bEditorOnly = false;
 
-			SiteDescription += TEXT(" ") + Context.SiteDescription;
+			SiteDescription += TEXT(" ") + SourceSiteContext.SiteDescription;
 		}
 
 		if (bEditorOnly)
@@ -71,8 +69,7 @@ EDataValidationResult UOUUTextValidator::ValidateLoadedAsset_Implementation(
 				INVTEXT("Text \"{0}\" is neither a culture invariant nor linked "
 						"from a string table. Source: {1}"),
 				FText::FromString(Entry.SourceData.SourceString),
-				FText::FromString(SiteDescription)),
-			IN OUT ValidationErrors);
+				FText::FromString(SiteDescription)));
 	}
 
 	if (Result == EDataValidationResult::Valid)

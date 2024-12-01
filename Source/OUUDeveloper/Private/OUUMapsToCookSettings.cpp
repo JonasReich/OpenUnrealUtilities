@@ -7,6 +7,7 @@
 #include "ISourceControlModule.h"
 #include "LogOpenUnrealUtilities.h"
 #include "Misc/ConfigCacheIni.h"
+#include "Misc/EngineVersionComparison.h"
 #include "SourceControlHelpers.h"
 
 namespace OUU::Developer::Private
@@ -65,7 +66,9 @@ void FOUUMapsToCookList::UpdateDefaultConfigFile(const FString& ConfigPath)
 	// Default ini files require the array syntax to be applied to the property name
 	// We also use the hardcoded name "Map", because that's required by the cooker.
 	const FString CompleteKey = TEXT("+Map");
+#if UE_VERSION_OLDER_THAN(5, 4, 0)
 	FConfigSection* Sec = GConfig->GetSectionPrivate(*OwningConfigSection, true, false, *ConfigPath);
+#endif
 	if (MapsToCook.Num() > 0)
 	{
 		TArray<FString> MapsToCookStrings;
@@ -74,20 +77,38 @@ void FOUUMapsToCookList::UpdateDefaultConfigFile(const FString& ConfigPath)
 			MapsToCookStrings.Add(Map.FilePath);
 		}
 
+		// Delete the old value for the property in the ConfigCache before (conditionally) adding in the new value
+#if UE_VERSION_OLDER_THAN(5, 4, 0)
 		if (Sec)
 		{
-			// Delete the old value for the property in the ConfigCache before (conditionally) adding in the new value
 			Sec->Remove(*CompleteKey);
 		}
+#else
+		GConfig->RemoveKeyFromSection(*OwningConfigSection, *CompleteKey, *ConfigPath);
+#endif
 
 		for (int32 i = 0; i < MapsToCook.Num(); i++)
 		{
-			Sec->Add(*CompleteKey, *MapsToCook[i].FilePath);
+#if UE_VERSION_OLDER_THAN(5, 4, 0)
+			if (Sec)
+			{
+				Sec->Add(*CompleteKey, *MapsToCook[i].FilePath);
+			}
+#else
+			GConfig->AddToSection(*OwningConfigSection, *CompleteKey, *MapsToCook[i].FilePath, *ConfigPath);
+#endif
 		}
 	}
 	else
 	{
-		Sec->Remove(*CompleteKey);
+#if UE_VERSION_OLDER_THAN(5, 4, 0)
+		if (Sec)
+		{
+			Sec->Remove(*CompleteKey);
+		}
+#else
+		GConfig->RemoveKeyFromSection(*OwningConfigSection, *CompleteKey, *ConfigPath);
+#endif
 	}
 }
 
