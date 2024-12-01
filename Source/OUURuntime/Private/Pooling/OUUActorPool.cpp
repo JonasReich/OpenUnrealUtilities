@@ -119,7 +119,7 @@ void UOUUActorPool::DestroyAllActors()
 	{
 		for (auto It = PooledActors.CreateIterator(); It; ++It)
 		{
-			TArray<AActor*>& ActorArray = It.Value();
+			TArray<TObjectPtr<AActor>>& ActorArray = It.Value();
 			for (int i = 0; i < ActorArray.Num(); i++)
 			{
 				World->DestroyActor(ActorArray[i]);
@@ -231,11 +231,11 @@ AActor* UOUUActorPool::SpawnOrRetrieveFromPool(
 	const FSpawnRequestHandle SpawnRequestHandle,
 	FSpawnRequest& SpawnRequest)
 {
-	TArray<AActor*>* Pool = PooledActors.Find(SpawnRequest.Template);
+	TArray<TObjectPtr<AActor>>* Pool = PooledActors.Find(SpawnRequest.Template);
 
 	if (Pool && Pool->Num() > 0)
 	{
-		AActor* PooledActor = (*Pool)[0];
+		TObjectPtr<AActor> PooledActor = (*Pool)[0];
 		Pool->RemoveAt(0);
 		--NumActorPooled;
 		ActivateActor(PooledActor);
@@ -417,7 +417,7 @@ bool UOUUActorPool::TryReleaseActorToPool(AActor* Actor)
 	const bool bIsPoolableActor = IsValidInterface<IOUUPoolableActor>(Actor);
 	if (bIsPoolableActor && CALL_INTERFACE(IOUUPoolableActor, CanBePooled, Actor))
 	{
-		TArray<AActor*>& Pool = PooledActors.FindOrAdd(Actor->GetClass());
+		TArray<TObjectPtr<AActor>>& Pool = PooledActors.FindOrAdd(Actor->GetClass());
 
 		const int32 MaxPoolSize = CALL_INTERFACE(IOUUPoolableActor, GetMaxPoolSize, Actor);
 		if (Pool.Num() >= MaxPoolSize)
