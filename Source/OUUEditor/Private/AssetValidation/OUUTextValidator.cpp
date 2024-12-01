@@ -23,10 +23,14 @@ bool UOUUTextValidator::CanValidateAsset_Implementation(UObject* InAsset) const
 		&& (Settings.IgnoreNoLocalizedTextsClasses.ContainsByPredicate(AssetIsClassPredicate) == false);
 }
 
+#if UE_VERSION_OLDER_THAN(5, 4, 0)
+EDataValidationResult UOUUTextValidator::ValidateLoadedAsset_Impl(UObject* InAsset, TArray<FText>& OutValidationErrors)
+#else
 EDataValidationResult UOUUTextValidator::ValidateLoadedAsset_Implementation(
 	const FAssetData& InAssetData,
 	UObject* InAsset,
 	FDataValidationContext& Context)
+#endif
 {
 	EDataValidationResult Result = EDataValidationResult::Valid;
 
@@ -69,7 +73,12 @@ EDataValidationResult UOUUTextValidator::ValidateLoadedAsset_Implementation(
 				INVTEXT("Text \"{0}\" is neither a culture invariant nor linked "
 						"from a string table. Source: {1}"),
 				FText::FromString(Entry.SourceData.SourceString),
-				FText::FromString(SiteDescription)));
+				FText::FromString(SiteDescription))
+#if UE_VERSION_OLDER_THAN(5, 4, 0)
+				,
+			OutValidationErrors
+#endif
+		);
 	}
 
 	if (Result == EDataValidationResult::Valid)
