@@ -463,7 +463,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayCue(
 			DebugLine(OUU::Runtime::GameplayDebuggerUtils::CleanupName(CueClass->GetName()), 7.f, 0);
 		}
 	#else
-		DebugLine(Info, TEXT("no NotifyMapActor since UE 5.3.0"), 7.f, 0);
+		DebugLine(TEXT("no NotifyMapActor since UE 5.3.0"), 7.f, 0);
 	#endif
 	}
 	else

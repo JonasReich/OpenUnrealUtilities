@@ -5,7 +5,7 @@
 #if WITH_GAMEPLAY_DEBUGGER
 
 	#include "Animation/AnimSequence.h"
-	#include "Animation/AnimTypes.h"
+	//#include "Animation/AnimTypes.h"
 	#include "Animation/Debug/DebuggableAnimInstance.h"
 	#include "Components/SkeletalMeshComponent.h"
 	#include "Components/StaticMeshComponent.h"

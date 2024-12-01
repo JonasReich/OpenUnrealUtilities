@@ -19,7 +19,7 @@ class OUURUNTIME_API USharedLock : public UObject
 	GENERATED_BODY()
 public:
 	/** Called whenever the lock state changes (from unlocked to locked or vice versa) */
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable,Category="OUU|Flow Control")
 	FOnSharedLockStateChanged OnLockStateChanged;
 
 	/**
@@ -27,7 +27,7 @@ public:
 	 * All of these key objects need to be removed via TryRelease() in order to release the entire lock.
 	 * May be called multiple times with the same key object without any side-effects.
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Flow Control")
 	void Lock(UObject* Key);
 
 	/**
@@ -37,7 +37,7 @@ public:
 	 * the specified duration has passed, so the entire lock is released again.
 	 * May be called multiple times with the same key object, which effectively resets the timer.
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Flow Control")
 	void LockForDuration(UObject* Key, float Duration);
 
 	/**
@@ -45,28 +45,28 @@ public:
 	 * @param	Key		Key to release from the lock
 	 * @returns			if the entire lock was successfully released
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Flow Control")
 	bool TryUnlock(UObject* Key);
 
 	/**
 	 * Simple check if the lock has any active keys.
 	 * Does not check for stale keys!
 	 */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure,Category="OUU|Flow Control")
 	bool IsLocked() const;
 
 	/**
 	 * Check if the lock has any active non-stale keys.
 	 * Cleans up any stale keys from the internal key list.
 	 */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure,Category="OUU|Flow Control")
 	bool CheckIsLocked();
 
 	/**
 	 * Get a copy of the key list. May contain stale entries.
 	 * Entries are not stably sorted.
 	 */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure,Category="OUU|Flow Control")
 	TArray<UObject*> GetActiveKeys() const;
 
 private:
@@ -74,6 +74,6 @@ private:
 	 * List of active keys. May contain stale entries.
 	 * Entries are not stably sorted.
 	 */
-	UPROPERTY(Transient)
+	UPROPERTY(Transient,Category="OUU|Flow Control",VisibleInstanceOnly)
 	TArray<TWeakObjectPtr<UObject>> ActiveKeys;
 };

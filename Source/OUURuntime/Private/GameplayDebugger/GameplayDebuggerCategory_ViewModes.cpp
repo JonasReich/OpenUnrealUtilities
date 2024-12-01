@@ -1,6 +1,7 @@
 // Copyright (c) 2023 Jonas Reich & Contributors
 
 #include "GameplayDebugger/GameplayDebuggerCategory_ViewModes.h"
+#include "Engine.h"
 
 #if WITH_GAMEPLAY_DEBUGGER
 	#include "BufferVisualizationData.h"
@@ -53,7 +54,7 @@ namespace OUU::Runtime::Private
 		case VMI_VisualizeSubstrate: return TEXT("VisualizeSubstrate");
 		case VMI_VisualizeGroom: return TEXT("VisualizeGroom");
 		case VMI_Max: return TEXT("Max");
-		default:;
+		default: ;
 		}
 		return TEXT("");
 	}
@@ -71,7 +72,6 @@ namespace OUU::Runtime::Private
 
 		return TEXT("");
 	}
-
 } // namespace OUU::Runtime::Private
 
 FGameplayDebuggerCategory_ViewModes::FGameplayDebuggerCategory_ViewModes()
@@ -114,7 +114,10 @@ void FGameplayDebuggerCategory_ViewModes::DrawData(
 	FGameplayDebuggerCanvasContext& CanvasContext)
 {
 	CanvasContext.FontRenderInfo.bEnableShadow = true;
-	CanvasContext.Font = GEngine->GetSmallFont();
+	if (GEngine)
+	{
+		CanvasContext.Font = GEngine->GetSmallFont();
+	}
 
 	PrintKeyBinds(CanvasContext);
 
@@ -307,7 +310,8 @@ void FGameplayDebuggerCategory_ViewModes::GetNextBuffer(const TArray<FString>& O
 				Max += Incr;
 			}
 
-			auto Wrap = [&](int32 Index) {
+			auto Wrap = [&](int32 Index)
+			{
 				if (Index < Min)
 				{
 					Index = Max;

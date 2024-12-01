@@ -14,6 +14,7 @@
 #include "Modules/ModuleManager.h"
 #include "OUUContentBrowserExtensions.h"
 #include "PropertyEditorUtils.h"
+#include "OUUEditor/Public/PropertyEditorUtils.h"
 
 namespace OUU::Editor
 {
@@ -47,7 +48,7 @@ namespace OUU::Editor
 			MessageLogModule.RegisterLogListing(TEXT("GameplayTagValidation"), INVTEXT("Gameplay Tag Validation"));
 		}
 
-		void ShutdownModule() override
+		void ShutdownModule()
 		{
 			if (OnUtilityWidgetsLoadedHandle.IsValid())
 			{

@@ -2,6 +2,12 @@
 
 #include "Core/OUUDataTableLibrary.h"
 
+#include "Misc/EngineVersionComparison.h"
+
+#if !UE_VERSION_OLDER_THAN(5, 4, 0)
+	#include "Blueprint/BlueprintExceptionInfo.h"
+#endif
+
 bool UOUUDataTableLibrary::AddRowToDataTable(UDataTable* DataTable, FName RowName, FTableRowBase RowStruct)
 {
 	// We must never hit this! The real implementation is in Generic_AddRowToDataTable
