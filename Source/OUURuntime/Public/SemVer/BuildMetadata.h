@@ -42,6 +42,11 @@ public:
 	 */
 	bool TryParseString(const FString& SourceString, ESemVerParsingStrictness InStrictness);
 
+	/**
+	 * Append different build metadata, adding '.' in-between, if necessary
+	 */
+	void Append(const FSemVerBuildMetadata& Other);
+
 	bool operator==(const FSemVerBuildMetadata& Other) const;
 	bool operator!=(const FSemVerBuildMetadata& Other) const;
 

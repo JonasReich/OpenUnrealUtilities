@@ -8,19 +8,22 @@ AWorldBoundSFSchedulerRegistry::AWorldBoundSFSchedulerRegistry()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+	PrimaryActorTick.bTickEvenWhenPaused = true;
 	PrimaryActorTick.TickGroup = TG_PrePhysics;
 
 	DuringPhysicsTickFunction.bCanEverTick = true;
 	DuringPhysicsTickFunction.bStartWithTickEnabled = true;
+	DuringPhysicsTickFunction.bTickEvenWhenPaused = true;
 	DuringPhysicsTickFunction.TickGroup = TG_DuringPhysics;
 
 	PostPhysicsTickFunction.bCanEverTick = true;
 	PostPhysicsTickFunction.bStartWithTickEnabled = true;
+	PostPhysicsTickFunction.bTickEvenWhenPaused = true;
 	PostPhysicsTickFunction.TickGroup = TG_PostPhysics;
 
-	#if WITH_BFG_TICK_OPTIMIZER
+#if WITH_BFG_TICK_OPTIMIZER
 	bNeverApplyTickOptimizations = true;
-	#endif
+#endif
 }
 
 bool AWorldBoundSFSchedulerRegistry::FPrioritizedScheduler::operator<(const FPrioritizedScheduler& Other) const

@@ -5,10 +5,11 @@
 #include "GameplayTagsManager.h"
 #include "Misc/CoreDelegates.h"
 
-void UTypedGameplayTagSettings::GetAdditionalRootTags(FGameplayTagContainer& OutRootTags,
+void UTypedGameplayTagSettings::GetAdditionalRootTags(
+	FGameplayTagContainer& OutRootTags,
 	const UStruct* BlueprintStruct)
 {
-	GetAdditionalRootTags(OutRootTags, *BlueprintStruct->GetName());
+	GetAdditionalRootTags(OutRootTags, BlueprintStruct->GetFName());
 }
 
 void UTypedGameplayTagSettings::GetAdditionalRootTags(
@@ -28,7 +29,7 @@ void UTypedGameplayTagSettings::AddNativeRootTags(const FGameplayTagContainer& R
 {
 	auto* Settings = GetMutableDefault<UTypedGameplayTagSettings>();
 	check(Settings);
-	const FName StructName = *BlueprintStruct->GetName();
+	const FName StructName = BlueprintStruct->GetFName();
 	Settings->NativeRootTags.Add(StructName, FGameplayTagContainer(RootTags));
 
 	// also add an entry for additional tags if not already present
@@ -42,7 +43,7 @@ void UTypedGameplayTagSettings::AddNativeRootTags(const FGameplayTagContainer& R
 void UTypedGameplayTagSettings::GetAllRootTags(FGameplayTagContainer& OutRootTags, const UStruct* BlueprintStruct)
 
 {
-	GetAllRootTags(OutRootTags, *BlueprintStruct->GetName());
+	GetAllRootTags(OutRootTags, BlueprintStruct->GetFName());
 }
 
 void UTypedGameplayTagSettings::GetAllRootTags(FGameplayTagContainer& OutRootTags, const FName& BlueprintStructName)

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 
+#include "Logging/IMessageLog.h"
 #include "Logging/TokenizedMessage.h"
 
 #include <type_traits>
@@ -125,6 +126,45 @@ public:
 		TArray<FMessageLogToken> ResultArray{Create(FirstArgument)};
 		ResultArray.Append(CreateList(RemainingArguments...));
 		return ResultArray;
+	}
+
+	template <typename... ArgTypes>
+	static TArray<TSharedRef<IMessageToken>> CreateNativeList(ArgTypes&&... TokenArgumentList)
+	{
+		TArray<TSharedRef<IMessageToken>> Tokens;
+		auto WrappedTokenList = CreateList<ArgTypes...>(Forward<ArgTypes>(TokenArgumentList)...);
+		for (auto& Token : WrappedTokenList)
+		{
+			Tokens.Add(Token.CreateNativeMessageToken());
+		}
+		return Tokens;
+	}
+
+	template <typename... ArgTypes>
+	static void AddTokensToMessage(const TSharedRef<FTokenizedMessage>& Message, ArgTypes&&... TokenArgumentList)
+	{
+		auto WrappedTokenList = CreateList<ArgTypes...>(Forward<ArgTypes>(TokenArgumentList)...);
+		for (auto& Token : WrappedTokenList)
+		{
+			Message->AddToken(Token.CreateNativeMessageToken());
+		}
+	}
+
+	template <typename... ArgTypes>
+	static TSharedRef<FTokenizedMessage> CreateMessage(EMessageSeverity::Type Severity, ArgTypes&&... TokenArgumentList)
+	{
+		auto Message = FTokenizedMessage::Create(Severity);
+		AddTokensToMessage<ArgTypes...>(Message, Forward<ArgTypes>(TokenArgumentList)...);
+		return Message;
+	}
+
+	template <typename... ArgTypes>
+	static void AddMessage(
+		const TSharedRef<IMessageLog> MessageLog,
+		EMessageSeverity::Type Severity,
+		ArgTypes&&... TokenArgumentList)
+	{
+		MessageLog->AddMessage(CreateMessage<ArgTypes...>(Severity, Forward<ArgTypes>(TokenArgumentList)...));
 	}
 
 	// Which of the payload data should be used

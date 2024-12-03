@@ -15,28 +15,43 @@
 
 namespace OUU::Runtime::Private
 {
-	template <typename... T>
-	struct TGetAllTypedTagRootTags_Recursive;
+	template <typename CallableT, typename... Ts>
+	struct TForEachTypedTagRootTag_Recursive;
 
-	template <typename T, typename... Ts>
-	struct TGetAllTypedTagRootTags_Recursive<T, Ts...>
+	template <typename CallableT, typename T, typename... Ts>
+	struct TForEachTypedTagRootTag_Recursive<CallableT, T, Ts...>
 	{
-		static void Impl(FGameplayTagContainer& OutRootTags)
+		static bool Impl(const CallableT& Callable)
 		{
-			const FGameplayTag RootTag = T::Get();
+			if (Callable(T::Get()))
+			{
+				return true;
+			}
+
+			return TForEachTypedTagRootTag_Recursive<CallableT, Ts...>::Impl(Callable);
+		}
+	};
+
+	template <typename CallableT>
+	struct TForEachTypedTagRootTag_Recursive<CallableT>
+	{
+		static bool Impl(const CallableT& Callable) { return false; }
+	};
+
+	template <typename... Ts, typename CallableT>
+	bool ForEachTypedTagRootTag_Recursive(const CallableT& Callable)
+	{
+		return TForEachTypedTagRootTag_Recursive<CallableT, Ts...>::Impl(Callable);
+	}
+
+	template <typename... Ts>
+	void GetAllTypedTagRootTags_Recursive(FGameplayTagContainer& OutRootTags)
+	{
+		ForEachTypedTagRootTag_Recursive<Ts...>([&](const FGameplayTag& RootTag) {
 			OutRootTags.AddTag(RootTag);
-			return TGetAllTypedTagRootTags_Recursive<Ts...>::Impl(OutRootTags);
-		}
-	};
-
-	template <>
-	struct TGetAllTypedTagRootTags_Recursive<>
-	{
-		static void Impl(FGameplayTagContainer& OutRootTags)
-		{
-			// do nothing
-		}
-	};
+			return false;
+		});
+	}
 
 #if WITH_EDITOR
 	OUURUNTIME_API FString MakeFilterString(const FGameplayTagContainer& GameplayTags);
@@ -84,18 +99,37 @@ public:
 	static ValueContainerType GetNativeTagRootTags()
 	{
 		FGameplayTagContainer Result;
-		OUU::Runtime::Private::TGetAllTypedTagRootTags_Recursive<InRootLiteralTagTypes...>::Impl(OUT Result);
+		OUU::Runtime::Private::GetAllTypedTagRootTags_Recursive<InRootLiteralTagTypes...>(OUT Result);
 		return ValueContainerType::CreateUnchecked(Result);
+	}
+
+	template <typename CallableT>
+	static bool ForEachNativeRootTag(const CallableT& Callable)
+	{
+		return OUU::Runtime::Private::ForEachTypedTagRootTag_Recursive<InRootLiteralTagTypes...>(
+			[&](const FGameplayTag& RootTag) { Callable(BlueprintTagType(RootTag)); });
 	}
 
 	static ValueContainerType GetAllRootTags()
 	{
 		FGameplayTagContainer Result;
 		// Native tags
-		OUU::Runtime::Private::TGetAllTypedTagRootTags_Recursive<InRootLiteralTagTypes...>::Impl(OUT Result);
+		OUU::Runtime::Private::GetAllTypedTagRootTags_Recursive<InRootLiteralTagTypes...>(OUT Result);
 		// Plus additional tags from settings
 		UTypedGameplayTagSettings::GetAdditionalRootTags(OUT Result, BlueprintTagType::StaticStruct());
 		return ValueContainerType::CreateUnchecked(Result);
+	}
+
+	template <typename CallableT>
+	static bool ForAllRootTags(const CallableT& Callable)
+	{
+		const auto HandleRootTag = [&](const FGameplayTag& RootTag) { return Callable(BlueprintTagType(RootTag)); };
+		if (OUU::Runtime::Private::ForEachTypedTagRootTag_Recursive<InRootLiteralTagTypes...>(HandleRootTag))
+		{
+			return true;
+		}
+
+		return UTypedGameplayTagSettings::ForEachAdditionalRootTag(HandleRootTag, BlueprintTagType::StaticStruct());
 	}
 
 	static ValueContainerType GetAllLeafTags()
@@ -128,13 +162,11 @@ public:
 	static BlueprintTagType TryConvert(FGameplayTag VanillaTag, bool bChecked)
 	{
 		ValueContainerType RootTags = GetAllRootTags();
-		for (auto RootTag : RootTags)
+		if (ForAllRootTags([&](const BlueprintTagType& RootTag) { return VanillaTag.MatchesTag(RootTag); }))
 		{
-			if (VanillaTag.MatchesTag(RootTag))
-			{
-				return BlueprintTagType(VanillaTag);
-			}
+			return BlueprintTagType(VanillaTag);
 		}
+
 		if (VanillaTag.IsValid() && bChecked)
 		{
 			checkf(
@@ -202,7 +234,17 @@ public:                                                                         
 	static TagType TryConvert(FGameplayTag FromTag) { return TypedTagImplType::TryConvert(FromTag, false); }           \
 	static TagType ConvertChecked(FGameplayTag FromTag) { return TypedTagImplType::TryConvert(FromTag, true); }        \
 	static TypedTagImplType::ValueContainerType GetAllRootTags() { return TypedTagImplType::GetAllRootTags(); }        \
+	template <typename CallableT>                                                                                      \
+	static bool ForEachNativeRootTag(const CallableT& Callable)                                                        \
+	{                                                                                                                  \
+		return TypedTagImplType::ForEachNativeRootTag(Callable);                                                       \
+	}                                                                                                                  \
 	static TypedTagImplType::ValueContainerType GetAllLeafTags() { return TypedTagImplType::GetAllLeafTags(); }        \
+	template <typename CallableT>                                                                                      \
+	static bool ForAllRootTags(const CallableT& Callable)                                                              \
+	{                                                                                                                  \
+		return TypedTagImplType::ForAllRootTags(Callable);                                                             \
+	}                                                                                                                  \
                                                                                                                        \
 protected:                                                                                                             \
 	FName GetStructName() const { return *TagType::StaticStruct()->GetName().Mid(1); }                                 \

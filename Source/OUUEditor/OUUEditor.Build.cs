@@ -6,21 +6,21 @@ public class OUUEditor : OUUModuleRules
 {
 	public OUUEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PublicDependencyModuleNames.AddRange(new string[] {
-
-            // Engine
-            "Core",
+		PublicDependencyModuleNames.AddRange(new string[]
+		{
+			// Engine
+			"Core",
 			"InputCore",
 			"UMG",
 
-            // Plugin
-            "OUURuntime"
+			// Plugin
+			"OUURuntime"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] {
-
-            // Engine
-            "CoreUObject",
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
+			// Engine
+			"CoreUObject",
 			"Engine",
 			"Slate",
 			"SlateCore",
@@ -59,8 +59,8 @@ public class OUUEditor : OUUModuleRules
 			"Json",
 			"MessageLog",
 
-            // OUU
-            "OUURuntime",
+			// OUU
+			"OUURuntime",
 			"OUUDeveloper",
 		});
 	}

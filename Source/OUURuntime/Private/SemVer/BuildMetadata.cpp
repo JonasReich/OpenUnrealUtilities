@@ -2,6 +2,7 @@
 
 #include "SemVer/BuildMetadata.h"
 
+#include "LogOpenUnrealUtilities.h"
 #include "Misc/RegexUtils.h"
 
 FSemVerBuildMetadata::FSemVerBuildMetadata(
@@ -58,6 +59,21 @@ bool FSemVerBuildMetadata::TryParseString(const FString& SourceString, ESemVerPa
 	Strictness = ESemVerParsingStrictness::Strict;
 	Metadata = "";
 	return false;
+}
+
+void FSemVerBuildMetadata::Append(const FSemVerBuildMetadata& Other)
+{
+	if (Other.Metadata.Len() == 0
+		|| ensureMsgf(Other.Strictness <= Strictness, TEXT("Metadata cannot be appended if it's less strict")) == false)
+	{
+		return;
+	}
+
+	if (Metadata.Len() > 0)
+	{
+		Metadata += TEXT(".");
+	}
+	Metadata += Other.Metadata;
 }
 
 bool FSemVerBuildMetadata::operator==(const FSemVerBuildMetadata& Other) const
