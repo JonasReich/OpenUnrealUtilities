@@ -11,7 +11,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnExclusiveLockStateChanged, UExcl
 /**
  * Object lock that only allows one object to access a resource exclusively
  */
-UCLASS()
+UCLASS(BlueprintType)
 class OUURUNTIME_API UExclusiveLock : public UObject
 {
 	GENERATED_BODY()

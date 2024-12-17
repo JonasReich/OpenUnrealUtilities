@@ -6,6 +6,25 @@
 #include "LogOpenUnrealUtilities.h"
 #include "TimerManager.h"
 
+USharedLock::FScopedLock::FScopedLock(USharedLock& InLock, UObject* InKey) : Lock(InLock), Key(InKey)
+{
+	Lock.Lock(Key);
+}
+
+USharedLock::FScopedLock::FScopedLock(FScopedLock&& Other) noexcept : Lock(Other.Lock), Key(Other.Key)
+{
+	Other.Key = nullptr;
+}
+
+USharedLock::FScopedLock::~FScopedLock() noexcept
+{
+	// Key may have been invalidated by move
+	if (Key)
+	{
+		Lock.TryUnlock(Key);
+	}
+}
+
 void USharedLock::Lock(UObject* Key)
 {
 	const bool bWasLockedBefore = IsLocked();
@@ -17,6 +36,11 @@ void USharedLock::Lock(UObject* Key)
 	{
 		OnLockStateChanged.Broadcast(this, true);
 	}
+}
+
+USharedLock::FScopedLock USharedLock::ScopedLock(UObject* Key)
+{
+	return {*this, Key};
 }
 
 void USharedLock::LockForDuration(UObject* Key, float Duration)
