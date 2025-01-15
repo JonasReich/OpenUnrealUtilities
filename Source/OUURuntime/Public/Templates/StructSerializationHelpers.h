@@ -28,12 +28,12 @@ namespace OUU::Runtime
 	{
 		if (StructRef.StaticStruct()->UseBinarySerialization(Slot.GetUnderlyingArchive()))
 		{
-			StructRef.StaticStruct()->SerializeBin(Slot.GetUnderlyingArchive(), &StructRef);
+			StructRef.StaticStruct()->SerializeBin(Slot, &StructRef);
 		}
 		else
 		{
 			StructRef.StaticStruct()->SerializeTaggedProperties(
-				Slot.GetUnderlyingArchive(),
+				Slot,
 				reinterpret_cast<uint8*>(&StructRef),
 				StructRef.StaticStruct(),
 				nullptr);
