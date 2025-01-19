@@ -13,11 +13,23 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnSharedLockStateChanged, USharedL
  * The lock is released as soon as the last key owner has seized control.
  * Possible application: Pause game requests
  */
-UCLASS()
+UCLASS(BlueprintType)
 class OUURUNTIME_API USharedLock : public UObject
 {
 	GENERATED_BODY()
 public:
+	struct OUURUNTIME_API FScopedLock : public FNoncopyable
+	{
+	private:
+		USharedLock& Lock;
+		UObject* Key;
+
+	public:
+		FScopedLock(USharedLock&, UObject*);
+		FScopedLock(FScopedLock&& Other) noexcept;
+		~FScopedLock() noexcept;
+	};
+
 	/** Called whenever the lock state changes (from unlocked to locked or vice versa) */
 	UPROPERTY(BlueprintAssignable,Category="OUU|Flow Control")
 	FOnSharedLockStateChanged OnLockStateChanged;
@@ -29,6 +41,12 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable,Category="OUU|Flow Control")
 	void Lock(UObject* Key);
+
+	/**
+	 * For C++ usage that can use RAII mechanisms: Add a lock while the result object is in scope.
+	 * After the result object runs out of scope, TryUnlock() is called for the given key.
+	 */
+	FScopedLock ScopedLock(UObject* Key);
 
 	/**
 	 * Add a key to the lock. May be called successively with multiple different key objects.

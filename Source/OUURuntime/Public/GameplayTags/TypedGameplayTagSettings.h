@@ -44,6 +44,10 @@ class OUURUNTIME_API UTypedGameplayTagSettings : public UDeveloperSettings
 public:
 	static void GetAdditionalRootTags(FGameplayTagContainer& OutRootTags, const UStruct* BlueprintStruct);
 	static void GetAdditionalRootTags(FGameplayTagContainer& OutRootTags, const FName& BlueprintStructName);
+	template <typename CallableT>
+	static bool ForEachAdditionalRootTag(const CallableT& Callable, const UStruct* BlueprintStruct);
+	template <typename CallableT>
+	static bool ForEachAdditionalRootTag(const CallableT& Callable, const FName& BlueprintStructName);
 	static void AddNativeRootTags(const FGameplayTagContainer& RootTags, const UStruct* BlueprintStruct);
 	static void GetAllRootTags(FGameplayTagContainer& OutRootTags, const UStruct* BlueprintStruct);
 	static void GetAllRootTags(FGameplayTagContainer& OutRootTags, const FName& BlueprintStructName);
@@ -93,3 +97,29 @@ private:
 	TMap<FName, FTypedGameplayTagSettingsEntry> SettingsCopyForUI;
 #endif
 };
+
+template <typename CallableT>
+bool UTypedGameplayTagSettings::ForEachAdditionalRootTag(const CallableT& Callable, const UStruct* BlueprintStruct)
+{
+	return ForEachAdditionalRootTag(Callable, BlueprintStruct->GetFName());
+}
+
+template <typename CallableT>
+bool UTypedGameplayTagSettings::ForEachAdditionalRootTag(const CallableT& Callable, const FName& BlueprintStructName)
+{
+	const auto* Settings = GetDefault<UTypedGameplayTagSettings>();
+	check(Settings);
+	auto& AdditionalRootTags = Settings->AdditionalRootTags;
+	if (auto* Tags = AdditionalRootTags.Find(BlueprintStructName))
+	{
+		for (const auto& Tag : *Tags)
+		{
+			if (Callable(Tag))
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}

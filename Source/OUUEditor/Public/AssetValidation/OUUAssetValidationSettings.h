@@ -24,4 +24,10 @@ public:
 	// ValidateNoLocalizedTextsClasses above.
 	UPROPERTY(Config, EditDefaultsOnly)
 	TArray<TSoftClassPtr<UObject>> IgnoreNoLocalizedTextsClasses;
+
+	UPROPERTY(Config, EditDefaultsOnly, meta = (LongPackageName))
+	TArray<FDirectoryPath> AssetListValidation_AlwaysIncludeDirectories;
+
+	UPROPERTY(Config, EditDefaultsOnly)
+	TArray<FSoftObjectPath> AssetListValidation_AlwaysIncludeAssets;
 };

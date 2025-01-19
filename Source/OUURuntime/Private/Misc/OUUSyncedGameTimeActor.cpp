@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2024 Jonas Reich & Contributors
+// Copyright (c) 2024 Jonas Reich & Contributors
 
 #include "Misc/OUUSyncedGameTimeActor.h"
 
@@ -41,7 +41,7 @@ AOUUSyncedGameTimeActor::AOUUSyncedGameTimeActor()
 
 double AOUUSyncedGameTimeActor::GetCurrentTimeSeconds() const
 {
-	if (OverrideTime > 0.0)
+	if (OverrideTime >= 0.0)
 	{
 		return OverrideTime;
 	}
