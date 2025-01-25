@@ -168,19 +168,19 @@ public:
 	}
 
 	// Which of the payload data should be used
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite,Category="OUU|Logging")
 	EMessageLogTokenType Type = EMessageLogTokenType::Text;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite,Category="OUU|Logging")
 	FText Text = {};
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite,Category="OUU|Logging")
 	FString URL = "";
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite,Category="OUU|Logging")
 	FString AssetName = "";
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite,Category="OUU|Logging")
 	const UObject* Object = nullptr;
 
 	TSharedPtr<IMessageToken> ForwardedNativeToken;

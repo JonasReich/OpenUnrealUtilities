@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 
 #include "EditorValidatorBase.h"
+#include "Misc/EngineVersionComparison.h"
 
 #include "OUUTextValidator.generated.h"
 
@@ -16,7 +17,14 @@ class UOUUTextValidator : public UEditorValidatorBase
 public:
 	// - UEditorValidatorBase
 	bool CanValidateAsset_Implementation(UObject* InAsset) const override;
-	EDataValidationResult ValidateLoadedAsset_Implementation(UObject* InAsset, TArray<FText>& ValidationErrors)
-		override;
+
+#if UE_VERSION_OLDER_THAN(5, 4, 0)
+	EDataValidationResult ValidateLoadedAsset_Impl(UObject* InAsset, TArray<FText>& OutValidationErrors);
+#else
+	EDataValidationResult ValidateLoadedAsset_Implementation(
+		const FAssetData& InAssetData,
+		UObject* InAsset,
+		FDataValidationContext& Context) override;
+#endif
 	// --
 };

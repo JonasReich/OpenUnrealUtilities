@@ -28,17 +28,17 @@ private:
 	IteratorType WrappedIterator;
 
 public:
-	CONSTEXPR TReverseIterator() : WrappedIterator() {}
-	CONSTEXPR explicit TReverseIterator(IteratorType It) : WrappedIterator(It) {}
+	constexpr TReverseIterator() : WrappedIterator() {}
+	constexpr explicit TReverseIterator(IteratorType It) : WrappedIterator(It) {}
 
-	CONSTEXPR ReferenceType operator*() const
+	constexpr ReferenceType operator*() const
 	{
 		IteratorType Temp = WrappedIterator;
 		--Temp;
 		return *Temp;
 	}
 
-	CONSTEXPR PointerType operator->() const
+	constexpr PointerType operator->() const
 	{
 		IteratorType Temp = WrappedIterator;
 		--Temp;
@@ -46,14 +46,14 @@ public:
 	}
 
 	// preincrement
-	CONSTEXPR TReverseIterator& operator++()
+	constexpr TReverseIterator& operator++()
 	{
 		--WrappedIterator;
 		return (*this);
 	}
 
 	// postincrement
-	CONSTEXPR TReverseIterator operator++(int)
+	constexpr TReverseIterator operator++(int)
 	{
 		TReverseIterator Temp = *this;
 		--WrappedIterator;
@@ -61,23 +61,23 @@ public:
 	}
 
 	// predecrement
-	CONSTEXPR TReverseIterator& operator--()
+	constexpr TReverseIterator& operator--()
 	{
 		--WrappedIterator;
 		return (*this);
 	}
 
 	// postdecrement
-	CONSTEXPR TReverseIterator operator--(int)
+	constexpr TReverseIterator operator--(int)
 	{
 		TReverseIterator Temp = *this;
 		++WrappedIterator;
 		return Temp;
 	}
 
-	CONSTEXPR bool operator==(const TReverseIterator& Other) { return WrappedIterator == Other.WrappedIterator; }
+	constexpr bool operator==(const TReverseIterator& Other) { return WrappedIterator == Other.WrappedIterator; }
 
-	CONSTEXPR bool operator!=(const TReverseIterator& Other) { return WrappedIterator != Other.WrappedIterator; }
+	constexpr bool operator!=(const TReverseIterator& Other) { return WrappedIterator != Other.WrappedIterator; }
 };
 
 /**
@@ -85,7 +85,7 @@ public:
  * Equivalent to std::make_reverse_iterator()
  */
 template <typename IteratorType>
-CONSTEXPR TReverseIterator<IteratorType> MakeReverseIterator(IteratorType Iterator)
+constexpr TReverseIterator<IteratorType> MakeReverseIterator(IteratorType Iterator)
 {
 	return TReverseIterator<IteratorType>(Iterator);
 }
@@ -94,13 +94,13 @@ template <bool bReverse, typename IteratorType>
 using TReverseIteratorIf = typename TEnableIf<bReverse, IteratorType>::Type;
 
 template <bool bReverse, typename IteratorType>
-CONSTEXPR TReverseIteratorIf<bReverse == true, IteratorType> MakeReverseIteratorIf(IteratorType Iterator)
+constexpr TReverseIteratorIf<bReverse == true, IteratorType> MakeReverseIteratorIf(IteratorType Iterator)
 {
 	return TReverseIterator<IteratorType>(Iterator);
 }
 
 template <bool bReverse, typename IteratorType>
-CONSTEXPR TReverseIteratorIf<bReverse == false, IteratorType> MakeReverseIteratorIf(IteratorType Iterator)
+constexpr TReverseIteratorIf<bReverse == false, IteratorType> MakeReverseIteratorIf(IteratorType Iterator)
 {
 	return Iterator;
 }
@@ -113,7 +113,7 @@ private:
 	ContainerType& Container;
 
 public:
-	CONSTEXPR explicit TReverseRangeAdaptor_ByRef(ContainerType& c) : Container(c) {}
+	constexpr explicit TReverseRangeAdaptor_ByRef(ContainerType& c) : Container(c) {}
 
 	auto begin() const noexcept { return MakeReverseIterator(OUU::Runtime::Private::IteratorUtils::end(Container)); }
 	auto end() const noexcept { return MakeReverseIterator(OUU::Runtime::Private::IteratorUtils::begin(Container)); }
@@ -127,7 +127,7 @@ private:
 	ContainerType Container;
 
 public:
-	CONSTEXPR explicit TReverseRangeAdaptor_ByValue(ContainerType&& c) : Container(c) {}
+	constexpr explicit TReverseRangeAdaptor_ByValue(ContainerType&& c) : Container(c) {}
 
 	auto begin() const noexcept { return MakeReverseIterator(OUU::Runtime::Private::IteratorUtils::end(Container)); }
 	auto end() const noexcept { return MakeReverseIterator(OUU::Runtime::Private::IteratorUtils::begin(Container)); }
@@ -135,13 +135,13 @@ public:
 
 /**	Adapts the referenced container so it can be iterated in reverse with a ranged-for-loop. */
 template <typename ContainerType>
-CONSTEXPR auto ReverseRange(ContainerType& Container)
+constexpr auto ReverseRange(ContainerType& Container)
 {
 	return TReverseRangeAdaptor_ByRef<ContainerType>(Container);
 }
 
 template <typename ContainerType>
-CONSTEXPR auto ReverseRange(ContainerType&& Container)
+constexpr auto ReverseRange(ContainerType&& Container)
 {
 	return TReverseRangeAdaptor_ByValue<ContainerType>(MoveTemp(Container));
 }

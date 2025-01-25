@@ -22,7 +22,7 @@ public:
 	/** @returns the mutable class default object of the specified class. Proceed with caution! */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Class", Meta = (DeterminesOutputType = Class))
 	static UObject* GetClassDefaultObject(TSubclassOf<UObject> Class);
-
+	
 	/** @returns the mutable class default object of the objects class. Proceed with caution! */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Class")
 	static UObject* GetClassDefaultObjectFromObject(const UObject* Object);
@@ -51,7 +51,7 @@ public:
 	 * If we are currently recording into the transaction buffer (undo/redo),
 	 * save a copy of this object into the buffer and mark the package as needing to be saved.
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable,Category="OUU|Utilities|Core")
 	static void ModifyObject(UObject* Object);
 
 	/** Converts a TopLevelAssetPath to a string */

@@ -32,6 +32,10 @@ public class OUUModuleRules : ModuleRules
 		// Unfortunately even this is needed to ensure that all includes are correct when building the plugin by itself.
 		bUseUnity = false;
 
+#if UE_5_4_OR_LATER
+		bWarningsAsErrors = true;
+#endif
+
 		OUUModuleRuleHelpers.AddGameplayDebuggerDependency(this, Target);
 	}
 }

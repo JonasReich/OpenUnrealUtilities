@@ -201,7 +201,7 @@ private:
 	UPROPERTY()
 	TArray<TObjectPtr<AActor>> DeactivatedActorsToDestroy;
 
-	TMap<TSubclassOf<AActor>, TArray<AActor*>> PooledActors;
+	TMap<TSubclassOf<AActor>, TArray<TObjectPtr<AActor>>> PooledActors;
 	FOUUActorPoolHandleManager_ActorSpawnRequest SpawnRequestHandleManager;
 	std::atomic<uint32> RequestSerialNumberCounter;
 	mutable int32 NumActorSpawned = 0;

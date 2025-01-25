@@ -25,7 +25,7 @@ public:
 	 * Calling this function again with the active object key will result in a success without any side-effects.
 	 * @returns whether the lock was successfully locked by this key object.
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "OUU")
 	bool TryLock(UObject* Key);
 
 	/**
@@ -34,22 +34,22 @@ public:
 	 * The lock will be automatically released after the specified time (in game time).
 	 * @returns whether the lock was successfully locked by this key object.
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "OUU")
 	bool TryLockForDuration(UObject* Key, float Duration);
 
 	/**
 	 * Release the lock with the object which was used to lock it.
 	 * Calling unlock with an object that was not used to lock it will trigger an ensure condition.
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "OUU")
 	bool TryUnlock(UObject* Key);
 
 	/** Is the lock locked by a valid key object? */
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintPure, Category = "OUU")
 	bool IsLocked() const;
 
 private:
 	/** Active key/owner of the lock. May turn stale while set. */
-	UPROPERTY(Transient)
+	UPROPERTY(Transient,Category="OUU",VisibleAnywhere)
 	TWeakObjectPtr<UObject> ActiveKey;
 };

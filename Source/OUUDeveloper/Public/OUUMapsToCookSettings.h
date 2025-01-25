@@ -15,10 +15,10 @@ struct OUUDEVELOPER_API FOUUMapsToCookList
 	GENERATED_BODY()
 public:
 	// Name of the config section that these properties reside in
-	UPROPERTY(Transient, VisibleAnywhere)
+	UPROPERTY(Transient, VisibleAnywhere,Category="OUU|Maps|Settings")
 	FString OwningConfigSection;
 
-	UPROPERTY(EditAnywhere, meta = (RelativeToGameContentDir, LongPackageName))
+	UPROPERTY(EditAnywhere,Category="OUU|Maps|Settings", meta = (RelativeToGameContentDir, LongPackageName))
 	TArray<FFilePath> MapsToCook;
 
 	void ReloadConfig(const FString& ConfigPath);
@@ -43,25 +43,21 @@ public:
 
 	// Request the package on default cooks.
 	// Not used if commandline, AlwaysCookMaps, or MapsToCook are present.
-	UPROPERTY(Transient, EditAnywhere, meta = (EditCondition = bEnableAllMaps))
+	UPROPERTY(Transient, EditAnywhere, meta = (EditCondition = bEnableAllMaps),Category="OUU|Maps|Settings")
 	FOUUMapsToCookList AllMaps;
 
 	// Request the package on every cook.
 	// Using this prevents AllMaps.
-	UPROPERTY(Transient, EditAnywhere)
+	UPROPERTY(Transient, EditAnywhere,Category="OUU|Maps|Settings")
 	FOUUMapsToCookList AlwaysCookMaps;
 
 	// Names of all custom config sections that contain map lists.
-	UPROPERTY(Config, EditAnywhere, meta = (EditFixedOrder), DisplayName = "Custom Config Sections")
+	UPROPERTY(Config, EditAnywhere,Category="OUU|Maps|Settings", meta = (EditFixedOrder), DisplayName = "Custom Config Sections")
 	TArray<FString> ConfigSections;
 
 	// Map lists from ConfigSections that can be referenced used -MAPINISECTION parameter in command-line cooks
 	UPROPERTY(
-		Transient,
-		EditAnywhere,
-		EditFixedSize,
-		meta = (EditFixedOrder),
-		DisplayName = "Custom Config Sections Map Lists")
+		Transient,Category="OUU|Maps|Settings",EditAnywhere,EditFixedSize,meta = (EditFixedOrder),DisplayName = "Custom Config Sections Map Lists")
 	TArray<FOUUMapsToCookList> MapLists;
 
 	// - UObject

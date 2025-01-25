@@ -8,7 +8,7 @@
 #include "FlowControl/ExclusiveLock.h"
 #include "FlowControl/SharedLock.h"
 #include "OUUTestObject.h"
-
+#include "Misc/AutomationTest.h"
 #include "LockTestHelpers.generated.h"
 
 UCLASS(meta = (Hidden, HideDropDown))

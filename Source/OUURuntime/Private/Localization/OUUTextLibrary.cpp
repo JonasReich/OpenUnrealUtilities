@@ -2,7 +2,7 @@
 
 #include "Localization/OUUTextLibrary.h"
 
-#include "HAL/PlatformFilemanager.h"
+#include "HAL/PlatformFileManager.h"
 #include "Internationalization/PolyglotTextData.h"
 #include "LogOpenUnrealUtilities.h"
 #include "Misc/FileHelper.h"

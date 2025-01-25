@@ -3,6 +3,10 @@
 #pragma once
 
 #include "GameplayDebugger/GameplayDebuggerCategory_OUUBase.h"
+#include "Animation/AnimTypes.h"
+
+#include "Animation/AnimationAsset.h"
+
 #if WITH_GAMEPLAY_DEBUGGER
 	#include "Animation/AnimationAsset.h"
 	#include "Animation/AnimTypes.h"

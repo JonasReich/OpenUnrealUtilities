@@ -51,10 +51,10 @@ public:
 	bool operator!=(const FSemVerBuildMetadata& Other) const;
 
 protected:
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly,Category="OUU|Runtime|SemVer")
 	FString Metadata;
 
 	/** How strictly this metadata adheres to the semver specification */
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly,Category="OUU|Runtime|SemVer")
 	ESemVerParsingStrictness Strictness = ESemVerParsingStrictness::Strict;
 };

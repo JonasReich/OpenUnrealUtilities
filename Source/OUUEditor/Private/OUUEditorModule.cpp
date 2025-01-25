@@ -14,6 +14,7 @@
 #include "Modules/ModuleManager.h"
 #include "OUUContentBrowserExtensions.h"
 #include "PropertyEditorUtils.h"
+#include "OUUEditor/Public/PropertyEditorUtils.h"
 
 namespace OUU::Editor
 {
