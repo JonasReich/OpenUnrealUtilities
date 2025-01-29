@@ -19,7 +19,8 @@ public:
 	bool CanValidateAsset_Implementation(UObject* InAsset) const override;
 
 #if UE_VERSION_OLDER_THAN(5, 4, 0)
-	EDataValidationResult ValidateLoadedAsset_Impl(UObject* InAsset, TArray<FText>& OutValidationErrors);
+	EDataValidationResult ValidateLoadedAsset_Implementation(UObject* InAsset, TArray<FText>& OutValidationErrors)
+		override;
 #else
 	EDataValidationResult ValidateLoadedAsset_Implementation(
 		const FAssetData& InAssetData,

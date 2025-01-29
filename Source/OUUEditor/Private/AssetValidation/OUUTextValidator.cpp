@@ -24,7 +24,9 @@ bool UOUUTextValidator::CanValidateAsset_Implementation(UObject* InAsset) const
 }
 
 #if UE_VERSION_OLDER_THAN(5, 4, 0)
-EDataValidationResult UOUUTextValidator::ValidateLoadedAsset_Impl(UObject* InAsset, TArray<FText>& OutValidationErrors)
+EDataValidationResult UOUUTextValidator::ValidateLoadedAsset_Implementation(
+	UObject* InAsset,
+	TArray<FText>& OutValidationErrors)
 #else
 EDataValidationResult UOUUTextValidator::ValidateLoadedAsset_Implementation(
 	const FAssetData& InAssetData,
