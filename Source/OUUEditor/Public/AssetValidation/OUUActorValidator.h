@@ -19,4 +19,9 @@ public:
 	EDataValidationResult ValidateLoadedAsset_Implementation(UObject* InAsset, TArray<FText>& ValidationErrors)
 		override;
 	// --
+
+private:
+	UPROPERTY(Transient)
+	UClass* NavigationDataClass = nullptr;
+
 };

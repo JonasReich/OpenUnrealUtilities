@@ -33,8 +33,12 @@ EDataValidationResult UOUUActorValidator::ValidateLoadedAsset_Implementation(
 		if (AttachRoot->GetOwner() == Actor && AttachRoot != RootComponent)
 		{
 			// Search class, so we don't need the module dependency just for this class check
-			auto* NavigationDataClass =
-				UClass::TryFindTypeSlow<UClass>(TEXT("NavigationData"), EFindFirstObjectOptions::EnsureIfAmbiguous);
+			if (NavigationDataClass == nullptr)
+			{
+				NavigationDataClass = UClass::TryFindTypeSlow<UClass>(
+					TEXT("/Script/NavigationSystem.NavigationData"),
+					EFindFirstObjectOptions::EnsureIfAmbiguous);
+			}
 
 			// Ignore the recast actor, which has 2 roots for some reason
 			if (Actor->IsA(NavigationDataClass))
