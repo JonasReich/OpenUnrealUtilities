@@ -304,7 +304,7 @@ private:                                                                        
 #define DEFINE_TYPED_GAMEPLAY_TAG(TagType)                                                                             \
 	TagType::FAutoRegistrationHelper::FAutoRegistrationHelper()                                                        \
 	{                                                                                                                  \
-		FCoreDelegates::OnAllModuleLoadingPhasesComplete.AddLambda([]() {                                              \
+		UGameplayTagsManager::OnLastChanceToAddNativeTags().AddLambda([]() {                                           \
 			UTypedGameplayTagSettings::AddNativeRootTags(                                                              \
 				TypedTagImplType::GetNativeTagRootTags().Get(),                                                        \
 				TagType::StaticStruct());                                                                              \
