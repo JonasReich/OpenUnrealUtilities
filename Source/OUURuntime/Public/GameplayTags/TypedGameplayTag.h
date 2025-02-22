@@ -481,14 +481,14 @@ public:
 	}
 	FORCEINLINE ValueContainerType Filter(const ReferenceContainerType OtherContainer) const
 	{
-		return ValueContainerType::CreateChecked(GetRef().Filter(OtherContainer));
+		return ValueContainerType::CreateChecked(GetRef().Filter(OtherContainer.GetRef()));
 	}
 	FORCEINLINE ValueContainerType FilterExact(const ReferenceContainerType OtherContainer) const
 	{
-		return ValueContainerType::CreateChecked(GetRef().FilterExact(OtherContainer));
+		return ValueContainerType::CreateChecked(GetRef().FilterExact(OtherContainer.GetRef()));
 	}
 	bool MatchesQuery(const struct FGameplayTagQuery& Query) const { return GetRef().MatchesQuery(Query); }
-	void AppendTags(const ReferenceContainerType& Other) { return GetRef().AppendTags(Other.Get()); }
+	void AppendTags(const ReferenceContainerType& Other) { return GetRef().AppendTags(Other.GetRef()); }
 	void AppendMatchingTags(ReferenceContainerType const& OtherA, ReferenceContainerType const& OtherB)
 	{
 		return GetRef().AppendMatchingTags(OtherA.GetRef(), OtherB.GetRef());
