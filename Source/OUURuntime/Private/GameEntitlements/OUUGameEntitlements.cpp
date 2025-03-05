@@ -90,7 +90,8 @@ void UOUUGameEntitlementsSubsystem::RefreshActiveVersionAndEntitlements()
 {
 	auto& Settings = UOUUGameEntitlementSettings::Get();
 #if WITH_EDITOR
-	auto& DefaultVersion = GIsEditor ? Settings.DefaultEditorVersion : Settings.DefaultVersion;
+	auto& DefaultVersion =
+		GIsEditor && IsRunningCookCommandlet() == false ? Settings.DefaultEditorVersion : Settings.DefaultVersion;
 #else
 	auto& DefaultVersion = Settings.DefaultVersion;
 #endif
