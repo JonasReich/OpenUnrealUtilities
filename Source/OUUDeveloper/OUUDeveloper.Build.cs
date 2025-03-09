@@ -18,7 +18,8 @@ public class OUUDeveloper : OUUModuleRules
 
 			// Plugin
 			"OUURuntime",
-			"OUUUMG"
+			"OUUUMG",
+			"OUUTags"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {
