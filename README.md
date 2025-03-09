@@ -8,7 +8,10 @@ The Open Unreal Utilities plugin is a collection of general purpose utilities in
 I'm developing it during my day job(s) and squeeze all the small utilities in here that don't feel big enough for dedicated plugins and
 that are relatively generic and should prove useful for almost any game project.
 
-Some of those smaller utilities have since grown to the point where I decided to move them to dedicated plugins (e.g. JSON data assets have been moved to [OUUJsonDataAssets](https://github.com/JonasReich/OUUJsonDataAssets)).
+Some of those smaller utilities have since grown to the point where I decided to move them to dedicated plugins:
+
+- JSON data assets in [OUUJsonDataAssets](https://github.com/JonasReich/OUUJsonDataAssets) (requires Epic Games group to access).
+- Gameplay Tag Extensions in [OUUTags](https://github.com/JonasReich/OUUTags).
 
 ## Contents
 
@@ -45,10 +48,6 @@ The **bold** features are the big ones that I most reccommend you to try the plu
 - Gameplay Debugger
 	- Player/NPC Actor selection extension
 	- Category / extension registration helpers
-- **Gameplay Tags**
-	- ``FGameplayTagQueryParser``: Parse gameplay tag queries from strings
-	- ``LiteralGameplayTags``: Tempates for declarations of native gameplay tag trees
-	- ``TypedGameplayTags``: "Type safe" gameplay tags for C++ and blueprints
 - Localization: FText conversion functions, esp. for lists
 - **Logging**: One-line message log macros and Blueprint extension
 - Math
