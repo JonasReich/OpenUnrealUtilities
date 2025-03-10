@@ -7,14 +7,9 @@
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidgetBlueprint.h"
 #include "Engine/AssetManager.h"
-#include "GameplayTags/TypedGameplayTag.h"
-#include "GameplayTags/TypedGameplayTagContainerCustomization.h"
 #include "MaterialAnalyzer/OUUMaterialAnalyzer.h"
-#include "MessageLogModule.h"
 #include "Modules/ModuleManager.h"
 #include "OUUContentBrowserExtensions.h"
-#include "PropertyEditorUtils.h"
-#include "OUUEditor/Public/PropertyEditorUtils.h"
 
 namespace OUU::Editor
 {
@@ -37,15 +32,6 @@ namespace OUU::Editor
 			MaterialAnalyzer::RegisterNomadTabSpawner();
 			ContentBrowserExtensions::RegisterHooks();
 
-			FCoreDelegates::OnAllModuleLoadingPhasesComplete.AddLambda(
-				[]() { FTypedGameplayTag_Base::RegisterAllDerivedPropertyTypeLayouts(); });
-
-			OUU::Editor::PropertyEditorUtils::RegisterCustomPropertyTypeLayout<
-				FTypedGameplayTagContainer,
-				FTypedGameplayTagContainer_PropertyTypeCustomization>();
-
-			auto& MessageLogModule = FModuleManager::LoadModuleChecked<FMessageLogModule>("MessageLog");
-			MessageLogModule.RegisterLogListing(TEXT("GameplayTagValidation"), INVTEXT("Gameplay Tag Validation"));
 		}
 
 		void ShutdownModule() override
@@ -58,10 +44,6 @@ namespace OUU::Editor
 
 			MaterialAnalyzer::UnregisterNomadTabSpawner();
 			ContentBrowserExtensions::UnregisterHooks();
-
-			FTypedGameplayTag_Base::UnregisterAllDerivedPropertyTypeLayouts();
-
-			OUU::Editor::PropertyEditorUtils::UnregisterCustomPropertyTypeLayout<FTypedGameplayTagContainer>();
 		}
 
 	private:

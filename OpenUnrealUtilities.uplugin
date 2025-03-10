@@ -79,6 +79,10 @@
 		{
 			"Name": "CommonUI",
 			"Enabled": true
+		},
+		{
+			"Name": "OUUTags",
+			"Enabled": true
 		}
 	]
 }
