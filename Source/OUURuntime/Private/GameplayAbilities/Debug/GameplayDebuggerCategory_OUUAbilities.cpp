@@ -501,49 +501,19 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawAttribute(FGameplayAttribute& A
 	Params.SourceTags = &QuerySourceTags;
 	Params.TargetTags = &QueryTargetTags;
 	Params.IncludePredictiveMods = true;
-
-	float FinalValue = 0.f;
+	
 	float BaseValue = AbilitySystem->GetNumericAttributeBase(Attribute);
 	float QualifiedValue = AbilitySystem->GetNumericAttribute(Attribute);
-
-	FAggregator Aggregator;
-	if (CaptureSpec.AttemptGetAttributeAggregatorSnapshot(Aggregator))
-	{
-		// Evaluate
-		float Add = GameplayEffectUtilities::GetModifierBiasByModifierOp(EGameplayModOp::Additive);
-		float AddBias = Add;
-		float Mul = GameplayEffectUtilities::GetModifierBiasByModifierOp(EGameplayModOp::Multiplicitive);
-		float MulBias = Mul;
-		float Div = GameplayEffectUtilities::GetModifierBiasByModifierOp(EGameplayModOp::Division);
-		float DivBias = Div;
-
-		Aggregator.EvaluateQualificationForAllMods(Params);
-		Aggregator.ForEachMod([&](const FAggregatorModInfo& ModInfo) -> void {
-			if (ModInfo.Mod)
-			{
-				switch (ModInfo.Op)
-				{
-				case EGameplayModOp::Additive: Add += (ModInfo.Mod->EvaluatedMagnitude - AddBias); break;
-				case EGameplayModOp::Multiplicitive: Mul += (ModInfo.Mod->EvaluatedMagnitude - MulBias); break;
-				case EGameplayModOp::Division: Div += (ModInfo.Mod->EvaluatedMagnitude - DivBias); break;
-				default:;
-				}
-			}
-		});
-
-		FinalValue = (BaseValue + Add) * Mul / Div;
-	}
 
 	FString PaddedAttributeName = Attribute.GetName();
 	while (PaddedAttributeName.Len() < 30)
 		PaddedAttributeName += " ";
 
 	FString AttributeString = FString::Printf(
-		TEXT("%s %.2f (Base: %.2f, Qualified: %.2f)"),
+		TEXT("%s %.2f (Base: %.2f)"),
 		*PaddedAttributeName,
-		FinalValue,
-		BaseValue,
-		QualifiedValue);
+		QualifiedValue,
+		BaseValue);
 
 	Canvas->SetDrawColor(ColorSwitch ? FColor::White : FColor::Emerald);
 	DebugLine(AttributeString, 4.f, 0);
