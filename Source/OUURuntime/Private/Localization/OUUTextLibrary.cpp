@@ -85,7 +85,7 @@ void UOUUTextLibrary::LoadLocalizedTextsFromCSV(const FString& CsvDirectoryPath)
 	}
 
 	// Register the polyglot data with the localization manager
-	FTextLocalizationManager::Get().RegisterPolyglotTextData(PolyglotDataArray);
+	FTextLocalizationManager::Get().RegisterPolyglotTextData(PolyglotDataArray, true);
 }
 
 void UOUUTextLibrary::LoadLocalizedTextsFromCSV(
@@ -146,6 +146,7 @@ void UOUUTextLibrary::LoadLocalizedTextsFromCSV(
 	GET_KEY_IDX(LocalizedString)
 #undef GET_KEY_IDX
 
+	int32 NumLoctexts = 0;
 	// Read all columns as polyglot data
 	for (int32 RowIdx = 1; Rows.IsValidIndex(RowIdx); RowIdx++)
 	{
@@ -157,11 +158,43 @@ void UOUUTextLibrary::LoadLocalizedTextsFromCSV(
 		FString LocalizedString = ImportRow[LocalizedStringIdx];
 		LocalizedString = LocalizedString.ReplaceEscapedCharWithChar();
 
-		auto& NewEntry = InOutPolyglotTextData.FindOrAdd(
-			FOUUTextIdentity{Namespace, Key},
-			FPolyglotTextData{ELocalizedTextSourceCategory::Editor, Namespace, Key, SourceString});
-		NewEntry.AddLocalizedString(Culture, LocalizedString);
+		if (LocalizedString.IsEmpty())
+		{
+			continue;
+		}
+
+		auto* StringPtr = *LocalizedString;
+		while (FChar::IsWhitespace(*StringPtr))
+		{
+			StringPtr++;
+		}
+
+		// Found non-whitespace non-terminator character in string...
+		if (StringPtr && *StringPtr)
+		{
+			NumLoctexts++;
+
+			ELocalizedTextSourceCategory TextSource = ELocalizedTextSourceCategory::Game;
+#if WITH_EDITOR
+			if (GIsEditor)
+			{
+				TextSource = ELocalizedTextSourceCategory::Editor;
+			}
+#endif
+			auto& NewEntry = InOutPolyglotTextData.FindOrAdd(
+				FOUUTextIdentity{Namespace, Key},
+				FPolyglotTextData{TextSource, Namespace, Key, SourceString, TEXT("en")});
+			NewEntry.AddLocalizedString(Culture, LocalizedString);
+		}
 	}
+
+	UE_LOG(
+		LogOpenUnrealUtilities,
+		Log,
+		TEXT("Imported %i loctexts for %s from %s"),
+		NumLoctexts,
+		*Culture,
+		*CsvFilePath);
 }
 
 #undef LOCTEXT_NAMESPACE
