@@ -116,7 +116,7 @@ void AOUUSyncedGameTimeActor::SetOverrideTimeScale(double NewTimeScale)
 
 	const double PrevScale = bWasPaused ? 1.0 : OverrideTimeScale;
 	const double UnScaledCurrentTime = GetCurrentTimeSeconds() * PrevScale;
-	OverrideTimeScale = NewTimeScale;
+	COMPARE_ASSIGN_AND_MARK_PROPERTY_DIRTY(AOUUSyncedGameTimeActor, OverrideTimeScale, NewTimeScale, this);
 	const double NewScale = FMath::IsNearlyZero(OverrideTimeScale) ? 1.0 : OverrideTimeScale;
 	const double NewTime = UnScaledCurrentTime / NewScale;
 	SetCurrentTimeSeconds(NewTime);
