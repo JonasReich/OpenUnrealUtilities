@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2024 Jonas Reich & Contributors
+// Copyright (c) 2024 Jonas Reich & Contributors
 
 #pragma once
 
@@ -83,6 +83,7 @@ public:
 	// - AActor
 public:
 	void BeginPlay() override;
+	void EndPlay(const EEndPlayReason::Type Reason) override;
 
 #if WITH_EDITOR
 	void PostLoad() override;

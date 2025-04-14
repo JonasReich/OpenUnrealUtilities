@@ -29,6 +29,7 @@ double FOUUSyncedGameTimeBlend::GetBlendedTimeOffset(double ServerTime) const
 AOUUSyncedGameTimeActor::AOUUSyncedGameTimeActor()
 {
 	bReplicates = true;
+	bAlwaysRelevant = true;
 	NetUpdateFrequency = 1.0f;
 
 	PrimaryActorTick.bCanEverTick = true;
@@ -141,13 +142,21 @@ void AOUUSyncedGameTimeActor::BeginPlay()
 	}
 
 	CachedGameState = World->GetGameState();
-	COMPARE_ASSIGN_AND_MARK_PROPERTY_DIRTY(AOUUSyncedGameTimeActor, OverrideTime, -1.0, this);
-	COMPARE_ASSIGN_AND_MARK_PROPERTY_DIRTY(AOUUSyncedGameTimeActor, OverrideTimeScale, 1.0, this);
 
 	if (HasAuthority())
 	{
 		RefreshInitialTime();
 	}
+}
+
+void AOUUSyncedGameTimeActor::EndPlay(const EEndPlayReason::Type Reason)
+{
+	Super::EndPlay(Reason);
+
+	// Reset values to default once play ends, in case actor is reused.
+	OverrideTime = -1.0;
+	OverrideTimeScale = 1.0;
+	TimeBlend = {};
 }
 
 #if WITH_EDITOR
