@@ -10,6 +10,8 @@ class FGameplayDebuggerCategory_GameEntitlements : public FOUUGameplayDebuggerCa
 public:
 	static auto GetCategoryName() { return TEXT("Entitlements"); }
 
+	FGameplayDebuggerCategory_GameEntitlements();
+
 public:
 	// - FGameplayDebuggerCategory interface
 	void DrawData(APlayerController* OwnerPC, FGameplayDebuggerCanvasContext& CanvasContext) override;
