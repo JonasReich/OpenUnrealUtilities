@@ -90,7 +90,15 @@ TSharedRef<IMessageToken> FMessageLogToken::CreateNativeMessageToken() const
 	switch (Type)
 	{
 	case EMessageLogTokenType::AssetName: return FAssetNameToken::Create(AssetName, Text);
-	case EMessageLogTokenType::Object: return FUObjectToken::Create(Object, Text);
+	case EMessageLogTokenType::Object:
+#if WITH_EDITOR
+		if (const AActor* Actor = Cast<AActor>(Object))
+		{
+			const FText ActorText = Text.IsEmptyOrWhitespace() ? FText::FromString(Actor->GetActorLabel()) : Text;
+			return FActorToken::Create(FSoftObjectPath(Actor).ToString(), Actor->GetActorGuid(), ActorText);
+		}
+#endif
+		return FUObjectToken::Create(Object, Text);
 	case EMessageLogTokenType::Text: return FTextToken::Create(Text);
 	case EMessageLogTokenType::URL: return FURLToken::Create(URL, Text);
 	case EMessageLogTokenType::ForwardNativeToken: return ForwardedNativeToken.ToSharedRef();

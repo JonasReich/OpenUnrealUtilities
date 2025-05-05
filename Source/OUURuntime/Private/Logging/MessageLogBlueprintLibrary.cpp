@@ -28,7 +28,8 @@ void UMessageLogBlueprintLibrary::AddTokenizedMessageLogMessage(
 		MessageTokens.Add(FMessageLogToken::CreateTextMessageLogToken(FText::FromString("<empty message>")));
 	}
 
-	const TSharedRef<FTokenizedMessage> Message = FTokenizedMessage::Create(StaticCast<EMessageSeverity::Type>(Severity));
+	const TSharedRef<FTokenizedMessage> Message =
+		FTokenizedMessage::Create(StaticCast<EMessageSeverity::Type>(Severity));
 	for (auto& Token : MessageTokens)
 	{
 		Message->AddToken(Token.CreateNativeMessageToken());
@@ -46,39 +47,38 @@ void UMessageLogBlueprintLibrary::OpenMessageLog(
 
 void UMessageLogBlueprintLibrary::NotifyMessageLog(
 	FName MessageLogName,
-	const FText& InMessage,
+	FText InMessage,
 	EMessageLogSeverity InMinSeverity,
 	bool bForce)
 {
 	FMessageLog(MessageLogName).Notify(InMessage, StaticCast<EMessageSeverity::Type>(InMinSeverity), bForce);
 }
 
-void UMessageLogBlueprintLibrary::NewMessageLogPage(FName MessageLogName, const FText& InLabel)
+void UMessageLogBlueprintLibrary::NewMessageLogPage(FName MessageLogName, FText InLabel)
 {
 	FMessageLog(MessageLogName).NewPage(InLabel);
 }
 
 FMessageLogToken UMessageLogBlueprintLibrary::CreateAssetNameMessageLogToken(
 	const FString& AssetName,
-	const FText& OptionalLabelOverride)
+	FText OptionalLabelOverride)
 {
 	return FMessageLogToken::CreateAssetNameMessageLogToken(AssetName, OptionalLabelOverride);
 }
 
 FMessageLogToken UMessageLogBlueprintLibrary::CreateObjectMessageLogToken(
 	const UObject* Object,
-	const FText& OptionalLabelOverride)
+	FText OptionalLabelOverride)
 {
 	return FMessageLogToken::CreateObjectMessageLogToken(Object, OptionalLabelOverride);
 }
 
-FMessageLogToken UMessageLogBlueprintLibrary::CreateTextMessageLogToken(const FText& Text)
+FMessageLogToken UMessageLogBlueprintLibrary::CreateTextMessageLogToken(FText Text)
 {
 	return FMessageLogToken::CreateTextMessageLogToken(Text);
 }
 
-FMessageLogToken UMessageLogBlueprintLibrary::CreateURLMessageLogToken(const FString& URL,
-	const FText& OptionalLabelOverride)
+FMessageLogToken UMessageLogBlueprintLibrary::CreateURLMessageLogToken(const FString& URL, FText OptionalLabelOverride)
 {
 	return FMessageLogToken::CreateURLMessageLogToken(URL, OptionalLabelOverride);
 }

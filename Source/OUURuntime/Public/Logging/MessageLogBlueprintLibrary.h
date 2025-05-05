@@ -77,7 +77,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Message Log")
 	static void NotifyMessageLog(
 		FName MessageLogName,
-		const FText& InMessage = FText(),
+		FText InMessage,
 		EMessageLogSeverity InMinSeverity = EMessageLogSeverity::Info,
 		bool bForce = false);
 
@@ -90,7 +90,7 @@ public:
 	 * @param	InLabel				The label for the page.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Message Log")
-	static void NewMessageLogPage(FName MessageLogName, const FText& InLabel);
+	static void NewMessageLogPage(FName MessageLogName, FText InLabel);
 
 	// -------------
 	// FMessageLogToken constructor wrappers
@@ -104,7 +104,7 @@ public:
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Message Log")
 	static FMessageLogToken CreateAssetNameMessageLogToken(const FString& AssetName,
-		const FText& OptionalLabelOverride);
+		FText OptionalLabelOverride);
 
 	/**
 	 * Creates a message log token that references any UObject. Can be clicked to navigate to actors in the scene.
@@ -113,11 +113,11 @@ public:
 	 *										name itself
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Message Log")
-	static FMessageLogToken CreateObjectMessageLogToken(const UObject* Object, const FText& OptionalLabelOverride);
+	static FMessageLogToken CreateObjectMessageLogToken(const UObject* Object, FText OptionalLabelOverride);
 
 	/** Creates a message log token from a text */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Message Log")
-	static FMessageLogToken CreateTextMessageLogToken(const FText& Text);
+	static FMessageLogToken CreateTextMessageLogToken(FText Text);
 
 	/**
 	 * Creates a message log token from a hyperlink URL. Can be clicked to open a browser to navigate to the linked
@@ -126,5 +126,5 @@ public:
 	 * @param	OptionalLabelOverride	If not empty, this text is displayed as clickable link instead of the URL itself
 	 */
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Message Log")
-	static FMessageLogToken CreateURLMessageLogToken(const FString& URL, const FText& OptionalLabelOverride);
+	static FMessageLogToken CreateURLMessageLogToken(const FString& URL, FText OptionalLabelOverride);
 };
