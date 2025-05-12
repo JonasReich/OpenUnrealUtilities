@@ -23,6 +23,7 @@ void UEdGraph_OUUReferenceViewer::RebuildGraph()
 		Cell.Y += 5;
 	}
 
+	UE_LOG(LogTemp, Log, TEXT("Graph rebuilt"));
 	OnGraphRebuilt.Broadcast();
 }
 

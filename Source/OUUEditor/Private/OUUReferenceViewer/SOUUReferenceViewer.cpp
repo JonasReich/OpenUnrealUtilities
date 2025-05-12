@@ -53,7 +53,7 @@ void SOUUReferenceViewer::Construct(const FArguments& InArgs, TSubclassOf<UEdGra
 		FUIAction(FExecuteAction::CreateUObject(OwnedGraph, &UEdGraph_OUUReferenceViewer::RebuildGraph)),
 		NAME_None,
 		TAttribute<FText>(),
-		TAttribute<FText>(),
+		INVTEXT("Rebuild reference graph"),
 		FSlateIcon(FAppStyle::Get().GetStyleSetName(), "Icons.Refresh"));
 	ToolBarBuilder.BeginSection("Extensions");
 	ToolBarBuilder.EndSection();
