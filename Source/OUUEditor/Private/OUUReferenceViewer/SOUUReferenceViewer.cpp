@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2025 Jonas Reich & Contributors
+// Copyright (c) 2025 Jonas Reich & Contributors
 
 #include "OUUReferenceViewer/SOUUReferenceViewer.h"
 
@@ -47,5 +47,34 @@ void SOUUReferenceViewer::Construct(const FArguments& InArgs, TSubclassOf<UEdGra
 	constexpr bool bZoomToFitOnlySelected = false;
 	OwnedGraph->OnGraphRebuilt.AddSP(GraphEditor, &SGraphEditor::ZoomToFit, bZoomToFitOnlySelected);
 
-	ChildSlot[GraphEditor];
+	FToolBarBuilder ToolBarBuilder(UIActions, FMultiBoxCustomization::None, InArgs._ToolbarExtenders, true);
+	ToolBarBuilder.SetStyle(&FAppStyle::Get(), "AssetEditorToolbar");
+	ToolBarBuilder.AddToolBarButton(
+		FUIAction(FExecuteAction::CreateUObject(OwnedGraph, &UEdGraph_OUUReferenceViewer::RebuildGraph)),
+		NAME_None,
+		TAttribute<FText>(),
+		TAttribute<FText>(),
+		FSlateIcon(FAppStyle::Get().GetStyleSetName(), "Icons.Refresh"));
+	ToolBarBuilder.BeginSection("Extensions");
+	ToolBarBuilder.EndSection();
+
+	// clang-format off
+	ChildSlot
+	[
+		SNew(SVerticalBox)
+		+ SVerticalBox::Slot().AutoHeight()
+		[
+			SNew(SBorder)
+			.BorderImage(FAppStyle::GetBrush("Brushes.Panel"))
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot().AutoWidth().Padding(4, 0)
+				[
+					ToolBarBuilder.MakeWidget()
+				]
+			]
+		]
+		+ SVerticalBox::Slot().FillHeight(1.f)[GraphEditor]
+	];
+	// clang-format on
 }

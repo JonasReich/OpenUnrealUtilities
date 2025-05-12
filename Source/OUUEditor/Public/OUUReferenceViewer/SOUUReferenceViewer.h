@@ -13,6 +13,7 @@ public:
 	SLATE_BEGIN_ARGS(SOUUReferenceViewer)
 		{
 		}
+		SLATE_ARGUMENT(TSharedPtr<class FExtender>, ToolbarExtenders)
 	SLATE_END_ARGS()
 
 	~SOUUReferenceViewer();
@@ -27,4 +28,5 @@ public:
 
 private:
 	UEdGraph_OUUReferenceViewer* OwnedGraph = nullptr;
+	TSharedPtr<FUICommandList> UIActions;
 };
