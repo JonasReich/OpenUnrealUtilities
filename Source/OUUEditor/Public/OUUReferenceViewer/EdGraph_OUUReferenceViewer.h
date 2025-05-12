@@ -21,6 +21,9 @@ public:
 
 	virtual TArray<TUniquePtr<FOUUReferenceViewerNode>> RebuildNodes() { return {}; }
 
+	DECLARE_EVENT(UEdGraph_OUUReferenceViewer, FOnGraphRebuilt)
+	FOnGraphRebuilt OnGraphRebuilt;
+
 private:
 	void RecursivelyBuildGraph(
 		FOUUReferenceViewerNode& Node,

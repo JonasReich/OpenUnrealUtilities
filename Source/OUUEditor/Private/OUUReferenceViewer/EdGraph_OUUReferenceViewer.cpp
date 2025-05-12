@@ -7,6 +7,11 @@
 
 void UEdGraph_OUUReferenceViewer::RebuildGraph()
 {
+	while (Nodes.IsEmpty() == false)
+	{
+		RemoveNode(Nodes.Last());
+	}
+
 	auto RootNodes = RebuildNodes();
 	FIntPoint Cell = FIntPoint::ZeroValue;
 	for (auto& RootNode : RootNodes)
@@ -17,6 +22,8 @@ void UEdGraph_OUUReferenceViewer::RebuildGraph()
 		}
 		Cell.Y += 5;
 	}
+
+	OnGraphRebuilt.Broadcast();
 }
 
 void UEdGraph_OUUReferenceViewer::RecursivelyBuildGraph(
@@ -29,7 +36,7 @@ void UEdGraph_OUUReferenceViewer::RecursivelyBuildGraph(
 	auto* pNewNode =
 		Cast<UEdGraphNode_OUUReferenceViewer>(CreateNode(UEdGraphNode_OUUReferenceViewer::StaticClass(), false));
 	AddNode(pNewNode);
-	pNewNode->Setup(Node.NodeTitle, Node.OptionalPayload);
+	pNewNode->Setup(Node);
 
 	constexpr int32 ColumnWidth = 500;
 	constexpr int32 RowHeight = 100;

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 
 #include "EdGraph/EdGraphNode.h"
+#include "OUUReferenceViewerNode.h"
 
 #include "EdGraphNode_OUUReferenceViewer.generated.h"
 
@@ -14,7 +15,7 @@ class OUUEDITOR_API UEdGraphNode_OUUReferenceViewer : public UEdGraphNode
 	GENERATED_BODY()
 
 public:
-	void Setup(FText& NodeTitle, TWeakObjectPtr<UObject> OptionalPayload);
+	void Setup(const FOUUReferenceViewerNode& DataNode);
 	void AddReferencer(UEdGraphNode_OUUReferenceViewer& Referencer);
 
 	TWeakObjectPtr<UObject> GetPayload() const;
@@ -28,6 +29,7 @@ private:
 	UEdGraphPin* DependencyPin = nullptr;
 	UEdGraphPin* ReferencerPin = nullptr;
 	FText NodeTitle;
+	FLinearColor NodeColor;
 
 	TWeakObjectPtr<UObject> PayloadObject;
 };

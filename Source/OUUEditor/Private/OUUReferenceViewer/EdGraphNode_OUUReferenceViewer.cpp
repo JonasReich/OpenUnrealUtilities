@@ -2,14 +2,17 @@
 
 #include "OUUReferenceViewer/EdGraphNode_OUUReferenceViewer.h"
 
-void UEdGraphNode_OUUReferenceViewer::Setup(FText& InNodeTitle, TWeakObjectPtr<UObject> InOptionalPayload)
+#include "OUUReferenceViewer/OUUReferenceViewerNode.h"
+
+void UEdGraphNode_OUUReferenceViewer::Setup(const FOUUReferenceViewerNode& DataNode)
 {
 	ReferencerPin = CreatePin(EEdGraphPinDirection::EGPD_Input, NAME_None, NAME_None);
 	ReferencerPin->bHidden = true;
 	DependencyPin = CreatePin(EEdGraphPinDirection::EGPD_Output, NAME_None, NAME_None);
 	DependencyPin->bHidden = true;
-	NodeTitle = InNodeTitle;
-	PayloadObject = InOptionalPayload;
+	NodeTitle = DataNode.NodeTitle;
+	NodeColor = DataNode.NodeColor;
+	PayloadObject = DataNode.OptionalPayload;
 }
 
 void UEdGraphNode_OUUReferenceViewer::AddReferencer(UEdGraphNode_OUUReferenceViewer& Referencer)
@@ -36,5 +39,5 @@ FText UEdGraphNode_OUUReferenceViewer::GetNodeTitle(ENodeTitleType::Type TitleTy
 
 FLinearColor UEdGraphNode_OUUReferenceViewer::GetNodeTitleColor() const
 {
-	return FLinearColor::Black;
+	return NodeColor;
 }
