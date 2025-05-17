@@ -83,4 +83,8 @@ namespace OUU::Editor::PropertyCustomizationHelpers
 
 	OUUEDITOR_API UClass* GetObjectPropertyClass(const FProperty* Property);
 
+	OUUEDITOR_API void AddInlineEditConditionFromProperty(
+		IDetailPropertyRow& PropertyRow,
+		TSharedPtr<IPropertyHandle> EditConditionProperty);
+
 } // namespace OUU::Editor::PropertyCustomizationHelpers

@@ -124,6 +124,12 @@ void FOUUAutomationTestWorld::CreateWorldImplementation(const FString& WorldSuff
 		DestroyWorldImplementation();
 	}
 
+	check(GEngine);
+
+	PreviousLocalPlayerClass = GEngine->LocalPlayerClass;
+	// Prevent game local player class from bleeding into automation tests
+	GEngine->LocalPlayerClass = ULocalPlayer::StaticClass();
+
 	const FString NewWorldName = "OUUAutomationTestWorld_" + WorldName + WorldSuffix;
 
 	const auto* GameMapSettings = GetMutableDefault<UGameMapsSettings>();
@@ -142,6 +148,8 @@ void FOUUAutomationTestWorld::CreateWorldImplementation(const FString& WorldSuff
 
 void FOUUAutomationTestWorld::DestroyWorldImplementation()
 {
+	check(GEngine);
+
 	// Prevent destroying world twice
 	if (!bHasWorld)
 		return;
@@ -173,6 +181,8 @@ void FOUUAutomationTestWorld::DestroyWorldImplementation()
 
 	const auto* GameMapSettings = GetMutableDefault<UGameMapsSettings>();
 	GameMapSettings->SetGameDefaultMap(PreviousDefaultMap);
+
+	GEngine->LocalPlayerClass = PreviousLocalPlayerClass;
 
 	World = nullptr;
 	GameInstance = nullptr;

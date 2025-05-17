@@ -34,12 +34,17 @@ public:
 	// - USubsystem
 	void Initialize(FSubsystemCollectionBase& Collection) override;
 
+public:
+	// Called when entitlements are first initialized or changed by setting an override version.
+	FSimpleMulticastDelegate OnActiveEntitlementsChanged;
+
 private:
 #if WITH_EDITOR
 	void OnSettingsChanged(FPropertyChangedChainEvent& _PropertyChangedEvent);
 #endif
 	void RefreshActiveVersionAndEntitlements();
 
+	bool bHasInitializedActiveEntitlements = false;
 	FOUUGameEntitlementVersion OverrideVersion;
 	FOUUGameEntitlementVersion ActiveVersion;
 	FOUUGameEntitlementModules_Value ActiveEntitlements;

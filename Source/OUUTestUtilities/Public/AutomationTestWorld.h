@@ -78,6 +78,7 @@ protected:
 	bool bHasWorld = false;
 	FString WorldName;
 	FString PreviousDefaultMap;
+	TSubclassOf<class ULocalPlayer> PreviousLocalPlayerClass;
 
 	void CreateWorldImplementation(const FString& WorldSuffix);
 	void DestroyWorldImplementation();
