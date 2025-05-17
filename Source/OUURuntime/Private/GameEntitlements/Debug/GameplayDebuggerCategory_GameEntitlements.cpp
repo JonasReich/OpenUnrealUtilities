@@ -10,19 +10,39 @@
 	#include "GameplayDebugger/GameplayDebuggerCategory_OUUBase.h"
 
 void FGameplayDebuggerCategory_GameEntitlements::DrawData(
-	APlayerController* _pOwnerPC,
-	FGameplayDebuggerCanvasContext& _CanvasContext)
+	APlayerController* OwnerPC,
+	FGameplayDebuggerCanvasContext& CanvasContext)
 {
 	auto& Subsystem = UOUUGameEntitlementsSubsystem::Get();
 	auto& Settings = UOUUGameEntitlementSettings::Get();
-	_CanvasContext.Printf(TEXT("Default Version: %s"), *Settings.DefaultVersion.ToShortDisplayString());
+	CanvasContext.Print(FColor::Yellow, TEXT("VERSIONS"));
+	CanvasContext.Printf(TEXT("Default Version: %s"), *Settings.DefaultVersion.ToShortDisplayString());
 	#if WITH_EDITOR
-	_CanvasContext.Printf(TEXT("Default Version (Editor): %s"), *Settings.DefaultEditorVersion.ToShortDisplayString());
+	CanvasContext.Printf(TEXT("Default Version (Editor): %s"), *Settings.DefaultEditorVersion.ToShortDisplayString());
 	#endif
-	_CanvasContext.Printf(TEXT("{green}Current Version: %s"), *Subsystem.GetActiveVersion().ToShortDisplayString());
-	_CanvasContext.Printf(
-		TEXT("Active Entitlements:\n\t%s"),
-		*Subsystem.GetActiveEntitlements().ToStringSimple().Replace(TEXT(", "), TEXT("\n\t")));
+	CanvasContext.Printf(TEXT("{green}Current Version: %s"), *Subsystem.GetActiveVersion().ToShortDisplayString());
+
+	CanvasContext.Print(TEXT(""));
+	CanvasContext.Print(FColor::Yellow, TEXT("COLLECTIONS"));
+	for (auto Tag : FOUUGameEntitlementModule::GetAllLeafTags())
+	{
+		if (Tag.MatchesTag(FOUUGameEntitlementTags::Collection::Get()))
+		{
+			FColor Color = Subsystem.IsEntitled(Tag) ? FColor::Green : FColor::White;
+			CanvasContext.Print(Color, *Tag.ToShortDisplayString());
+		}
+	}
+
+	CanvasContext.Print(TEXT(""));
+	CanvasContext.Print(FColor::Yellow, TEXT("MODULES"));
+	for (auto Tag : FOUUGameEntitlementModule::GetAllLeafTags())
+	{
+		if (Tag.MatchesTag(FOUUGameEntitlementTags::Module::Get()))
+		{
+			FColor Color = Subsystem.IsEntitled(Tag) ? FColor::Green : FColor::White;
+			CanvasContext.Print(Color, *Tag.ToShortDisplayString());
+		}
+	}
 }
 
 #endif

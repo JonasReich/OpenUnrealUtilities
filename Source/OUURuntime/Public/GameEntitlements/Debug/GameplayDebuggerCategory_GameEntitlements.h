@@ -12,6 +12,6 @@ public:
 
 public:
 	// - FGameplayDebuggerCategory interface
-	void DrawData(APlayerController* _pOwnerPC, FGameplayDebuggerCanvasContext& _CanvasContext) override;
+	void DrawData(APlayerController* OwnerPC, FGameplayDebuggerCanvasContext& CanvasContext) override;
 };
 #endif
