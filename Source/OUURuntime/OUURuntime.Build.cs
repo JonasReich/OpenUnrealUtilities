@@ -72,8 +72,22 @@ public class OUURuntime : OUUModuleRules
 			"JsonUtilities",
 			"Json",
 			"Projects",
-			"NetCore"
+			"NetCore",
 		});
+
+		if (Target.Platform == UnrealTargetPlatform.Win64)
+		{
+			PrivateDependencyModuleNames.AddRange(new string[]
+			{
+				"SteamShared",
+			});
+			AddEngineThirdPartyPrivateStaticDependencies(Target, "Steamworks");
+			PrivateDefinitions.Add("WITH_STEAM=1");
+		}
+		else
+		{
+			PrivateDefinitions.Add("WITH_STEAM=0");
+		}
 
 		// - Editor only dependencies
 		if (Target.bBuildEditor)
