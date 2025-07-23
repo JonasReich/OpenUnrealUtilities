@@ -24,6 +24,7 @@ public:
 	bool IsEntitled(const FOUUGameEntitlementModule& Module) const;
 	bool IsEntitled(const FOUUGameEntitlementModules_Ref& Modules) const;
 
+	bool HasInitializedActiveEntitlements() const;
 	FOUUGameEntitlementModules_Value GetActiveEntitlements() const;
 
 	UFUNCTION(BlueprintPure, DisplayName = "GetActiveEntitlements")

@@ -54,6 +54,11 @@ bool UOUUGameEntitlementsSubsystem::IsEntitled(const FOUUGameEntitlementModules_
 	return ActiveEntitlements.HasAll(FOUUGameEntitlementModuleAndCollections_Value::CreateChecked(Modules.Get()));
 }
 
+bool UOUUGameEntitlementsSubsystem::HasInitializedActiveEntitlements() const
+{
+	return bHasInitializedActiveEntitlements;
+}
+
 FOUUGameEntitlementModules_Value UOUUGameEntitlementsSubsystem::GetActiveEntitlements() const
 {
 	return FOUUGameEntitlementModules_Value::CreateFiltered(ActiveEntitlements.Get());
