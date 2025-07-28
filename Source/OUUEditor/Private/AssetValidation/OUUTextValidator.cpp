@@ -5,7 +5,10 @@
 #include "AssetValidation/OUUAssetValidationSettings.h"
 #include "Serialization/PropertyLocalizationDataGathering.h"
 
-bool UOUUTextValidator::CanValidateAsset_Implementation(UObject* InAsset) const
+bool UOUUTextValidator::CanValidateAsset_Implementation(
+		const FAssetData& InAssetData,
+		UObject* InAsset,
+		FDataValidationContext& InContext) const
 {
 	// For now: do not run this validator in cook.
 	// If you want validate from command-line explicitly, please run an asset validation commandlet on widget BPs
@@ -23,19 +26,12 @@ bool UOUUTextValidator::CanValidateAsset_Implementation(UObject* InAsset) const
 		&& (Settings.IgnoreNoLocalizedTextsClasses.ContainsByPredicate(AssetIsClassPredicate) == false);
 }
 
-#if UE_VERSION_OLDER_THAN(5, 4, 0)
 EDataValidationResult UOUUTextValidator::ValidateLoadedAsset_Implementation(
-	UObject* InAsset,
-	TArray<FText>& OutValidationErrors)
-#else
-EDataValidationResult UOUUTextValidator::ValidateLoadedAsset_Implementation(
-	const FAssetData& InAssetData,
-	UObject* InAsset,
-	FDataValidationContext& Context)
-#endif
+		const FAssetData& InAssetData,
+		UObject* InAsset,
+		FDataValidationContext& Context)
 {
 	EDataValidationResult Result = EDataValidationResult::Valid;
-
 	const auto* Package = InAsset->GetPackage();
 
 	TArray<UObject*> Objects;
@@ -68,24 +64,13 @@ EDataValidationResult UOUUTextValidator::ValidateLoadedAsset_Implementation(
 		if (bEditorOnly)
 			continue;
 
-		Result = EDataValidationResult::Invalid;
-		AssetFails(
-			InAsset,
-			FText::Format(
-				INVTEXT("Text \"{0}\" is neither a culture invariant nor linked "
-						"from a string table. Source: {1}"),
-				FText::FromString(Entry.SourceData.SourceString),
-				FText::FromString(SiteDescription))
-#if UE_VERSION_OLDER_THAN(5, 4, 0)
-				,
-			OutValidationErrors
-#endif
-		);
-	}
-
-	if (Result == EDataValidationResult::Valid)
-	{
-		AssetPasses(InAsset);
+		auto ErrorMessage = FText::Format(
+			INVTEXT("Text \"{0}\" is neither a culture invariant nor linked "
+					"from a string table. Source: {1}"),
+			FText::FromString(Entry.SourceData.SourceString),
+			FText::FromString(SiteDescription));
+		Context.AddError(ErrorMessage);
+		return EDataValidationResult::Invalid;
 	}
 	return Result;
 }

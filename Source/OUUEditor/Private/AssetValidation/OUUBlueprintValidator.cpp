@@ -27,16 +27,11 @@ EBlueprintHasDefaultRoot BlueprintHasNonMovableDefaultRoot(const UBlueprint& Blu
 															   : EBlueprintHasDefaultRoot::YesNonMovable;
 }
 
-#if UE_VERSION_OLDER_THAN(5, 4, 0)
-bool UOUUBlueprintValidator::CanValidateAsset_Implementation(UObject* InAsset) const
-#else
 bool UOUUBlueprintValidator::CanValidateAsset_Implementation(
 	const FAssetData& InAssetData,
 	UObject* InAsset,
 	FDataValidationContext& InContext) const
-#endif
 {
-	// For now: do not run this validator in cook.
 	if (IsValid(InAsset) == false)
 	{
 		return false;
@@ -45,29 +40,16 @@ bool UOUUBlueprintValidator::CanValidateAsset_Implementation(
 	return InAsset->IsA<UBlueprint>();
 }
 
-#if UE_VERSION_OLDER_THAN(5, 4, 0)
-EDataValidationResult UOUUBlueprintValidator::ValidateLoadedAsset_Implementation(
-	UObject* InAsset,
-	TArray<FText>& ValidationErrors)
-#else
 EDataValidationResult UOUUBlueprintValidator::ValidateLoadedAsset_Implementation(
 	const FAssetData& InAssetData,
 	UObject* InAsset,
 	FDataValidationContext& Context)
-#endif
 {
-	EDataValidationResult Result = EDataValidationResult::Valid;
-
 	UBlueprint* Blueprint = Cast<UBlueprint>(InAsset);
 
 	if (IsValid(Blueprint) == false)
 	{
-#if UE_VERSION_OLDER_THAN(5, 4, 0)
-		AssetFails(InAsset, INVTEXT("Asset is not a blueprint"), IN OUT ValidationErrors);
-#else
 		Context.AddError(INVTEXT("Asset is not a blueprint"));
-#endif
-
 		return EDataValidationResult::Invalid;
 	}
 
@@ -93,40 +75,24 @@ EDataValidationResult UOUUBlueprintValidator::ValidateLoadedAsset_Implementation
 								"Replace with any named component"),
 						FText::FromName(BlueprintToCheck->GetFName()));
 
-#if UE_VERSION_OLDER_THAN(5, 4, 0)
-					AssetWarning(InAsset, WarningMessage);
-#else
-					Context.AddWarning(WarningMessage);
-#endif
+					Context.AddWarning(INVTEXT("Asset is not a blueprint"));
 					break;
 				}
 				else if (Status == EBlueprintHasDefaultRoot::YesNonMovable)
 				{
-					Result = EDataValidationResult::Invalid;
 					auto ErrorMessage = FText::FormatOrdered(
 						INVTEXT("Actor blueprint {0} has a NON-MOVABLE DefaultSceneRoot and child blueprints. "
 								"This will inevitably break attachment of child blueprints, because they are not "
 								"inheritable. Replace with any named component"),
 						FText::FromName(BlueprintToCheck->GetFName()));
 
-#if UE_VERSION_OLDER_THAN(5, 4, 0)
-					AssetFails(InAsset, ErrorMessage, ValidationErrors);
-#else
-					Context.AddError(ErrorMessage);
-#endif
-					break;
+					Context.AddError(INVTEXT("Asset is not a blueprint"));
+					return EDataValidationResult::Invalid;
 				}
 			}
 
 			ClassToCheck = BlueprintToCheck->ParentClass;
 		}
 	}
-
-#if UE_VERSION_OLDER_THAN(5, 4, 0)
-	if (Result == EDataValidationResult::Valid)
-	{
-		AssetPasses(InAsset);
-	}
-#endif
-	return Result;
+	return EDataValidationResult::Valid;
 }
