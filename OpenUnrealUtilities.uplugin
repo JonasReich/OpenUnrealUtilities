@@ -83,6 +83,13 @@
 		{
 			"Name": "OUUTags",
 			"Enabled": true
+		},
+		{
+			"Name": "SteamShared",
+			"Enabled": true,
+			"SupportedTargetPlatforms": [
+				"Win64"
+			]
 		}
 	]
 }

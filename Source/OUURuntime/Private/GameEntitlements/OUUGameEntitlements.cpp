@@ -44,18 +44,24 @@ UOUUGameEntitlementsSubsystem& UOUUGameEntitlementsSubsystem::Get()
 bool UOUUGameEntitlementsSubsystem::IsEntitled(const FOUUGameEntitlementModule& Module) const
 {
 	// Invalid = empty tag should be treated as asking for "no requirements"
-	return Module.IsValid() == false || ActiveEntitlements.HasTag(Module);
+	return Module.IsValid() == false
+		|| ActiveEntitlements.HasTag(FOUUGameEntitlementModuleAndCollection::ConvertChecked(Module));
 }
 
 bool UOUUGameEntitlementsSubsystem::IsEntitled(const FOUUGameEntitlementModules_Ref& Modules) const
 {
 	// Expected to return true if Modules is empty
-	return ActiveEntitlements.HasAll(Modules);
+	return ActiveEntitlements.HasAll(FOUUGameEntitlementModuleAndCollections_Value::CreateChecked(Modules.Get()));
 }
 
-FOUUGameEntitlementModules_Ref UOUUGameEntitlementsSubsystem::GetActiveEntitlements() const
+bool UOUUGameEntitlementsSubsystem::HasInitializedActiveEntitlements() const
 {
-	return ActiveEntitlements;
+	return bHasInitializedActiveEntitlements;
+}
+
+FOUUGameEntitlementModules_Value UOUUGameEntitlementsSubsystem::GetActiveEntitlements() const
+{
+	return FOUUGameEntitlementModules_Value::CreateFiltered(ActiveEntitlements.Get());
 }
 
 FGameplayTagContainer UOUUGameEntitlementsSubsystem::K2_GetActiveEntitlements() const
@@ -94,6 +100,19 @@ void UOUUGameEntitlementsSubsystem::Initialize(FSubsystemCollectionBase& Collect
 #endif
 }
 
+bool UOUUGameEntitlementsSubsystem::IsEntitledToCollection(const FOUUGameEntitlementCollection& Collection) const
+{
+	// Invalid = empty tag should be treated as asking for "no requirements"
+	return Collection.IsValid() == false
+		|| ActiveEntitlements.HasTag(FOUUGameEntitlementModuleAndCollection::ConvertChecked(Collection));
+}
+
+bool UOUUGameEntitlementsSubsystem::IsEntitledToCollection(const FOUUGameEntitlementCollections_Ref& Collections) const
+{
+	// Expected to return true if Modules is empty
+	return ActiveEntitlements.HasAll(FOUUGameEntitlementModuleAndCollections_Value::CreateChecked(Collections.Get()));
+}
+
 #if WITH_EDITOR
 void UOUUGameEntitlementsSubsystem::OnSettingsChanged(FPropertyChangedChainEvent& _PropertyChangedEvent)
 {
@@ -118,7 +137,7 @@ void UOUUGameEntitlementsSubsystem::RefreshActiveVersionAndEntitlements()
 	ActiveEntitlements.Reset();
 	if (auto* EntitlementsPtr = Settings.EntitlementsPerVersion.Find(ActiveVersion))
 	{
-		ActiveEntitlements = FOUUGameEntitlementModules_Value::CreateChecked(*EntitlementsPtr);
+		ActiveEntitlements = FOUUGameEntitlementModuleAndCollections_Value::CreateChecked(*EntitlementsPtr);
 	}
 
 	// recursively add entitlements from module collections
@@ -132,7 +151,8 @@ void UOUUGameEntitlementsSubsystem::RefreshActiveVersionAndEntitlements()
 			{
 				if (auto* EntitlementsPtr = Settings.ModuleCollections.Find(EntitlementAsCollection))
 				{
-					ActiveEntitlements.AppendTags(FOUUGameEntitlementModules_Value::CreateChecked(*EntitlementsPtr));
+					ActiveEntitlements.AppendTags(
+						FOUUGameEntitlementModuleAndCollections_Value::CreateChecked(*EntitlementsPtr));
 				}
 			}
 		}

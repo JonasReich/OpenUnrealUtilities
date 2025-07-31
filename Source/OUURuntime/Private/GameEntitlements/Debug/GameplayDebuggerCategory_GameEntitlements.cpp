@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2024 Jonas Reich & Contributors
+// Copyright (c) 2024 Jonas Reich & Contributors
 
 #include "GameEntitlements/Debug/GameplayDebuggerCategory_GameEntitlements.h"
 
@@ -32,14 +32,14 @@ void FGameplayDebuggerCategory_GameEntitlements::DrawData(
 	CanvasContext.Print(TEXT(""));
 
 	auto VersionTags = FOUUGameEntitlementVersion::GetAllLeafTags();
-	auto ModuleTags = FOUUGameEntitlementModule::GetAllLeafTags();
+	auto AllTags = FOUUGameEntitlementModuleAndCollection::GetAllLeafTags();
 
 	constexpr float BackgroundPadding = 5.0f;
 	constexpr float BackgroundWidth = 400.0f;
 	constexpr FLinearColor BackgroundColor(0.1f, 0.1f, 0.1f, 0.8f);
 
-	const float BackgroundHeight = CanvasContext.GetLineHeight() * CanvasContext.Canvas->GetDPIScale()
-		* (VersionTags.Num() + ModuleTags.Num() + 5);
+	const float BackgroundHeight =
+		CanvasContext.GetLineHeight() * CanvasContext.Canvas->GetDPIScale() * (VersionTags.Num() + AllTags.Num() + 5);
 	const FVector2D BackgroundLocation = FVector2D(BackgroundPadding, CanvasContext.CursorY - BackgroundPadding);
 	const FVector2D BackgroundSize(BackgroundWidth + 2 * BackgroundPadding, BackgroundHeight + 2 * BackgroundPadding);
 
@@ -73,24 +73,20 @@ void FGameplayDebuggerCategory_GameEntitlements::DrawData(
 
 	CanvasContext.Print(TEXT(""));
 	CanvasContext.Print(FColor::Yellow, TEXT("COLLECTIONS"));
-	for (auto Tag : ModuleTags)
+	const auto CollectionTags = FOUUGameEntitlementCollection::GetAllLeafTags();
+	for (auto Tag : CollectionTags)
 	{
-		if (Tag.MatchesTag(FOUUGameEntitlementTags::Collection::Get()))
-		{
-			FColor Color = Subsystem.IsEntitled(Tag) ? FColor::Green : FColor::White;
-			CanvasContext.Print(Color, *Tag.ToShortDisplayString());
-		}
+		FColor Color = Subsystem.IsEntitledToCollection(Tag) ? FColor::Green : FColor::White;
+		CanvasContext.Print(Color, *Tag.ToShortDisplayString());
 	}
 
 	CanvasContext.Print(TEXT(""));
 	CanvasContext.Print(FColor::Yellow, TEXT("MODULES"));
+	const auto ModuleTags = FOUUGameEntitlementModule::GetAllLeafTags();
 	for (auto Tag : ModuleTags)
 	{
-		if (Tag.MatchesTag(FOUUGameEntitlementTags::Module::Get()))
-		{
-			FColor Color = Subsystem.IsEntitled(Tag) ? FColor::Green : FColor::White;
-			CanvasContext.Print(Color, *Tag.ToShortDisplayString());
-		}
+		FColor Color = Subsystem.IsEntitled(Tag) ? FColor::Green : FColor::White;
+		CanvasContext.Print(Color, *Tag.ToShortDisplayString());
 	}
 }
 

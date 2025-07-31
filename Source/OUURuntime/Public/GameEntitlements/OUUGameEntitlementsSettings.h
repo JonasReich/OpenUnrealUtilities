@@ -35,7 +35,7 @@ public:
 	UPROPERTY(Config, EditAnywhere)
 	FOUUGameEntitlementVersion DefaultEditorVersion;
 
-	UPROPERTY(Config, EditAnywhere, meta = (Categories = "TypedTag{OUUGameEntitlementModule}"))
+	UPROPERTY(Config, EditAnywhere, meta = (Categories = "TypedTag{OUUGameEntitlementModuleAndCollection}"))
 	TMap<FOUUGameEntitlementVersion, FGameplayTagContainer> EntitlementsPerVersion;
 
 	UPROPERTY(Config, EditAnywhere, meta = (Categories = "TypedTag{OUUGameEntitlementModule}"))

@@ -13,6 +13,10 @@ UCLASS(BlueprintType)
 class OUURUNTIME_API UOUUGameEntitlementsSubsystem : public UEngineSubsystem
 {
 	GENERATED_BODY()
+
+public:
+	friend class FGameplayDebuggerCategory_GameEntitlements;
+
 public:
 	static UOUUGameEntitlementsSubsystem& Get();
 
@@ -20,7 +24,8 @@ public:
 	bool IsEntitled(const FOUUGameEntitlementModule& Module) const;
 	bool IsEntitled(const FOUUGameEntitlementModules_Ref& Modules) const;
 
-	FOUUGameEntitlementModules_Ref GetActiveEntitlements() const;
+	bool HasInitializedActiveEntitlements() const;
+	FOUUGameEntitlementModules_Value GetActiveEntitlements() const;
 
 	UFUNCTION(BlueprintPure, DisplayName = "GetActiveEntitlements")
 	FGameplayTagContainer K2_GetActiveEntitlements() const;
@@ -39,6 +44,9 @@ public:
 	FSimpleMulticastDelegate OnActiveEntitlementsChanged;
 
 private:
+	bool IsEntitledToCollection(const FOUUGameEntitlementCollection& Collection) const;
+	bool IsEntitledToCollection(const FOUUGameEntitlementCollections_Ref& Collections) const;
+
 #if WITH_EDITOR
 	void OnSettingsChanged(FPropertyChangedChainEvent& _PropertyChangedEvent);
 #endif
@@ -47,5 +55,5 @@ private:
 	bool bHasInitializedActiveEntitlements = false;
 	FOUUGameEntitlementVersion OverrideVersion;
 	FOUUGameEntitlementVersion ActiveVersion;
-	FOUUGameEntitlementModules_Value ActiveEntitlements;
+	FOUUGameEntitlementModuleAndCollections_Value ActiveEntitlements;
 };
