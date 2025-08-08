@@ -15,6 +15,17 @@
 // Semantic Versioning 2.0.0 as specified at https://semver.org/spec/v2.0.0.html
 //////////////////////////////////////////////////////////////////////////
 
+enum class ESemVerComponent
+{
+	Major,
+	Minor,
+	Patch,
+	PreRelease,
+	Build,
+
+	Last = Build
+};
+
 /**
  * A semantic version for software. Usable for games, plugins, tools, etc.
  * Summary from the Semantic Versioning 2.0.0 specification:
@@ -57,22 +68,22 @@ public:
 		const FString& SourceString,
 		ESemVerParsingStrictness Strictness = ESemVerParsingStrictness::Strict);
 
-	UPROPERTY(BlueprintReadWrite,Category="OUU|Runtime|SemVer")
+	UPROPERTY(BlueprintReadWrite, Category = "OUU|Runtime|SemVer")
 	int32 MajorVersion = 0;
 
-	UPROPERTY(BlueprintReadWrite,Category="OUU|Runtime|SemVer")
+	UPROPERTY(BlueprintReadWrite, Category = "OUU|Runtime|SemVer")
 	int32 MinorVersion = 1;
 
-	UPROPERTY(BlueprintReadWrite,Category="OUU|Runtime|SemVer")
+	UPROPERTY(BlueprintReadWrite, Category = "OUU|Runtime|SemVer")
 	int32 PatchVersion = 0;
 
-	UPROPERTY(BlueprintReadWrite,Category="OUU|Runtime|SemVer")
+	UPROPERTY(BlueprintReadWrite, Category = "OUU|Runtime|SemVer")
 	FSemVerPreReleaseIdentifier PreReleaseIdentifier;
 
-	UPROPERTY(BlueprintReadWrite,Category="OUU|Runtime|SemVer")
+	UPROPERTY(BlueprintReadWrite, Category = "OUU|Runtime|SemVer")
 	FSemVerBuildMetadata BuildMetadata;
 
-	FString ToString() const;
+	FString ToString(ESemVerComponent FinalComponent = ESemVerComponent::Last) const;
 
 	/**
 	 * Try to set this semantic version from a string.

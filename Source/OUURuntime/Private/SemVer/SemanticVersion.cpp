@@ -46,13 +46,31 @@ FSemanticVersion::FSemanticVersion(
 	TryParseString(SourceString, Strictness);
 }
 
-FString FSemanticVersion::ToString() const
+FString FSemanticVersion::ToString(ESemVerComponent FinalComponent /*= ESemVerComponent::Last*/) const
 {
-	FString Result = FString::Printf(TEXT("%i.%i.%i"), MajorVersion, MinorVersion, PatchVersion);
+	FString Result = FString::Printf(TEXT("%i"), MajorVersion);
+	if (FinalComponent == ESemVerComponent::Major)
+	{
+		return Result;
+	}
+	Result.Append(FString::Printf(TEXT(".%i"), MinorVersion));
+	if (FinalComponent == ESemVerComponent::Minor)
+	{
+		return Result;
+	}
+	Result.Append(FString::Printf(TEXT(".%i"), PatchVersion));
+	if (FinalComponent == ESemVerComponent::Patch)
+	{
+		return Result;
+	}
 	FString PreReleaseIdentifierString = PreReleaseIdentifier.ToString();
 	if (PreReleaseIdentifierString.Len() > 0)
 	{
 		Result.Append("-").Append(PreReleaseIdentifierString);
+	}
+	if (FinalComponent == ESemVerComponent::PreRelease)
+	{
+		return Result;
 	}
 	FString BuildMetadataString = BuildMetadata.ToString();
 	if (BuildMetadataString.Len() > 0)
