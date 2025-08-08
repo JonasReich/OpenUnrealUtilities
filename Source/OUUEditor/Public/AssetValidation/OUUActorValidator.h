@@ -5,23 +5,28 @@
 #include "CoreMinimal.h"
 
 #include "EditorValidatorBase.h"
+#include "OUUAssetValidatorBase_EngineVersionGlue.h"
 
 #include "OUUActorValidator.generated.h"
 
 // Validates actor instances with some generic checks.
 UCLASS()
-class UOUUActorValidator : public UEditorValidatorBase
+class UOUUActorValidator : public UOUUAssetValidatorBase_EngineVersionGlue
 {
 	GENERATED_BODY()
 public:
-	// - UEditorValidatorBase
-	bool CanValidateAsset_Implementation(UObject* InAsset) const override;
-	EDataValidationResult ValidateLoadedAsset_Implementation(UObject* InAsset, TArray<FText>& ValidationErrors)
-		override;
+	// - UEditorValidatorBase / UOUUAssetValidatorBase_EngineVersionGlue (depending on engine version)
+	bool CanValidateAsset_Implementation(
+		const FAssetData& InAssetData,
+		UObject* InObject,
+		FDataValidationContext& InContext) const override;
+	EDataValidationResult ValidateLoadedAsset_Implementation(
+		const FAssetData& InAssetData,
+		UObject* InAsset,
+		FDataValidationContext& Context) override;
 	// --
 
 private:
 	UPROPERTY(Transient)
 	UClass* NavigationDataClass = nullptr;
-
 };

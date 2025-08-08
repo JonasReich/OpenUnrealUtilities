@@ -3,18 +3,21 @@
 #include "AssetValidation/OUUHardReferenceValidator.h"
 
 #include "AssetRegistry/IAssetRegistry.h"
+#include "Misc/DataValidation.h"
 
-bool UOUUHardReferenceValidator::CanValidateAsset_Implementation(UObject* InAsset) const
+bool UOUUHardReferenceValidator::CanValidateAsset_Implementation(
+		const FAssetData& InAssetData,
+		UObject* InObject,
+		FDataValidationContext& InContext) const 
 {
 	return true;
 }
 
 EDataValidationResult UOUUHardReferenceValidator::ValidateLoadedAsset_Implementation(
-	UObject* InAsset,
-	TArray<FText>& ValidationErrors)
+		const FAssetData& InAssetData,
+		UObject* InAsset,
+		FDataValidationContext& Context)
 {
-	EDataValidationResult Result = EDataValidationResult::Valid;
-
 	FAssetData TargetAsset{InAsset};
 	FAssetIdentifier TargetAssetId{*InAsset->GetPackage()->GetPathName()};
 
@@ -40,15 +43,11 @@ EDataValidationResult UOUUHardReferenceValidator::ValidateLoadedAsset_Implementa
 				auto ErrorMessage = FText::Format(
 					INVTEXT("Hard reference to asset marked \"NotHardReferencable\": {0}"),
 					FText::FromName(Dependency.PackageName));
-				AssetFails(InAsset, ErrorMessage, ValidationErrors);
-				Result = EDataValidationResult::Invalid;
+
+				Context.AddError(ErrorMessage);
+				return EDataValidationResult::Invalid;
 			}
 		}
 	}
-
-	if (Result != EDataValidationResult::Invalid)
-	{
-		AssetPasses(InAsset);
-	}
-	return Result;
+	return EDataValidationResult::Valid;
 }
