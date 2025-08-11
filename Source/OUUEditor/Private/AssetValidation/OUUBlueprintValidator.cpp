@@ -72,7 +72,8 @@ EDataValidationResult UOUUBlueprintValidator::ValidateLoadedAsset_Implementation
 					auto WarningMessage = FText::FormatOrdered(
 						INVTEXT("Actor blueprint {0} has a MOVABLE DefaultSceneRoot and child blueprints. These may "
 								"break attachment of child blueprints easily, because they are not inheritable. "
-								"Replace with any named component"),
+								"Consider replacing it with any named component - keep in mind that replacing the root"
+								"component of already placed actors can break attachment of manually added components!"),
 						FText::FromName(BlueprintToCheck->GetFName()));
 
 					Context.AddWarning(WarningMessage);
