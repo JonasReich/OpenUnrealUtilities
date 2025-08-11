@@ -75,7 +75,7 @@ EDataValidationResult UOUUBlueprintValidator::ValidateLoadedAsset_Implementation
 								"Replace with any named component"),
 						FText::FromName(BlueprintToCheck->GetFName()));
 
-					Context.AddWarning(INVTEXT("Asset is not a blueprint"));
+					Context.AddWarning(WarningMessage);
 					break;
 				}
 				else if (Status == EBlueprintHasDefaultRoot::YesNonMovable)
@@ -86,7 +86,7 @@ EDataValidationResult UOUUBlueprintValidator::ValidateLoadedAsset_Implementation
 								"inheritable. Replace with any named component"),
 						FText::FromName(BlueprintToCheck->GetFName()));
 
-					Context.AddError(INVTEXT("Asset is not a blueprint"));
+					Context.AddError(ErrorMessage);
 					return EDataValidationResult::Invalid;
 				}
 			}
