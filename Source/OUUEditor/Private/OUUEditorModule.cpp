@@ -31,7 +31,6 @@ namespace OUU::Editor
 
 			MaterialAnalyzer::RegisterNomadTabSpawner();
 			ContentBrowserExtensions::RegisterHooks();
-
 		}
 
 		void ShutdownModule() override
@@ -94,10 +93,20 @@ namespace OUU::Editor
 
 					for (const auto& AssetPath : AssetPathsToLoad)
 					{
-						if (auto* EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(AssetPath.ResolveObject()))
+						if (auto* EditorWidgetBlueprint =
+								Cast<UEditorUtilityWidgetBlueprint>(AssetPath.ResolveObject()))
 						{
-							FName TabId;
-							EditorUtilitySubsystem->RegisterTabAndGetID(EditorWidget, OUT TabId);
+							if (EditorWidgetBlueprint->GeneratedClass)
+							{
+								const UEditorUtilityWidget* EditorUtilityWidget =
+									EditorWidgetBlueprint->GeneratedClass->GetDefaultObject<UEditorUtilityWidget>();
+								if (EditorUtilityWidget && EditorUtilityWidget->ShouldAlwaysReregisterWithWindowsMenu())
+
+								{
+									FName TabId;
+									EditorUtilitySubsystem->RegisterTabAndGetID(EditorWidgetBlueprint, OUT TabId);
+								}
+							}
 						}
 					}
 
