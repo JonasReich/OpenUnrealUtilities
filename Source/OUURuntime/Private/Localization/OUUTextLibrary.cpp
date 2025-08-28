@@ -63,11 +63,11 @@ FText UOUUTextLibrary::JoinBy(const TArray<FText>& Texts, FText Separator)
 	return CombinedText;
 }
 
-bool UOUUTextLibrary::ExportStringTableToCSV(const UStringTable* StringTable, const FString& ExportPath)
+bool UOUUTextLibrary::ExportStringTableToCSV(const UObject* StringTable, const FString& ExportPath)
 {
-	if (StringTable)
+	if (const auto* CastedStringTable = Cast<UStringTable>(StringTable))
 	{
-		return StringTable->GetStringTable()->ExportStrings(ExportPath);
+		return CastedStringTable->GetStringTable()->ExportStrings(ExportPath);
 	}
 	return false;
 }

@@ -45,11 +45,13 @@ public:
 
 	/**
 	 * Export the key, string, and meta-data information in this string table to a CSV file (does not export the
-	 * namespace)
+	 * namespace).
+	 * Because UStringTable is not blueprint exposed, we need to pass it as UObject.
+	 * @param ExportPath Disk file path of the target csv file, including extension
 	 * @returns if the export succeeded
 	 */
-	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Text")
-	static bool ExportStringTableToCSV(const UStringTable* StringTable, const FString& ExportPath);
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Text")
+	static bool ExportStringTableToCSV(const UObject* StringTable, const FString& ExportPath);
 
 	// Load all CSV files from a given folder as polyglot data.
 	// The culture is assumed to be added as a suffix to the file names, i.e. filename_culture.csv,
