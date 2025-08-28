@@ -4,6 +4,8 @@
 
 #include "HAL/PlatformFileManager.h"
 #include "Internationalization/PolyglotTextData.h"
+#include "Internationalization/StringTable.h"
+#include "Internationalization/StringTableCore.h"
 #include "LogOpenUnrealUtilities.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
@@ -59,6 +61,15 @@ FText UOUUTextLibrary::JoinBy(const TArray<FText>& Texts, FText Separator)
 		CombinedText = FText::FormatOrdered(INVTEXT("{0}{1}{2}"), CombinedText, Separator, Texts[i]);
 	}
 	return CombinedText;
+}
+
+bool UOUUTextLibrary::ExportStringTableToCSV(const UStringTable* StringTable, const FString& ExportPath)
+{
+	if (StringTable)
+	{
+		return StringTable->GetStringTable()->ExportStrings(ExportPath);
+	}
+	return false;
 }
 
 void UOUUTextLibrary::LoadLocalizedTextsFromCSV(const FString& CsvDirectoryPath)

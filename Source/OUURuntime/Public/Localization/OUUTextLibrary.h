@@ -43,6 +43,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Text")
 	static FText JoinBy(const TArray<FText>& Texts, FText Separator);
 
+	/**
+	 * Export the key, string, and meta-data information in this string table to a CSV file (does not export the
+	 * namespace)
+	 * @returns if the export succeeded
+	 */
+	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Text")
+	static bool ExportStringTableToCSV(const UStringTable* StringTable, const FString& ExportPath);
+
 	// Load all CSV files from a given folder as polyglot data.
 	// The culture is assumed to be added as a suffix to the file names, i.e. filename_culture.csv,
 	// e.g. translations_de.csv, or translations_en-US.csv
@@ -54,11 +62,7 @@ private:
 	struct FOUUTextIdentity
 	{
 	public:
-		FOUUTextIdentity(FString Namespace, FString Key)
-			: Namespace(MoveTemp(Namespace))
-			, Key(MoveTemp(Key))
-		{
-		}
+		FOUUTextIdentity(FString Namespace, FString Key) : Namespace(MoveTemp(Namespace)), Key(MoveTemp(Key)) {}
 
 		FString Namespace;
 		FString Key;
@@ -68,10 +72,7 @@ private:
 			return Namespace == Other.Namespace && Key == Other.Key;
 		}
 
-		FORCEINLINE bool operator!=(const FOUUTextIdentity& Other) const
-		{
-			return !(Other == *this);
-		}
+		FORCEINLINE bool operator!=(const FOUUTextIdentity& Other) const { return !(Other == *this); }
 
 		friend inline uint32 GetTypeHash(const FOUUTextIdentity& Id)
 		{
