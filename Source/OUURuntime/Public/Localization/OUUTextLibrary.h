@@ -43,6 +43,22 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Open Unreal Utilities|Text")
 	static FText JoinBy(const TArray<FText>& Texts, FText Separator);
 
+	// Register a CSV string table for a plugin by resolving the file from plugin install directory.
+	// The string table is NOT automatically collected by the localization gatherer in-full when using this (which it
+	// would be when using the LOCTABLE_FROM_FILE_X macros), so you will need some other process to include the CSV
+	// source strings!
+	// @param InPluginRelativeTablePath path to csv (including extension) relative to the plugin's content directory
+	static void RegisterPluginStringTable(
+		const FString& InPluginName,
+		const FName& InTableId,
+		const FString& InNamespace,
+		const FString& InPluginRelativeTablePath);
+
+	// Register a CSV string table for a plugin (see above).
+	// This overload registers the string table with table and namespace derived from the base name of the input file.
+	// @param InPluginRelativeTablePath path to csv (including extension) relative to the plugin's content directory
+	static void RegisterPluginStringTable(const FString& InPluginName, const FString& InPluginRelativeTablePath);
+
 	/**
 	 * Export the key, string, and meta-data information in this string table to a CSV file (does not export the
 	 * namespace).

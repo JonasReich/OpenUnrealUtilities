@@ -3,9 +3,11 @@
 #include "Localization/OUUTextLibrary.h"
 
 #include "HAL/PlatformFileManager.h"
+#include "Interfaces/IPluginManager.h"
 #include "Internationalization/PolyglotTextData.h"
 #include "Internationalization/StringTable.h"
 #include "Internationalization/StringTableCore.h"
+#include "Internationalization/StringTableRegistry.h"
 #include "LogOpenUnrealUtilities.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
@@ -61,6 +63,26 @@ FText UOUUTextLibrary::JoinBy(const TArray<FText>& Texts, FText Separator)
 		CombinedText = FText::FormatOrdered(INVTEXT("{0}{1}{2}"), CombinedText, Separator, Texts[i]);
 	}
 	return CombinedText;
+}
+
+void UOUUTextLibrary::RegisterPluginStringTable(
+	const FString& InPluginName,
+	const FName& InTableId,
+	const FString& InNamespace,
+	const FString& InPluginRelativeTablePath)
+{
+	auto pPlugin = IPluginManager::Get().FindPlugin(InPluginName);
+	if (ensureMsgf(pPlugin, TEXT("Plugin %s not found"), *InPluginName))
+	{
+		FStringTableRegistry::Get()
+			.Internal_LocTableFromFile(InTableId, InNamespace, InPluginRelativeTablePath, pPlugin->GetContentDir());
+	}
+}
+
+void UOUUTextLibrary::RegisterPluginStringTable(const FString& InPluginName, const FString& InPluginRelativeTablePath)
+{
+	const FString FileBaseName = FPaths::GetBaseFilename(InPluginRelativeTablePath);
+	RegisterPluginStringTable(InPluginName, *FileBaseName, FileBaseName, InPluginRelativeTablePath);
 }
 
 bool UOUUTextLibrary::ExportStringTableToCSV(const UObject* StringTable, const FString& ExportPath)
