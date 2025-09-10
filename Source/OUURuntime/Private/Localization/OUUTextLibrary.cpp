@@ -188,6 +188,11 @@ void UOUUTextLibrary::LoadLocalizedTextsFromCSV(
 		auto& Key = ImportRow[KeyIdx];
 		FString SourceString = ImportRow[SourceStringIdx];
 		SourceString = SourceString.ReplaceEscapedCharWithChar();
+		if (SourceString.IsEmpty())
+		{
+			continue;
+		}
+
 		FString LocalizedString = ImportRow[LocalizedStringIdx];
 		LocalizedString = LocalizedString.ReplaceEscapedCharWithChar();
 
