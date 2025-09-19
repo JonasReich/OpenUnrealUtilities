@@ -21,19 +21,7 @@ bool UOUUAnimationEditorLibrary::ImplementsAnimationLayerInterface(
 	if (!ensure(IsValid(AnimInstanceClass) && IsValid(AnimationLayerInterface)))
 		return false;
 
-	UAnimBlueprint* AnimationBlueprint = Cast<UAnimBlueprint>(AnimInstanceClass->ClassGeneratedBy);
-	if (!ensure(IsValid(AnimationBlueprint)))
-		return false;
-
-	for (const FBPInterfaceDescription& InterfaceDesc : AnimationBlueprint->ImplementedInterfaces)
-	{
-		if (InterfaceDesc.Interface->IsChildOf(AnimationLayerInterface))
-		{
-			return true;
-		}
-	}
-
-	return false;
+	return AnimInstanceClass->ImplementsInterface(AnimationLayerInterface);
 }
 
 USkeleton* UOUUAnimationEditorLibrary::GetAnimInstanceClassTargetSkeleton(TSubclassOf<UAnimInstance> AnimInstanceClass)
