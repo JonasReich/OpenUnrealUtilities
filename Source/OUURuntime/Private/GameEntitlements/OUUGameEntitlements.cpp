@@ -8,6 +8,15 @@ extern TAutoConsoleVariable<FString> CVar_OverrideEntitlementVersion;
 
 namespace OUU::Runtime::GameEntitlements
 {
+	FOUUGameEntitlementVersion GetOverrideEntitlement()
+	{
+		auto TagName = FOUUGameEntitlementTags::Version::Get().GetName() + TEXT(".")
+				+ CVar_OverrideEntitlementVersion.GetValueOnGameThread();
+
+		const FGameplayTag RawTag = FGameplayTag::RequestGameplayTag(*TagName, false);
+		return FOUUGameEntitlementVersion::TryConvert(RawTag);
+	}
+
 	void UpdateOverrideEntitlementFromCVar()
 	{
 		// When using command line to set the cvar via
@@ -16,14 +25,10 @@ namespace OUU::Runtime::GameEntitlements
 		// screws with the tag load order, so instead we rely on the subsystem initialization below to call this.
 		if (UGameplayTagsManager::GetIfAllocated() && GEngine)
 		{
-			auto TagName = FOUUGameEntitlementTags::Version::Get().GetName() + TEXT(".")
-				+ CVar_OverrideEntitlementVersion.GetValueOnGameThread();
-
-			const FGameplayTag RawTag = FGameplayTag::RequestGameplayTag(*TagName, false);
-			const auto VersionTag = FOUUGameEntitlementVersion::TryConvert(RawTag);
 			// It's okay or even expected to pass an invalid tag here, because empty/invalid tags will reset the
 			// override.
-			UOUUGameEntitlementsSubsystem::Get().SetOverrideVersion(VersionTag);
+			UOUUGameEntitlementsSubsystem::Get().SetOverrideVersion(
+				OUU::Runtime::GameEntitlements::GetOverrideEntitlement());
 		}
 	}
 } // namespace OUU::Runtime::GameEntitlements
@@ -124,8 +129,15 @@ void UOUUGameEntitlementsSubsystem::RefreshActiveVersionAndEntitlements()
 {
 	// Prevent recursing into this function
 	bHasInitializedActiveEntitlements = false;
-	OUU::Runtime::GameEntitlements::UpdateOverrideEntitlementFromCVar();
 
+	static FOUUGameEntitlementVersion CachedOverrideVersion;
+	if (OUU::Runtime::GameEntitlements::GetOverrideEntitlement() != CachedOverrideVersion)
+	{
+		// Only update the override version with the CVar's value if it has changed
+		OUU::Runtime::GameEntitlements::UpdateOverrideEntitlementFromCVar();
+		CachedOverrideVersion = OverrideVersion;
+	}
+	
 	auto& Settings = UOUUGameEntitlementSettings::Get();
 #if WITH_EDITOR
 	auto& DefaultVersion =
