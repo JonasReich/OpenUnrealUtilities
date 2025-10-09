@@ -4,6 +4,7 @@
 
 #include "HAL/PlatformFileManager.h"
 #include "Interfaces/IPluginManager.h"
+#include "Internationalization/Culture.h"
 #include "Internationalization/PolyglotTextData.h"
 #include "Internationalization/StringTable.h"
 #include "Internationalization/StringTableCore.h"
@@ -96,6 +97,8 @@ bool UOUUTextLibrary::ExportStringTableToCSV(const UObject* StringTable, const F
 
 void UOUUTextLibrary::LoadLocalizedTextsFromCSV(const FString& CsvDirectoryPath)
 {
+	auto PrioritizedCultureNames = FInternationalization::Get().GetCurrentCulture()->GetPrioritizedParentCultureNames();
+
 	auto& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
 	TMap<FOUUTextIdentity, FPolyglotTextData> PolyglotData;
 	PlatformFile.IterateDirectory(*CsvDirectoryPath, [&](const TCHAR* IteratePath, bool IsDirectory) -> bool {
@@ -105,9 +108,21 @@ void UOUUTextLibrary::LoadLocalizedTextsFromCSV(const FString& CsvDirectoryPath)
 		}
 		FString PathPart, NamePart, ExtensionPart;
 		FPaths::Split(IteratePath, PathPart, NamePart, ExtensionPart);
+		if (ExtensionPart.Equals(TEXT("csv"), ESearchCase::IgnoreCase) == false)
+		{
+			return true;
+		}
+
 		FString BaseNamePart, CulturePart;
 		NamePart.Split(TEXT("_"), &BaseNamePart, &CulturePart);
-		LoadLocalizedTextsFromCSV(IteratePath, CulturePart, PolyglotData);
+
+		// Skip any culture codes that are not part of the active culture name list.
+		// Allowing the entire list is required to e.g. allow having a base en translation with only a few en-US
+		// overrides.
+		if (PrioritizedCultureNames.Contains(CulturePart))
+		{
+			LoadLocalizedTextsFromCSV(IteratePath, CulturePart, PolyglotData);
+		}
 		return true;
 	});
 
