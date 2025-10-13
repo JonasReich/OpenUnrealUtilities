@@ -40,11 +40,14 @@ public:
 	{
 		if (IsPreWrap())
 		{
-			GetStorage().AddUninitialized(1);
+			GetStorage().Add(Element);
 		}
-		ArrayType& ArrayReference = GetStorage();
-		check(ArrayReference.IsValidIndex(WriteIndex));
-		ArrayReference[WriteIndex] = Element;
+		else
+		{
+			ArrayType& ArrayReference = GetStorage();
+			check(ArrayReference.IsValidIndex(WriteIndex));
+			ArrayReference[WriteIndex] = Element;
+		}
 		WriteIndex = (WriteIndex + 1) % ArrayMax;
 	}
 
@@ -141,7 +144,6 @@ public:
 		Super::StorageReference = Storage;
 		Storage.Reserve(MaxNum);
 		check(&Storage == &GetStorage());
-		check(Storage == GetStorage());
 	}
 
 	TCircularArray(const TCircularArray& Other) : TCircularArray() { *this = Other; }
@@ -161,7 +163,7 @@ public:
 		return *this;
 	}
 
-	const ArrayType& GetStorage() const { return Storage; }
+	using TCircularArrayAdaptor_Base<SelfType, ElementType, AllocatorType>::GetStorage;
 
 private:
 	ArrayType Storage;
