@@ -23,27 +23,26 @@ private:
 };
 
 /**
- * Call the succeeding block of code if the enclosing function scope is called recursively more than RecursionLimit
- * times. Generally best placed at the start of a function for best legibility.
- *
- * Example:
- *
- * void Foo()
- * {
- *     ON_RECURSION_LIMIT_REACHED(50)
- *     {
- *         ensureMsgf(false, TEXT("Foo called recursively more than 50 times"));
- *         return;
- *     }
- *     Foo();
- * }
+ * Call the succeeding block of code if the enclosing scope is called recursively more than specified number of times.
+ * Generally best placed at the start of a function for best legibility.
+ * @param RecursionLimit: How often the scope may be re-entered recursively before triggering.
  */
 #define ON_RECURSION_LIMIT_REACHED(RecursionLimit)                                                                     \
-	static_assert(RecursionLimit > 1, "RecursionLimit must be a positive uint16");                                     \
 	PRIVATE_ON_RECURSION_LIMIT_REACHED_IMPL(                                                                           \
 		RecursionLimit,                                                                                                \
 		PREPROCESSOR_JOIN(RecursionCounter, __LINE__),                                                                 \
 		PREPROCESSOR_JOIN(RecursionGuard, __LINE__))
+
+/**
+ * Easy to use version of an ensure and return if a recursion limit was reached.
+ * @param RecursionLimit: How often the scope may be re-entered recursively before triggering the ensure.
+ */
+#define ENSURE_RECURSION_LIMIT_AND_RETURN(RecursionLimit, ...)                                                         \
+	ON_RECURSION_LIMIT_REACHED(RecursionLimit)                                                                         \
+	{                                                                                                                  \
+		ensureMsgf(false, TEXT("Recursion limit (%i) reached"), RecursionLimit);                                       \
+		return __VA_ARGS__;                                                                                            \
+	}
 
 #define PRIVATE_ON_RECURSION_LIMIT_REACHED_IMPL(RecursionLimit, RecursionCounter, RecursionGuard)                      \
 	static uint16 RecursionCounter = 0;                                                                                \
