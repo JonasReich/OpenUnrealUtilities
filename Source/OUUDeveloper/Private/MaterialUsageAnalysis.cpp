@@ -13,15 +13,12 @@
 #include "LogOpenUnrealUtilities.h"
 #include "Materials/MaterialInterface.h"
 #include "Misc/CanvasGraphPlottingUtils.h"
+#include "OUUWorldStatsOverlay.h"
 #include "Templates/CastObjectRange.h"
 #include "Templates/RingAggregator.h"
 #include "Templates/StringUtils.h"
 #include "Tickable.h"
 #include "UnrealClient.h"
-
-#if WITH_EDITOR
-	#include "Editor.h"
-#endif
 
 constexpr int32 NumFramesForBuffer = 100;
 constexpr float UpdateInterval = 0.1f;
@@ -111,23 +108,6 @@ UObject* GetMeshFromPrimitiveComponent(const UPrimitiveComponent* PrimitiveCompo
 		return SkinnedMeshComponent->GetSkinnedAsset();
 	}
 	return nullptr;
-}
-
-UWorld* GetTargetWorld()
-{
-	auto* TargetWorld = GEngine->GetCurrentPlayWorld();
-#if WITH_EDITOR
-	if (!TargetWorld)
-	{
-		TargetWorld = GEditor->GetEditorWorldContext().World();
-	}
-#endif
-	UE_CLOG(
-		!IsValid(TargetWorld),
-		LogOpenUnrealUtilities,
-		Error,
-		TEXT("Did not find any world to perform material analysis"));
-	return TargetWorld;
 }
 
 FMaterialAnalysisResults AnalyzeMaterialUsage(UWorld* TargetWorld)
@@ -304,165 +284,80 @@ void DumpMaterialAnalysis(UWorld* TargetWorld)
 	UE_LOG(LogOpenUnrealUtilities, Log, TEXT(" \n%s"), *AnalysisLogString);
 }
 
-class FMaterialAnalysisTickHelper : public FTickableGameObject
+class FMaterialAnalysisOverlay : public OUU::Developer::TWorldStatsOverlay<FMaterialAnalysisOverlay>
 {
-private:
-	static TUniquePtr<FMaterialAnalysisTickHelper> GTickHelper;
-
 public:
-	FMaterialAnalysisTickHelper()
+	FMaterialAnalysisOverlay() : TWorldStatsOverlay(::UpdateInterval)
 	{
-		ComponentStats.Add({Buffer_ComponentsNow, FColorList::Red, "now"});
-		ComponentStats.Add({Buffer_ComponentsBest, FColorList::Green, "best"});
+		auto& ComponentStats = GraphStats.AddDefaulted_GetRef();
+		ComponentStats.Name = TEXT("static mesh components");
+		ComponentStats.DataSeries.Add({Buffer_ComponentsNow, FColorList::Red, "now"});
+		ComponentStats.DataSeries.Add({Buffer_ComponentsBest, FColorList::Green, "best"});
 
-		DrawCallsStats.Add({Buffer_DrawCallsNow, FColorList::Red, "now"});
-		DrawCallsStats.Add({Buffer_DrawCallsBest, FColorList::Green, "best"});
-		DrawCallsStats.Add({Buffer_Materials, FColorList::LightBlue, "materials"});
-		DrawCallsStats.Add({Buffer_MaterialCombinations, FColorList::Yellow, "mat combos"});
+		auto& DrawCallsStats = GraphStats.AddDefaulted_GetRef();
+		DrawCallsStats.Name = TEXT("static mesh draw calls");
+		DrawCallsStats.DataSeries.Add({Buffer_DrawCallsNow, FColorList::Red, "now"});
+		DrawCallsStats.DataSeries.Add({Buffer_DrawCallsBest, FColorList::Green, "best"});
+		DrawCallsStats.DataSeries.Add({Buffer_Materials, FColorList::LightBlue, "materials"});
+		DrawCallsStats.DataSeries.Add({Buffer_MaterialCombinations, FColorList::Yellow, "mat combos"});
 
-		InstanceStats.Add({Buffer_NumStaticMeshInstances_Max, FColorList::Violet, "max"});
-		InstanceStats.Add({Buffer_NumStaticMeshInstances_Now, FColorList::Red, "now"});
-		InstanceStats.Add({Buffer_NumStaticMeshInstances_Possible, FColorList::Green, "best"});
-	}
-
-	static void Toggle()
-	{
-		if (GTickHelper.IsValid())
-		{
-			AHUD::OnHUDPostRender.RemoveAll(GTickHelper.Get());
-			GTickHelper.Reset();
-		}
-		else
-		{
-			GTickHelper = MakeUnique<FMaterialAnalysisTickHelper>();
-			AHUD::OnHUDPostRender.AddRaw(GTickHelper.Get(), &FMaterialAnalysisTickHelper::OnShowDebugInfo);
-		}
+		auto& InstanceStats = GraphStats.AddDefaulted_GetRef();
+		InstanceStats.Name = TEXT("mesh instances");
+		InstanceStats.DataSeries.Add({Buffer_NumStaticMeshInstances_Max, FColorList::Violet, "max"});
+		InstanceStats.DataSeries.Add({Buffer_NumStaticMeshInstances_Now, FColorList::Red, "now"});
+		InstanceStats.DataSeries.Add({Buffer_NumStaticMeshInstances_Possible, FColorList::Green, "best"});
 	}
 
 private:
-	float LastUpdateTime = 0.f;
-	float AccumulatedTime = 0.f;
-
 	// Component stats
 	TCircularAggregator<float> Buffer_ComponentsNow{NumFramesForBuffer};
 	TCircularAggregator<float> Buffer_ComponentsBest{NumFramesForBuffer};
-	TArray<OUU::Runtime::CanvasGraphPlottingUtils::FGraphStatData> ComponentStats;
-	float MaxNumComponents = 0.f;
 
 	// Draw calls
 	TCircularAggregator<float> Buffer_DrawCallsNow{NumFramesForBuffer};
 	TCircularAggregator<float> Buffer_DrawCallsBest{NumFramesForBuffer};
 	TCircularAggregator<float> Buffer_Materials{NumFramesForBuffer};
 	TCircularAggregator<float> Buffer_MaterialCombinations{NumFramesForBuffer};
-	TArray<OUU::Runtime::CanvasGraphPlottingUtils::FGraphStatData> DrawCallsStats;
-	float MaxDrawCalls = 0.f;
 
 	// Instances
 	TCircularAggregator<float> Buffer_NumStaticMeshInstances_Max{NumFramesForBuffer};
 	TCircularAggregator<float> Buffer_NumStaticMeshInstances_Now{NumFramesForBuffer};
 	TCircularAggregator<float> Buffer_NumStaticMeshInstances_Possible{NumFramesForBuffer};
-	TArray<OUU::Runtime::CanvasGraphPlottingUtils::FGraphStatData> InstanceStats;
-	float MaxInstances = 0.f;
 
-	// - FTickableGameObject
-	void Tick(float DeltaTime) override
+	// - TWorldStatsOverlay
+	void TickStats(UWorld* TargetWorld) override
 	{
-		AccumulatedTime += DeltaTime;
-		if (AccumulatedTime > UpdateInterval)
-		{
-			auto* TargetWorld = GetTargetWorld();
-			if (!TargetWorld)
-				return;
-
-			const auto Results = AnalyzeMaterialUsage(TargetWorld);
-
-			auto UpdateMax = [](auto& Stats, auto& MaxValue) {
-				MaxValue = 100.f;
-				for (auto& Stat : Stats)
-				{
-					MaxValue = FMath::Max(
-						MaxValue,
-						static_cast<const TCircularAggregator<float>*>(Stat.ValueAggregator.ValueContainer)->Max());
-				}
-			};
-
-			// Components
-			Buffer_ComponentsNow.Add(Results.MeshStatsSum.NumStaticMeshComponentsNow);
-			Buffer_ComponentsBest.Add(Results.NumStaticMeshComponents_Best);
-
-			UpdateMax(ComponentStats, MaxNumComponents);
-
-			// Draw calls
-			Buffer_DrawCallsNow.Add(Results.DrawCalls_Current);
-			Buffer_DrawCallsBest.Add(Results.DrawCalls_Best);
-			Buffer_Materials.Add(Results.NumUniqueMaterials);
-			Buffer_MaterialCombinations.Add(Results.MeshStatsByCombo.Num());
-
-			UpdateMax(DrawCallsStats, MaxDrawCalls);
-
-			// Instances
-			Buffer_NumStaticMeshInstances_Max.Add(Results.MeshStatsSum.NumStaticMeshInstances_Max);
-			Buffer_NumStaticMeshInstances_Now.Add(Results.MeshStatsSum.NumStaticMeshInstances_Now);
-			Buffer_NumStaticMeshInstances_Possible.Add(Results.MeshStatsSum.NumStaticMeshInstances_Possible);
-
-			UpdateMax(InstanceStats, MaxInstances);
-		}
-		while (AccumulatedTime > UpdateInterval)
-		{
-			AccumulatedTime -= UpdateInterval;
-		}
-	}
-
-	// ReSharper disable once CppParameterMayBeConstPtrOrRef
-	void OnShowDebugInfo(AHUD* HUD, UCanvas* InCanvas) const
-	{
-		const float GraphBottomYPos =
-			InCanvas->Canvas->GetRenderTarget()->GetSizeXY().Y / InCanvas->GetDPIScale() - 50.0f;
-
 		const bool bUseLogarithmicYAxis = CVarUseLogarithmicYAxis.GetValueOnAnyThread();
+		for (auto& Entry : GraphStats)
+		{
+			Entry.bUseLogarithmicAxis = bUseLogarithmicYAxis;
+		}
 
-		OUU::Runtime::CanvasGraphPlottingUtils::DrawCanvasGraph(
-			InCanvas->Canvas,
-			80.0f + 450.0f + 350.f * 0.f,
-			GraphBottomYPos,
-			ComponentStats,
-			"static mesh components",
-			MaxNumComponents,
-			bUseLogarithmicYAxis);
-		OUU::Runtime::CanvasGraphPlottingUtils::DrawCanvasGraph(
-			InCanvas->Canvas,
-			80.0f + 450.0f + 350.f * 1.f,
-			GraphBottomYPos,
-			DrawCallsStats,
-			"static mesh draw calls",
-			MaxDrawCalls,
-			bUseLogarithmicYAxis);
-		OUU::Runtime::CanvasGraphPlottingUtils::DrawCanvasGraph(
-			InCanvas->Canvas,
-			80.0f + 450.0f + 350.f * 2.f,
-			GraphBottomYPos,
-			InstanceStats,
-			"mesh instances",
-			MaxInstances,
-			bUseLogarithmicYAxis);
+		const auto Results = AnalyzeMaterialUsage(TargetWorld);
+
+		// Components
+		Buffer_ComponentsNow.Add(Results.MeshStatsSum.NumStaticMeshComponentsNow);
+		Buffer_ComponentsBest.Add(Results.NumStaticMeshComponents_Best);
+
+		// Draw calls
+		Buffer_DrawCallsNow.Add(Results.DrawCalls_Current);
+		Buffer_DrawCallsBest.Add(Results.DrawCalls_Best);
+		Buffer_Materials.Add(Results.NumUniqueMaterials);
+		Buffer_MaterialCombinations.Add(Results.MeshStatsByCombo.Num());
+
+		// Instances
+		Buffer_NumStaticMeshInstances_Max.Add(Results.MeshStatsSum.NumStaticMeshInstances_Max);
+		Buffer_NumStaticMeshInstances_Now.Add(Results.MeshStatsSum.NumStaticMeshInstances_Now);
+		Buffer_NumStaticMeshInstances_Possible.Add(Results.MeshStatsSum.NumStaticMeshInstances_Possible);
 	}
-
-	TStatId GetStatId() const override { return TStatId(); }
-
-	ETickableTickType GetTickableTickType() const override { return ETickableTickType::Always; }
-
-	UWorld* GetTickableGameObjectWorld() const override { return GetTargetWorld(); }
-	// --
 };
 
-TUniquePtr<FMaterialAnalysisTickHelper> FMaterialAnalysisTickHelper::GTickHelper;
+DEFINE_OUU_WORLD_STAT_OVERLAY(
+	FMaterialAnalysisOverlay,
+	MATERIAL_ANALYSIS_BASE_CVAR,
+	"Toggle displaying stats of static meshes and their materials in the current world as on-screen graphs")
 
 static FAutoConsoleCommand AnalyzeMaterialUsage_Command(
 	TEXT(MATERIAL_ANALYSIS_BASE_CVAR ".Dump"),
 	TEXT("Write stats of static meshes and their materials in the current world to the log"),
-	FConsoleCommandDelegate::CreateStatic([]() { DumpMaterialAnalysis(GetTargetWorld()); }));
-
-static FAutoConsoleCommand StartTickAnalyzeMaterialUsage_Command(
-	TEXT(MATERIAL_ANALYSIS_BASE_CVAR),
-	TEXT("Toggle displaying stats of static meshes and their materials in the current world as on-screen graphs"),
-	FConsoleCommandDelegate::CreateStatic([]() { FMaterialAnalysisTickHelper::Toggle(); }));
+	FConsoleCommandDelegate::CreateStatic([]() { DumpMaterialAnalysis(FMaterialAnalysisOverlay::GetStatsWorld()); }));

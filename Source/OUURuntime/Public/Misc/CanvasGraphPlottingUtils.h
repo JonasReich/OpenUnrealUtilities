@@ -34,14 +34,14 @@ namespace OUU::Runtime::CanvasGraphPlottingUtils
 			FValueRangeRef(
 				const void* InValueContainer,
 				const TFunction<float(const void*, int32)>& InGetValueDelegate,
-				const TFunction<float(const void*)>& InGetNumDelegate) :
+				const TFunction<int32(const void*)>& InGetNumDelegate) :
 				ValueContainer(InValueContainer),
 				GetValueDelegate(InGetValueDelegate),
 				GetNumDelegate(InGetNumDelegate){};
 
 			const void* ValueContainer = nullptr;
 			TFunction<float(const void*, int32)> GetValueDelegate;
-			TFunction<float(const void*)> GetNumDelegate;
+			TFunction<int32(const void*)> GetNumDelegate;
 
 			float operator[](int32 Idx) const { return GetValueDelegate(ValueContainer, Idx); }
 			int32 Num() const { return GetNumDelegate(ValueContainer); }
@@ -57,6 +57,13 @@ namespace OUU::Runtime::CanvasGraphPlottingUtils
 		FString Title;
 	};
 
+	struct FLimit
+	{
+		float Value;
+		FLinearColor Color;
+		FString Title;
+	};
+
 	void OUURUNTIME_API DrawCanvasGraph(
 		FCanvas* InCanvas,
 		float GraphLeftXPos,
@@ -64,7 +71,8 @@ namespace OUU::Runtime::CanvasGraphPlottingUtils
 		const TArray<FGraphStatData>& StatsToDraw,
 		const FString& GraphTitle,
 		float HighestValue,
-		bool bUseLogarithmicYAxis = false);
+		bool bUseLogarithmicYAxis = false,
+		TArray<FLimit> Limits = {});
 } // namespace OUU::Runtime::CanvasGraphPlottingUtils
 
 namespace UE_DEPRECATED(

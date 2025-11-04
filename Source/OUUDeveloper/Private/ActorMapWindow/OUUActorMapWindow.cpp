@@ -7,6 +7,7 @@
 #include "AbilitySystemComponent.h"
 #include "ActorMapWindow/OUUActorMapWindow_Private.h"
 #include "Brushes/SlateColorBrush.h"
+#include "CompGeom/PolygonTriangulation.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Engine/Engine.h"
 #include "Engine/SceneCapture2D.h"
@@ -18,6 +19,7 @@
 #include "GameplayTagContainer.h"
 #include "GameplayTags/GameplayTagQueryParser.h"
 #include "Misc/RegexUtils.h"
+#include "Polygon2.h"
 #include "TextureResource.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/Input/SButton.h"
@@ -149,13 +151,45 @@ namespace OUU::Developer::ActorMapWindow
 			const FVector HalfMapSizeVector = FVector(MapSizeActual / 2.f, MapSizeActual / 2.f, 0);
 			const FVector TopLeftCorner = ReferencePosition.Get() - HalfMapSizeVector;
 			FBox BBox(TopLeftCorner, ReferencePosition.Get() + HalfMapSizeVector);
-			auto ActualActorQueries = *ActorQueries.Get();
 
 			const TSharedRef<FSlateFontMeasure> FontMeasure =
 				FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
 			auto& Style = FCoreStyle::Get().GetWidgetStyle<FTextBlockStyle>("SmallText");
 			const FSlateFontInfo FontInfo = Style.Font;
 
+			auto DrawDistanceCircle = [&](float CircleRadiusMultiplier) {
+				const float CircleRadius = MaxComponent * CircleRadiusMultiplier;
+				UE::Geometry::FPolygon2f PathCircle = UE::Geometry::FPolygon2f::MakeCircle(CircleRadius, 32);
+				// append a vertex copy. Otherwise we get a crash, because the internal array gets resized and moved
+				// before resolving the array reference
+				const auto FirstVertexCopy = CopyTemp(PathCircle.GetVertices()[0]);
+				PathCircle.AppendVertex(FirstVertexCopy);
+				FSlateDrawElement::MakeLines(
+					OutDrawElements,
+					RetLayerId++,
+					AllottedGeometry.ToPaintGeometry(Size, FSlateLayoutTransform(1.f, Position + Size / 2.0)),
+					PathCircle.GetVertices(),
+					DrawEffects);
+
+				const float CircleRadiusWorldScale = (MapSizeActual / 2.f) * CircleRadiusMultiplier;
+				constexpr double WorldToMeters = 100.0;
+				FSlateDrawElement::MakeText(
+					OutDrawElements,
+					RetLayerId++,
+					AllottedGeometry.ToPaintGeometry(
+						FVector2D(FVector2f(1.0, 1.0)),
+						FSlateLayoutTransform(1.f, Position + FVector2D(MaxComponent - CircleRadius, Size.Y / 2.0))),
+					FText::AsCultureInvariant(FString::Printf(TEXT("%.1fm"), CircleRadiusWorldScale / WorldToMeters)),
+					FontInfo,
+					DrawEffects);
+			};
+
+			DrawDistanceCircle(1.f);
+			DrawDistanceCircle(1.f / 2.f);
+			DrawDistanceCircle(1.f / 4.f);
+			DrawDistanceCircle(1.f / 8.f);
+
+			auto ActualActorQueries = *ActorQueries.Get();
 			for (auto Query : ActualActorQueries)
 			{
 				if (!Query.IsValid())
@@ -193,7 +227,7 @@ namespace OUU::Developer::ActorMapWindow
 
 					if (this->DrawLabels.Get() == ECheckBoxState::Checked)
 					{
-						FText LabelText = FText::FromString(Actor->GetActorNameOrLabel());
+						FText LabelText = FText::AsCultureInvariant(Actor->GetActorNameOrLabel());
 
 						FVector2f LabelDimensions = FontMeasure->Measure(LabelText, FontInfo);
 
