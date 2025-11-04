@@ -5,12 +5,12 @@
 #include "OUUWorldStatsOverlay.h"
 #include "Templates/CircularAggregator.h"
 
-class FObjectCountOverlay : public OUU::Developer::TWorldStatsOverlay<FObjectCountOverlay>
+class FObjectCountOverlay : public OUU::Developer::FWorldStatsOverlay
 {
 public:
 	static constexpr int32 NumFramesForBuffer = 100;
 
-	FObjectCountOverlay() : TWorldStatsOverlay(.1)
+	FObjectCountOverlay() : FWorldStatsOverlay(.1)
 	{
 		auto& ActorStats = GraphStats.AddDefaulted_GetRef();
 		ActorStats.Name = TEXT("actors + components");

@@ -284,10 +284,10 @@ void DumpMaterialAnalysis(UWorld* TargetWorld)
 	UE_LOG(LogOpenUnrealUtilities, Log, TEXT(" \n%s"), *AnalysisLogString);
 }
 
-class FMaterialAnalysisOverlay : public OUU::Developer::TWorldStatsOverlay<FMaterialAnalysisOverlay>
+class FMaterialAnalysisOverlay : public OUU::Developer::FWorldStatsOverlay
 {
 public:
-	FMaterialAnalysisOverlay() : TWorldStatsOverlay(::UpdateInterval)
+	FMaterialAnalysisOverlay() : FWorldStatsOverlay(::UpdateInterval)
 	{
 		auto& ComponentStats = GraphStats.AddDefaulted_GetRef();
 		ComponentStats.Name = TEXT("static mesh components");

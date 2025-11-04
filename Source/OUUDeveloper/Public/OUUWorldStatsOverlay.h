@@ -59,7 +59,6 @@ namespace OUU::Developer
 
 		virtual void TickStats(UWorld* TargetWorld) = 0;
 
-	protected:
 		void RegisterDebugDrawDelegates(bool Register);
 
 	protected:
@@ -75,40 +74,22 @@ namespace OUU::Developer
 		void OnDrawDebugService(UCanvas* InCanvas, APlayerController* PlayerController) const;
 		void OnDrawDebug(UCanvas* InCanvas) const;
 	};
-
-	template <class DerivedClass>
-	class TWorldStatsOverlay : public FWorldStatsOverlay
-	{
-	private:
-		static TUniquePtr<DerivedClass> GOverlay;
-
-	public:
-		TWorldStatsOverlay(float InUpdateInterval) : FWorldStatsOverlay(InUpdateInterval)
-		{
-			static_assert(
-				TIsDerivedFrom<DerivedClass, TWorldStatsOverlay>::Value,
-				"DerivedClass must be derived from TWorldStatsOverlay");
-		}
-
-		static void Toggle()
-		{
-			if (GOverlay.IsValid())
-			{
-				GOverlay->RegisterDebugDrawDelegates(false);
-				GOverlay.Reset();
-			}
-			else
-			{
-				GOverlay = MakeUnique<DerivedClass>();
-				GOverlay->RegisterDebugDrawDelegates(true);
-			}
-		}
-	};
 } // namespace OUU::Developer
 
 #define DEFINE_OUU_WORLD_STAT_OVERLAY(Class, ToggleCVarCommand, ToggleCVarDescription)                                 \
-	TUniquePtr<Class> OUU::Developer::TWorldStatsOverlay<Class>::GOverlay;                                             \
-	static FAutoConsoleCommand Class_ToggleCommand(                                                                    \
+	TUniquePtr<Class> G##Class##Overlay;                                                                               \
+	static FAutoConsoleCommand G##Class##ToggleCommand(                                                                \
 		TEXT(ToggleCVarCommand),                                                                                       \
 		TEXT(ToggleCVarDescription),                                                                                   \
-		FConsoleCommandDelegate::CreateStatic([]() { Class::Toggle(); }));
+		FConsoleCommandDelegate::CreateStatic([]() {                                                                   \
+			if (G##Class##Overlay.IsValid())                                                                           \
+			{                                                                                                          \
+				G##Class##Overlay->RegisterDebugDrawDelegates(false);                                                  \
+				G##Class##Overlay.Reset();                                                                             \
+			}                                                                                                          \
+			else                                                                                                       \
+			{                                                                                                          \
+				G##Class##Overlay = MakeUnique<Class>();                                                               \
+				G##Class##Overlay->RegisterDebugDrawDelegates(true);                                                   \
+			}                                                                                                          \
+		}));
