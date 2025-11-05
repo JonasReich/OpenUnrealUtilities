@@ -49,12 +49,14 @@ EDataValidationResult UOUURestrictedNamesValidator::ValidateLoadedAsset_Implemen
 			FString LocalPath;
 			FPackageName::TryConvertLongPackageNameToFilename(PackagePath, LocalPath);
 			FPaths::MakePathRelativeTo(LocalPath, *FPaths::RootDir());
+			// these are exceptions that contain platform specific content
 			TArray<FString> AllowedDirectories;
 			GConfig->GetArray(TEXT("Staging"), TEXT("AllowedDirectories"), OUT AllowedDirectories, GGameIni);
+			// these are known platform specific folders
 			TArray<FString> AllowedPlatformDirectories;
 			GConfig->GetArray(
 				TEXT("Staging"),
-				TEXT("AllowedPlatformDirectories"),
+				TEXT("KnownPlatformDirectories"),
 				OUT AllowedPlatformDirectories,
 				GGameIni);
 			AllowedDirectories.Append(AllowedPlatformDirectories);
@@ -69,7 +71,7 @@ EDataValidationResult UOUURestrictedNamesValidator::ValidateLoadedAsset_Implemen
 
 		Context.AddError(INVTEXT("Asset is in a restricted platform specific directory (e.g. Windows/XSX/Apple/etc). "
 								 "Please rename or add an exception to Game.ini [Staging]AllowedDirectories if this is "
-								 "NOT a platform directory or [Staging]AllowedPlatformDirectories if it IS."));
+								 "NOT a platform directory or [Staging]KnownPlatformDirectories if it IS."));
 		return EDataValidationResult::Invalid;
 	}
 
