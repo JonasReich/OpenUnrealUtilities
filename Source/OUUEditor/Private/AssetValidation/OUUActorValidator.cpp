@@ -17,7 +17,7 @@ EDataValidationResult UOUUActorValidator::ValidateLoadedAsset_Implementation(
 	UObject* InAsset,
 	FDataValidationContext& Context)
 {
-	auto* Actor = Cast<AActor>(InAsset);
+	const auto* Actor = Cast<AActor>(InAsset);
 
 	if (IsValid(Actor) == false)
 	{
@@ -25,10 +25,10 @@ EDataValidationResult UOUUActorValidator::ValidateLoadedAsset_Implementation(
 		return EDataValidationResult::Invalid;
 	}
 
-	USceneComponent* RootComponent = Actor->GetRootComponent();
+	const USceneComponent* RootComponent = Actor->GetRootComponent();
 	TArray<USceneComponent*> AdditionalRoots;
 	Actor->ForEachComponent<USceneComponent>(false, [&](const USceneComponent* SceneComponent) {
-		auto* AttachRoot = SceneComponent->GetAttachmentRoot();
+		const auto* AttachRoot = SceneComponent->GetAttachmentRoot();
 		if (AttachRoot->GetOwner() == Actor && AttachRoot != RootComponent)
 		{
 			// Search class, so we don't need the module dependency just for this class check
@@ -45,7 +45,7 @@ EDataValidationResult UOUUActorValidator::ValidateLoadedAsset_Implementation(
 				return;
 			}
 
-			auto WarningMessage = FText::Format(
+			const auto WarningMessage = FText::Format(
 				INVTEXT("Actor has multiple root components: {0} and {1}"),
 				FText::FromName(RootComponent->GetFName()),
 				FText::FromName(AttachRoot->GetFName()));

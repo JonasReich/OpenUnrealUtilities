@@ -27,7 +27,7 @@ bool UOUUSteamUtils::WriteSteamAppIdToDisk(int32 SteamAppId)
 	if (SteamAppId > 0)
 	{
 		// Access the physical file writer directly so that we still write next to the executable in CotF builds.
-		FString SteamAppIdFilename = GetSteamAppIdFilename();
+		const FString SteamAppIdFilename = GetSteamAppIdFilename();
 		IFileHandle* Handle = IPlatformFile::GetPlatformPhysical().OpenWrite(*SteamAppIdFilename, false, false);
 		if (!Handle)
 		{
@@ -36,7 +36,7 @@ bool UOUUSteamUtils::WriteSteamAppIdToDisk(int32 SteamAppId)
 		}
 		else
 		{
-			FString AppId = FString::Printf(TEXT("%d"), SteamAppId);
+			const FString AppId = FString::Printf(TEXT("%d"), SteamAppId);
 
 			FBufferArchive Archive;
 			Archive.Serialize((void*)TCHAR_TO_ANSI(*AppId), AppId.Len());

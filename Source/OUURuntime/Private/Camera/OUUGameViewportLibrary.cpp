@@ -13,7 +13,7 @@ void UOUUGameViewportLibrary::UpdateSplitscreenInfo(
 {
 	if (UGameViewportClient* GameViewportClient = GEngine->GameViewport)
 	{
-		auto& SplitscreenInfo = GameViewportClient->SplitscreenInfo;
+		const auto& SplitscreenInfo = GameViewportClient->SplitscreenInfo;
 		if (SplitscreenInfo.IsValidIndex(ScreenIndex))
 		{
 			auto& PlayerData = GameViewportClient->SplitscreenInfo[ScreenIndex].PlayerData;

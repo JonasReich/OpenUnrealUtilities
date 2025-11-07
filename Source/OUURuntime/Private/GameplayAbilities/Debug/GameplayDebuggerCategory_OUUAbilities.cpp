@@ -260,13 +260,13 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayAbilityInstance(UOUUGam
 
 	bool FirstTaskMsg = true;
 	int32 MsgCount = 0;
-	constexpr int32 MaskTaskDebugCount = 5;
 	for (FAbilityTaskDebugMessage& Msg : ReverseRange(Instance->TaskDebugMessages))
 	{
 		if (Instance->ActiveTasks.Contains(Msg.FromTask) == false)
 		{
 			// Cap finished task messages to 5 per ability if we are printing to screen (else things
 			// will scroll off)
+			constexpr int32 MaskTaskDebugCount = 5;
 			if (++MsgCount > MaskTaskDebugCount)
 			{
 				break;
@@ -410,7 +410,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayCue(
 {
 	FString CueTagString = ThisGameplayCueTag.ToString();
 	CueTagString.RemoveFromStart(BaseCueTagString);
-	int32 idx = CueSet->GameplayCueDataMap.FindChecked(ThisGameplayCueTag);
+	const int32 idx = CueSet->GameplayCueDataMap.FindChecked(ThisGameplayCueTag);
 	if (idx == INDEX_NONE)
 	{
 		// ReSharper disable once CppUnreachableCode
@@ -421,7 +421,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayCue(
 		}
 		return;
 	}
-	auto CueData = CueSet->GameplayCueData[idx];
+	const auto CueData = CueSet->GameplayCueData[idx];
 
 	if (CueData.LoadedGameplayCueClass == nullptr)
 	{
@@ -501,7 +501,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawAttribute(FGameplayAttribute& A
 	Params.SourceTags = &QuerySourceTags;
 	Params.TargetTags = &QueryTargetTags;
 	Params.IncludePredictiveMods = true;
-	
+
 	float BaseValue = AbilitySystem->GetNumericAttributeBase(Attribute);
 	float QualifiedValue = AbilitySystem->GetNumericAttribute(Attribute);
 
@@ -509,11 +509,8 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawAttribute(FGameplayAttribute& A
 	while (PaddedAttributeName.Len() < 30)
 		PaddedAttributeName += " ";
 
-	FString AttributeString = FString::Printf(
-		TEXT("%s %.2f (Base: %.2f)"),
-		*PaddedAttributeName,
-		QualifiedValue,
-		BaseValue);
+	FString AttributeString =
+		FString::Printf(TEXT("%s %.2f (Base: %.2f)"), *PaddedAttributeName, QualifiedValue, BaseValue);
 
 	Canvas->SetDrawColor(ColorSwitch ? FColor::White : FColor::Emerald);
 	DebugLine(AttributeString, 4.f, 0);
@@ -571,11 +568,11 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawDebugBody()
 	{
 		DEBUG_BODY_SECTION("CUES")
 		UGameplayCueManager* CueManager = UAbilitySystemGlobals::Get().GetGameplayCueManager();
-		auto BaseCueTag = UGameplayCueSet::BaseGameplayCueTag();
-		FString BaseCueTagString = BaseCueTag.ToString() + TEXT(".");
+		const auto BaseCueTag = UGameplayCueSet::BaseGameplayCueTag();
+		const FString BaseCueTagString = BaseCueTag.ToString() + TEXT(".");
 		FGameplayTagContainer AllGameplayCueTags = UGameplayTagsManager::Get().RequestGameplayTagChildren(BaseCueTag);
-		auto CueSet = CueManager->GetRuntimeCueSet();
-		for (FGameplayTag ThisGameplayCueTag : AllGameplayCueTags)
+		const auto CueSet = CueManager->GetRuntimeCueSet();
+		for (const FGameplayTag ThisGameplayCueTag : AllGameplayCueTags)
 		{
 			DrawGameplayCue(CueManager, BaseCueTagString, CueSet, ThisGameplayCueTag);
 		}

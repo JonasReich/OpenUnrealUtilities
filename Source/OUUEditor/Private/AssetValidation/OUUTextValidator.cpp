@@ -6,9 +6,9 @@
 #include "Serialization/PropertyLocalizationDataGathering.h"
 
 bool UOUUTextValidator::CanValidateAsset_Implementation(
-		const FAssetData& InAssetData,
-		UObject* InAsset,
-		FDataValidationContext& InContext) const
+	const FAssetData& InAssetData,
+	UObject* InAsset,
+	FDataValidationContext& InContext) const
 {
 	// For now: do not run this validator in cook.
 	// If you want validate from command-line explicitly, please run an asset validation commandlet on widget BPs
@@ -27,11 +27,10 @@ bool UOUUTextValidator::CanValidateAsset_Implementation(
 }
 
 EDataValidationResult UOUUTextValidator::ValidateLoadedAsset_Implementation(
-		const FAssetData& InAssetData,
-		UObject* InAsset,
-		FDataValidationContext& Context)
+	const FAssetData& InAssetData,
+	UObject* InAsset,
+	FDataValidationContext& Context)
 {
-	EDataValidationResult Result = EDataValidationResult::Valid;
 	const auto* Package = InAsset->GetPackage();
 
 	TArray<UObject*> Objects;
@@ -64,7 +63,7 @@ EDataValidationResult UOUUTextValidator::ValidateLoadedAsset_Implementation(
 		if (bEditorOnly)
 			continue;
 
-		auto ErrorMessage = FText::Format(
+		const auto ErrorMessage = FText::Format(
 			INVTEXT("Text \"{0}\" is neither a culture invariant nor linked "
 					"from a string table. Source: {1}"),
 			FText::FromString(Entry.SourceData.SourceString),
@@ -72,5 +71,5 @@ EDataValidationResult UOUUTextValidator::ValidateLoadedAsset_Implementation(
 		Context.AddError(ErrorMessage);
 		return EDataValidationResult::Invalid;
 	}
-	return Result;
+	return EDataValidationResult::Valid;
 }

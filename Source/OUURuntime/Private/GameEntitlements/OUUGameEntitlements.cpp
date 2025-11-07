@@ -10,7 +10,7 @@ namespace OUU::Runtime::GameEntitlements
 {
 	FOUUGameEntitlementVersion GetOverrideEntitlement()
 	{
-		auto TagName = FOUUGameEntitlementTags::Version::Get().GetName() + TEXT(".")
+		const auto TagName = FOUUGameEntitlementTags::Version::Get().GetName() + TEXT(".")
 				+ CVar_OverrideEntitlementVersion.GetValueOnGameThread();
 
 		const FGameplayTag RawTag = FGameplayTag::RequestGameplayTag(*TagName, false);
@@ -156,7 +156,7 @@ void UOUUGameEntitlementsSubsystem::RefreshActiveVersionAndEntitlements()
 	int32 LastEntitlementCount = -1;
 	while (ActiveEntitlements.Num() != LastEntitlementCount)
 	{
-		for (auto Entitlement : ActiveEntitlements)
+		for (const auto Entitlement : ActiveEntitlements)
 		{
 			auto EntitlementAsCollection = FOUUGameEntitlementCollection::TryConvert(Entitlement);
 			if (EntitlementAsCollection.IsValid())

@@ -20,11 +20,11 @@ class UOUUAssetValidatorBase_EngineVersionGlue : public UEditorValidatorBase
 	GENERATED_BODY()
 public:
 #if UE_VERSION_OLDER_THAN(5, 4, 0)
-	bool CanValidateAsset_Implementation(UObject* InAsset) const final override
+	bool CanValidateAsset_Implementation(UObject* InAsset) const final
 	{
-		FAssetData InAssetData(InAsset);
+		const FAssetData InAssetData(InAsset);
 		FDataValidationContext Context;
-		auto Result = CanValidateAsset_Implementation(InAssetData, InAsset, IN OUT Context);
+		const auto Result = CanValidateAsset_Implementation(InAssetData, InAsset, IN OUT Context);
 		return Result;
 	}
 	virtual bool CanValidateAsset_Implementation(
@@ -35,10 +35,9 @@ public:
 		return false;
 	}
 
-	EDataValidationResult ValidateLoadedAsset_Implementation(UObject* InAsset, TArray<FText>& ValidationErrors)
-		final override
+	EDataValidationResult ValidateLoadedAsset_Implementation(UObject* InAsset, TArray<FText>& ValidationErrors) final
 	{
-		FAssetData InAssetData(InAsset);
+		const FAssetData InAssetData(InAsset);
 		FDataValidationContext Context;
 		auto Result = ValidateLoadedAsset_Implementation(InAssetData, InAsset, Context);
 		for (auto& Issue : Context.GetIssues())

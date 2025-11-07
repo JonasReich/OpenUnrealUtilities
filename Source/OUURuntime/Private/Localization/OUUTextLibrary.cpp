@@ -72,7 +72,7 @@ void UOUUTextLibrary::RegisterPluginStringTable(
 	const FString& InNamespace,
 	const FString& InPluginRelativeTablePath)
 {
-	auto pPlugin = IPluginManager::Get().FindPlugin(InPluginName);
+	const auto pPlugin = IPluginManager::Get().FindPlugin(InPluginName);
 	if (ensureMsgf(pPlugin, TEXT("Plugin %s not found"), *InPluginName))
 	{
 		FStringTableRegistry::Get()
@@ -97,7 +97,7 @@ bool UOUUTextLibrary::ExportStringTableToCSV(const UObject* StringTable, const F
 
 void UOUUTextLibrary::LoadLocalizedTextsFromCSV(const FString& CsvDirectoryPath)
 {
-	auto PrioritizedCultureNames = FInternationalization::Get().GetCurrentCulture()->GetPrioritizedParentCultureNames();
+	const auto PrioritizedCultureNames = FInternationalization::Get().GetCurrentCulture()->GetPrioritizedParentCultureNames();
 
 	auto& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
 	TMap<FOUUTextIdentity, FPolyglotTextData> PolyglotData;

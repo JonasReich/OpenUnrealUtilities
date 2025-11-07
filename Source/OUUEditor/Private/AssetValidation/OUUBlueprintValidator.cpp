@@ -45,7 +45,7 @@ EDataValidationResult UOUUBlueprintValidator::ValidateLoadedAsset_Implementation
 	UObject* InAsset,
 	FDataValidationContext& Context)
 {
-	UBlueprint* Blueprint = Cast<UBlueprint>(InAsset);
+	const UBlueprint* Blueprint = Cast<UBlueprint>(InAsset);
 
 	if (IsValid(Blueprint) == false)
 	{
@@ -55,7 +55,7 @@ EDataValidationResult UOUUBlueprintValidator::ValidateLoadedAsset_Implementation
 
 	if (Blueprint->ParentClass->IsChildOf<AActor>())
 	{
-		UClass* ClassToCheck = Blueprint->GeneratedClass;
+		const UClass* ClassToCheck = Blueprint->GeneratedClass;
 
 		while (ClassToCheck->IsInBlueprint())
 		{
@@ -65,11 +65,11 @@ EDataValidationResult UOUUBlueprintValidator::ValidateLoadedAsset_Implementation
 			const auto* BlueprintToCheck = CastChecked<UBlueprint>(ClassToCheck->ClassGeneratedBy);
 			if (ChildClasses.Num() > 0)
 			{
-				auto Status = BlueprintHasNonMovableDefaultRoot(*BlueprintToCheck);
+				const auto Status = BlueprintHasNonMovableDefaultRoot(*BlueprintToCheck);
 
 				if (Status == EBlueprintHasDefaultRoot::YesMovable)
 				{
-					auto WarningMessage = FText::FormatOrdered(
+					const auto WarningMessage = FText::FormatOrdered(
 						INVTEXT("Actor blueprint {0} has a MOVABLE DefaultSceneRoot and child blueprints. These may "
 								"break attachment of child blueprints easily, because they are not inheritable. "
 								"Consider replacing it with any named component - keep in mind that replacing the root"
@@ -81,7 +81,7 @@ EDataValidationResult UOUUBlueprintValidator::ValidateLoadedAsset_Implementation
 				}
 				else if (Status == EBlueprintHasDefaultRoot::YesNonMovable)
 				{
-					auto ErrorMessage = FText::FormatOrdered(
+					const auto ErrorMessage = FText::FormatOrdered(
 						INVTEXT("Actor blueprint {0} has a NON-MOVABLE DefaultSceneRoot and child blueprints. "
 								"This will inevitably break attachment of child blueprints, because they are not "
 								"inheritable. Replace with any named component"),

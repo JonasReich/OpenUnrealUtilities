@@ -22,7 +22,7 @@ EDataValidationResult UOUURestrictedNamesValidator::ValidateLoadedAsset_Implemen
 {
 	// Use the package name instead of package path to make sure every folder starts and ends in a slash to simplify
 	// checks below.
-	auto PackagePath = InAssetData.PackageName.ToString();
+	const auto PackagePath = InAssetData.PackageName.ToString();
 	if (PackagePath.StartsWith(TEXT("/Game/")) == false)
 	{
 		// Never validate content outside the main project content dir
