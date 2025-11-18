@@ -69,6 +69,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Text")
 	static bool ExportStringTableToCSV(const UObject* StringTable, const FString& ExportPath);
 
+	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Text")
+	static TSet<FString> GetCSVTranslationCultureNames(const FString& CsvDirectoryPath);
+
 	// Load all CSV files from a given folder as polyglot data.
 	// The culture is assumed to be added as a suffix to the file names, i.e. filename_culture.csv,
 	// e.g. translations_de.csv, or translations_en-US.csv
