@@ -4,7 +4,7 @@
 
 #include "SequentialFrameScheduler/SequentialFrameScheduler.h"
 
-void FSequentialFrameTask::FTaskHandle::Cancel()
+void FSequentialFrameTaskHandle::Cancel()
 {
 	if (const auto Scheduler = pWeakScheduler.Pin())
 	{

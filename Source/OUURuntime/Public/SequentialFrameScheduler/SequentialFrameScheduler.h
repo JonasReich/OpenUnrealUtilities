@@ -28,7 +28,7 @@ class OUURUNTIME_API FSequentialFrameScheduler : public TSharedFromThis<FSequent
 #endif
 
 public:
-	using FTaskHandle = FSequentialFrameTask::FTaskHandle;
+	using FTaskHandle = FSequentialFrameTaskHandle;
 	using FTaskUnifiedDelegate = FSequentialFrameTask::FTaskUnifiedDelegate;
 	using FTaskDelegate = FSequentialFrameTask::FTaskDelegate;
 	using FTaskDynamicDelegate = FSequentialFrameTask::FTaskDynamicDelegate;

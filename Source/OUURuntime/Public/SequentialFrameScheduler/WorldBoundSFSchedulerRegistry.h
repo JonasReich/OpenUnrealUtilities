@@ -57,6 +57,16 @@ public:
 	void TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
 	// --
 
+	UFUNCTION(BlueprintCallable)
+	static FSequentialFrameTaskHandle ScheduleTask(
+		const UObject* WorldContextObject,
+		FName SchedulerName,
+		ETickingGroup TickingGroup,
+		int32 MaxNumTasksToExecutePerFrame,
+		FTimerDynamicDelegate Task);
+	UFUNCTION(BlueprintCallable)
+	static void CancelTask(FSequentialFrameTaskHandle Handle);
+
 private:
 	UPROPERTY()
 	FActorTickFunction DuringPhysicsTickFunction;

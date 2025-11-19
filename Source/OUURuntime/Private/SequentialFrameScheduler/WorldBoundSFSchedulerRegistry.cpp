@@ -114,6 +114,31 @@ void AWorldBoundSFSchedulerRegistry::TickActor(
 	}
 }
 
+FSequentialFrameTaskHandle AWorldBoundSFSchedulerRegistry::ScheduleTask(
+	const UObject* WorldContextObject,
+	FName SchedulerName,
+	ETickingGroup TickingGroup,
+	int32 MaxNumTasksToExecutePerFrame,
+	FTimerDynamicDelegate Task)
+{
+	auto pScheduler = GetNamedScheduler(WorldContextObject, SchedulerName, TickingGroup);
+	if (pScheduler)
+	{
+		pScheduler->MaxNumTasksToExecutePerFrame = MaxNumTasksToExecutePerFrame;
+		return pScheduler->AddTask(Task, 0.0f);
+	}
+
+	return FSequentialFrameTaskHandle();
+}
+
+void AWorldBoundSFSchedulerRegistry::CancelTask(FSequentialFrameTaskHandle Handle)
+{
+	if (Handle.IsValid())
+	{
+		Handle.Cancel();
+	}
+}
+
 AWorldBoundSFSchedulerRegistry* AWorldBoundSFSchedulerRegistry::GetWorldSingleton(const UObject* WorldContextObject)
 {
 	check(IsValid(WorldContextObject));
