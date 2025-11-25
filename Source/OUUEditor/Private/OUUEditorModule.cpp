@@ -62,8 +62,10 @@ namespace OUU::Editor
 		 */
 		void RegisterAllEditorUtilityWidgetTabs()
 		{
-			if (!GEditor)
+			if (GIsEditor == false || IsRunningCommandlet())
+			{
 				return;
+			}
 
 			TArray<FAssetData> BlueprintList;
 			FARFilter Filter;
@@ -83,8 +85,9 @@ namespace OUU::Editor
 
 			FStreamableManager& StreamableManager = UAssetManager::Get().GetStreamableManager();
 
-			OnUtilityWidgetsLoadedHandle =
-				StreamableManager.RequestAsyncLoad(AssetPathsToLoad, [this, AssetPathsToLoad]() -> void {
+			OnUtilityWidgetsLoadedHandle = StreamableManager.RequestAsyncLoad(
+				AssetPathsToLoad,
+				[this, AssetPathsToLoad]() -> void {
 					UEditorUtilitySubsystem* EditorUtilitySubsystem =
 						GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
 
@@ -111,7 +114,11 @@ namespace OUU::Editor
 					}
 
 					OnUtilityWidgetsLoadedHandle = nullptr;
-				});
+				},
+				FStreamableManager::DefaultAsyncLoadPriority,
+				false,
+				false,
+				TEXT("RegisterEditorUtilityWidgets"));
 		}
 	};
 } // namespace OUU::Editor
