@@ -145,7 +145,7 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
 	for (int32 i = 0; i < TaskHistory.Num() && i < 20; i++)
 	{
 		int32 FrameNumber;
-		FSequentialFrameTask::FTaskHandle TaskHandle;
+		FSequentialFrameTaskHandle TaskHandle;
 		float TimeBetweenUpdates;
 		float TaskDuration;
 		Tie(FrameNumber, TaskHandle, TimeBetweenUpdates, TaskDuration) = TaskHistory[i];
@@ -233,7 +233,7 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
 					&DebugScheduler->DebugData.TaskHistory,
 					[&](const void* ContainerPtr, int32 Idx) -> float {
 						auto HistoryEntry = static_cast<const TaskHistoryType*>(ContainerPtr)->operator[](Idx);
-						const auto EntryTaskHandle = HistoryEntry.Get<FSequentialFrameTask::FTaskHandle>();
+						const auto EntryTaskHandle = HistoryEntry.Get<FSequentialFrameTaskHandle>();
 						static float LastCachedValue = -1.f;
 						if (Idx == 0)
 						{
@@ -256,7 +256,7 @@ void FGameplayDebuggerCategory_SequentialFrameScheduler::DrawData(
 					&DebugScheduler->DebugData.TaskHistory,
 					[&](const void* ContainerPtr, int32 Idx) -> float {
 						auto HistoryEntry = static_cast<const TaskHistoryType*>(ContainerPtr)->operator[](Idx);
-						const auto EntryTaskHandle = HistoryEntry.Get<FSequentialFrameTask::FTaskHandle>();
+						const auto EntryTaskHandle = HistoryEntry.Get<FSequentialFrameTaskHandle>();
 						static float LastCachedValue = -1.f;
 						if (Idx == 0)
 						{

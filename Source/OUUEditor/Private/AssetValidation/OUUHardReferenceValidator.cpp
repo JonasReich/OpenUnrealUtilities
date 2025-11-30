@@ -6,17 +6,19 @@
 #include "Misc/DataValidation.h"
 
 bool UOUUHardReferenceValidator::CanValidateAsset_Implementation(
-		const FAssetData& InAssetData,
-		UObject* InObject,
-		FDataValidationContext& InContext) const 
+	const FAssetData& InAssetData,
+	UObject* InObject,
+	FDataValidationContext& InContext) const
 {
-	return true;
+	// do not run this validator on actors -
+	// the dependency search via asset registry iterates and loads far too many packages
+	return IsValid(InObject) && InObject->IsA<AActor>() == false;
 }
 
 EDataValidationResult UOUUHardReferenceValidator::ValidateLoadedAsset_Implementation(
-		const FAssetData& InAssetData,
-		UObject* InAsset,
-		FDataValidationContext& Context)
+	const FAssetData& InAssetData,
+	UObject* InAsset,
+	FDataValidationContext& Context)
 {
 	FAssetData TargetAsset{InAsset};
 	FAssetIdentifier TargetAssetId{*InAsset->GetPackage()->GetPathName()};

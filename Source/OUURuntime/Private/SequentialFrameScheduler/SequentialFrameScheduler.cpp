@@ -173,7 +173,7 @@ void FSequentialFrameScheduler::UnPauseTask(const FTaskHandle& Handle)
 	}
 }
 
-FSequentialFrameTask::FTaskHandle FSequentialFrameScheduler::InternalAddTask(
+FSequentialFrameTaskHandle FSequentialFrameScheduler::InternalAddTask(
 	FTaskUnifiedDelegate&& Delegate,
 	float InPeriod,
 	bool bTickAsOftenAsPossible)

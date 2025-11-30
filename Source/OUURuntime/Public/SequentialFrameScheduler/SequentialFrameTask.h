@@ -6,41 +6,46 @@
 
 #include "TimerManager.h"
 
+#include "SequentialFrameTask.generated.h"
+
 class FSequentialFrameScheduler;
+
+/** Handle to a task registered in the SequentialFrameScheduler */
+USTRUCT(BlueprintType)
+struct OUURUNTIME_API FSequentialFrameTaskHandle
+{
+	GENERATED_BODY()
+
+public:
+	FSequentialFrameTaskHandle() = default;
+
+	FSequentialFrameTaskHandle(int32 InIndex, const TWeakPtr<FSequentialFrameScheduler>& _pWeakScheduler) :
+		Index(InIndex), pWeakScheduler(_pWeakScheduler)
+	{
+	}
+
+	int32 Index = INDEX_NONE;
+
+	bool operator==(const FSequentialFrameTaskHandle& _Other) const
+	{
+		return Index == _Other.Index && pWeakScheduler == _Other.pWeakScheduler;
+	}
+	bool IsValid() const { return Index != INDEX_NONE && pWeakScheduler != nullptr; }
+	void Reset()
+	{
+		Index = INDEX_NONE;
+		pWeakScheduler = nullptr;
+	}
+	void Cancel();
+
+private:
+	TWeakPtr<FSequentialFrameScheduler> pWeakScheduler = nullptr;
+};
 
 /** A task that is registered in the SequentialFrameScheduler */
 class OUURUNTIME_API FSequentialFrameTask
 {
 public:
-	/** Handle to a task registered in the scheduler */
-	struct OUURUNTIME_API FTaskHandle
-	{
-	public:
-		FTaskHandle() = default;
-
-		FTaskHandle(int32 InIndex, const TWeakPtr<FSequentialFrameScheduler>& _pWeakScheduler) :
-			Index(InIndex), pWeakScheduler(_pWeakScheduler)
-		{
-		}
-
-		int32 Index = INDEX_NONE;
-
-		bool operator==(const FTaskHandle& _Other) const
-		{
-			return Index == _Other.Index && pWeakScheduler == _Other.pWeakScheduler;
-		}
-		bool IsValid() const { return Index != INDEX_NONE && pWeakScheduler != nullptr; }
-		void Reset()
-		{
-			Index = INDEX_NONE;
-			pWeakScheduler = nullptr;
-		}
-		void Cancel();
-
-	private:
-		TWeakPtr<FSequentialFrameScheduler> pWeakScheduler = nullptr;
-	};
-
 	/**
 	 * Sequential frame tasks use extended unified timer delegates,
 	 * because we don't want to reinvent the wheel and make it usable with everything
@@ -53,7 +58,7 @@ public:
 	using FTaskDynamicDelegate = FTimerDynamicDelegate;
 	//-------------------------
 
-	FTaskHandle Handle;
+	FSequentialFrameTaskHandle Handle;
 
 	// #TODO change time values to double
 	float Period = 0.03f;
@@ -96,7 +101,7 @@ private:
 	float GetPeriodDivisor() const;
 };
 
-FORCEINLINE uint32 OUURUNTIME_API GetTypeHash(const FSequentialFrameTask::FTaskHandle& Handle)
+FORCEINLINE uint32 OUURUNTIME_API GetTypeHash(const FSequentialFrameTaskHandle& Handle)
 {
 	return Handle.Index;
 }

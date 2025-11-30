@@ -95,6 +95,31 @@ bool UOUUTextLibrary::ExportStringTableToCSV(const UObject* StringTable, const F
 	return false;
 }
 
+TSet<FString> UOUUTextLibrary::GetCSVTranslationCultureNames(const FString& CsvDirectoryPath)
+{
+	TSet<FString> Result;
+	auto& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+	PlatformFile.IterateDirectory(*CsvDirectoryPath, [&](const TCHAR* IteratePath, bool IsDirectory) -> bool {
+		if (IsDirectory)
+		{
+			return true;
+		}
+		FString PathPart, NamePart, ExtensionPart;
+		FPaths::Split(IteratePath, PathPart, NamePart, ExtensionPart);
+		if (ExtensionPart.Equals(TEXT("csv"), ESearchCase::IgnoreCase) == false)
+		{
+			return true;
+		}
+
+		FString BaseNamePart, CulturePart;
+		NamePart.Split(TEXT("_"), &BaseNamePart, &CulturePart);
+
+		Result.Add(CulturePart);
+		return true;
+	});
+	return Result;
+}
+
 void UOUUTextLibrary::LoadLocalizedTextsFromCSV(const FString& CsvDirectoryPath)
 {
 	const auto PrioritizedCultureNames = FInternationalization::Get().GetCurrentCulture()->GetPrioritizedParentCultureNames();

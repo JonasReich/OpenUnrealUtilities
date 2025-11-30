@@ -25,9 +25,9 @@ private:
 	bool bToggleDummyTask = false;
 	bool bDummyTaskWasSpawned = false;
 
-	FSequentialFrameTask::FTaskHandle DummyTaskHandle_1;
-	FSequentialFrameTask::FTaskHandle DummyTaskHandle_2;
-	FSequentialFrameTask::FTaskHandle DummyTaskHandle_3;
+	FSequentialFrameTaskHandle DummyTaskHandle_1;
+	FSequentialFrameTaskHandle DummyTaskHandle_2;
+	FSequentialFrameTaskHandle DummyTaskHandle_3;
 
 	void CycleDebugScheduler();
 	void ToggleDummyTask();
