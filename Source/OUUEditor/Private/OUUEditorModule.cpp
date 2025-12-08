@@ -7,9 +7,16 @@
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidgetBlueprint.h"
 #include "Engine/AssetManager.h"
+#include "GameEntitlements/OUUGameEntitlementsSettings.h"
+#include "Gameentitlements/OUUGameEntitlements.h"
+#include "GameplayTagsEditorModule.h"
+#include "GameplayTagsModule.h"
+#include "ISinglePropertyView.h"
+#include "LevelEditor.h"
 #include "MaterialAnalyzer/OUUMaterialAnalyzer.h"
 #include "Modules/ModuleManager.h"
 #include "OUUContentBrowserExtensions.h"
+#include "SGameplayTagWidget.h"
 
 namespace OUU::Editor
 {
@@ -31,6 +38,20 @@ namespace OUU::Editor
 
 			MaterialAnalyzer::RegisterNomadTabSpawner();
 			ContentBrowserExtensions::RegisterHooks();
+
+			if (FLevelEditorModule* LevelEditorModule =
+					FModuleManager::GetModulePtr<FLevelEditorModule>(TEXT("LevelEditor")))
+			{
+				EntitlementsMenuExtender = MakeShareable(new FExtender());
+				EntitlementsMenuExtender->AddToolBarExtension(
+					"Play",
+					EExtensionHook::After,
+					nullptr,
+					FToolBarExtensionDelegate::CreateRaw(
+						this,
+						&FOUUEditorModule::CreateGameEntitlementsToolbarExtension));
+				LevelEditorModule->GetToolBarExtensibilityManager()->AddExtender(EntitlementsMenuExtender);
+			}
 		}
 
 		void ShutdownModule() override
@@ -41,6 +62,16 @@ namespace OUU::Editor
 				OnUtilityWidgetsLoadedHandle = nullptr;
 			}
 
+			if (EntitlementsMenuExtender.IsValid())
+			{
+				if (FLevelEditorModule* LevelEditorModule =
+						FModuleManager::GetModulePtr<FLevelEditorModule>(TEXT("LevelEditor")))
+				{
+					LevelEditorModule->GetToolBarExtensibilityManager()->RemoveExtender(EntitlementsMenuExtender);
+				}
+			}
+			EntitlementsMenuExtender.Reset();
+
 			MaterialAnalyzer::UnregisterNomadTabSpawner();
 			ContentBrowserExtensions::UnregisterHooks();
 		}
@@ -48,6 +79,7 @@ namespace OUU::Editor
 	private:
 		FDelegateHandle OnFilesLoadedHandle;
 		TSharedPtr<FStreamableHandle> OnUtilityWidgetsLoadedHandle;
+		TSharedPtr<FExtender> EntitlementsMenuExtender;
 
 		void HandleOnFiledLoaded()
 		{
@@ -119,6 +151,32 @@ namespace OUU::Editor
 				false,
 				false,
 				TEXT("RegisterEditorUtilityWidgets"));
+		}
+
+		void CreateGameEntitlementsToolbarExtension(FToolBarBuilder& ToolbarBuilder)
+		{
+			if (UOUUGameEntitlementSettings::Get().EnablePIEToolbarExtension == false)
+			{
+				return;
+			}
+
+			ToolbarBuilder.BeginSection("OUUEntitlements");
+			{
+				FPropertyEditorModule& PropertyEditorModule =
+					FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+				FSinglePropertyParams PropertyParams;
+				PropertyParams.NameOverride = INVTEXT("Entitlement\nOverride\nVersion");
+				const TSharedPtr<ISinglePropertyView> OverrideEntitlementProperty =
+					PropertyEditorModule.CreateSingleProperty(
+						&UOUUGameEntitlementsSubsystem::Get(),
+						TEXT("OverrideVersion"),
+						PropertyParams);
+				if (OverrideEntitlementProperty.IsValid())
+				{
+					ToolbarBuilder.AddWidget(OverrideEntitlementProperty.ToSharedRef());
+				}
+			}
+			ToolbarBuilder.EndSection();
 		}
 	};
 } // namespace OUU::Editor

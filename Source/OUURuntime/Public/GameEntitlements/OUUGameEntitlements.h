@@ -48,12 +48,16 @@ private:
 	bool IsEntitledToCollection(const FOUUGameEntitlementCollections_Ref& Collections) const;
 
 #if WITH_EDITOR
-	void OnSettingsChanged(FPropertyChangedChainEvent& _PropertyChangedEvent);
+	void OnSettingsChanged(FPropertyChangedChainEvent& PropertyChangedEvent);
+	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 	void RefreshActiveVersionAndEntitlements();
 
 	bool bHasInitializedActiveEntitlements = false;
+
+	UPROPERTY(EditAnywhere)
 	FOUUGameEntitlementVersion OverrideVersion;
+
 	FOUUGameEntitlementVersion ActiveVersion;
 	FOUUGameEntitlementModuleAndCollections_Value ActiveEntitlements;
 };

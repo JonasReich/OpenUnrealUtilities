@@ -11,7 +11,7 @@ namespace OUU::Runtime::GameEntitlements
 	FOUUGameEntitlementVersion GetOverrideEntitlement()
 	{
 		auto TagName = FOUUGameEntitlementTags::Version::Get().GetName() + TEXT(".")
-				+ CVar_OverrideEntitlementVersion.GetValueOnGameThread();
+			+ CVar_OverrideEntitlementVersion.GetValueOnGameThread();
 
 		const FGameplayTag RawTag = FGameplayTag::RequestGameplayTag(*TagName, false);
 		return FOUUGameEntitlementVersion::TryConvert(RawTag);
@@ -81,6 +81,11 @@ FOUUGameEntitlementVersion UOUUGameEntitlementsSubsystem::GetActiveVersion() con
 
 void UOUUGameEntitlementsSubsystem::SetOverrideVersion(const FOUUGameEntitlementVersion& Version)
 {
+#if WITH_EDITOR
+	FScopedTransaction Transaction(INVTEXT("Change Entitlement Override Version"));
+	Modify();
+#endif
+
 	OverrideVersion = Version;
 	if (bHasInitializedActiveEntitlements)
 	{
@@ -119,8 +124,14 @@ bool UOUUGameEntitlementsSubsystem::IsEntitledToCollection(const FOUUGameEntitle
 }
 
 #if WITH_EDITOR
-void UOUUGameEntitlementsSubsystem::OnSettingsChanged(FPropertyChangedChainEvent& _PropertyChangedEvent)
+void UOUUGameEntitlementsSubsystem::OnSettingsChanged(FPropertyChangedChainEvent& PropertyChangedEvent)
 {
+	RefreshActiveVersionAndEntitlements();
+}
+
+void UOUUGameEntitlementsSubsystem::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
 	RefreshActiveVersionAndEntitlements();
 }
 #endif
@@ -137,7 +148,7 @@ void UOUUGameEntitlementsSubsystem::RefreshActiveVersionAndEntitlements()
 		OUU::Runtime::GameEntitlements::UpdateOverrideEntitlementFromCVar();
 		CachedOverrideVersion = OverrideVersion;
 	}
-	
+
 	auto& Settings = UOUUGameEntitlementSettings::Get();
 #if WITH_EDITOR
 	auto& DefaultVersion =
