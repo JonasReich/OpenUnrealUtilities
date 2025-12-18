@@ -564,7 +564,7 @@ namespace OUU::Editor::CompileBlueprints
 		bool bIncludeProject,
 		bool bIncludeEngine)
 	{
-		return FConsoleCommandWithArgsDelegate::CreateLambda([=](const TArray<FString>&) {
+		return FConsoleCommandWithArgsDelegate::CreateLambda([ PresetName, bIncludeProject, bIncludeEngine ](const TArray<FString>&) {
 			FString ArgsLine =
 				FString::Printf(TEXT("-SimpleAssetList %s"), *GetIncludeFoldersArg(bIncludeProject, bIncludeEngine));
 

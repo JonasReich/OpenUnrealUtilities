@@ -104,15 +104,21 @@ public:
 
 	/** Version that takes a dynamic delegate (e.g. for UFunctions). */
 	FORCEINLINE FTaskHandle
-		AddTask(FTaskDynamicDelegate const& InDynDelegate, float InPeriod, bool bTickAsOftenAsPossible = true)
+		AddTask(FTaskDynamicDelegate InDynDelegate, float InPeriod, bool bTickAsOftenAsPossible = true)
 	{
-		return InternalAddTask(FTaskUnifiedDelegate(InDynDelegate), InPeriod, bTickAsOftenAsPossible);
+		return InternalAddTask(
+			FTaskUnifiedDelegate::CreateUFunction(InDynDelegate.GetUObject(), InDynDelegate.GetFunctionName()),
+			InPeriod,
+			bTickAsOftenAsPossible);
 	}
 
 	/** Version that takes a TFunction */
 	FORCEINLINE FTaskHandle AddTask(TFunction<void()>&& Callback, float InPeriod, bool bTickAsOftenAsPossible = true)
 	{
-		return InternalAddTask(FTaskUnifiedDelegate(MoveTemp(Callback)), InPeriod, bTickAsOftenAsPossible);
+		return InternalAddTask(
+			FTaskUnifiedDelegate::CreateLambda(MoveTemp(Callback)),
+			InPeriod,
+			bTickAsOftenAsPossible);
 	}
 
 	void RemoveTask(const FTaskHandle& Handle);

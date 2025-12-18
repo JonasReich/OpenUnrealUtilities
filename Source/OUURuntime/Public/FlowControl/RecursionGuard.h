@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2025 Jonas Reich & Contributors
+// Copyright (c) 2025 Jonas Reich & Contributors
 
 #pragma once
 
@@ -45,6 +45,6 @@ private:
 	}
 
 #define PRIVATE_ON_RECURSION_LIMIT_REACHED_IMPL(RecursionLimit, RecursionCounter, RecursionGuard)                      \
-	static uint16 RecursionCounter = 0;                                                                                \
+	static thread_local uint16 RecursionCounter = 0;                                                                   \
 	const FRecursionGuard RecursionGuard{RecursionCounter, RecursionLimit};                                            \
 	if (RecursionGuard.WasLimitReached())

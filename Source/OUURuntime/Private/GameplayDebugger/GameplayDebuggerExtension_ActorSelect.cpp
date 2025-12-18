@@ -71,7 +71,7 @@ void FGameplayDebuggerExtension_ActorSelect::SelectLocalPlayerPawn()
 {
 	if (auto* LocalController = UGameplayStatics::GetPlayerController(GetWorldFromReplicator(), 0))
 	{
-		auto* LocalPawn = LocalController->GetPawn();
+		auto LocalPawn = LocalController->GetPawn();
 		GetReplicator()->SetDebugActor(
 			LocalPawn ? ImplicitConv<AActor*>(LocalPawn) : ImplicitConv<AActor*>(LocalController));
 	}
@@ -82,8 +82,9 @@ void FGameplayDebuggerExtension_ActorSelect::SelectClosestNPC()
 {
 	if (auto* LocalController = UGameplayStatics::GetPlayerController(GetWorldFromReplicator(), 0))
 	{
-		auto* LocalPawn = LocalController->GetPawn();
-		const auto* ReferenceActor = LocalPawn ? ImplicitConv<AActor*>(LocalPawn) : ImplicitConv<AActor*>(LocalController);
+		auto LocalPawn = LocalController->GetPawn();
+		const auto ReferenceActor =
+			LocalPawn ? ImplicitConv<AActor*>(LocalPawn) : ImplicitConv<AActor*>(LocalController);
 		const FVector ReferenceLocation = ReferenceActor->GetActorLocation();
 		APawn* ClosestPawn = nullptr;
 		float ClosestDist = TNumericLimits<float>::Max();

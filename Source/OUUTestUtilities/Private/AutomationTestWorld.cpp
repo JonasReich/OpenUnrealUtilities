@@ -78,7 +78,7 @@ bool FOUUAutomationTestWorld::InitializeGame()
 
 	// Set game mode
 	const bool bIsGameModeSet = World->SetGameMode(URL);
-	CHECK_INIT_GAME_CONDITION(!bIsGameModeSet, "Failed to set game mode");
+	CHECK_INIT_GAME_CONDITION(!bIsGameModeSet, TEXT("Failed to set game mode"));
 	GameMode = World->GetAuthGameMode();
 
 	// Debug error string required for many of the initialization functions on UWorld
@@ -93,7 +93,7 @@ bool FOUUAutomationTestWorld::InitializeGame()
 	GameMode->PlayerStateClass = APlayerState::StaticClass();
 	LocalPlayer = World->GetGameInstance()->CreateLocalPlayer(0, OUT ErrorString, false);
 	CHECK_INIT_GAME_CONDITION(ErrorString.Len() > 0, ErrorString);
-	CHECK_INIT_GAME_CONDITION(LocalPlayer == nullptr, "Failed to spawn LocalPlayer: returned nullptr");
+	CHECK_INIT_GAME_CONDITION(LocalPlayer == nullptr, TEXT("Failed to spawn LocalPlayer: returned nullptr"));
 
 	// Begin play for all actors
 	BeginPlay();
@@ -103,7 +103,7 @@ bool FOUUAutomationTestWorld::InitializeGame()
 
 	PlayerController = World->SpawnPlayActor(LocalPlayer, ENetRole::ROLE_Authority, URL, NetIdRepl, OUT ErrorString);
 	CHECK_INIT_GAME_CONDITION(ErrorString.Len() > 0, ErrorString);
-	CHECK_INIT_GAME_CONDITION(PlayerController == nullptr, "Failed to spawn PlayerController: returned nullptr");
+	CHECK_INIT_GAME_CONDITION(PlayerController == nullptr, TEXT("Failed to spawn PlayerController: returned nullptr"));
 
 	return true;
 }

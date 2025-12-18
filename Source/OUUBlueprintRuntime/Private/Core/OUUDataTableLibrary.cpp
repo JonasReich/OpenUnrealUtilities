@@ -1,6 +1,7 @@
 // Copyright (c) 2023 Jonas Reich & Contributors
 
 #include "Core/OUUDataTableLibrary.h"
+#include "Blueprint/BlueprintExceptionInfo.h"
 
 #include "Misc/EngineVersionComparison.h"
 

@@ -53,8 +53,8 @@ public:
 	 * We can't just alias the types because then they can't be easily used in dependent types.
 	 * The next best thing is inheriting from them, so here we go :)
 	 */
-	using FTaskUnifiedDelegate = FTimerUnifiedDelegate;
-	using FTaskDelegate = FTimerDelegate;
+	using FTaskUnifiedDelegate = FSimpleDelegate;
+	using FTaskDelegate = FSimpleDelegate;
 	using FTaskDynamicDelegate = FTimerDynamicDelegate;
 	//-------------------------
 

@@ -1,8 +1,10 @@
-﻿// Copyright (c) 2025 Jonas Reich & Contributors
+// Copyright (c) 2025 Jonas Reich & Contributors
 
 #pragma once
 
 #include "CoreMinimal.h"
+
+#include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "OUUSteamUtils.generated.h"
 

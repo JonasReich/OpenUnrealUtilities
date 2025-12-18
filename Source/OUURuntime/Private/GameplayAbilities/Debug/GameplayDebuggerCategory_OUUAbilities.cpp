@@ -173,13 +173,13 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayEffect(FActiveGameplayE
 
 	FString StackString;
 	#if UE_VERSION_OLDER_THAN(5, 3, 0)
-	const int32 ActiveGE_StackCount = ActiveGE.Spec.StackCount;
+	const int32 ActiveGE_StackCount = ActiveGE.Spec.GetStackCount();
 	#else
 	const int32 ActiveGE_StackCount = ActiveGE.Spec.GetStackCount();
 	#endif
 	if (ActiveGE_StackCount > 1)
 	{
-		if (ActiveGE.Spec.Def->StackingType == EGameplayEffectStackingType::AggregateBySource)
+		if (ActiveGE.Spec.Def->GetStackingType() == EGameplayEffectStackingType::AggregateBySource)
 		{
 			StackString = FString::Printf(
 				TEXT("(Stacks: %d. From: %s) "),
@@ -311,7 +311,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DetermineAbilityStatusText(
 		OutStatusText = TEXT(" (InputBlocked)");
 		OutAbilityTextColor = FColor::Red;
 	}
-	else if (Ability->AbilityTags.HasAny(BlockedAbilityTags))
+	else if (Ability->GetAssetTags().HasAny(BlockedAbilityTags))
 	{
 		OutStatusText = TEXT(" (TagBlocked)");
 		OutAbilityTextColor = FColor::Red;
@@ -363,10 +363,10 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawAbility(
 	DetermineAbilityStatusText(BlockedAbilityTags, AbilitySpec, Ability, OUT StatusText, OUT AbilityTextColor);
 
 	const FString InputPressedStr = AbilitySpec.InputPressed ? TEXT("(InputPressed)") : TEXT("");
-	const FString ActivationModeStr = AbilitySpec.IsActive() ? UEnum::GetValueAsString(
+	const FString ActivationModeStr = (AbilitySpec.IsActive() && AbilitySpec.Ability) ? UEnum::GetValueAsString(
 										  TEXT("GameplayAbilities.EGameplayAbilityActivationMode"),
-										  AbilitySpec.ActivationInfo.ActivationMode)
-															 : TEXT("");
+										  AbilitySpec.Ability->GetCurrentActivationInfoRef().ActivationMode)
+																					  : TEXT("");
 
 	Canvas->SetDrawColor(AbilityTextColor);
 
@@ -435,12 +435,12 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayCue(
 
 	auto CueClass = CueData.LoadedGameplayCueClass;
 
-	if (Cast<UGameplayCueNotify_Static>(CueClass->ClassDefaultObject) != nullptr)
+	if (CueClass->GetDefaultObject<UGameplayCueNotify_Static>() != nullptr)
 	{
 		Canvas->SetDrawColor(FColorList::Grey);
 		DebugLine(FString::Printf(TEXT("%s -> non-instanced"), *CueTagString), 0.f, 0);
 	}
-	else if (Cast<AGameplayCueNotify_Actor>(CueClass->ClassDefaultObject) != nullptr)
+	else if (CueClass->GetDefaultObject<AGameplayCueNotify_Actor>() != nullptr)
 	{
 		Canvas->SetDrawColor(FColorList::White);
 
@@ -501,7 +501,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawAttribute(FGameplayAttribute& A
 	Params.SourceTags = &QuerySourceTags;
 	Params.TargetTags = &QueryTargetTags;
 	Params.IncludePredictiveMods = true;
-	
+
 	float BaseValue = AbilitySystem->GetNumericAttributeBase(Attribute);
 	float QualifiedValue = AbilitySystem->GetNumericAttribute(Attribute);
 
@@ -509,11 +509,8 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawAttribute(FGameplayAttribute& A
 	while (PaddedAttributeName.Len() < 30)
 		PaddedAttributeName += " ";
 
-	FString AttributeString = FString::Printf(
-		TEXT("%s %.2f (Base: %.2f)"),
-		*PaddedAttributeName,
-		QualifiedValue,
-		BaseValue);
+	FString AttributeString =
+		FString::Printf(TEXT("%s %.2f (Base: %.2f)"), *PaddedAttributeName, QualifiedValue, BaseValue);
 
 	Canvas->SetDrawColor(ColorSwitch ? FColor::White : FColor::Emerald);
 	DebugLine(AttributeString, 4.f, 0);
@@ -725,7 +722,7 @@ void FGameplayDebuggerCategory_OUUAbilities::NewColumn()
 		const UFont* LargeFont = GEngine->GetLargeFont();
 		Canvas->DrawText(
 			LargeFont,
-			"COLUMN OVERSPILL",
+			TEXT("COLUMN OVERSPILL"),
 			DebugInfo.XPos + 4.f,
 			DebugInfo.YPos - LargeFont->GetMaxCharHeight(),
 			1.f,

@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2024 Jonas Reich & Contributors
+// Copyright (c) 2024 Jonas Reich & Contributors
 
 #pragma once
 

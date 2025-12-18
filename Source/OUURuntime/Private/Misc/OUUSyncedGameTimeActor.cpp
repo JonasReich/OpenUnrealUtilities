@@ -30,7 +30,7 @@ AOUUSyncedGameTimeActor::AOUUSyncedGameTimeActor()
 {
 	bReplicates = true;
 	bAlwaysRelevant = true;
-	NetUpdateFrequency = 1.0f;
+	SetNetUpdateFrequency(1.0f);
 
 	PrimaryActorTick.bCanEverTick = true;
 

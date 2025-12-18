@@ -248,7 +248,7 @@ void UOUUMultiplayerTestController::ClientStartSessionSearch()
 	ClientSessionSearch = MakeShared<FOnlineSessionSearch>();
 	ClientSessionSearch->MaxSearchResults = 1;
 	ClientSessionSearch->bIsLanQuery = true;
-	ClientSessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
+	ClientSessionSearch->QuerySettings.Set(SEARCH_LOBBIES, true, EOnlineComparisonOp::Equals);
 
 	GetSessions()->AddOnFindSessionsCompleteDelegate_Handle(FOnFindSessionsCompleteDelegate::CreateUObject(
 		this,

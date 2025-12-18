@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2023 Jonas Reich & Contributors
+// Copyright (c) 2023 Jonas Reich & Contributors
 
 #pragma once
 
@@ -56,8 +56,6 @@ enum class EOUUBlueprintObjectFlags : uint8
 	NeedInitialization,
 	// During load, indicates object needs loading.
 	NeedLoad,
-	// Keep this object during garbage collection because it's still being used by the cooker
-	KeepForCooker,
 	// Object needs to be postloaded.
 	NeedPostLoad,
 	// During load, indicates that the object still needs to instance subobjects
@@ -96,11 +94,18 @@ enum class EOUUBlueprintObjectFlags : uint8
 	StrongRefOnFrame,
 	// Object should not be included for duplication unless it's being duplicated for a PIE session
 	NonPIEDuplicateTransient,
+	// Hidden version of the class default object that cannot and will never be mutated
+	ImmutableDefaultObject,
 	// This object was constructed during load and will be loaded shortly
 	WillBeLoaded,
 	// This object has an external package assigned and should look it up when
 	// getting the outermost package
 	HasExternalPackage,
+
+	// RF_MirroredGarbage is mirrored in EInternalObjectFlags::Garbage because checking the internal flags is much
+	// faster for the Garbage Collector while checking the object flags is much faster outside of it where the Object
+	// pointer is already available and most likely cached.
+	MirroredGarbage,
 
 	// Allocated from a ref-counted page shared with other UObjects
 	AllocatedInSharedPage,

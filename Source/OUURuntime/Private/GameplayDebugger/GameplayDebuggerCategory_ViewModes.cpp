@@ -1,6 +1,7 @@
 // Copyright (c) 2023 Jonas Reich & Contributors
 
 #include "GameplayDebugger/GameplayDebuggerCategory_ViewModes.h"
+
 #include "Engine.h"
 
 #if WITH_GAMEPLAY_DEBUGGER
@@ -25,6 +26,7 @@ namespace OUU::Runtime::Private
 		case VMI_Unlit: return TEXT("Unlit");
 		case VMI_Lit: return TEXT("Lit");
 		case VMI_Lit_DetailLighting: return TEXT("Lit_DetailLighting");
+		case VMI_Lit_Wireframe: return TEXT("Lit_Wireframe");
 		case VMI_LightingOnly: return TEXT("LightingOnly");
 		case VMI_LightComplexity: return TEXT("LightComplexity");
 		case VMI_ShaderComplexity: return TEXT("ShaderComplexity");
@@ -34,7 +36,6 @@ namespace OUU::Runtime::Private
 		case VMI_MeshUVDensityAccuracy: return TEXT("MeshUVDensityAccuracy");
 		case VMI_MaterialTextureScaleAccuracy: return TEXT("MaterialTextureScaleAccuracy");
 		case VMI_RequiredTextureResolution: return TEXT("RequiredTextureResolution");
-		case VMI_VirtualTexturePendingMips: return TEXT("VirtualTexturePendingMips");
 		case VMI_StationaryLightOverlap: return TEXT("StationaryLightOverlap");
 		case VMI_LightmapDensity: return TEXT("LightmapDensity");
 		case VMI_LitLightmapDensity: return TEXT("LitLightmapDensity");
@@ -42,19 +43,18 @@ namespace OUU::Runtime::Private
 		case VMI_VisualizeBuffer: return TEXT("VisualizeBuffer");
 		case VMI_VisualizeNanite: return TEXT("VisualizeNanite");
 		case VMI_VisualizeLumen: return TEXT("VisualizeLumen");
+		case VMI_VisualizeSubstrate: return TEXT("VisualizeSubstrate");
+		case VMI_VisualizeGroom: return TEXT("VisualizeGroom");
 		case VMI_VisualizeVirtualShadowMap: return TEXT("VisualizeVirtualShadowMap");
+		case VMI_VisualizeVirtualTexture: return TEXT("VisualizeVirtualTexture");
 		case VMI_RayTracingDebug: return TEXT("RayTracingDebug");
 		case VMI_PathTracing: return TEXT("PathTracing");
 		case VMI_CollisionPawn: return TEXT("CollisionPawn");
 		case VMI_CollisionVisibility: return TEXT("CollisionVis");
 		case VMI_LODColoration: return TEXT("LODColoration");
 		case VMI_HLODColoration: return TEXT("HLODColoration");
-		case VMI_GroupLODColoration: return TEXT("GroupLODColoration");
 		case VMI_VisualizeGPUSkinCache: return TEXT("VisualizeGPUSkinCache");
-		case VMI_VisualizeSubstrate: return TEXT("VisualizeSubstrate");
-		case VMI_VisualizeGroom: return TEXT("VisualizeGroom");
-		case VMI_Max: return TEXT("Max");
-		default: ;
+		case VMI_LWCComplexity: return TEXT("LWCComplexity");
 		}
 		return TEXT("");
 	}
@@ -310,8 +310,7 @@ void FGameplayDebuggerCategory_ViewModes::GetNextBuffer(const TArray<FString>& O
 				Max += Incr;
 			}
 
-			auto Wrap = [&](int32 Index)
-			{
+			auto Wrap = [&](int32 Index) {
 				if (Index < Min)
 				{
 					Index = Max;
