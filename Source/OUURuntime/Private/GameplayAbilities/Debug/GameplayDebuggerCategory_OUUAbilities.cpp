@@ -179,8 +179,16 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayEffect(FActiveGameplayE
 	#endif
 	if (ActiveGE_StackCount > 1)
 	{
+	#if UE_VERSION_OLDER_THAN(5, 8, 0)
+		// UGameplayEffect::GetStackingType was newly introduced but not DLL exported in UE5.7
+		PRAGMA_DISABLE_DEPRECATION_WARNINGS
+		if (ActiveGE.Spec.Def->StackingType == EGameplayEffectStackingType::AggregateBySource)
+		{
+			PRAGMA_ENABLE_DEPRECATION_WARNINGS
+	#else
 		if (ActiveGE.Spec.Def->GetStackingType() == EGameplayEffectStackingType::AggregateBySource)
 		{
+	#endif
 			StackString = FString::Printf(
 				TEXT("(Stacks: %d. From: %s) "),
 				ActiveGE_StackCount,
