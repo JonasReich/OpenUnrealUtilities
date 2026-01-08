@@ -26,7 +26,7 @@ namespace OUU::Developer::ActorMapWindow::Private
 			}
 		SLATE_END_ARGS()
 
-		virtual ~SActorMap() override;
+		~SActorMap() override;
 
 		// - SWidget
 		void Construct(const FArguments& InArgs);

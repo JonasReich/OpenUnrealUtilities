@@ -91,7 +91,7 @@ void FGameplayDebuggerCategory_Animation::DrawData(
 		return;
 
 	DebugMeshComponentIndex = DebugMeshComponentIndex % NumSkeletalMeshComponents;
-	auto* DebugMeshComponent = SkeletalMeshComponents[DebugMeshComponentIndex];
+	const auto* DebugMeshComponent = SkeletalMeshComponents[DebugMeshComponentIndex];
 	CanvasContext.Printf(
 		TEXT("Target Mesh [%i / %i]: %s (%s)"),
 		DebugMeshComponentIndex,
@@ -223,7 +223,7 @@ void FGameplayDebuggerCategory_Animation::DisplayDebug(
 
 	AnimInstance->AddGameplayDebuggerInfo(CanvasContext);
 
-	FDebugDisplayInfo DisplayInfo{TArray<FName>{}, ToggledCategories};
+	const FDebugDisplayInfo DisplayInfo{TArray<FName>{}, ToggledCategories};
 	float YL = CanvasContext.CursorY;
 	float YPos = CanvasContext.CursorY;
 

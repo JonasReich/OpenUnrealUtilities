@@ -63,6 +63,7 @@ public:
 	 * Export the key, string, and meta-data information in this string table to a CSV file (does not export the
 	 * namespace).
 	 * Because UStringTable is not blueprint exposed, we need to pass it as UObject.
+	 * @param StringTable Table to export
 	 * @param ExportPath Disk file path of the target csv file, including extension
 	 * @returns if the export succeeded
 	 */
