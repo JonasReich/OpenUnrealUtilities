@@ -41,38 +41,49 @@ The **bold** features are the big ones that I most reccommend you to try the plu
 - Camera
 	- ``UOUUSceneProjectionLibrary``: (De)projection for scene capture and camera components
 	- ``UTextureRenderTargetLibrary``: Query and modify render targets
+- Credits
+	- Parse credits list from markdown and populate an animated scrolling widget
 - FlowControl
 	- Blueprint exposed lock and request types
+- **GameEntitlements**
+	- Tag-based tracking of game components and access to them in different configurations of the game. E.g. used in Titan Quest II for granting beta/WIP access to features.
 - GameplayAbilities
 	- Gameplay Debugger incl. gameplay event history
 - Gameplay Debugger
 	- Player/NPC Actor selection extension
 	- Category / extension registration helpers
-- Localization: FText conversion functions, esp. for lists
-- **Logging**: One-line message log macros and Blueprint extension
+- Localization:
+	- FText conversion functions, esp. for lists
+	- Load translations from CSV at runtime
+- **Logging**
+	- One-line message log macros and Blueprint extension
 - Math
 	- ``USpiralIdUtilities`` Conversion to/from 2D grid coordinates to 1D index
 	- Small util functions
 - Misc
 	- Canvas graph plotting
 	- Easy to use regex wrappers
-- **SemVer**: Semantic Version parser and runtime
-- **Sequential Frame Scheduler**: Distribute frequent game tasks that only need to be ran every other tick over multiple frames
+- **SemVer**
+	- Semantic Version parser and runtime
+- **Sequential Frame Scheduler**
+	- Distribute frequent game tasks that only need to be ran every other tick over multiple frames
 - **Templates**
 	- Container/iterator templates to cast during iteration, reverse iterate, turn an array into a circular buffer, etc
 	- String conversion for many of the built-in types like arrays, maps, shared ptr, etc - mostly intended for debugging
+	- Circular array and aggregator
 	- Macros/tempaltes for easier blueprintable interface usage
 	- Read/write locks
-	- and more...
-- Traits: Additional type traits for template implementations (e.g. conditional types, iterator traits, etc)
-- UMG: Iteration helpers for UMG widget chains
+	- SubclassWithInterfaces to combine multiple class requirements for one object (e.g. ActorComponent implementing interface X)
+- Traits
+	- Additional type traits for template implementations (e.g. conditional types, iterator traits, etc)
+- UMG
+	- Iteration helpers for UMG widget chains
 
 ### Editor/Development Features
 
 - UI for "MapIniSection" cook settings in project settings window
 - Topdown "Actor Map" debug window
 - Garbage collection dump/debug console commands
-- Gameplay tag validation (like asset validation, but gameplay tags)
 - and more...
 
 ## Versions
@@ -90,15 +101,16 @@ Active development happens on branches named by supported engine version (patter
 Multiple version branches may receive updates at the same time, e.g. even after the UE 5.0 release, I keep adding features to ue4.27 that are infrequently cross-merged to the ue5.0. This is because I'm still actively using the plugin on projects that do not always upgrade to the latest UE version.
 
 > **active development:**
-> **[ue5.2](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue5.2)**
-> **[ue5.3](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue5.3)**
+> **[ue5.7](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue5.7)**
 >
 > old versions (not supported anymore):
 > [ue4.25](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue4.25),
 > [ue4.26](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue4.26),
 > [ue4.27](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue4.27),
 > [ue5.0](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue5.0),
-> [ue5.1](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue5.1)
+> [ue5.1](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue5.1),
+> [ue5.2](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue5.2),
+> [ue5.3](https://github.com/JonasReich/OpenUnrealUtilities/tree/ue5.3)
 
 I'm generally avoiding to merge back from higher engine version branches to lower engine version branches to guarantee asset compatibility.
 
