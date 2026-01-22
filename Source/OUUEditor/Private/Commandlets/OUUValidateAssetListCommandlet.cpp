@@ -154,6 +154,9 @@ void UOUUValidateAssetListCommandlet::ValidateSingleAsset(
 	MapCheckListing->ClearMessages();
 	TArray<FString> AssetErrorStrings;
 
+	// Load the asset but make sure we don't accidentally load a whole World partition map with all actors.
+	auto* AssetPtr = Asset.GetAsset({ULevel::DontLoadExternalObjectsTag});
+
 	if (const auto* AssetClass = Asset.GetClass())
 	{
 		if (AssetClass->IsChildOf<UWorld>())
@@ -166,7 +169,7 @@ void UOUUValidateAssetListCommandlet::ValidateSingleAsset(
 
 		if (AssetClass->IsChildOf<AActor>())
 		{
-			Cast<AActor>(Asset.GetAsset())->CheckForErrors();
+			Cast<AActor>(AssetPtr)->CheckForErrors();
 		}
 
 		// Compile blueprints as part of their validation
@@ -177,7 +180,7 @@ void UOUUValidateAssetListCommandlet::ValidateSingleAsset(
 
 			CompilerLog.BeginEvent(TEXT("Compile"));
 			FKismetEditorUtilities::CompileBlueprint(
-				Cast<UBlueprint>(Asset.GetAsset()),
+				Cast<UBlueprint>(AssetPtr),
 				EBlueprintCompileOptions::SkipGarbageCollection | EBlueprintCompileOptions::SkipSave,
 				&CompilerLog);
 			CompilerLog.EndEvent();
@@ -197,7 +200,7 @@ void UOUUValidateAssetListCommandlet::ValidateSingleAsset(
 		TArray<FText> PackageErrors, PackageWarnings;
 		const auto AssetResult =
 			EditorValidationSubsystem
-				.IsAssetValid(Asset, OUT PackageErrors, OUT PackageWarnings, EDataValidationUsecase::Commandlet);
+				.IsAssetValid(AssetPtr, OUT PackageErrors, OUT PackageWarnings, EDataValidationUsecase::Commandlet);
 
 		if (AssetResult == EDataValidationResult::Invalid)
 		{
