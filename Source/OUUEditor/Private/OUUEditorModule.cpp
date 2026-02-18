@@ -8,7 +8,7 @@
 #include "EditorUtilityWidgetBlueprint.h"
 #include "Engine/AssetManager.h"
 #include "GameEntitlements/OUUGameEntitlementsSettings.h"
-#include "Gameentitlements/OUUGameEntitlements.h"
+#include "GameEntitlements/OUUGameEntitlements.h"
 #include "GameplayTagsEditorModule.h"
 #include "GameplayTagsModule.h"
 #include "ISinglePropertyView.h"
