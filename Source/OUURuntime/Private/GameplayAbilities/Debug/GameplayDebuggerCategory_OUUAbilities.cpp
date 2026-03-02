@@ -431,7 +431,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayCue(
 	}
 	auto CueData = CueSet->GameplayCueData[idx];
 
-	if (CueData.LoadedGameplayCueClass == nullptr)
+	if (IsValid(CueData.LoadedGameplayCueClass) == false)
 	{
 		if (bPrintNotLoadedCues)
 		{
