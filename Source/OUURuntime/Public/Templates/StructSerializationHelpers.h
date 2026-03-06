@@ -24,7 +24,7 @@ namespace OUU::Runtime
 	}
 
 	template <typename StructType>
-	auto DefaultStructSerialization(StructType& StructRef, FStructuredArchive::FSlot& Slot)
+	auto DefaultStructSerialization(StructType& StructRef, FStructuredArchive::FSlot Slot)
 	{
 		if (StructRef.StaticStruct()->UseBinarySerialization(Slot.GetUnderlyingArchive()))
 		{
