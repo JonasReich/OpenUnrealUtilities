@@ -6,37 +6,58 @@
 
 namespace OUU::Runtime
 {
-	template <typename StructType>
-	auto DefaultStructSerialization(StructType& StructRef, FArchive& Ar)
+	inline void DefaultStructSerialization(
+		UScriptStruct& Struct,
+		void* StructData,
+		FArchive& Ar,
+		const void* Defaults = nullptr)
 	{
-		if (StructRef.StaticStruct()->UseBinarySerialization(Ar))
+		if (Struct.UseBinarySerialization(Ar))
 		{
-			StructRef.StaticStruct()->SerializeBin(Ar, &StructRef);
+			Struct.SerializeBin(Ar, StructData);
 		}
 		else
 		{
-			StructRef.StaticStruct()->SerializeTaggedProperties(
+			Struct.SerializeTaggedProperties(
 				Ar,
-				reinterpret_cast<uint8*>(&StructRef),
-				StructRef.StaticStruct(),
-				nullptr);
+				reinterpret_cast<uint8*>(StructData),
+				&Struct,
+				reinterpret_cast<const uint8*>(Defaults));
+		}
+	}
+
+	inline void DefaultStructSerialization(
+		UScriptStruct& Struct,
+		void* StructData,
+		FStructuredArchive::FSlot Slot,
+		const void* Defaults = nullptr)
+	{
+		if (Struct.UseBinarySerialization(Slot.GetUnderlyingArchive()))
+		{
+			Struct.SerializeBin(Slot, StructData);
+		}
+		else
+		{
+			Struct.SerializeTaggedProperties(
+				Slot,
+				reinterpret_cast<uint8*>(StructData),
+				&Struct,
+				reinterpret_cast<const uint8*>(Defaults));
 		}
 	}
 
 	template <typename StructType>
-	auto DefaultStructSerialization(StructType& StructRef, FStructuredArchive::FSlot Slot)
+	auto DefaultStructSerialization(StructType& StructRef, FArchive& Ar, const void* Defaults = nullptr)
 	{
-		if (StructRef.StaticStruct()->UseBinarySerialization(Slot.GetUnderlyingArchive()))
-		{
-			StructRef.StaticStruct()->SerializeBin(Slot, &StructRef);
-		}
-		else
-		{
-			StructRef.StaticStruct()->SerializeTaggedProperties(
-				Slot,
-				reinterpret_cast<uint8*>(&StructRef),
-				StructRef.StaticStruct(),
-				nullptr);
-		}
+		DefaultStructSerialization(*StructType::StaticStruct(), &StructRef, Ar, Defaults);
+	}
+
+	template <typename StructType>
+	auto DefaultStructSerialization(
+		StructType& StructRef,
+		FStructuredArchive::FSlot Slot,
+		const void* Defaults = nullptr)
+	{
+		DefaultStructSerialization(*StructType::StaticStruct(), &StructRef, Slot, Defaults);
 	}
 } // namespace OUU::Runtime
