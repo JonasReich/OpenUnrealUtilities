@@ -12,10 +12,7 @@ namespace OUU::Runtime::Private
 	{
 		CanvasContext
 			.Printf(TEXT("{yellow}Key Bindings: %s"), *FString(InputNames.Num() > 0 ? TEXT("") : TEXT("None")));
-		for (int32 i = 0; i < InputNames.Num(); i++)
-		{
-			PrintKeyBind(CanvasContext, i);
-		}
+		CanvasContext.Print(GetKeyBindsString_SingleLine());
 		CanvasContext.MoveToNewLine();
 	}
 
