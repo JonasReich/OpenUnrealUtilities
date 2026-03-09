@@ -443,36 +443,15 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayCue(
 
 	auto CueClass = CueData.LoadedGameplayCueClass;
 
-	if (CueClass->GetDefaultObject<UGameplayCueNotify_Static>() != nullptr)
+	if (CueClass->IsChildOf<UGameplayCueNotify_Static>())
 	{
 		Canvas->SetDrawColor(FColorList::Grey);
 		DebugLine(FString::Printf(TEXT("%s -> non-instanced"), *CueTagString), 0.f, 0);
 	}
-	else if (CueClass->GetDefaultObject<AGameplayCueNotify_Actor>() != nullptr)
+	else if (CueClass->IsChildOf<AGameplayCueNotify_Actor>())
 	{
 		Canvas->SetDrawColor(FColorList::White);
-
 		DebugLine(FString::Printf(TEXT("%s -> actor"), *CueTagString), 0.f, 0);
-	#if UE_VERSION_OLDER_THAN(5, 3, 0)
-		AActor* LocalAvatarActor = AbilitySystem->GetAvatarActor_Direct();
-		AActor* LocalOwnerActor = AbilitySystem->GetOwnerActor();
-		for (auto CueEntry : CueManager->NotifyMapActor)
-		{
-			FGCNotifyActorKey Key = CueEntry.Key;
-			if (Key.CueClass != CueClass)
-				continue;
-
-			AGameplayCueNotify_Actor* CueActor = CueEntry.Value.Get();
-			bool bIsValidForThisACS =
-				(Key.TargetActor == LocalAvatarActor || Key.TargetActor == LocalOwnerActor) && IsValid(CueActor);
-
-			Canvas->SetDrawColor(bIsValidForThisACS ? FColorList::Green : FColorList::Grey);
-
-			DebugLine(OUU::Runtime::GameplayDebuggerUtils::CleanupName(CueClass->GetName()), 7.f, 0);
-		}
-	#else
-		DebugLine(TEXT("no NotifyMapActor since UE 5.3.0"), 7.f, 0);
-	#endif
 	}
 	else
 	{
