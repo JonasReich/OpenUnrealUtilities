@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 
-#include "ActorMapWindow/OUUActorMapWindow.h"
+#include "ActorMapWindow/OUUActorMapWindow_TabSpawner.h"
 #include "Modules/ModuleManager.h"
 
 class FOUUDeveloperModule : public IModuleInterface
