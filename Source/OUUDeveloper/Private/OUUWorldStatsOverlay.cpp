@@ -110,7 +110,17 @@ namespace OUU::Developer
 		constexpr float HeightPerGraph = 350.f;
 
 		const float RemainingWidth = (CanvasWidth - GraphGridLeftX - OuterPaddingX);
+		if (RemainingWidth <= 0.f)
+		{
+			return;
+		}
+
 		const int32 NumGraphsPerRow = FMath::Floor(RemainingWidth / WidthPerGraph);
+
+		if (NumGraphsPerRow <= 0)
+		{
+			return;
+		}
 
 		for (int32 StatsIndex = 0; StatsIndex < GraphStats.Num(); ++StatsIndex)
 		{

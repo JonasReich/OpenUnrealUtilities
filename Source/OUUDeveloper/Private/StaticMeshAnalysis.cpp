@@ -9,11 +9,11 @@
 #include "Engine/LevelStreaming.h"
 #include "Engine/SkeletalMesh.h"
 #include "Engine/StaticMesh.h"
-#include "GameFramework/HUD.h"
 #include "LogOpenUnrealUtilities.h"
 #include "Materials/MaterialInterface.h"
 #include "Misc/CanvasGraphPlottingUtils.h"
 #include "OUUWorldStatsOverlay.h"
+#include "PhysicsEngine/BodySetup.h"
 #include "Templates/CastObjectRange.h"
 #include "Templates/RingAggregator.h"
 #include "Templates/StringUtils.h"
@@ -23,10 +23,10 @@
 constexpr int32 NumFramesForBuffer = 100;
 constexpr float UpdateInterval = 0.1f;
 
-#define MATERIAL_ANALYSIS_BASE_CVAR "ouu.Debug.MaterialUsageAnalysis"
+#define STATIC_MESH_ANALYSIS_BASE_CVAR "ouu.Debug.StaticMeshAnalysis"
 
 #define DECLARE_CVAR(Type, CVar, Command, DefaultValue, HelpText)                                                      \
-	TAutoConsoleVariable<Type> CVar{TEXT(MATERIAL_ANALYSIS_BASE_CVAR Command), DefaultValue, TEXT(HelpText)};          \
+	TAutoConsoleVariable<Type> CVar{TEXT(STATIC_MESH_ANALYSIS_BASE_CVAR Command), DefaultValue, TEXT(HelpText)};       \
 	FString CVar##_Name = TEXT(Command);
 
 DECLARE_CVAR(
@@ -45,6 +45,13 @@ DECLARE_CVAR(
 
 DECLARE_CVAR(
 	bool,
+	CVarExcludeEditorOnly,
+	".ExcludeEditorOnly",
+	true,
+	"If true, exclude any meshes that are on editor only actors or components");
+
+DECLARE_CVAR(
+	bool,
 	CVarAllowMovableInstances,
 	".AllowMovableInstances",
 	false,
@@ -56,13 +63,14 @@ DECLARE_CVAR(
 	CVarExcludeVirtualTextureOnlyMeshes,
 	".ExcludeVirtualTextureOnlyMeshes",
 	true,
-	"Exclude meshes that are configured to only render into the virtual texture");
+	"Exclude meshes that are configured to only render into the virtual texture. This does not influence the collision "
+	"analysis");
 
 DECLARE_CVAR(bool, CVarUseLogarithmicYAxis, ".LogYAxis", false, "Draw the on-screen graphs with logarithmic Y axis");
 
 #undef DECLARE_CVAR
 
-using MeshMaterialCombinationType = TTuple<UObject*, FString>;
+using MeshCollisionMaterialCombinationType = TTuple<UObject*, ECollisionEnabled::Type, FString>;
 
 struct FMeshStats
 {
@@ -77,12 +85,11 @@ struct FMeshStats
 	int32 NumSkinnedMeshComponents = 0;
 };
 
-struct FMaterialAnalysisResults
+struct FStaticMeshAnalysisResults
 {
-	TMap<MeshMaterialCombinationType, FMeshStats> MeshStatsByCombo;
+	TMap<MeshCollisionMaterialCombinationType, FMeshStats> MeshStatsByCombo;
 	int32 NumPrimitivesWithoutMesh = 0;
-	int32 NumUnrecognizedPrimitivesWithMesh = 0;
-	int32 NumIgnoredPrimitivesNotRendered = 0;
+	int32 NumIgnoredPrimitives = 0;
 	TMap<UClass*, int32> UnsupportedPrimCounts;
 
 	FMeshStats MeshStatsSum;
@@ -95,6 +102,20 @@ struct FMaterialAnalysisResults
 	int32 DrawCalls_Best = 0;
 
 	int32 NumUniqueMaterials = 0;
+
+	int32 TotalShapeCount = 0;
+	int32 TotalExpensiveShapeCount = 0;
+	int32 NumStaticMeshComponentsWithPhysics = 0;
+	int32 MaxShapeCount = 0;
+	int32 MaxExpensiveShapeCount = 0;
+	FString MaxExpensiveShapeOwner;
+	TArray<FString> CustomCollisionMeshPaths;
+	TMap<FName, int32> CollisionProfileCounts;
+	int32 TotalNumPhysicsEnabled_Query = 0;
+	int32 TotalNumPhysicsEnabled_Physics = 0;
+	int32 TotalNumPhysicsEnabled_Probe = 0;
+
+	int32 NumShapes_Small = 0, NumShapes_Medium = 0, NumShapes_Large = 0;
 };
 
 UObject* GetMeshFromPrimitiveComponent(const UPrimitiveComponent* PrimitiveComponent)
@@ -110,16 +131,27 @@ UObject* GetMeshFromPrimitiveComponent(const UPrimitiveComponent* PrimitiveCompo
 	return nullptr;
 }
 
-FMaterialAnalysisResults AnalyzeMaterialUsage(UWorld* TargetWorld)
+FStaticMeshAnalysisResults AnalyzeMaterialUsage(UWorld* TargetWorld)
 {
 	const bool bOnlyRecentlyRendered = CVarOnlyRecentlyRendered.GetValueOnAnyThread();
 	const bool bExcludeVTOnlyMeshes = CVarExcludeVirtualTextureOnlyMeshes.GetValueOnAnyThread();
+	const bool bExcludeEditorOnlyObjects = CVarExcludeEditorOnly.GetValueOnAnyThread();
 
-	FMaterialAnalysisResults Results;
+	FStaticMeshAnalysisResults Results;
 	TSet<UMaterialInterface*> UniqueMaterials;
 	for (const auto* Actor : TActorRange<AActor>(TargetWorld))
 	{
+		if (bExcludeEditorOnlyObjects && Actor->IsEditorOnly())
+		{
+			continue;
+		}
+
 		Actor->ForEachComponent<UPrimitiveComponent>(false, [&](const UPrimitiveComponent* PrimitiveComponent) {
+			if (bExcludeEditorOnlyObjects && PrimitiveComponent->IsEditorOnly())
+			{
+				return;
+			}
+
 			auto* Mesh = GetMeshFromPrimitiveComponent(PrimitiveComponent);
 			if (!Mesh)
 			{
@@ -127,28 +159,130 @@ FMaterialAnalysisResults AnalyzeMaterialUsage(UWorld* TargetWorld)
 				Results.UnsupportedPrimCounts.FindOrAdd(PrimitiveComponent->GetClass(), 0) += 1;
 				return;
 			}
+
 			// Exclude b/c it wasn't recently rendered?
 			if (bOnlyRecentlyRendered
 				&& (!PrimitiveComponent->WasRecentlyRendered() || !PrimitiveComponent->IsVisible()
 					|| PrimitiveComponent->bHiddenInGame))
 			{
-				Results.NumIgnoredPrimitivesNotRendered += 1;
+				Results.NumIgnoredPrimitives += 1;
 				return;
 			}
+
+			if (PrimitiveComponent->IsCollisionEnabled())
+			{
+				bool bQuery, bPhysics, bProbe;
+				CollisionEnabledToFlags(PrimitiveComponent->GetCollisionEnabled(), bQuery, bPhysics, bProbe);
+				if (bQuery)
+				{
+					++Results.TotalNumPhysicsEnabled_Query;
+				}
+				if (bPhysics)
+				{
+					++Results.TotalNumPhysicsEnabled_Physics;
+				}
+				if (bProbe)
+				{
+					++Results.TotalNumPhysicsEnabled_Probe;
+				}
+
+				if (PrimitiveComponent->GetCollisionProfileName() == TEXT("Custom"))
+				{
+					if (Results.CustomCollisionMeshPaths.Num() < 10)
+					{
+						Results.CustomCollisionMeshPaths.Add(FString::Printf(
+							TEXT("%s on %s"),
+							*Mesh->GetPathName(),
+							*PrimitiveComponent->GetPathName()));
+					}
+				}
+
+				Results.CollisionProfileCounts.FindOrAdd(PrimitiveComponent->GetCollisionProfileName(), 0) += 1;
+
+				// always get the body instance / physics stats
+				if (UStaticMesh* StaticMesh = Cast<UStaticMesh>(Mesh))
+				{
+					if (auto* BodySetup = StaticMesh->GetBodySetup())
+					{
+						static const TSet<EAggCollisionShape::Type> AllShapeTypes{
+							// "cheap" collision
+							EAggCollisionShape::Sphere,
+							EAggCollisionShape::Box,
+							EAggCollisionShape::Sphyl,
+							EAggCollisionShape::TaperedCapsule,
+
+							// "expensive" collision
+							EAggCollisionShape::Convex,
+							EAggCollisionShape::LevelSet,
+
+							// types not fully supported yet in 5.7
+							// EAggCollisionShape::SkinnedLevelSet
+							// EAggCollisionShape::MLLevelSet
+							// EAggCollisionShape::SkinnedTriangleMesh
+						};
+						static const TSet<EAggCollisionShape::Type> ExpensiveShapeTypes{
+							EAggCollisionShape::Convex,
+							EAggCollisionShape::LevelSet};
+
+						int32 TotalShapeCount = 0;
+						int32 ExpensiveShapeCount = 0;
+						int32 TotalExpensiveShapeCount = 0;
+
+						for (auto& Element : AllShapeTypes)
+						{
+							const int32 Count = BodySetup->AggGeom.GetElementCount(Element);
+							TotalShapeCount += Count;
+
+							if (ExpensiveShapeTypes.Contains(Element))
+							{
+								ExpensiveShapeCount += Count;
+							}
+						}
+
+						auto AABB = BodySetup->AggGeom.CalcAABB(FTransform{});
+						const float Size = AABB.GetSize().GetAbsMax();
+						if (Size < 100.f)
+						{
+							Results.NumShapes_Small += 1;
+						}
+						else if (Size < 500.f)
+						{
+							Results.NumShapes_Medium += 1;
+						}
+						else
+						{
+							Results.NumShapes_Large += 1;
+						}
+
+						++Results.NumStaticMeshComponentsWithPhysics;
+						Results.TotalShapeCount += TotalShapeCount;
+						Results.TotalExpensiveShapeCount += TotalExpensiveShapeCount;
+						Results.MaxShapeCount = FMath::Max(Results.MaxShapeCount, TotalShapeCount);
+						if (ExpensiveShapeCount > Results.MaxExpensiveShapeCount)
+						{
+							Results.MaxExpensiveShapeCount = ExpensiveShapeCount;
+							Results.MaxExpensiveShapeOwner = PrimitiveComponent->GetPathName();
+						}
+					}
+				}
+			}
+
 			// Exclude b/c of Virtual Texture?
 			if (bExcludeVTOnlyMeshes
 				&& PrimitiveComponent->GetVirtualTextureRenderPassType() != ERuntimeVirtualTextureMainPassType::Always
 				&& PrimitiveComponent->GetRuntimeVirtualTextures().Num() > 0)
 			{
-				Results.NumIgnoredPrimitivesNotRendered += 1;
+				Results.NumIgnoredPrimitives += 1;
 				return;
 			}
 
 			TArray<UMaterialInterface*> Materials;
 			constexpr bool bGetDebugMaterials = false;
 			PrimitiveComponent->GetUsedMaterials(OUT Materials, bGetDebugMaterials);
-			auto& Stats =
-				Results.MeshStatsByCombo.FindOrAdd(MeshMaterialCombinationType{Mesh, ArrayToString(Materials)});
+			auto& Stats = Results.MeshStatsByCombo.FindOrAdd(MeshCollisionMaterialCombinationType{
+				Mesh,
+				PrimitiveComponent->GetCollisionEnabled(),
+				ArrayToString(Materials)});
 			if (Stats.MaterialObjects.Num() == 0)
 			{
 				// Move materials into stats. Only access the material member after this!
@@ -187,11 +321,6 @@ FMaterialAnalysisResults AnalyzeMaterialUsage(UWorld* TargetWorld)
 			else if (PrimitiveComponent->IsA<USkinnedMeshComponent>())
 			{
 				Stats.NumSkinnedMeshComponents += 1;
-			}
-			else
-			{
-				Results.NumUnrecognizedPrimitivesWithMesh++;
-				Results.UnsupportedPrimCounts.FindOrAdd(PrimitiveComponent->GetClass(), 0) += 1;
 			}
 		});
 	}
@@ -245,18 +374,19 @@ void DumpMaterialAnalysis(UWorld* TargetWorld)
 #define UE_ANALYSIS_LOG_CVAR(CVar)	 UE_ANALYSIS_LOG("\t%s: %s", *CVar##_Name, *LexToString(CVar.GetValueOnAnyThread()));
 
 	UE_ANALYSIS_LOG("---------------------------------------------------------------");
-	UE_ANALYSIS_LOG("Material usage analysis completed. Summary:");
+	UE_ANALYSIS_LOG("Static mesh analysis completed. Summary:");
 	UE_ANALYSIS_LOG("---------------------------------------------------------------");
 	UE_ANALYSIS_LOG("Settings:");
 	UE_ANALYSIS_LOG_CVAR(CVarMinInstances);
 	UE_ANALYSIS_LOG_CVAR(CVarOnlyRecentlyRendered);
+	UE_ANALYSIS_LOG_CVAR(CVarExcludeEditorOnly);
 	UE_ANALYSIS_LOG_CVAR(CVarAllowMovableInstances);
 	UE_ANALYSIS_LOG_CVAR(CVarExcludeVirtualTextureOnlyMeshes);
 	UE_ANALYSIS_LOG("---------------------------------------------------------------");
 	UE_ANALYSIS_LOG("World: %s", *TargetWorld->GetName());
 	UE_ANALYSIS_LOG("Loaded streaming levels: %s", *FString::Join(LoadedLevelsStrings, TEXT(", ")));
 	UE_ANALYSIS_LOG("---------------------------------------------------------------");
-	UE_ANALYSIS_LOG("Unique materials/mesh combinations: %i", Results.MeshStatsByCombo.Num());
+	UE_ANALYSIS_LOG("Unique mesh/collision/material combinations: %i", Results.MeshStatsByCombo.Num());
 
 	UE_ANALYSIS_LOG("---------------------------------------------------------------");
 	UE_ANALYSIS_LOG("SM components: %i", Results.MeshStatsSum.NumStaticMeshComponentsNow);
@@ -272,11 +402,44 @@ void DumpMaterialAnalysis(UWorld* TargetWorld)
 		Results.PotentialComponentSave_ByInstancing,
 		Results.PotentialComponentSave_ByInstancing_Percentage);
 	UE_ANALYSIS_LOG("---------------------------------------------------------------");
-	UE_ANALYSIS_LOG("Ignored prims (not rendered / VT only): %i", Results.NumIgnoredPrimitivesNotRendered);
+	UE_ANALYSIS_LOG("Ignored prims (editor only / not rendered / VT only): %i", Results.NumIgnoredPrimitives);
 	UE_ANALYSIS_LOG("Skinned meshes: %i", Results.MeshStatsSum.NumSkinnedMeshComponents);
 	UE_ANALYSIS_LOG("Primitives w/o mesh: %i", Results.NumPrimitivesWithoutMesh);
-	UE_ANALYSIS_LOG("Unrecognized Prims w/ mesh: %i", Results.NumUnrecognizedPrimitivesWithMesh);
-	UE_ANALYSIS_LOG("Not-fully supported primitive component classes: %s", *MapToString(Results.UnsupportedPrimCounts));
+	UE_ANALYSIS_LOG("Unsupported primitive component classes: %s", *MapToString(Results.UnsupportedPrimCounts));
+	UE_ANALYSIS_LOG("---------------------------------------------------------------");
+	UE_ANALYSIS_LOG("Physics Stats:");
+	UE_ANALYSIS_LOG("Number of physics profiles: %i", Results.CollisionProfileCounts.Num());
+	for (auto& Entry : Results.CollisionProfileCounts)
+	{
+		UE_ANALYSIS_LOG("- Profile '%s': %i", *Entry.Key.ToString(), Entry.Value);
+	}
+	UE_ANALYSIS_LOG("Custom collision meshes (%i, max 10):", Results.CustomCollisionMeshPaths.Num());
+	for (auto& Entry : Results.CustomCollisionMeshPaths)
+	{
+		UE_ANALYSIS_LOG("- %s", *Entry);
+	}
+	UE_ANALYSIS_LOG("Total num static mesh components with physics:  %i", Results.NumStaticMeshComponentsWithPhysics);
+	UE_ANALYSIS_LOG(
+		"Avg num shapes per static mesh component: %i",
+		(Results.NumStaticMeshComponentsWithPhysics > 0
+			 ? Results.TotalShapeCount / Results.NumStaticMeshComponentsWithPhysics
+			 : 0));
+	UE_ANALYSIS_LOG("Shapes responses:");
+	UE_ANALYSIS_LOG("- Query enabled: %i", Results.TotalNumPhysicsEnabled_Query);
+	UE_ANALYSIS_LOG("- Physics enabled: %i", Results.TotalNumPhysicsEnabled_Physics);
+	UE_ANALYSIS_LOG("- Probes enabled: %i", Results.TotalNumPhysicsEnabled_Probe);
+	UE_ANALYSIS_LOG("Shapes by complexity:");
+	UE_ANALYSIS_LOG("- total: %i (max %i per mesh)", Results.TotalShapeCount, Results.MaxShapeCount);
+	UE_ANALYSIS_LOG("- cheap (box, sphere, capsule): %i", Results.MaxShapeCount - Results.MaxExpensiveShapeCount);
+	UE_ANALYSIS_LOG(
+		"- expensive (convex collision, other): %i (max %i per mesh)",
+		Results.TotalExpensiveShapeCount,
+		Results.MaxExpensiveShapeCount);
+	UE_ANALYSIS_LOG("- biggest number of expensive collisions: %s", *Results.MaxExpensiveShapeOwner);
+	UE_ANALYSIS_LOG("Shapes by AABB size:");
+	UE_ANALYSIS_LOG("- small (<100uu): %i", Results.NumShapes_Small);
+	UE_ANALYSIS_LOG("- medium (<500uu): %i", Results.NumShapes_Medium);
+	UE_ANALYSIS_LOG("- large (>500uu): %i", Results.NumShapes_Large);
 	UE_ANALYSIS_LOG("---------------------------------------------------------------");
 #undef UE_ANALYSIS_LOG
 #undef UE_ANALYSIS_LOG_CVAR
@@ -299,13 +462,39 @@ public:
 		DrawCallsStats.DataSeries.Add({Buffer_DrawCallsNow, FColorList::Red, "now"});
 		DrawCallsStats.DataSeries.Add({Buffer_DrawCallsBest, FColorList::Green, "best"});
 		DrawCallsStats.DataSeries.Add({Buffer_Materials, FColorList::LightBlue, "materials"});
-		DrawCallsStats.DataSeries.Add({Buffer_MaterialCombinations, FColorList::Yellow, "mat combos"});
+		DrawCallsStats.DataSeries.Add({Buffer_MeshCombinations, FColorList::Yellow, "mat/collision combos"});
 
 		auto& InstanceStats = GraphStats.AddDefaulted_GetRef();
 		InstanceStats.Name = TEXT("mesh instances");
 		InstanceStats.DataSeries.Add({Buffer_NumStaticMeshInstances_Max, FColorList::Violet, "max"});
 		InstanceStats.DataSeries.Add({Buffer_NumStaticMeshInstances_Now, FColorList::Red, "now"});
 		InstanceStats.DataSeries.Add({Buffer_NumStaticMeshInstances_Possible, FColorList::Green, "best"});
+
+		auto& ShapeCounts = GraphStats.AddDefaulted_GetRef();
+		ShapeCounts.Name = TEXT("physics (total)");
+		ShapeCounts.DataSeries.Add({Buffer_SMCollision_TotalShapeCount, FColorList::Violet, "all shapes"});
+		ShapeCounts.DataSeries.Add({Buffer_SMCollision_ExpensiveShapeCount, FColorList::Red, "expensive shapes"});
+		ShapeCounts.DataSeries.Add({Buffer_SMCollision_NumCollisionsEnabled_Query, FColorList::Yellow, "query"});
+		ShapeCounts.DataSeries.Add({Buffer_SMCollision_NumCollisionsEnabled_Physics, FColorList::Green, "physics"});
+		ShapeCounts.DataSeries.Add({Buffer_SMCollision_NumCollisionsEnabled_Probe, FColorList::Blue, "probe"});
+
+		auto& PerMeshShapes = GraphStats.AddDefaulted_GetRef();
+		PerMeshShapes.Name = TEXT("physics (per mesh)");
+		PerMeshShapes.DataSeries.Add({Buffer_SMCollision_AvgShapeCount, FColorList::Violet, "avg shapes"});
+		PerMeshShapes.DataSeries.Add({Buffer_SMCollision_MaxShapeCount, FColorList::Green, "max shapes"});
+		PerMeshShapes.DataSeries.Add(
+			{Buffer_SMCollision_MaxExpensiveShapeCount, FColorList::Red, "max expensive shapes"});
+
+		auto& ShapeSizes = GraphStats.AddDefaulted_GetRef();
+		ShapeSizes.Name = TEXT("physics (shapes by size)");
+		ShapeSizes.DataSeries.Add({Buffer_SMCollision_NumShapeSizes_Small, FColorList::Red, "small"});
+		ShapeSizes.DataSeries.Add({Buffer_SMCollision_NumShapeSizes_Medium, FColorList::Green, "medium"});
+		ShapeSizes.DataSeries.Add({Buffer_SMCollision_NumShapeSizes_Large, FColorList::Yellow, "large"});
+
+		auto& PhysicsProfiles = GraphStats.AddDefaulted_GetRef();
+		PhysicsProfiles.Name = TEXT("physics (profiles)");
+		PhysicsProfiles.DataSeries.Add(
+			{Buffer_SMCollision_NumCollisionProfiles, FColorList::LightBlue, "num profiles"});
 	}
 
 private:
@@ -317,12 +506,34 @@ private:
 	TCircularAggregator<float> Buffer_DrawCallsNow{NumFramesForBuffer};
 	TCircularAggregator<float> Buffer_DrawCallsBest{NumFramesForBuffer};
 	TCircularAggregator<float> Buffer_Materials{NumFramesForBuffer};
-	TCircularAggregator<float> Buffer_MaterialCombinations{NumFramesForBuffer};
+	TCircularAggregator<float> Buffer_MeshCombinations{NumFramesForBuffer};
 
 	// Instances
 	TCircularAggregator<float> Buffer_NumStaticMeshInstances_Max{NumFramesForBuffer};
 	TCircularAggregator<float> Buffer_NumStaticMeshInstances_Now{NumFramesForBuffer};
 	TCircularAggregator<float> Buffer_NumStaticMeshInstances_Possible{NumFramesForBuffer};
+
+	// Physics
+	TCircularAggregator<float> Buffer_SMCollision_TotalShapeCount{NumFramesForBuffer};
+	TCircularAggregator<float> Buffer_SMCollision_ExpensiveShapeCount{NumFramesForBuffer};
+	TCircularAggregator<float> Buffer_SMCollision_AvgShapeCount{NumFramesForBuffer};
+	TCircularAggregator<float> Buffer_SMCollision_MaxShapeCount{NumFramesForBuffer};
+	TCircularAggregator<float> Buffer_SMCollision_MaxExpensiveShapeCount{NumFramesForBuffer};
+	TCircularAggregator<float> Buffer_SMCollision_NumCollisionProfiles{NumFramesForBuffer};
+	// query|physics|probe
+	TCircularAggregator<float> Buffer_SMCollision_NumCollisionsEnabled_Query{NumFramesForBuffer};
+	TCircularAggregator<float> Buffer_SMCollision_NumCollisionsEnabled_Physics{NumFramesForBuffer};
+	TCircularAggregator<float> Buffer_SMCollision_NumCollisionsEnabled_Probe{NumFramesForBuffer};
+
+	// size tracking
+	TCircularAggregator<float> Buffer_SMCollision_NumShapeSizes_Small{NumFramesForBuffer};
+	TCircularAggregator<float> Buffer_SMCollision_NumShapeSizes_Medium{NumFramesForBuffer};
+	TCircularAggregator<float> Buffer_SMCollision_NumShapeSizes_Large{NumFramesForBuffer};
+
+	// not aggregated, just show the current frame:
+	TMap<FName, int32> CollisionProfileCounts;
+	FString MaxExpensiveShapeOwner;
+	TArray<FString> CustomCollisionMeshPaths;
 
 	// - TWorldStatsOverlay
 	void TickStats(UWorld* TargetWorld) override
@@ -333,7 +544,7 @@ private:
 			Entry.bUseLogarithmicAxis = bUseLogarithmicYAxis;
 		}
 
-		const auto Results = AnalyzeMaterialUsage(TargetWorld);
+		auto Results = AnalyzeMaterialUsage(TargetWorld);
 
 		// Components
 		Buffer_ComponentsNow.Add(Results.MeshStatsSum.NumStaticMeshComponentsNow);
@@ -343,21 +554,81 @@ private:
 		Buffer_DrawCallsNow.Add(Results.DrawCalls_Current);
 		Buffer_DrawCallsBest.Add(Results.DrawCalls_Best);
 		Buffer_Materials.Add(Results.NumUniqueMaterials);
-		Buffer_MaterialCombinations.Add(Results.MeshStatsByCombo.Num());
+		Buffer_MeshCombinations.Add(Results.MeshStatsByCombo.Num());
 
 		// Instances
 		Buffer_NumStaticMeshInstances_Max.Add(Results.MeshStatsSum.NumStaticMeshInstances_Max);
 		Buffer_NumStaticMeshInstances_Now.Add(Results.MeshStatsSum.NumStaticMeshInstances_Now);
 		Buffer_NumStaticMeshInstances_Possible.Add(Results.MeshStatsSum.NumStaticMeshInstances_Possible);
+
+		// Physics
+		Buffer_SMCollision_TotalShapeCount.Add(Results.TotalShapeCount);
+		Buffer_SMCollision_ExpensiveShapeCount.Add(Results.TotalExpensiveShapeCount);
+		Buffer_SMCollision_MaxShapeCount.Add(Results.MaxShapeCount);
+		Buffer_SMCollision_MaxExpensiveShapeCount.Add(Results.MaxExpensiveShapeCount);
+		if (Results.NumStaticMeshComponentsWithPhysics > 0)
+		{
+			Buffer_SMCollision_AvgShapeCount.Add(Results.TotalShapeCount / Results.NumStaticMeshComponentsWithPhysics);
+		}
+		else
+		{
+			Buffer_SMCollision_AvgShapeCount.Add(0);
+		}
+
+		Buffer_SMCollision_NumCollisionProfiles.Add(Results.CollisionProfileCounts.Num());
+		Buffer_SMCollision_NumCollisionsEnabled_Query.Add(Results.TotalNumPhysicsEnabled_Query);
+		Buffer_SMCollision_NumCollisionsEnabled_Physics.Add(Results.TotalNumPhysicsEnabled_Physics);
+		Buffer_SMCollision_NumCollisionsEnabled_Probe.Add(Results.TotalNumPhysicsEnabled_Probe);
+
+		Buffer_SMCollision_NumShapeSizes_Small.Add(Results.NumShapes_Small);
+		Buffer_SMCollision_NumShapeSizes_Medium.Add(Results.NumShapes_Medium);
+		Buffer_SMCollision_NumShapeSizes_Large.Add(Results.NumShapes_Large);
+
+		CollisionProfileCounts = Results.CollisionProfileCounts;
+		MaxExpensiveShapeOwner = MoveTemp(Results.MaxExpensiveShapeOwner);
+		CustomCollisionMeshPaths = MoveTemp(Results.CustomCollisionMeshPaths);
+	}
+
+	void OnDrawDebug(UCanvas* InCanvas) const override
+	{
+		FWorldStatsOverlay::OnDrawDebug(InCanvas);
+
+		InCanvas->Canvas->DrawShadowedString(
+			50.f,
+			50.f,
+			*FString::Printf(
+				TEXT("Most Expensive Physics Shape Owner (%i shapes): %s"),
+				Buffer_SMCollision_MaxExpensiveShapeCount.HasData()
+					? static_cast<int32>(Buffer_SMCollision_MaxExpensiveShapeCount.Last())
+					: 0,
+				*MaxExpensiveShapeOwner),
+			GEngine->GetSmallFont(),
+			FColor::White);
+
+		InCanvas->Canvas->DrawShadowedString(
+			50.f,
+			65.f,
+			*FString::Printf(TEXT("Collision Profiles: %s"), *MapToString(CollisionProfileCounts)),
+			GEngine->GetSmallFont(),
+			FColor::White);
+
+		InCanvas->Canvas->DrawShadowedString(
+			50.f,
+			80.f,
+			*FString::Printf(
+				TEXT("Custom Collision Components (max first 10):\n%s"),
+				*ArrayToString(CustomCollisionMeshPaths, TEXT("\n"))),
+			GEngine->GetSmallFont(),
+			FColor::White);
 	}
 };
 
 DEFINE_OUU_WORLD_STAT_OVERLAY(
 	FMaterialAnalysisOverlay,
-	MATERIAL_ANALYSIS_BASE_CVAR,
+	STATIC_MESH_ANALYSIS_BASE_CVAR,
 	"Toggle displaying stats of static meshes and their materials in the current world as on-screen graphs")
 
 static FAutoConsoleCommand AnalyzeMaterialUsage_Command(
-	TEXT(MATERIAL_ANALYSIS_BASE_CVAR ".Dump"),
+	TEXT(STATIC_MESH_ANALYSIS_BASE_CVAR ".Dump"),
 	TEXT("Write stats of static meshes and their materials in the current world to the log"),
 	FConsoleCommandDelegate::CreateStatic([]() { DumpMaterialAnalysis(FMaterialAnalysisOverlay::GetStatsWorld()); }));

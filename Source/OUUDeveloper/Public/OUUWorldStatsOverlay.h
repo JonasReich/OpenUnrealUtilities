@@ -72,7 +72,7 @@ namespace OUU::Developer
 		// --
 
 		void OnDrawDebugService(UCanvas* InCanvas, APlayerController* PlayerController) const;
-		void OnDrawDebug(UCanvas* InCanvas) const;
+		virtual void OnDrawDebug(UCanvas* InCanvas) const;
 	};
 } // namespace OUU::Developer
 
