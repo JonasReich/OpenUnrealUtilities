@@ -241,13 +241,10 @@ void UOUUTextLibrary::LoadLocalizedTextsFromCSV(
 			continue;
 		}
 
-		auto* StringPtr = *LocalizedString;
-		while (FChar::IsWhitespace(*StringPtr))
-		{
-			StringPtr++;
-		}
+		// Manually escape zero width space (as it is not handled by ReplaceEscapedCharWithChar).
+		LocalizedString.ReplaceInline(TEXT("\\u200B"), TEXT("\u200B"));
 
-		// Found non-whitespace non-terminator character in string...
+		auto* StringPtr = *LocalizedString;
 		if (StringPtr && *StringPtr)
 		{
 			NumLoctexts++;
