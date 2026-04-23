@@ -93,7 +93,9 @@ public class OUURuntime : OUUModuleRules
 
 				"ContentBrowser",
 				"ContentBrowserData",
-				"AssetRegistry"
+				"ContentBrowserFileDataSource",
+				
+				"AssetRegistry",
 			});
 		}
 

@@ -14,6 +14,10 @@
 #include "Misc/Paths.h"
 #include "Serialization/Csv/CsvParser.h"
 
+#if WITH_EDITOR
+	#include "ContentBrowserFileDataSource.h"
+#endif
+
 #define LOCTEXT_NAMESPACE "OUUTextLibrary"
 
 FText UOUUTextLibrary::FormatListText(const TArray<FText>& Texts, bool bFormatWithFinalAndSeparator)
@@ -77,6 +81,17 @@ void UOUUTextLibrary::RegisterPluginStringTable(
 	{
 		FStringTableRegistry::Get()
 			.Internal_LocTableFromFile(InTableId, InNamespace, InPluginRelativeTablePath, pPlugin->GetContentDir());
+#if WITH_EDITOR
+
+		if (auto* pCSVContentBrowserSource =
+				FindObject<UContentBrowserFileDataSource>(GetTransientPackage(), TEXT("CsLocCSV")))
+		{
+			auto RelativeDirectory = FPaths::GetPath(InPluginRelativeTablePath).Replace(TEXT("\\"), TEXT("/"));
+			const FString MountPath = FString::Printf(TEXT("/%s/%s"), *InPluginName, *RelativeDirectory);
+			pCSVContentBrowserSource
+				->AddFileMount(*MountPath, FPaths::Combine(pPlugin->GetContentDir(), RelativeDirectory));
+		}
+#endif
 	}
 }
 
