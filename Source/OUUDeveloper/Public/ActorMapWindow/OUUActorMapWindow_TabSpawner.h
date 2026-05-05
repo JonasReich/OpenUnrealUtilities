@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2023 Jonas Reich & Contributors
+// Copyright (c) 2023 Jonas Reich & Contributors
 
 #pragma once
 
@@ -26,6 +26,6 @@ namespace OUU::Developer::ActorMapWindow
 
 		Default = Labels | SceneCapture
 	};
-	DECLARE_BITMASK_OPERATORS(EShowFlags)
-
 } // namespace OUU::Developer::ActorMapWindow
+
+DECLARE_BITMASK_OPERATORS(OUU::Developer::ActorMapWindow::EShowFlags)
