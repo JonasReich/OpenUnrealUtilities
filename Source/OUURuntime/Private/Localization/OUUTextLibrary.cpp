@@ -137,7 +137,19 @@ TSet<FString> UOUUTextLibrary::GetCSVTranslationCultureNames(const FString& CsvD
 
 void UOUUTextLibrary::LoadLocalizedTextsFromCSV(const FString& CsvDirectoryPath)
 {
-	auto PrioritizedCultureNames = FInternationalization::Get().GetCurrentCulture()->GetPrioritizedParentCultureNames();
+	TArray<FString> PrioritizedCultureNames;
+#if WITH_EDITOR
+	const auto PIEPreviewLanguage = FTextLocalizationManager::Get().GetConfiguredGameLocalizationPreviewLanguage();
+	if (FTextLocalizationManager::Get().IsGameLocalizationPreviewEnabled() && PIEPreviewLanguage.IsEmpty() == false)
+	{
+		// In PIE, respect the game localization preview lange instead of the global culture setting.
+		PrioritizedCultureNames = FInternationalization::Get().GetPrioritizedCultureNames(PIEPreviewLanguage);
+	}
+	else
+#endif
+	{
+		PrioritizedCultureNames = FInternationalization::Get().GetCurrentCulture()->GetPrioritizedParentCultureNames();
+	}
 
 	auto& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
 	TMap<FOUUTextIdentity, FPolyglotTextData> PolyglotData;
@@ -264,16 +276,9 @@ void UOUUTextLibrary::LoadLocalizedTextsFromCSV(
 		{
 			NumLoctexts++;
 
-			ELocalizedTextSourceCategory TextSource = ELocalizedTextSourceCategory::Game;
-#if WITH_EDITOR
-			if (GIsEditor)
-			{
-				TextSource = ELocalizedTextSourceCategory::Editor;
-			}
-#endif
 			auto& NewEntry = InOutPolyglotTextData.FindOrAdd(
 				FOUUTextIdentity{Namespace, Key},
-				FPolyglotTextData{TextSource, Namespace, Key, SourceString, TEXT("en")});
+				FPolyglotTextData{ELocalizedTextSourceCategory::Game, Namespace, Key, SourceString, TEXT("en")});
 			NewEntry.AddLocalizedString(Culture, LocalizedString);
 		}
 	}
