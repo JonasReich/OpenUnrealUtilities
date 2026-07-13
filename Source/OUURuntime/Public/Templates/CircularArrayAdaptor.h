@@ -80,6 +80,15 @@ public:
 	ElementType& operator[](SizeType Index) { return GetStorage()[GetWrappedRingIndex(Index)]; }
 	const ElementType& operator[](SizeType Index) const { return GetStorage()[GetWrappedRingIndex(Index)]; }
 
+	// Use this to get a view of all values that were already pushed into the array and are still in storage.
+	// Immediately after initialization, this will return an empty view.
+	// Before wrap, it will return an array view matching the ranged for view.
+	// After wrap, this will be an unpredictable mess, but is quite fast if you don't care about order.
+	TConstArrayView<ElementType> UnsortedValues() const
+	{
+		return TConstArrayView<ElementType>(GetStorage()).Left(Num());
+	}
+
 	void Reset()
 	{
 		GetStorage().Reset();
