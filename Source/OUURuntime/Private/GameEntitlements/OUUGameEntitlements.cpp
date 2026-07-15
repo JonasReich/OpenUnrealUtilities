@@ -2,7 +2,9 @@
 
 #include "GameEntitlements/OUUGameEntitlements.h"
 
+#include "Engine/World.h"
 #include "GameEntitlements/OUUGameEntitlementsSettings.h"
+#include "Online/OUUSteamUtils.h"
 
 extern TAutoConsoleVariable<FString> CVar_OverrideEntitlementVersion;
 
@@ -40,6 +42,13 @@ TAutoConsoleVariable<FString> CVar_OverrideEntitlementVersion{
 		 "e.g. 'Foo' for the 'GameEntitlements.Version.Foo' tag."),
 	FConsoleVariableDelegate::CreateLambda(
 		[](IConsoleVariable*) { OUU::Runtime::GameEntitlements::UpdateOverrideEntitlementFromCVar(); })};
+
+#if !UE_BUILD_SHIPPING
+TAutoConsoleVariable<bool> CVar_UnlockAllDlcEntitlements{
+	TEXT("ouu.Entitlements.UnlockAllDlc"),
+	false,
+	TEXT("Editor/testing only: treat all configured Steam DLC as owned so their entitlement modules are granted.")};
+#endif
 
 UOUUGameEntitlementsSubsystem& UOUUGameEntitlementsSubsystem::Get()
 {
@@ -108,7 +117,36 @@ void UOUUGameEntitlementsSubsystem::Initialize(FSubsystemCollectionBase& Collect
 	GetMutableDefault<UOUUGameEntitlementSettings>()
 		->OnSettingsChanged.AddUObject(this, &UOUUGameEntitlementsSubsystem::OnSettingsChanged);
 #endif
+
+	// Re-evaluate entitlements when a game instance starts, once Steam DLC ownership is available.
+	StartGameInstanceHandle =
+		FWorldDelegates::OnStartGameInstance.AddUObject(this, &UOUUGameEntitlementsSubsystem::HandleStartGameInstance);
+
+#if !UE_BUILD_SHIPPING
+	CVar_UnlockAllDlcEntitlements.AsVariable()->SetOnChangedCallback(
+		FConsoleVariableDelegate::CreateUObject(this, &UOUUGameEntitlementsSubsystem::HandleUnlockAllDlcCVarChanged));
+#endif
 }
+
+void UOUUGameEntitlementsSubsystem::Deinitialize()
+{
+	FWorldDelegates::OnStartGameInstance.Remove(StartGameInstanceHandle);
+	StartGameInstanceHandle.Reset();
+
+	Super::Deinitialize();
+}
+
+void UOUUGameEntitlementsSubsystem::HandleStartGameInstance(UGameInstance* /*GameInstance*/)
+{
+	RefreshActiveVersionAndEntitlements();
+}
+
+#if !UE_BUILD_SHIPPING
+void UOUUGameEntitlementsSubsystem::HandleUnlockAllDlcCVarChanged(IConsoleVariable* /*Variable*/)
+{
+	RefreshActiveVersionAndEntitlements();
+}
+#endif
 
 bool UOUUGameEntitlementsSubsystem::IsEntitledToCollection(const FOUUGameEntitlementCollection& Collection) const
 {
@@ -161,6 +199,20 @@ void UOUUGameEntitlementsSubsystem::RefreshActiveVersionAndEntitlements()
 	if (auto* EntitlementsPtr = Settings.EntitlementsPerVersion.Find(ActiveVersion))
 	{
 		ActiveEntitlements = FOUUGameEntitlementModuleAndCollections_Value::CreateChecked(*EntitlementsPtr);
+	}
+
+	// Grant entitlements for owned Steam DLC (the ownership query is wrapped in UOUUSteamUtils).
+#if !UE_BUILD_SHIPPING
+	const bool bUnlockAllDlc = CVar_UnlockAllDlcEntitlements.GetValueOnGameThread();
+#else
+	const bool bUnlockAllDlc = false;
+#endif
+	for (const auto& DlcEntry : Settings.SteamDlcEntitlements)
+	{
+		if (bUnlockAllDlc || UOUUSteamUtils::IsDlcInstalled(DlcEntry.Key))
+		{
+			ActiveEntitlements.AppendTags(FOUUGameEntitlementModuleAndCollections_Value::CreateChecked(DlcEntry.Value));
+		}
 	}
 
 	// recursively add entitlements from module collections

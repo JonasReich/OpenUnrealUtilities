@@ -46,6 +46,10 @@ public:
 	UPROPERTY(Config, EditAnywhere, meta = (Categories = "TypedTag{OUUGameEntitlementModule}"))
 	TMap<FOUUGameEntitlementCollection, FGameplayTagContainer> ModuleCollections;
 
+	// Maps a Steam DLC AppID to the entitlement module(s) granted while that DLC is owned/installed.
+	UPROPERTY(Config, EditAnywhere, meta = (Categories = "TypedTag{OUUGameEntitlementModule}"))
+	TMap<int32, FGameplayTagContainer> SteamDlcEntitlements;
+
 #if WITH_EDITOR
 	FOnOUUGameEntitlementSettingsChanged OnSettingsChanged;
 #endif

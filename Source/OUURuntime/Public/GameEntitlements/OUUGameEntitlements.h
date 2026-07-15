@@ -8,6 +8,9 @@
 
 #include "OUUGameEntitlements.generated.h"
 
+class IConsoleVariable;
+class UGameInstance;
+
 /** Central subsystem to track entitlements */
 UCLASS(BlueprintType)
 class OUURUNTIME_API UOUUGameEntitlementsSubsystem : public UEngineSubsystem
@@ -38,6 +41,7 @@ public:
 
 	// - USubsystem
 	void Initialize(FSubsystemCollectionBase& Collection) override;
+	void Deinitialize() override;
 
 public:
 	// Called when entitlements are first initialized or changed by setting an override version.
@@ -52,6 +56,15 @@ private:
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 	void RefreshActiveVersionAndEntitlements();
+
+	// Re-evaluate entitlements once a game instance starts, when Steam DLC ownership is available.
+	void HandleStartGameInstance(UGameInstance* GameInstance);
+
+	FDelegateHandle StartGameInstanceHandle;
+
+#if !UE_BUILD_SHIPPING
+	void HandleUnlockAllDlcCVarChanged(IConsoleVariable* Variable);
+#endif
 
 	bool bHasInitializedActiveEntitlements = false;
 
