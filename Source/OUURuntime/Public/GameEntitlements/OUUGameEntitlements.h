@@ -39,6 +39,12 @@ public:
 	// Restrict Blueprint access for now.
 	void SetOverrideVersion(const FOUUGameEntitlementVersion& Version);
 
+#if !UE_BUILD_SHIPPING
+	// Editor/testing only: force a single Steam DLC (by AppID) on or off in the entitlement rebuild, independent of
+	// real Steam ownership. Ignored while ouu.Entitlements.UnlockAllDlc is set.
+	void SetDlcForcedUnlocked(int32 SteamDlcAppId, bool bForceUnlocked);
+#endif
+
 	// - USubsystem
 	void Initialize(FSubsystemCollectionBase& Collection) override;
 	void Deinitialize() override;
@@ -64,6 +70,9 @@ private:
 
 #if !UE_BUILD_SHIPPING
 	void HandleUnlockAllDlcCVarChanged(IConsoleVariable* Variable);
+
+	// Steam DLC AppIDs forced to be treated as owned, independent of real ownership. Editor/testing only.
+	TSet<int32> ForcedUnlockedDlcAppIds;
 #endif
 
 	bool bHasInitializedActiveEntitlements = false;
