@@ -101,11 +101,18 @@ UOUUGameEntitlementsSubsystem& UOUUGameEntitlementsSubsystem::Get()
 	return *GEngine->GetEngineSubsystem<UOUUGameEntitlementsSubsystem>();
 }
 
-bool UOUUGameEntitlementsSubsystem::IsEntitled(const FOUUGameEntitlementModule& Module) const
+bool UOUUGameEntitlementsSubsystem::IsEntitled(
+	const FOUUGameEntitlementModuleAndCollections_Value& ActiveEntitlements,
+	const FOUUGameEntitlementModule& Module)
 {
 	// Invalid = empty tag should be treated as asking for "no requirements"
 	return Module.IsValid() == false
 		|| ActiveEntitlements.HasTag(FOUUGameEntitlementModuleAndCollection::ConvertChecked(Module));
+}
+
+bool UOUUGameEntitlementsSubsystem::IsEntitled(const FOUUGameEntitlementModule& Module) const
+{
+	return IsEntitled(ActiveEntitlements, Module);
 }
 
 bool UOUUGameEntitlementsSubsystem::IsEntitled(const FOUUGameEntitlementModules_Ref& Modules) const

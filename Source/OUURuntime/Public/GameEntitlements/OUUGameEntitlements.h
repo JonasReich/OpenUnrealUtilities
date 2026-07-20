@@ -23,6 +23,14 @@ public:
 public:
 	static UOUUGameEntitlementsSubsystem& Get();
 
+	// Evaluate an entitlement check against an explicitly-provided resolved entitlement set (modules + collections),
+	// rather than this subsystem's own local ActiveEntitlements. Useful when the set originates elsewhere - e.g.
+	// reported up from a remote client and stored per-player on the server. An invalid/empty Module is treated as
+	// "no requirement" and returns true.
+	static bool IsEntitled(
+		const FOUUGameEntitlementModuleAndCollections_Value& ActiveEntitlements,
+		const FOUUGameEntitlementModule& Module);
+
 	UFUNCTION(BlueprintPure)
 	bool IsEntitled(const FOUUGameEntitlementModule& Module) const;
 	bool IsEntitled(const FOUUGameEntitlementModules_Ref& Modules) const;
