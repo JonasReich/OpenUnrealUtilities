@@ -6,6 +6,7 @@
 #include "AssetValidation/OUUAssetValidationSettings.h"
 #include "Dom/JsonObject.h"
 #include "Editor.h"
+#include "Editor/Transactor.h"
 #include "EditorValidatorSubsystem.h"
 #include "FileHelpers.h"
 #include "IMessageLogListing.h"
@@ -15,6 +16,33 @@
 #include "MessageLogModule.h"
 #include "Misc/FileHelper.h"
 #include "Serialization/JsonSerializer.h"
+
+namespace OUU::Editor::ValidateAssetList::Private
+{
+	// Releases the currently loaded editor map and forces a garbage collection.
+	//
+	// Validating a world asset loads a full map and can trigger world partition streaming generation
+	// as well as blueprint reinstancing (e.g. when the project-wide WorldSettings blueprint is compiled).
+	// Inside a single commandlet process none of that is collected on its own, so leftover duplicated /
+	// reinstanced actors keep piling up in memory. In particular the WorldSettings actor can survive as a
+	// duplicate and then get misreported as "has same GUID as ..." by a later MAP CHECK - a false positive
+	// that never shows in the editor, because there only ever one world is resident and GC runs on map change.
+	//
+	// Switching to a blank map first makes the world we just validated unreferenced so the GC can actually
+	// reclaim it, keeping memory bounded and stopping stale actors from leaking into subsequent map checks.
+	void PurgeLoadedMap()
+	{
+		UEditorLoadingAndSavingUtils::NewBlankMap(/*bSaveExistingMap*/ false);
+
+		// The transaction buffer can keep the trashed world and its actors alive, defeating the GC.
+		if (GEditor->Trans != nullptr)
+		{
+			GEditor->Trans->Reset(NSLOCTEXT("OUUValidateAssetList", "PurgeLoadedMap", "Asset validation"));
+		}
+
+		CollectGarbage(RF_NoFlags);
+	}
+} // namespace OUU::Editor::ValidateAssetList::Private
 
 int32 UOUUValidateAssetListCommandlet::Main(const FString& FullCommandLine)
 {
@@ -234,5 +262,13 @@ void UOUUValidateAssetListCommandlet::ValidateSingleAsset(
 		OutReportObject->FJsonObject::SetStringField(Asset.PackageName.ToString(), PackageErrorString);
 
 		++OutNumInvalidAssets;
+	}
+
+	// For world assets we loaded an entire map above; release it and collect garbage so leftover actors
+	// (e.g. a reinstanced/duplicated WorldSettings) don't linger and get misreported by a later MAP CHECK.
+	// See OUU::Editor::ValidateAssetList::Private::PurgeLoadedMap for details.
+	if (const auto* AssetClass = Asset.GetClass(); AssetClass != nullptr && AssetClass->IsChildOf<UWorld>())
+	{
+		OUU::Editor::ValidateAssetList::Private::PurgeLoadedMap();
 	}
 }

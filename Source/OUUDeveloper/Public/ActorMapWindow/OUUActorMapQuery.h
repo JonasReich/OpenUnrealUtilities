@@ -22,7 +22,7 @@ public:
 
 	/** Color in which the query results are displayed. */
 	UPROPERTY(EditAnywhere)
-	FColor QueryColor;
+	FColor QueryColor = FColor::Green;
 
 	/** String that must be contained within the actor name. Ignored if empty. */
 	UPROPERTY(EditAnywhere)

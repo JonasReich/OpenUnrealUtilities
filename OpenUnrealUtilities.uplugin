@@ -81,6 +81,17 @@
 			"Enabled": true
 		},
 		{
+			"Name": "HermesCore",
+			"Enabled": true,
+			"Optional": true,
+			"TargetAllowList": [
+				"Editor"
+			],
+			"SupportedTargetPlatforms": [
+				"Win64"
+			]
+		},
+		{
 			"Name": "OUUTags",
 			"Enabled": true
 		},

@@ -41,7 +41,7 @@ namespace OUU::Runtime
 		double TotalSeconds = 0.0;
 
 		// Per channel timing info
-		FChannelTimingResult ChannelTimings[static_cast<int32>(ETimingChannel::Num)] = {};
+		FChannelTimingResult ChannelTimingsSeconds[static_cast<int32>(ETimingChannel::Num)] = {};
 
 		// How many total frames count as hitches
 		int32 TotalHitchFrames = 0;
@@ -86,7 +86,7 @@ namespace OUU::Runtime
 			{
 				for (int32 ChannelIdx = 0; ChannelIdx < static_cast<int32>(ETimingChannel::Num); ++ChannelIdx)
 				{
-					auto& SourceChannel = TimingChannels[ChannelIdx];
+					auto& SourceChannel = TimingChannelsSeconds[ChannelIdx];
 					auto SortedCopy = TArray<double>(SourceChannel.UnsortedValues());
 					SortedCopy.Sort();
 					const int32 N = SortedCopy.Num();
@@ -96,10 +96,10 @@ namespace OUU::Runtime
 						Sum += V;
 					}
 
-					R.ChannelTimings[ChannelIdx].Avg = static_cast<float>(Sum / N);
-					R.ChannelTimings[ChannelIdx].Min = SortedCopy[0];
-					R.ChannelTimings[ChannelIdx].Max = SortedCopy[N - 1];
-					R.ChannelTimings[ChannelIdx].Percentile = Percentile(SortedCopy, TimingPercentile / 100.0);
+					R.ChannelTimingsSeconds[ChannelIdx].Avg = static_cast<float>(Sum / N);
+					R.ChannelTimingsSeconds[ChannelIdx].Min = SortedCopy[0];
+					R.ChannelTimingsSeconds[ChannelIdx].Max = SortedCopy[N - 1];
+					R.ChannelTimingsSeconds[ChannelIdx].Percentile = Percentile(SortedCopy, TimingPercentile / 100.0);
 				}
 
 				R.MostCommonHitchType = EFrameHitchType::NoHitch;
@@ -153,7 +153,7 @@ namespace OUU::Runtime
 			// It's fine to reset all the channel values. Hitches are detected by UE code, so we just care about the
 			// average in the last interval, not a rolling average.
 			// #TODO could this reset be made cheaper, e.g. by explicitly clearing memory?
-			std::ranges::fill(TimingChannels, TFixedSizeCircularAggregator<double, MaxSamples>{});
+			std::ranges::fill(TimingChannelsSeconds, TFixedSizeCircularAggregator<double, MaxSamples>{});
 			std::ranges::fill(HitchCounts, 0);
 			std::ranges::fill(BoundCounts, 0);
 
@@ -183,14 +183,15 @@ namespace OUU::Runtime
 
 			CurrentIntervalReport.TotalSeconds += TotalFrame;
 
-			// Record timing channel values as ms
-			TimingChannels[static_cast<int32>(ETimingChannel::Frame)].Add(TotalFrame / 1000.0);
-			TimingChannels[static_cast<int32>(ETimingChannel::Game)].Add(FrameData.GameThreadTimeSeconds / 1000.0);
-			TimingChannels[static_cast<int32>(ETimingChannel::Render)].Add(FrameData.RenderThreadTimeSeconds / 1000.0);
-			TimingChannels[static_cast<int32>(ETimingChannel::RHI)].Add(FrameData.RHIThreadTimeSeconds / 1000.0);
-			TimingChannels[static_cast<int32>(ETimingChannel::GPU)].Add(FrameData.GPUTimeSeconds / 1000.0);
-			TimingChannels[static_cast<int32>(ETimingChannel::FlushAsyncLoading)].Add(
-				FrameData.FlushAsyncLoadingTime / 1000.0);
+			// All the Epic values are in seconds, so we retain that scale for as long as possible.
+			// Consumers may want to convert to milliseconds values.
+			TimingChannelsSeconds[static_cast<int32>(ETimingChannel::Frame)].Add(TotalFrame);
+			TimingChannelsSeconds[static_cast<int32>(ETimingChannel::Game)].Add(FrameData.GameThreadTimeSeconds);
+			TimingChannelsSeconds[static_cast<int32>(ETimingChannel::Render)].Add(FrameData.RenderThreadTimeSeconds);
+			TimingChannelsSeconds[static_cast<int32>(ETimingChannel::RHI)].Add(FrameData.RHIThreadTimeSeconds);
+			TimingChannelsSeconds[static_cast<int32>(ETimingChannel::GPU)].Add(FrameData.GPUTimeSeconds);
+			TimingChannelsSeconds[static_cast<int32>(ETimingChannel::FlushAsyncLoading)].Add(
+				FrameData.FlushAsyncLoadingTime);
 
 			// Record bound counts
 			if (FrameData.bGameThreadBound)
@@ -267,7 +268,7 @@ namespace OUU::Runtime
 
 		// Track individual frame times per channel. Note that these are capped at MaxSamples, so any data before that
 		// will get lost even though other metrics (like hitch counts) persist!
-		TFixedSizeCircularAggregator<double, MaxSamples> TimingChannels[static_cast<int32>(ETimingChannel::Num)];
+		TFixedSizeCircularAggregator<double, MaxSamples> TimingChannelsSeconds[static_cast<int32>(ETimingChannel::Num)];
 
 		// For these stats we just track the total sum to compute averages.
 		// Use double instead of int to rule out overflow errors. Not as accurate, but should still bring us in the
