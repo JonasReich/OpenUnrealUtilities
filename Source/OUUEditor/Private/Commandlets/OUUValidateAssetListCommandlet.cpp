@@ -84,6 +84,13 @@ int32 UOUUValidateAssetListCommandlet::Main(const FString& FullCommandLine)
 		AssetRegistry.WaitForCompletion();
 	}
 
+	// Setup list of monitored log listings
+	FMessageLogModule& MessageLogModule = FModuleManager::LoadModuleChecked<FMessageLogModule>("MessageLog");
+	for (auto LogListingName : UOUUAssetValidationSettings::Get().AssetListValidation_MonitoredMessageLogListings)
+	{
+		MonitoredLogListings.Add(MessageLogModule.GetLogListing(LogListingName));
+	}
+
 	const auto ReportObject = MakeShared<FJsonObject>();
 	int32 NumInvalidAssets = 0;
 
@@ -124,6 +131,8 @@ int32 UOUUValidateAssetListCommandlet::Main(const FString& FullCommandLine)
 			OUT NumInvalidAssets);
 	}
 
+	MonitoredLogListings.Empty();
+
 	FString JsonString;
 	const TSharedRef<TJsonWriter<>> JsonWriter = TJsonWriterFactory<>::Create(OUT & JsonString);
 	ensure(FJsonSerializer::Serialize(ReportObject, JsonWriter));
@@ -157,18 +166,14 @@ void UOUUValidateAssetListCommandlet::ValidateEntry(
 		AssetRegistry.GetAssetsByPackageName(*AssetListEntry, OUT PackageAssetsData);
 	}
 
-	FMessageLogModule& MessageLogModule = FModuleManager::LoadModuleChecked<FMessageLogModule>("MessageLog");
-	const auto MapCheckListing = MessageLogModule.GetLogListing(TEXT("MapCheck"));
-
 	for (auto& Asset : PackageAssetsData)
 	{
-		ValidateSingleAsset(EditorValidationSubsystem, MapCheckListing, Asset, OutReportObject, OutNumInvalidAssets);
+		ValidateSingleAsset(EditorValidationSubsystem, Asset, OutReportObject, OutNumInvalidAssets);
 	}
 }
 
 void UOUUValidateAssetListCommandlet::ValidateSingleAsset(
 	const UEditorValidatorSubsystem& EditorValidationSubsystem,
-	const TSharedRef<IMessageLogListing>& MapCheckListing,
 	const FAssetData& Asset,
 	const TSharedRef<FJsonObject>& OutReportObject,
 	int32& OutNumInvalidAssets)
@@ -179,9 +184,12 @@ void UOUUValidateAssetListCommandlet::ValidateSingleAsset(
 		return;
 	}
 
-	MapCheckListing->ClearMessages();
-	TArray<FString> AssetErrorStrings;
+	for (auto LogListing : MonitoredLogListings)
+	{
+		LogListing->ClearMessages();
+	}
 
+	TArray<FString> AssetErrorStrings;
 	// Load the asset but make sure we don't accidentally load a whole World partition map with all actors.
 	auto* AssetPtr = Asset.GetAsset({ULevel::DontLoadExternalObjectsTag});
 
@@ -239,20 +247,23 @@ void UOUUValidateAssetListCommandlet::ValidateSingleAsset(
 		}
 	}
 
-	// Add all map check errors that were reported during this assets validation.
-	auto MapCheckMessages = MapCheckListing->GetFilteredMessages();
-	for (const auto& MapCheckMessage : MapCheckMessages)
+	// Add all message log messages in monitored listings
+	for (auto LogListing : MonitoredLogListings)
 	{
-		if (MapCheckMessage->GetSeverity() != EMessageSeverity::Info)
+		auto Messages = LogListing->GetFilteredMessages();
+		for (const auto& Message : Messages)
 		{
-			auto MapCheckMessageString = MapCheckMessage->ToText().ToString();
-			if (MapCheckMessageString.Contains(TEXT("See the MapCheck log messages for details")))
+			if (Message->GetSeverity() != EMessageSeverity::Info)
 			{
-				// Ignore the "See the MapCheck log messages for details" message that is added for every actor
-				// that fails the map check.
-				continue;
+				auto MessageString = Message->ToText().ToString();
+				if (MessageString.Contains(TEXT("See the MapCheck log messages for details")))
+				{
+					// Ignore the "See the MapCheck log messages for details" message that is added for every actor
+					// that fails the map check.
+					continue;
+				}
+				AssetErrorStrings.Add(MessageString);
 			}
-			AssetErrorStrings.Add(MapCheckMessageString);
 		}
 	}
 

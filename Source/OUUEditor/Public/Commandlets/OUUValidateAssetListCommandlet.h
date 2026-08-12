@@ -31,8 +31,10 @@ private:
 
 	void ValidateSingleAsset(
 		const UEditorValidatorSubsystem& EditorValidationSubsystem,
-		const TSharedRef<IMessageLogListing>& MapCheckListing,
 		const FAssetData& Asset,
 		const TSharedRef<FJsonObject>& OutReportObject,
 		int32& OutNumInvalidAssets);
+	
+private:
+	TArray<TSharedPtr<IMessageLogListing>> MonitoredLogListings; 
 };
