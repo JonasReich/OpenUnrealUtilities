@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2026 Jonas Reich & Contributors
+// Copyright (c) 2026 Jonas Reich & Contributors
 
 #include "SActorMap.h"
 
@@ -330,13 +330,13 @@ namespace OUU::Developer::ActorMapWindow
 			.Content()
 			[
 				SNew(SImage)
-                .Image(&MapBrush)
+				.Image(&MapBrush)
 			]
 		]
 		+ SOverlay::Slot()
 		[
 			SNew(SBorder)
-			.Clipping(EWidgetClipping::ClipToBounds)
+			.Clipping(EWidgetClipping::ClipToBounds).BorderImage(nullptr)
 			[	
 				SNew(SActorLocationOverlay, TargetWorld.Get())
 					.ActorQueries(&ActorQueries)
