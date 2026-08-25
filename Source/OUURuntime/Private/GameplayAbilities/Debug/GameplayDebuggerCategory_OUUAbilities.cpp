@@ -44,6 +44,42 @@ FAutoConsoleVariableRef CVar_bPrintUnmappedCues{
 	bPrintUnmappedCues,
 	TEXT("Should unmapped gameplay cues be printed? (Default: false)")};
 
+bool bOverrideCategoryAttribute = false;
+FAutoConsoleVariableRef CVar_bOverrideCategoryAttribute{
+	TEXT("ouu.Debug.Ability.ShowAttributes"),
+	bOverrideCategoryAttribute,
+	TEXT("If set to true, only this and other ShowXXXX enabled categories are drawn")};
+
+bool bOverrideCategoryGE = false;
+FAutoConsoleVariableRef CVar_bOverrideCategoryGE{
+	TEXT("ouu.Debug.Ability.ShowEffects"),
+	bOverrideCategoryGE,
+	TEXT("If set to true, only this and other ShowXXXX enabled categories are drawn")};
+
+bool bOverrideCategoryAbility = false;
+FAutoConsoleVariableRef CVar_bOverrideCategoryAbility{
+	TEXT("ouu.Debug.Ability.ShowAbilities"),
+	bOverrideCategoryAbility,
+	TEXT("If set to true, only this and other ShowXXXX enabled categories are drawn")};
+
+bool bOverrideCategoryGECue = false;
+FAutoConsoleVariableRef CVar_bOverrideCategoryGECue{
+	TEXT("ouu.Debug.Ability.ShowEffectCues"),
+	bOverrideCategoryGECue,
+	TEXT("If set to true, only this and other ShowXXXX enabled categories are drawn")};
+
+bool bOverrideCategoryTag = false;
+FAutoConsoleVariableRef CVar_bOverrideCategoryTag{
+	TEXT("ouu.Debug.Ability.ShowTags"),
+	bOverrideCategoryTag,
+	TEXT("If set to true, only this and other ShowXXXX enabled categories are drawn")};
+
+bool bOverrideCategoryEvent = false;
+FAutoConsoleVariableRef CVar_bOverrideCategoryEvent{
+	TEXT("ouu.Debug.Ability.ShowEvents"),
+	bOverrideCategoryEvent,
+	TEXT("If set to true, only this and other ShowXXXX enabled categories are drawn")};
+
 void FGameplayDebuggerCategory_OUUAbilities::DrawBackground(
 	FGameplayDebuggerCanvasContext& CanvasContext,
 	const FVector2D& BackgroundLocation,
@@ -520,6 +556,10 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawDebugBody()
 	// First the categories that have a pretty stable length - then the categories that are more fluctuating.
 	// That way the entries don't jump around AS MUCH on the screen.
 
+	bool AnyOverridesEnabled =
+		bOverrideCategoryAttribute || bOverrideCategoryAbility || bOverrideCategoryGE || bOverrideCategoryGECue || bOverrideCategoryEvent || bOverrideCategoryTag;
+
+	if (AnyOverridesEnabled == false || bOverrideCategoryAttribute)
 	{
 		DEBUG_BODY_SECTION("ATTRIBUTES")
 
@@ -533,8 +573,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawDebugBody()
 		}
 	}
 
-	NewColumn();
-
+	if (AnyOverridesEnabled == false || bOverrideCategoryAbility)
 	{
 		DEBUG_BODY_SECTION("ABILITIES")
 
@@ -552,6 +591,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawDebugBody()
 		}
 	}
 
+	if (AnyOverridesEnabled == false || bOverrideCategoryGECue)
 	{
 		DEBUG_BODY_SECTION("CUES")
 		UGameplayCueManager* CueManager = UAbilitySystemGlobals::Get().GetGameplayCueManager();
@@ -565,6 +605,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawDebugBody()
 		}
 	}
 
+	if (AnyOverridesEnabled == false || bOverrideCategoryTag)
 	{
 		DEBUG_BODY_SECTION("TAGS")
 		FGameplayTagContainer OwnerTags;
@@ -573,8 +614,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawDebugBody()
 		AddTagList(BlockedAbilityTags, "BlockedAbilityTags");
 	}
 
-	NewColumn();
-
+	if (AnyOverridesEnabled == false || bOverrideCategoryGE)
 	{
 		DEBUG_BODY_SECTION("GAMEPLAY EFFECTS")
 		for (FActiveGameplayEffect& ActiveGE : &(AbilitySystem->ActiveGameplayEffects))
@@ -583,6 +623,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawDebugBody()
 		}
 	}
 
+	if ((AnyOverridesEnabled == false || bOverrideCategoryEvent) && AbilitySystem->CircularGameplayEventHistory.Num())
 	{
 		DEBUG_BODY_SECTION("GAMEPLAY EVENTS")
 		for (auto Entry : ReverseRange(AbilitySystem->CircularGameplayEventHistory))
@@ -753,9 +794,12 @@ void FGameplayDebuggerCategory_OUUAbilities::AddTagList(FGameplayTagContainer Ta
 			CombinedTagsString += TEXT(", ");
 		}
 	}
-
-	DebugLine(FString::Printf(TEXT("%s: %s"), *TagsListTitle, *CombinedTagsString), 4.f, 2);
-	DebugLine("", 0.f, 2);
+	
+	if (CombinedTagsString.IsEmpty() == false)
+	{
+		DebugLine(FString::Printf(TEXT("%s: %s"), *TagsListTitle, *CombinedTagsString), 4.f, 2);
+        	DebugLine("", 0.f, 2);
+	}
 }
 
 #endif
