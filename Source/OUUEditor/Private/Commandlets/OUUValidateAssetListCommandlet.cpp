@@ -15,6 +15,7 @@
 #include "LogOpenUnrealUtilities.h"
 #include "MessageLogModule.h"
 #include "Misc/FileHelper.h"
+#include "Misc/OUUAssetRegistryUtils.h"
 #include "Serialization/JsonSerializer.h"
 
 namespace OUU::Editor::ValidateAssetList::Private
@@ -72,17 +73,7 @@ int32 UOUUValidateAssetListCommandlet::Main(const FString& FullCommandLine)
 	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
 
 	// Make sure asset registry is fully loaded before validation, some assets may rely on that.
-	if (UE::AssetRegistry::ShouldSearchAllAssetsAtStart() == false)
-	{
-		AssetRegistry.SearchAllAssets(true);
-		// Note: OnFilesLoaded will never be broadcast if the asset registry doesn't search all assets right from the
-		// start, so we have to trigger that manually. Why?
-		AssetRegistry.OnFilesLoaded().Broadcast();
-	}
-	else
-	{
-		AssetRegistry.WaitForCompletion();
-	}
+	OUU::Runtime::AssetRegistryUtils::WaitForAssetRegistry();
 
 	// Setup list of monitored log listings
 	FMessageLogModule& MessageLogModule = FModuleManager::LoadModuleChecked<FMessageLogModule>("MessageLog");
