@@ -2,6 +2,7 @@
 
 #include "Localization/OUUTextLibrary.h"
 
+#include "HAL/LowLevelMemTracker.h"
 #include "HAL/PlatformFileManager.h"
 #include "Interfaces/IPluginManager.h"
 #include "Internationalization/Culture.h"
@@ -76,6 +77,8 @@ void UOUUTextLibrary::RegisterPluginStringTable(
 	const FString& InNamespace,
 	const FString& InPluginRelativeTablePath)
 {
+	LLM_SCOPE(ELLMTag::Localization);
+
 	auto pPlugin = IPluginManager::Get().FindPlugin(InPluginName);
 	if (ensureMsgf(pPlugin, TEXT("Plugin %s not found"), *InPluginName))
 	{
@@ -137,6 +140,8 @@ TSet<FString> UOUUTextLibrary::GetCSVTranslationCultureNames(const FString& CsvD
 
 void UOUUTextLibrary::LoadLocalizedTextsFromCSV(const FString& CsvDirectoryPath)
 {
+	LLM_SCOPE(ELLMTag::Localization);
+
 	TArray<FString> PrioritizedCultureNames;
 #if WITH_EDITOR
 	const auto PIEPreviewLanguage = FTextLocalizationManager::Get().GetConfiguredGameLocalizationPreviewLanguage();
@@ -193,6 +198,8 @@ void UOUUTextLibrary::LoadLocalizedTextsFromCSV(
 	const FString& Culture,
 	TMap<FOUUTextIdentity, FPolyglotTextData>& InOutPolyglotTextData)
 {
+	LLM_SCOPE(ELLMTag::Localization);
+
 	FString CSVData;
 	const bool bLoadedFile = FFileHelper::LoadFileToString(CSVData, *CsvFilePath);
 	if (bLoadedFile == false)
