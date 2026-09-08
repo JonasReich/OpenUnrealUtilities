@@ -9,18 +9,18 @@
 #include "Engine/AssetManager.h"
 #include "GameEntitlements/OUUGameEntitlements.h"
 #include "GameEntitlements/OUUGameEntitlementsSettings.h"
-#include "GameplayTagsEditorModule.h"
-#include "GameplayTagsModule.h"
-#include "ISinglePropertyView.h"
-#include "LevelEditor.h"
-#include "Logging/MessageLogMacros.h"
 #include "MaterialAnalyzer/OUUMaterialAnalyzer.h"
 #include "Modules/ModuleManager.h"
 #include "OUUContentBrowserExtensions.h"
-#include "SGameplayTagWidget.h"
+#include "PIESettings/OUUPIESettingsRegistry.h"
+#include "PIESettings/OUUPIESettingsTab.h"
 
 namespace OUU::Editor
 {
+	static const FName GEntitlementOverrideVersionId = TEXT("OUU.Entitlements.OverrideVersion");
+	// The console variable entry is identified by the variable name itself.
+	static const FName GEntitlementUnlockAllDlcId = TEXT("ouu.Entitlements.UnlockAllDlc");
+
 	class FOUUEditorModule : public IModuleInterface
 	{
 	public:
@@ -40,19 +40,10 @@ namespace OUU::Editor
 			MaterialAnalyzer::RegisterNomadTabSpawner();
 			ContentBrowserExtensions::RegisterHooks();
 
-			if (FLevelEditorModule* LevelEditorModule =
-					FModuleManager::GetModulePtr<FLevelEditorModule>(TEXT("LevelEditor")))
-			{
-				EntitlementsMenuExtender = MakeShareable(new FExtender());
-				EntitlementsMenuExtender->AddToolBarExtension(
-					"Play",
-					EExtensionHook::After,
-					nullptr,
-					FToolBarExtensionDelegate::CreateRaw(
-						this,
-						&FOUUEditorModule::CreateGameEntitlementsToolbarExtension));
-				LevelEditorModule->GetToolBarExtensibilityManager()->AddExtender(EntitlementsMenuExtender);
-			}
+			FCoreDelegates::OnPostEngineInit.AddRaw(this, &FOUUEditorModule::RegisterGameEntitlementsPIESettings);
+
+			PIESettings::RegisterNomadTabSpawner();
+			PIESettings::RegisterToolbarExtension();
 		}
 
 		void ShutdownModule() override
@@ -63,15 +54,11 @@ namespace OUU::Editor
 				OnUtilityWidgetsLoadedHandle = nullptr;
 			}
 
-			if (EntitlementsMenuExtender.IsValid())
-			{
-				if (FLevelEditorModule* LevelEditorModule =
-						FModuleManager::GetModulePtr<FLevelEditorModule>(TEXT("LevelEditor")))
-				{
-					LevelEditorModule->GetToolBarExtensibilityManager()->RemoveExtender(EntitlementsMenuExtender);
-				}
-			}
-			EntitlementsMenuExtender.Reset();
+			FCoreDelegates::OnPostEngineInit.RemoveAll(this);
+
+			PIESettings::UnregisterToolbarExtension();
+			PIESettings::UnregisterNomadTabSpawner();
+			UnregisterGameEntitlementsPIESettings();
 
 			MaterialAnalyzer::UnregisterNomadTabSpawner();
 			ContentBrowserExtensions::UnregisterHooks();
@@ -80,7 +67,6 @@ namespace OUU::Editor
 	private:
 		FDelegateHandle OnFilesLoadedHandle;
 		TSharedPtr<FStreamableHandle> OnUtilityWidgetsLoadedHandle;
-		TSharedPtr<FExtender> EntitlementsMenuExtender;
 
 		void HandleOnFiledLoaded()
 		{
@@ -158,30 +144,60 @@ namespace OUU::Editor
 				TEXT("RegisterEditorUtilityWidgets"));
 		}
 
-		void CreateGameEntitlementsToolbarExtension(FToolBarBuilder& ToolbarBuilder)
+		PIESettings::FCapabilityState EvaluateEntitledContent()
 		{
-			if (UOUUGameEntitlementSettings::Get().EnablePIEToolbarExtension == false)
+			auto& EntitlementSubsystem = UOUUGameEntitlementsSubsystem::Get();
+			const FOUUGameEntitlementVersion ActiveVersion = EntitlementSubsystem.GetActiveVersion();
+			if (ActiveVersion.IsValid() == false)
 			{
-				return;
+				return PIESettings::FCapabilityState(
+					PIESettings::ECapabilityStatus::Unavailable,
+					INVTEXT("No entitlement version resolved, so every gated module is locked."));
 			}
 
-			ToolbarBuilder.BeginSection("OUUEntitlements");
+			for (auto& DLCEntry : UOUUGameEntitlementSettings::Get().SteamDlcEntitlements)
 			{
-				FPropertyEditorModule& PropertyEditorModule =
-					FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-				FSinglePropertyParams PropertyParams;
-				PropertyParams.NameOverride = INVTEXT("Entitlement\nOverride\nVersion");
-				const TSharedPtr<ISinglePropertyView> OverrideEntitlementProperty =
-					PropertyEditorModule.CreateSingleProperty(
-						&UOUUGameEntitlementsSubsystem::Get(),
-						TEXT("OverrideVersion"),
-						PropertyParams);
-				if (OverrideEntitlementProperty.IsValid())
+				for (auto& Tag : DLCEntry.Value)
 				{
-					ToolbarBuilder.AddWidget(OverrideEntitlementProperty.ToSharedRef());
+					if (EntitlementSubsystem.IsEntitled(FOUUGameEntitlementModule::ConvertChecked(Tag)) == false)
+					{
+						return PIESettings::FCapabilityState(
+							PIESettings::ECapabilityStatus::Limited,
+							FText::Format(
+								INVTEXT("no entitlement for DLC {0}"),
+								FText::FromName(Tag.GetTagLeafName())));
+					}
 				}
 			}
-			ToolbarBuilder.EndSection();
+
+			return PIESettings::FCapabilityState(
+				PIESettings::ECapabilityStatus::Available,
+				FText::Format(INVTEXT("Running as '{0}'."), FText::FromName(ActiveVersion.GetTagLeafName())));
+		}
+
+		void RegisterGameEntitlementsPIESettings()
+		{
+			PIESettings::FSettingEntry OverrideVersion = PIESettings::MakePropertyEntry(
+				TEXT("Entitlements"),
+				GEntitlementOverrideVersionId,
+				&UOUUGameEntitlementsSubsystem::Get(),
+				TEXT("OverrideVersion"));
+			OverrideVersion.bShowInToolbar = true;
+			PIESettings::RegisterSetting(MoveTemp(OverrideVersion));
+
+			PIESettings::FCapability EntitlementCapability{
+				TEXT("TQ2.Capability.EntitledContent"),
+				INVTEXT("Entitlement-gated content"),
+				INVTEXT("Which chapters, data layers and modules the session may reach."),
+				[this] { return EvaluateEntitledContent(); }};
+
+			PIESettings::RegisterCapability(MoveTemp(EntitlementCapability));
+		}
+
+		void UnregisterGameEntitlementsPIESettings()
+		{
+			PIESettings::UnregisterSetting(GEntitlementOverrideVersionId);
+			PIESettings::UnregisterSetting(GEntitlementUnlockAllDlcId);
 		}
 	};
 } // namespace OUU::Editor

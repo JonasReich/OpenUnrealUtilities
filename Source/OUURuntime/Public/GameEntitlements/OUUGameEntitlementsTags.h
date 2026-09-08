@@ -11,10 +11,14 @@ OUU_DECLARE_GAMEPLAY_TAGS_START(
 	FOUUGameEntitlementTags,
 	"GameEntitlements",
 	"Tags for the game entitlements system from the OpenUnrealUtilities plugin")
-	OUU_GTAG(
+	OUU_GTAG_GROUP_START(
 		Module,
 		"Individual items a user/session may be entitled to access that can be locked/unlocked",
 		ParentTagType::Flags | EFlags::AllowContentChildTags)
+		OUU_GTAG(
+			UnlockAllDLC,
+			"Special entitlement module that can be added to a dev version to unlock all configured DLC entitlements")
+	OUU_GTAG_GROUP_END(Module)
 	OUU_GTAG(
 		Collection,
 		"Meta combination of modules that can be controlled at once",

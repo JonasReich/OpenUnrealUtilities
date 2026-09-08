@@ -263,12 +263,12 @@ void UOUUGameEntitlementsSubsystem::RefreshActiveVersionAndEntitlements()
 	// Prevent recursing into this function
 	bHasInitializedActiveEntitlements = false;
 
-	static FOUUGameEntitlementVersion CachedOverrideVersion;
-	if (OUU::Runtime::GameEntitlements::GetOverrideEntitlement() != CachedOverrideVersion)
+	static FOUUGameEntitlementVersion CVarOverrideVersion_Cached;
+	if (OUU::Runtime::GameEntitlements::GetOverrideEntitlement() != CVarOverrideVersion_Cached)
 	{
 		// Only update the override version with the CVar's value if it has changed
 		OUU::Runtime::GameEntitlements::UpdateOverrideEntitlementFromCVar();
-		CachedOverrideVersion = OverrideVersion;
+		CVarOverrideVersion_Cached = OverrideVersion;
 	}
 
 	auto& Settings = UOUUGameEntitlementSettings::Get();
@@ -279,6 +279,16 @@ void UOUUGameEntitlementsSubsystem::RefreshActiveVersionAndEntitlements()
 	auto& DefaultVersion = Settings.DefaultVersion;
 #endif
 	ActiveVersion = OverrideVersion.IsValid() ? OverrideVersion : DefaultVersion;
+
+#if WITH_EDITOR
+	// Also write entitlement back to the override field in order to make the editor toolbar always show the active
+	// entitlement. We only need separate properties to decide which version to pick.
+	if (OverrideVersion.IsValid() == false)
+	{
+		OverrideVersion = ActiveVersion;
+	}
+#endif
+
 	ActiveEntitlements.Reset();
 	if (auto* EntitlementsPtr = Settings.EntitlementsPerVersion.Find(ActiveVersion))
 	{
@@ -322,6 +332,17 @@ void UOUUGameEntitlementsSubsystem::RefreshActiveVersionAndEntitlements()
 		}
 		LastEntitlementCount = ActiveEntitlements.Num();
 	}
+
+#if !UE_BUILD_SHIPPING
+	// 2nd way to obtain all DLC: if the version or any collection contains the "grant all DLC" module
+	if (ActiveEntitlements.HasTag(FOUUGameEntitlementTags::Module::UnlockAllDLC::Get()))
+	{
+		for (const auto& DlcEntry : Settings.SteamDlcEntitlements)
+		{
+			ActiveEntitlements.AppendTags(FOUUGameEntitlementModuleAndCollections_Value::CreateChecked(DlcEntry.Value));
+		}
+	}
+#endif
 
 	bHasInitializedActiveEntitlements = true;
 	OnActiveEntitlementsChanged.Broadcast();
