@@ -8,6 +8,8 @@
 #include "UObject/ScriptInterface.h"
 #include "UObject/WeakInterfacePtr.h"
 
+#include <type_traits>
+
 /**
  * Call a function on a blueprint implementable interface object.
  * The object can be any of [UObject*, TScriptInterface, IInterface*].
@@ -52,8 +54,33 @@
 	TRY_ASSIGN_INTERFACE(AssignTarget, InterfaceType, Function, InterfaceObject, ##__VA_ARGS__)                        \
 	else { AssignTarget = FallbackValue; }
 
+#if defined(__RESHARPER__)
+/**
+ * ReSharper's C++ front-end cannot resolve UClassType::StaticClassFlags, which UE 5.7 declares via
+ * the DECLARE_CLASS2 macro. That makes TIsIInterface<T>::Value evaluate to false, which in turn
+ * SFINAEs away every constrained overload below, so code inspection reports them as
+ * CppCompilerErrors ("No viable function") even though the code compiles fine.
+ *
+ * For code inspection only, detect interfaces via the UClassType typedef that UHT injects into
+ * every IInterface class - ReSharper resolves that one correctly. The real compiler keeps the
+ * engine trait, including its CLASS_Interface flag check.
+ */
+template <typename T, typename = void>
+struct TIsIInterfaceForCodeInspection : std::false_type
+{
+};
+
+template <typename T>
+struct TIsIInterfaceForCodeInspection<T, std::void_t<typename T::UClassType>> : std::true_type
+{
+};
+
+template <typename T>
+using TIsIInterface_T = TEnableIf<TIsIInterfaceForCodeInspection<T>::value>::Type;
+#else
 template <typename T>
 using TIsIInterface_T = typename TEnableIf<TIsIInterface<T>::Value>::Type;
+#endif
 
 /** Get the underlying object from an interface so you can call Execute_* functions on it */
 template <typename T, typename = TIsIInterface_T<T>>
