@@ -61,8 +61,8 @@ namespace OUU::Developer
 
 		void RegisterDebugDrawDelegates(bool Register);
 
-	protected:
 		// - FTickableGameObject
+	public:
 		void Tick(float DeltaTime) override;
 		TStatId GetStatId() const override;
 		ETickableTickType GetTickableTickType() const override;
@@ -71,6 +71,7 @@ namespace OUU::Developer
 		UWorld* GetTickableGameObjectWorld() const override;
 		// --
 
+	protected:
 		void OnDrawDebugService(UCanvas* InCanvas, APlayerController* PlayerController) const;
 		virtual void OnDrawDebug(UCanvas* InCanvas) const;
 	};

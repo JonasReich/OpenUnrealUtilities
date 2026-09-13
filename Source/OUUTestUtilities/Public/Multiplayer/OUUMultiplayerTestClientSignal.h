@@ -11,7 +11,7 @@
 class AOUUMultiplayerFunctionalTest;
 
 // This class is used to send signals from clients to the server.
-// With 2+ clients we need one actor for each client where they can be the NetOwner, so they can send RPCs. 
+// With 2+ clients we need one actor for each client where they can be the NetOwner, so they can send RPCs.
 UCLASS(BlueprintType)
 class AOUUMultiplayerTestClientSignal : public AInfo
 {
@@ -22,9 +22,10 @@ public:
 	AOUUMultiplayerTestClientSignal();
 
 	// - AActor
+protected:
 	void BeginPlay() override;
 	// --
-	
+
 private:
 	UFUNCTION(Server, Reliable)
 	void Server_NotifySyncPointReached(AOUUMultiplayerFunctionalTest* Test, int32 SyncPoint);

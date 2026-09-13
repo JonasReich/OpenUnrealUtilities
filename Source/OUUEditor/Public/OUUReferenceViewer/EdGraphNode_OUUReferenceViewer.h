@@ -16,7 +16,7 @@ class OUUEDITOR_API UEdGraphNode_OUUReferenceViewer : public UEdGraphNode
 
 public:
 	void Setup(const FOUUReferenceViewerNode& DataNode);
-	void AddReferencer(UEdGraphNode_OUUReferenceViewer& Referencer);
+	void AddReferencer(const UEdGraphNode_OUUReferenceViewer& Referencer);
 
 	TWeakObjectPtr<UObject> GetPayload() const;
 

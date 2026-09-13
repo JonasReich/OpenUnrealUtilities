@@ -7,6 +7,7 @@
 
 class FOUUDeveloperModule : public IModuleInterface
 {
+public:
 	void StartupModule() override { OUU::Developer::ActorMapWindow::RegisterNomadTabSpawner(); }
 	void ShutdownModule() override { OUU::Developer::ActorMapWindow::UnregisterNomadTabSpawner(); }
 };

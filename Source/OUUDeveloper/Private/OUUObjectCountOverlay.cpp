@@ -34,6 +34,7 @@ private:
 	TCircularAggregator<float> Buffer_ComponentsPerActor{NumFramesForBuffer};
 
 	// - TWorldStatsOverlay
+public:
 	void TickStats(UWorld* TargetWorld) override
 	{
 		int32 ActorCount = 0;

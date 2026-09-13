@@ -81,14 +81,16 @@ public:
 	void SetOverrideTimeScale(double NewTimeScale);
 
 	// - AActor
-public:
-	void BeginPlay() override;
-	void EndPlay(const EEndPlayReason::Type Reason) override;
-
 #if WITH_EDITOR
+public:
 	void PostLoad() override;
 	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
+
+protected:
+	void BeginPlay() override;
+	void EndPlay(const EEndPlayReason::Type Reason) override;
+
 	// --
 
 	void RefreshInitialTime();
@@ -121,5 +123,5 @@ private:
 	AGameStateBase* CachedGameState = nullptr;
 
 	UFUNCTION()
-	void OnRep_TimeBlend(FOUUSyncedGameTimeBlend OldBlend);
+	void OnRep_TimeBlend(const FOUUSyncedGameTimeBlend& OldBlend);
 };

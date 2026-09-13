@@ -304,11 +304,11 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayAbilityInstance(UOUUGam
 
 	bool FirstTaskMsg = true;
 	int32 MsgCount = 0;
-	constexpr int32 MaskTaskDebugCount = 5;
 	for (FAbilityTaskDebugMessage& Msg : ReverseRange(Instance->TaskDebugMessages))
 	{
 		if (Instance->ActiveTasks.Contains(Msg.FromTask) == false)
 		{
+			constexpr int32 MaskTaskDebugCount = 5;
 			// Cap finished task messages to 5 per ability if we are printing to screen (else things
 			// will scroll off)
 			if (++MsgCount > MaskTaskDebugCount)
@@ -556,8 +556,8 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawDebugBody()
 	// First the categories that have a pretty stable length - then the categories that are more fluctuating.
 	// That way the entries don't jump around AS MUCH on the screen.
 
-	bool AnyOverridesEnabled =
-		bOverrideCategoryAttribute || bOverrideCategoryAbility || bOverrideCategoryGE || bOverrideCategoryGECue || bOverrideCategoryEvent || bOverrideCategoryTag;
+	bool AnyOverridesEnabled = bOverrideCategoryAttribute || bOverrideCategoryAbility || bOverrideCategoryGE
+		|| bOverrideCategoryGECue || bOverrideCategoryEvent || bOverrideCategoryTag;
 
 	if (AnyOverridesEnabled == false || bOverrideCategoryAttribute)
 	{
@@ -794,11 +794,11 @@ void FGameplayDebuggerCategory_OUUAbilities::AddTagList(FGameplayTagContainer Ta
 			CombinedTagsString += TEXT(", ");
 		}
 	}
-	
+
 	if (CombinedTagsString.IsEmpty() == false)
 	{
 		DebugLine(FString::Printf(TEXT("%s: %s"), *TagsListTitle, *CombinedTagsString), 4.f, 2);
-        	DebugLine("", 0.f, 2);
+		DebugLine("", 0.f, 2);
 	}
 }
 

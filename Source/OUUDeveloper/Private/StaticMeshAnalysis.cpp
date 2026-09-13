@@ -536,6 +536,7 @@ private:
 	TArray<FString> CustomCollisionMeshPaths;
 
 	// - TWorldStatsOverlay
+public:
 	void TickStats(UWorld* TargetWorld) override
 	{
 		const bool bUseLogarithmicYAxis = CVarUseLogarithmicYAxis.GetValueOnAnyThread();
@@ -589,6 +590,7 @@ private:
 		CustomCollisionMeshPaths = MoveTemp(Results.CustomCollisionMeshPaths);
 	}
 
+protected:
 	void OnDrawDebug(UCanvas* InCanvas) const override
 	{
 		FWorldStatsOverlay::OnDrawDebug(InCanvas);

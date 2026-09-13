@@ -57,6 +57,10 @@ public:
 	void Initialize(FSubsystemCollectionBase& Collection) override;
 	void Deinitialize() override;
 
+#if WITH_EDITOR
+	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
+
 public:
 	// Called when entitlements are first initialized or changed by setting an override version.
 	FSimpleMulticastDelegate OnActiveEntitlementsChanged;
@@ -67,7 +71,6 @@ private:
 
 #if WITH_EDITOR
 	void OnSettingsChanged(FPropertyChangedChainEvent& PropertyChangedEvent);
-	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 	void RefreshActiveVersionAndEntitlements();
 
