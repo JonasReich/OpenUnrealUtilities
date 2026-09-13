@@ -14,7 +14,7 @@ template <typename IteratorType>
 struct TIteratorTraits<IteratorType, false>
 {
 	using ReferenceType = decltype(DeclVal<IteratorType>().operator*());
-	using ElementType = typename TRemoveReference<ReferenceType>::Type;
+	using ElementType = TRemoveReference<ReferenceType>::Type;
 	using PointerType = ElementType*;
 };
 
@@ -22,7 +22,7 @@ struct TIteratorTraits<IteratorType, false>
 template <typename IteratorType>
 struct TIteratorTraits<IteratorType, true>
 {
-	using ElementType = typename TRemovePointer<IteratorType>::Type;
+	using ElementType = TRemovePointer<IteratorType>::Type;
 	using PointerType = ElementType*;
 	using ReferenceType = ElementType&;
 };

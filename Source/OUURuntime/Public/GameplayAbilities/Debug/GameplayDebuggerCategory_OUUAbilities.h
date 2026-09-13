@@ -33,7 +33,7 @@ public:
 
 	void DrawData(APlayerController* OwnerPC, FGameplayDebuggerCanvasContext& CanvasContext) override;
 	void DebugDrawGameplayEffectModifier(
-		FActiveGameplayEffect& ActiveGE,
+		const FActiveGameplayEffect& ActiveGE,
 		const FModifierSpec& ModSpec,
 		const FGameplayModifierInfo& ModInfo);
 
@@ -67,7 +67,7 @@ protected:
 
 	void DrawGameplayCue(
 		UGameplayCueManager* CueManager,
-		FString BaseCueTagString,
+		const FString& BaseCueTagString,
 		UGameplayCueSet* CueSet,
 		FGameplayTag ThisGameplayCueTag);
 

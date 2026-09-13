@@ -84,10 +84,10 @@ public:
 	FOnOUUWebBrowserConsoleMessage OnConsoleMessage;
 
 	// -- UWidget
-	virtual void SynchronizeProperties() override;
-	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
+	void SynchronizeProperties() override;
+	void ReleaseSlateResources(bool bReleaseChildren) override;
 #if WITH_EDITOR
-	virtual const FText GetPaletteCategory() override;
+	const FText GetPaletteCategory() override;
 #endif
 
 protected:
@@ -103,7 +103,7 @@ protected:
 	TSharedPtr<SWebBrowser> WebBrowserWidget;
 
 	// -- UWidget
-	virtual TSharedRef<SWidget> RebuildWidget() override;
+	TSharedRef<SWidget> RebuildWidget() override;
 
 	/** Bound to SWebBrowser::OnUrlChanged; rebroadcasts via OnUrlChanged. */
 	void HandleOnUrlChanged(const FText& Text);

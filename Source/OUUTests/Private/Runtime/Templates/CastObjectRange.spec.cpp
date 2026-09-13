@@ -15,10 +15,10 @@ namespace OUU::Tests::CastObjectRangeTests
 		bool bTargetConst,
 		bool bCopySourceArray,
 		bool bForwardConstArray,
-		typename SourceType = typename TConditionalType<bSourceConst, const UObject*, UObject*>::Type,
-		typename TargetType = typename TConditionalType<bTargetConst, const AActor*, AActor*>::Type,
+		typename SourceType = TConditionalType<bSourceConst, const UObject*, UObject*>::Type,
+		typename TargetType = TConditionalType<bTargetConst, const AActor*, AActor*>::Type,
 		typename ForwardArrayType =
-			typename TConditionalType<bForwardConstArray, const TArray<SourceType>&, TArray<SourceType>&>::Type>
+			TConditionalType<bForwardConstArray, const TArray<SourceType>&, TArray<SourceType>&>::Type>
 	void TestObjectRange(FAutomationTestBase& AutomationTest, FString TestString)
 	{
 		// Arrange

@@ -105,7 +105,8 @@ namespace OUU::Runtime
 				R.MostCommonHitchType = EFrameHitchType::NoHitch;
 				int32 MaxHitchCount = 0;
 				// Skip the  EFrameHitchType::NoHitch (0) case
-				for (int32 HitchType = (int32)EFrameHitchType::UnknownUnit; HitchType <= (int32)EFrameHitchType::GPU;
+				for (int32 HitchType = static_cast<int32>(EFrameHitchType::UnknownUnit);
+					 HitchType <= static_cast<int32>(EFrameHitchType::GPU);
 					 ++HitchType)
 				{
 					if (HitchCounts[HitchType] > MaxHitchCount)
@@ -119,7 +120,8 @@ namespace OUU::Runtime
 				R.MostCongestedChannel = ETimingChannel::Frame;
 				int32 MaxBoundChannelCount = 0;
 				// Skip the frame summary channel
-				for (int32 ChannelIdx = (int32)ETimingChannel::Frame + 1; ChannelIdx < (int32)ETimingChannel::Num;
+				for (int32 ChannelIdx = static_cast<int32>(ETimingChannel::Frame) + 1;
+					 ChannelIdx < static_cast<int32>(ETimingChannel::Num);
 					 ++ChannelIdx)
 				{
 					if (BoundCounts[ChannelIdx] > MaxBoundChannelCount)

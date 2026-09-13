@@ -200,7 +200,7 @@ public:
 		StartTime = FPlatformTime::Seconds();
 	}
 
-	virtual ~FGarbageCollectionListener() override
+	~FGarbageCollectionListener() override
 	{
 		ClearTimer();
 		DumpCurrentClassDeletions();

@@ -77,7 +77,7 @@ struct TMinBitSizedInteger
 		return 0;
 	}
 
-	using Type = typename TBitSizedInteger<NearestIntegerBitCount(MinBitCount), bSigned>::Type;
+	using Type = TBitSizedInteger<NearestIntegerBitCount(MinBitCount), bSigned>::Type;
 };
 
 /** Trait that returns the smallest integer type which has enough mutable bits for the target number */
@@ -86,5 +86,5 @@ struct TMinValueInteger
 {
 	static const bool bSigned = IsNegativeInteger(TargetNumber);
 	static const SIZE_T MinBits = GetMinBitSize(TargetNumber);
-	using Type = typename TMinBitSizedInteger<MinBits, bSigned>::Type;
+	using Type = TMinBitSizedInteger<MinBits, bSigned>::Type;
 };

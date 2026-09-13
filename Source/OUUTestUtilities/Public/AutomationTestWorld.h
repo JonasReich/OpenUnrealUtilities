@@ -96,7 +96,7 @@ struct OUUTESTUTILITIES_API FOUUScopedAutomationTestWorld : public FOUUAutomatio
 public:
 	using Super = FOUUAutomationTestWorld;
 	explicit FOUUScopedAutomationTestWorld(const FString& InWorldName);
-	virtual ~FOUUScopedAutomationTestWorld() override;
+	~FOUUScopedAutomationTestWorld() override;
 
 	// - FAutomationTestWorld
 	void CreateWorld(const FString& WorldSuffix) override;

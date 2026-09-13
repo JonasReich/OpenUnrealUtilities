@@ -70,7 +70,7 @@ namespace OUU::Editor::PIESettings
 			if (CastField<FArrayProperty>(Property) && Object->IsA<UDeveloperSettings>())
 			{
 				Entry.MakeWidget =
-					[&, WeakObject = TWeakObjectPtr<UObject>(Object), PropertyName]() -> TSharedRef<SWidget> {
+					[&, WeakObject = TWeakObjectPtr<UObject>(Object)]() -> TSharedRef<SWidget> {
 					return SNew(SButton).Text(INVTEXT("Show in Settings")).OnClicked_Lambda([WeakObject]() {
 						OpenDeveloperSettings(Cast<UDeveloperSettings>(WeakObject.Get()));
 						return FReply::Handled();

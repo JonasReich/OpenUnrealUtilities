@@ -146,7 +146,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawData(
 }
 
 void FGameplayDebuggerCategory_OUUAbilities::DebugDrawGameplayEffectModifier(
-	FActiveGameplayEffect& ActiveGE,
+	const FActiveGameplayEffect& ActiveGE,
 	const FModifierSpec& ModSpec,
 	const FGameplayModifierInfo& ModInfo)
 {
@@ -448,7 +448,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawAbility(
 
 void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayCue(
 	UGameplayCueManager* CueManager,
-	FString BaseCueTagString,
+	const FString& BaseCueTagString,
 	UGameplayCueSet* CueSet,
 	FGameplayTag ThisGameplayCueTag)
 {
