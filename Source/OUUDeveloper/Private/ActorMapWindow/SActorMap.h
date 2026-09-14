@@ -33,7 +33,7 @@ namespace OUU::Developer::ActorMapWindow
 		void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 		// --
 
-		UWorld* GetDynamicTargetWorld() const;
+		static UWorld* GetDynamicTargetWorld();
 		/** Separate initializer outside of construct so the widget can be reused for a different world */
 		void InitializeForWorld(UWorld* InTargetWorld);
 		FORCEINLINE UWorld* GetTargetWorld() const { return TargetWorld.Get(); }

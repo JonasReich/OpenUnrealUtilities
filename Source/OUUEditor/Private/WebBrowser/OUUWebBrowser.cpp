@@ -112,7 +112,7 @@ TSharedRef<SWidget> UOUUWebBrowser::RebuildWidget()
 	return WebBrowserWidget.ToSharedRef();
 }
 
-void UOUUWebBrowser::HandleOnUrlChanged(const FText& Text)
+void UOUUWebBrowser::HandleOnUrlChanged(const FText& Text) const
 {
 	OnUrlChanged.Broadcast(Text);
 }
@@ -121,7 +121,7 @@ void UOUUWebBrowser::HandleOnConsoleMessage(
 	const FString& Message,
 	const FString& Source,
 	int32 Line,
-	EWebBrowserConsoleLogSeverity Severity)
+	EWebBrowserConsoleLogSeverity Severity) const
 {
 	OnConsoleMessage.Broadcast(Message, Source, Line);
 }

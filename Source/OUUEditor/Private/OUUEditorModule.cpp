@@ -144,7 +144,7 @@ namespace OUU::Editor
 				TEXT("RegisterEditorUtilityWidgets"));
 		}
 
-		PIESettings::FCapabilityState EvaluateEntitledContent()
+		static PIESettings::FCapabilityState EvaluateEntitledContent()
 		{
 			auto& EntitlementSubsystem = UOUUGameEntitlementsSubsystem::Get();
 			const FOUUGameEntitlementVersion ActiveVersion = EntitlementSubsystem.GetActiveVersion();
@@ -189,12 +189,12 @@ namespace OUU::Editor
 				TEXT("TQ2.Capability.EntitledContent"),
 				INVTEXT("Entitlement-gated content"),
 				INVTEXT("Which chapters, data layers and modules the session may reach."),
-				[this] { return EvaluateEntitledContent(); }};
+				EvaluateEntitledContent};
 
 			PIESettings::RegisterCapability(MoveTemp(EntitlementCapability));
 		}
 
-		void UnregisterGameEntitlementsPIESettings()
+		static void UnregisterGameEntitlementsPIESettings()
 		{
 			PIESettings::UnregisterSetting(GEntitlementOverrideVersionId);
 			PIESettings::UnregisterSetting(GEntitlementUnlockAllDlcId);

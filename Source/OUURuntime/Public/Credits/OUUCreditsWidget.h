@@ -33,6 +33,7 @@ public:
 	TWeakPtr<FActiveTimerHandle> TimerHandle;
 	float ScrollSpeedPixelsPerSecond = 0.0f;
 
+	// ReSharper disable once CppHidingFunction
 	void Construct(const FArguments& InArgs);
 	EActiveTimerReturnType RollCredits(double InCurrentTime, float InDeltaTime);
 

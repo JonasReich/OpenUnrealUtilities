@@ -529,7 +529,7 @@ namespace OUU::Developer::ActorMapWindow
 		}
 	}
 
-	UWorld* SActorMap::GetDynamicTargetWorld() const
+	UWorld* SActorMap::GetDynamicTargetWorld()
 	{
 		// Always prefer the play world (both in cooked game and in PIE)
 		if (UWorld* PossibleResult = GEngine->GetCurrentPlayWorld())

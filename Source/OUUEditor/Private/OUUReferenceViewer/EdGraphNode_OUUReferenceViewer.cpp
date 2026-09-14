@@ -15,7 +15,7 @@ void UEdGraphNode_OUUReferenceViewer::Setup(const FOUUReferenceViewerNode& DataN
 	PayloadObject = DataNode.OptionalPayload;
 }
 
-void UEdGraphNode_OUUReferenceViewer::AddReferencer(const UEdGraphNode_OUUReferenceViewer& Referencer)
+void UEdGraphNode_OUUReferenceViewer::AddReferencer(const UEdGraphNode_OUUReferenceViewer& Referencer) const
 {
 	UEdGraphPin* ReferencerDependencyPin = Referencer.DependencyPin;
 

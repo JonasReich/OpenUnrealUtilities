@@ -24,7 +24,7 @@ namespace OUU::Editor::Private::PIESettings
 	}
 
 	//------------------------------------------------------------------------------------------------------------------
-	TSharedRef<SWidget> SPIESettingsConsoleVariableRow::MakeValueWidget()
+	TSharedRef<SWidget> SPIESettingsConsoleVariableRow::MakeValueWidget() const
 	{
 		if (ConsoleVariable == nullptr)
 		{
@@ -49,7 +49,7 @@ namespace OUU::Editor::Private::PIESettings
 	}
 
 	//------------------------------------------------------------------------------------------------------------------
-	TSharedRef<SWidget> SPIESettingsConsoleVariableRow::MakeBoolWidget()
+	TSharedRef<SWidget> SPIESettingsConsoleVariableRow::MakeBoolWidget() const
 	{
 		return SNew(SCheckBox)
 			.IsChecked_Lambda([this]() -> ECheckBoxState {
@@ -60,7 +60,7 @@ namespace OUU::Editor::Private::PIESettings
 	}
 
 	//------------------------------------------------------------------------------------------------------------------
-	TSharedRef<SWidget> SPIESettingsConsoleVariableRow::MakeIntWidget()
+	TSharedRef<SWidget> SPIESettingsConsoleVariableRow::MakeIntWidget() const
 	{
 		return SNew(SNumericEntryBox<int32>)
 			.AllowSpin(false)
@@ -70,7 +70,7 @@ namespace OUU::Editor::Private::PIESettings
 	}
 
 	//------------------------------------------------------------------------------------------------------------------
-	TSharedRef<SWidget> SPIESettingsConsoleVariableRow::MakeFloatWidget()
+	TSharedRef<SWidget> SPIESettingsConsoleVariableRow::MakeFloatWidget() const
 	{
 		return SNew(SNumericEntryBox<float>)
 			.AllowSpin(false)
@@ -80,7 +80,7 @@ namespace OUU::Editor::Private::PIESettings
 	}
 
 	//------------------------------------------------------------------------------------------------------------------
-	TSharedRef<SWidget> SPIESettingsConsoleVariableRow::MakeStringWidget()
+	TSharedRef<SWidget> SPIESettingsConsoleVariableRow::MakeStringWidget() const
 	{
 		return SNew(SEditableTextBox)
 			.Text_Lambda([this]() { return FText::FromString(ConsoleVariable->GetString()); })
