@@ -3,6 +3,7 @@
 #include "AssetValidation/OUUTextValidator.h"
 
 #include "AssetValidation/OUUAssetValidationSettings.h"
+#include "Misc/DataValidation.h"
 #include "Serialization/PropertyLocalizationDataGathering.h"
 
 bool UOUUTextValidator::CanValidateAsset_Implementation(

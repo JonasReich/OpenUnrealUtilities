@@ -3,7 +3,6 @@
 #include "Core/OUUDataTableLibrary.h"
 
 #include "Blueprint/BlueprintExceptionInfo.h"
-#include "Misc/EngineVersionComparison.h"
 
 bool UOUUDataTableLibrary::AddRowToDataTable(UDataTable* DataTable, FName RowName, FTableRowBase RowStruct)
 {

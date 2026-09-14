@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ActorMapWindow/OUUActorMapWindow_TabSpawner.h"
+#include "ActorMapWindow/OUUactorMapQuery.h"
 #include "Slate/SplitterColumnSizeData.h"
 #include "Templates/BitmaskUtils.h"
 #include "Widgets/SWidget.h"

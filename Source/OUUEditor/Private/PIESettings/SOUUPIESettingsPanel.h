@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 
-#include "PIESettings/OUUPIESettingsRegistry.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/SCompoundWidget.h"
 

@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 
-#include "GameFramework/HUD.h"
 #include "Misc/CanvasGraphPlottingUtils.h"
 #include "Templates/CircularAggregator.h"
 #include "Tickable.h"

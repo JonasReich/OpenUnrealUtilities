@@ -2,8 +2,12 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
+#include "ActorMapWindow/OUUActorMapQuery.h"
 #include "ActorMapWindow/OUUActorMapWindow_TabSpawner.h"
 #include "Slate/SplitterColumnSizeData.h"
+#include "Widgets/Views/STableRow.h"
 
 namespace OUU::Developer::ActorMapWindow
 {

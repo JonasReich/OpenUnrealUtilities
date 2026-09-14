@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 
 #include "EditorValidatorBase.h"
-#include "Misc/DataValidation.h"
 
 #include "OUUHardReferenceValidator.generated.h"
 

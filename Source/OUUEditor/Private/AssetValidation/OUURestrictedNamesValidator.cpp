@@ -2,6 +2,8 @@
 
 #include "AssetValidation/OUURestrictedNamesValidator.h"
 
+#include "Misc/DataValidation.h"
+
 bool UOUURestrictedNamesValidator::CanValidateAsset_Implementation(
 	const FAssetData& InAssetData,
 	UObject* InObject,
@@ -54,11 +56,8 @@ EDataValidationResult UOUURestrictedNamesValidator::ValidateLoadedAsset_Implemen
 			GConfig->GetArray(TEXT("Staging"), TEXT("AllowedDirectories"), OUT AllowedDirectories, GGameIni);
 			// these are known platform specific folders
 			TArray<FString> AllowedPlatformDirectories;
-			GConfig->GetArray(
-				TEXT("Staging"),
-				TEXT("KnownPlatformDirectories"),
-				OUT AllowedPlatformDirectories,
-				GGameIni);
+			GConfig
+				->GetArray(TEXT("Staging"), TEXT("KnownPlatformDirectories"), OUT AllowedPlatformDirectories, GGameIni);
 			AllowedDirectories.Append(AllowedPlatformDirectories);
 			for (auto& Dir : AllowedDirectories)
 			{

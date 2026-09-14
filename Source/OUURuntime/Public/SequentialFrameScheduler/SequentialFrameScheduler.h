@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 
-#include "Misc/EngineVersionComparison.h"
 #include "SequentialFrameScheduler/SequentialFrameTask.h"
 #include "Templates/RingAggregator.h"
 

@@ -1,7 +1,10 @@
 ﻿// Copyright (c) 2026 Jonas Reich & Contributors
 
 #pragma once
+
+#include "ActorMapWindow/OUUActorMapQuery.h"
 #include "ActorMapWindow/OUUActorMapWindow_TabSpawner.h"
+
 
 namespace OUU::Developer::ActorMapWindow
 {

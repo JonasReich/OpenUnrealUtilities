@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2026 Jonas Reich & Contributors
 
 #include "AbilitySystemComponent.h"
+#include "ActorMapWindow/OUUActorMapQuery.h"
 #include "ActorMapWindow/OUUActorMapWindow_TabSpawner.h"
 #include "Misc/RegexUtils.h"
 #include "WorldPartition/WorldPartitionActorDescInstance.h"
