@@ -79,7 +79,7 @@ void UOUUTextLibrary::RegisterPluginStringTable(
 {
 	LLM_SCOPE(ELLMTag::Localization);
 
-	auto pPlugin = IPluginManager::Get().FindPlugin(InPluginName);
+	const auto pPlugin = IPluginManager::Get().FindPlugin(InPluginName);
 	if (ensureMsgf(pPlugin, TEXT("Plugin %s not found"), *InPluginName))
 	{
 		FStringTableRegistry::Get()

@@ -10,7 +10,6 @@
 #include "GameFramework/WorldSettings.h"
 #include "IXRCamera.h"
 #include "IXRTrackingSystem.h"
-#include "Misc/EngineVersionComparison.h"
 #include "SceneViewExtension.h"
 
 bool UOUUSceneProjectionLibrary::GetViewProjectionData(
@@ -110,11 +109,7 @@ bool UOUUSceneProjectionLibrary::GetViewProjectionData(
 	else
 	{
 		// Let the stereoscopic rendering device handle creating its own projection matrix, as needed
-#if UE_VERSION_OLDER_THAN(5, 0, 0)
-		OutProjectionData.ProjectionMatrix = GEngine->StereoRenderingDevice->GetStereoProjectionMatrix(StereoPass);
-#else
 		OutProjectionData.ProjectionMatrix = GEngine->StereoRenderingDevice->GetStereoProjectionMatrix(ViewIndex);
-#endif
 
 		// calculate the out rect
 		OutProjectionData.SetViewRectangle(FIntRect(X, Y, X + SizeX, Y + SizeY));

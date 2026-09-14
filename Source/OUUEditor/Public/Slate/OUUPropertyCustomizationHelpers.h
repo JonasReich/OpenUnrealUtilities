@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 
 #include "ContentBrowserDelegates.h"
-#include "IDetailCustomization.h"
 #include "IPropertyTypeCustomization.h"
 #include "PropertyCustomizationHelpers.h"
 

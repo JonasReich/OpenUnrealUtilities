@@ -235,7 +235,7 @@ AActor* UOUUActorPool::SpawnOrRetrieveFromPool(
 
 	if (Pool && Pool->Num() > 0)
 	{
-		TObjectPtr<AActor> PooledActor = (*Pool)[0];
+		const TObjectPtr<AActor> PooledActor = (*Pool)[0];
 		Pool->RemoveAt(0);
 		--NumActorPooled;
 		ActivateActor(PooledActor);

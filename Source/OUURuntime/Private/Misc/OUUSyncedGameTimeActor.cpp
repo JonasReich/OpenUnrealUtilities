@@ -178,7 +178,7 @@ void AOUUSyncedGameTimeActor::RefreshInitialTime()
 	SetCurrentTimeSeconds(GetInitialTimeSeconds());
 }
 
-void AOUUSyncedGameTimeActor::OnRep_TimeBlend(FOUUSyncedGameTimeBlend OldBlend)
+void AOUUSyncedGameTimeActor::OnRep_TimeBlend(const FOUUSyncedGameTimeBlend& OldBlend)
 {
 	if (CachedGameState)
 	{

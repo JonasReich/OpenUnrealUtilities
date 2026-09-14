@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 
-#include "PIESettings/OUUPIESettingsRegistry.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/SCompoundWidget.h"
 
@@ -23,6 +22,6 @@ namespace OUU::Editor::Private::PIESettings
 		void Construct(const FArguments& InArgs);
 
 	private:
-		TSharedRef<SWidget> MakeSettingsGroup(const FString& Group, const FText& Heading);
+		static TSharedRef<SWidget> MakeSettingsGroup(const FString& Group, const FText& Heading);
 	};
 } // namespace OUU::Editor::Private::PIESettings

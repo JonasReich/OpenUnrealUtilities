@@ -64,7 +64,7 @@ namespace OUU::Runtime::Private::SubclassWithInterface
 #undef SPECIALIZE_OBJECT_STORAGE
 
 	template <typename StorageType>
-	using TObjectT = typename TObject<StorageType>::Type;
+	using TObjectT = TObject<StorageType>::Type;
 
 } // namespace OUU::Runtime::Private::SubclassWithInterface
 
@@ -115,7 +115,7 @@ public:
 	 */
 	template <
 		typename DerivedClass,
-		typename = typename TEnableIf<TAnd<
+		typename = TEnableIf<TAnd<
 			TIsDerivedFrom<DerivedClass, ObjectBaseClass>,
 			TIsDerivedFrom<DerivedClass, InterfaceClasses>...>::Value>::Type>
 	TSubclassWithInterfaces_Base(DerivedClass* InObject) : Object(InObject)
@@ -124,7 +124,7 @@ public:
 
 	template <
 		typename DerivedClass,
-		typename = typename TEnableIf<TAnd<
+		typename = TEnableIf<TAnd<
 			TIsDerivedFrom<DerivedClass, ObjectBaseClass>,
 			TIsDerivedFrom<DerivedClass, InterfaceClasses>...>::Value>::Type>
 	TSubclassWithInterfaces_Base(DerivedClass& InObject) : Object(InObject)
@@ -151,7 +151,7 @@ public:
 	// Get a reference to the stored object cast to InterfaceClass*
 	// Only possible with subclass structs that have bIsPointer = true.
 	template <class InterfaceClass>
-	typename TEnableIf<bIsPointer == true, InterfaceClass*>::Type GetInterface() const
+	TEnableIf<bIsPointer == true, InterfaceClass*>::Type GetInterface() const
 	{
 		return GetInterfacePtr<InterfaceClass>();
 	}
@@ -159,7 +159,7 @@ public:
 	// Get a reference to the stored object cast to InterfaceClass&
 	// Only possible with subclass structs that have bIsPointer = false.
 	template <class InterfaceClass>
-	typename TEnableIf<bIsPointer == false, InterfaceClass&>::Type GetInterface() const
+	TEnableIf<bIsPointer == false, InterfaceClass&>::Type GetInterface() const
 	{
 		return *GetInterfacePtr<InterfaceClass>();
 	}
@@ -187,7 +187,7 @@ public:
 
 	using ThisType = TSubclassWithInterfaces_Base<InObjectBaseClassWithStorageSpecifier, InterfaceClasses...>;
 
-	using ObjectBaseClass = typename Super::ObjectBaseClass;
+	using ObjectBaseClass = Super::ObjectBaseClass;
 
 	static const uint32 NumInterfaces = sizeof...(InterfaceClasses);
 
@@ -196,11 +196,11 @@ public:
 	friend struct TSubclassWithInterfaces;
 
 private:
-	TSubclassWithInterfaces(ObjectBaseClass* InObject, typename Super::EForceConstruct) :
+	TSubclassWithInterfaces(ObjectBaseClass* InObject, Super::EForceConstruct) :
 		Super(InObject, Super::EForceConstruct::Value)
 	{
 	}
-	TSubclassWithInterfaces(ObjectBaseClass& InObject, typename Super::EForceConstruct) :
+	TSubclassWithInterfaces(ObjectBaseClass& InObject, Super::EForceConstruct) :
 		Super(InObject, Super::EForceConstruct::Value)
 	{
 	}
@@ -208,7 +208,7 @@ private:
 public:
 	template <
 		typename DerivedClass,
-		typename = typename TEnableIf<TAnd<
+		typename = TEnableIf<TAnd<
 			TIsDerivedFrom<DerivedClass, ObjectBaseClass>,
 			TIsDerivedFrom<DerivedClass, InterfaceClasses>...>::Value>::Type>
 	TSubclassWithInterfaces(DerivedClass* InObject) : Super(InObject)
@@ -219,7 +219,7 @@ public:
 
 	template <
 		typename DerivedClass,
-		typename = typename TEnableIf<TAnd<
+		typename = TEnableIf<TAnd<
 			TIsDerivedFrom<DerivedClass, ObjectBaseClass>,
 			TIsDerivedFrom<DerivedClass, InterfaceClasses>...>::Value>::Type>
 	TSubclassWithInterfaces(DerivedClass& InObject) : Super(InObject)

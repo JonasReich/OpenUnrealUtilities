@@ -24,6 +24,7 @@ using OUU_GameplayDebuggerCategories = TGameplayDebuggerCategoryTypeList<
 class FOUURuntimeModule : public IModuleInterface
 {
 	// - IModuleInterface
+public:
 	void StartupModule() override
 	{
 #if WITH_GAMEPLAY_DEBUGGER

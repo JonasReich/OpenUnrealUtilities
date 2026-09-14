@@ -146,7 +146,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawData(
 }
 
 void FGameplayDebuggerCategory_OUUAbilities::DebugDrawGameplayEffectModifier(
-	FActiveGameplayEffect& ActiveGE,
+	const FActiveGameplayEffect& ActiveGE,
 	const FModifierSpec& ModSpec,
 	const FGameplayModifierInfo& ModInfo)
 {
@@ -208,11 +208,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayEffect(FActiveGameplayE
 	}
 
 	FString StackString;
-	#if UE_VERSION_OLDER_THAN(5, 3, 0)
 	const int32 ActiveGE_StackCount = ActiveGE.Spec.GetStackCount();
-	#else
-	const int32 ActiveGE_StackCount = ActiveGE.Spec.GetStackCount();
-	#endif
 	if (ActiveGE_StackCount > 1)
 	{
 	#if UE_VERSION_OLDER_THAN(5, 8, 0)
@@ -304,13 +300,13 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayAbilityInstance(UOUUGam
 
 	bool FirstTaskMsg = true;
 	int32 MsgCount = 0;
-	constexpr int32 MaskTaskDebugCount = 5;
 	for (FAbilityTaskDebugMessage& Msg : ReverseRange(Instance->TaskDebugMessages))
 	{
 		if (Instance->ActiveTasks.Contains(Msg.FromTask) == false)
 		{
 			// Cap finished task messages to 5 per ability if we are printing to screen (else things
 			// will scroll off)
+			constexpr int32 MaskTaskDebugCount = 5;
 			if (++MsgCount > MaskTaskDebugCount)
 			{
 				break;
@@ -448,13 +444,13 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawAbility(
 
 void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayCue(
 	UGameplayCueManager* CueManager,
-	FString BaseCueTagString,
+	const FString& BaseCueTagString,
 	UGameplayCueSet* CueSet,
 	FGameplayTag ThisGameplayCueTag)
 {
 	FString CueTagString = ThisGameplayCueTag.ToString();
 	CueTagString.RemoveFromStart(BaseCueTagString);
-	int32 idx = CueSet->GameplayCueDataMap.FindChecked(ThisGameplayCueTag);
+	const int32 idx = CueSet->GameplayCueDataMap.FindChecked(ThisGameplayCueTag);
 	if (idx == INDEX_NONE)
 	{
 		// ReSharper disable once CppUnreachableCode
@@ -465,7 +461,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayCue(
 		}
 		return;
 	}
-	auto CueData = CueSet->GameplayCueData[idx];
+	const auto CueData = CueSet->GameplayCueData[idx];
 
 	if (IsValid(CueData.LoadedGameplayCueClass) == false)
 	{
@@ -556,8 +552,8 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawDebugBody()
 	// First the categories that have a pretty stable length - then the categories that are more fluctuating.
 	// That way the entries don't jump around AS MUCH on the screen.
 
-	bool AnyOverridesEnabled =
-		bOverrideCategoryAttribute || bOverrideCategoryAbility || bOverrideCategoryGE || bOverrideCategoryGECue || bOverrideCategoryEvent || bOverrideCategoryTag;
+	bool AnyOverridesEnabled = bOverrideCategoryAttribute || bOverrideCategoryAbility || bOverrideCategoryGE
+		|| bOverrideCategoryGECue || bOverrideCategoryEvent || bOverrideCategoryTag;
 
 	if (AnyOverridesEnabled == false || bOverrideCategoryAttribute)
 	{
@@ -595,11 +591,11 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawDebugBody()
 	{
 		DEBUG_BODY_SECTION("CUES")
 		UGameplayCueManager* CueManager = UAbilitySystemGlobals::Get().GetGameplayCueManager();
-		auto BaseCueTag = UGameplayCueSet::BaseGameplayCueTag();
-		FString BaseCueTagString = BaseCueTag.ToString() + TEXT(".");
+		const auto BaseCueTag = UGameplayCueSet::BaseGameplayCueTag();
+		const FString BaseCueTagString = BaseCueTag.ToString() + TEXT(".");
 		FGameplayTagContainer AllGameplayCueTags = UGameplayTagsManager::Get().RequestGameplayTagChildren(BaseCueTag);
-		auto CueSet = CueManager->GetRuntimeCueSet();
-		for (FGameplayTag ThisGameplayCueTag : AllGameplayCueTags)
+		const auto CueSet = CueManager->GetRuntimeCueSet();
+		for (const FGameplayTag ThisGameplayCueTag : AllGameplayCueTags)
 		{
 			DrawGameplayCue(CueManager, BaseCueTagString, CueSet, ThisGameplayCueTag);
 		}
@@ -794,11 +790,11 @@ void FGameplayDebuggerCategory_OUUAbilities::AddTagList(FGameplayTagContainer Ta
 			CombinedTagsString += TEXT(", ");
 		}
 	}
-	
+
 	if (CombinedTagsString.IsEmpty() == false)
 	{
 		DebugLine(FString::Printf(TEXT("%s: %s"), *TagsListTitle, *CombinedTagsString), 4.f, 2);
-        	DebugLine("", 0.f, 2);
+		DebugLine("", 0.f, 2);
 	}
 }
 

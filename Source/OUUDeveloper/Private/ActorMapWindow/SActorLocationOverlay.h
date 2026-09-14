@@ -1,7 +1,10 @@
 ﻿// Copyright (c) 2026 Jonas Reich & Contributors
 
 #pragma once
+
+#include "ActorMapWindow/OUUActorMapQuery.h"
 #include "ActorMapWindow/OUUActorMapWindow_TabSpawner.h"
+
 
 namespace OUU::Developer::ActorMapWindow
 {
@@ -31,7 +34,7 @@ namespace OUU::Developer::ActorMapWindow
 		TAttribute<FVector> ReferencePosition = FVector::ZeroVector;
 		TAttribute<float> MapSize = 0.f;
 		TAttribute<EShowFlags> ShowFlags;
-		
+
 #if WITH_EDITOR
 		FBox2D WorldMiniMapBounds;
 		FSlateBrush WPMinimapBrush;
@@ -39,12 +42,16 @@ namespace OUU::Developer::ActorMapWindow
 
 		void Construct(const FArguments& InArgs, UWorld* InWorld);
 
+		// parent class implementation should not be private
+		// ReSharper disable once CppOverrideWithDifferentVisibility
 		FVector2D ComputeDesiredSize(float LayoutScaleMultiplier) const override
 		{
 			// No desired size. Always use maximum available space
 			return FVector2D::ZeroVector;
 		}
 
+		// parent class implementation should not be private
+		// ReSharper disable once CppOverrideWithDifferentVisibility
 		int32 OnPaint(
 			const FPaintArgs& Args,
 			const FGeometry& AllottedGeometry,
@@ -53,7 +60,7 @@ namespace OUU::Developer::ActorMapWindow
 			int32 LayerId,
 			const FWidgetStyle& InWidgetStyle,
 			bool bParentEnabled) const override;
-		
+
 		FVector2D WorldToWidgetSpace(const FGeometry& Geometry, const FVector2D& WorldLocation) const;
 	};
 } // namespace OUU::Developer::ActorMapWindow

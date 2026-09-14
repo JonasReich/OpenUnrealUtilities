@@ -16,7 +16,7 @@ public:
 		SLATE_ARGUMENT(TSharedPtr<class FExtender>, ToolbarExtenders)
 	SLATE_END_ARGS()
 
-	~SOUUReferenceViewer();
+	~SOUUReferenceViewer() override;
 
 	void Construct(const FArguments& InArgs, TSubclassOf<UEdGraph_OUUReferenceViewer> GraphClass);
 

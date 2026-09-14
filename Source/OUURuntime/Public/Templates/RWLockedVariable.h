@@ -83,7 +83,7 @@ class TScopedRWLockedVariableRef
 public:
 	static const bool bIsWriteLock = bInIsWriteLock;
 	// Native scope lock type used internally to lock/release the RWLock
-	using ScopeLockType = typename TConditionalType<bIsWriteLock, FWriteScopeLock, FReadScopeLock>::Type;
+	using ScopeLockType = TConditionalType<bIsWriteLock, FWriteScopeLock, FReadScopeLock>::Type;
 
 	template <typename>
 	friend class TRWLockedVariable;

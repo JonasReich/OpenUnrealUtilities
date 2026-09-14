@@ -84,10 +84,10 @@ public:
 	FOnOUUWebBrowserConsoleMessage OnConsoleMessage;
 
 	// -- UWidget
-	virtual void SynchronizeProperties() override;
-	virtual void ReleaseSlateResources(bool bReleaseChildren) override;
+	void SynchronizeProperties() override;
+	void ReleaseSlateResources(bool bReleaseChildren) override;
 #if WITH_EDITOR
-	virtual const FText GetPaletteCategory() override;
+	const FText GetPaletteCategory() override;
 #endif
 
 protected:
@@ -103,17 +103,17 @@ protected:
 	TSharedPtr<SWebBrowser> WebBrowserWidget;
 
 	// -- UWidget
-	virtual TSharedRef<SWidget> RebuildWidget() override;
+	TSharedRef<SWidget> RebuildWidget() override;
 
 	/** Bound to SWebBrowser::OnUrlChanged; rebroadcasts via OnUrlChanged. */
-	void HandleOnUrlChanged(const FText& Text);
+	void HandleOnUrlChanged(const FText& Text) const;
 
 	/** Bound to SWebBrowser::OnConsoleMessage; rebroadcasts via OnConsoleMessage (severity is dropped). */
 	void HandleOnConsoleMessage(
 		const FString& Message,
 		const FString& Source,
 		int32 Line,
-		EWebBrowserConsoleLogSeverity Severity);
+		EWebBrowserConsoleLogSeverity Severity) const;
 
 	/** Bound to SWebBrowser::OnBeforePopup; rebroadcasts via OnBeforePopup on the game thread. */
 	bool HandleOnBeforePopup(FString URL, FString Frame);

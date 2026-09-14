@@ -24,11 +24,11 @@ namespace OUU::Editor::Private::PIESettings
 		void Construct(const FArguments& InArgs, FName InConsoleVariableName);
 
 	private:
-		TSharedRef<SWidget> MakeValueWidget();
-		TSharedRef<SWidget> MakeBoolWidget();
-		TSharedRef<SWidget> MakeIntWidget();
-		TSharedRef<SWidget> MakeFloatWidget();
-		TSharedRef<SWidget> MakeStringWidget();
+		TSharedRef<SWidget> MakeValueWidget() const;
+		TSharedRef<SWidget> MakeBoolWidget() const;
+		TSharedRef<SWidget> MakeIntWidget() const;
+		TSharedRef<SWidget> MakeFloatWidget() const;
+		TSharedRef<SWidget> MakeStringWidget() const;
 
 		FName ConsoleVariableName;
 

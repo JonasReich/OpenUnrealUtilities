@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2025 Jonas Reich & Contributors
+// Copyright (c) 2025 Jonas Reich & Contributors
 
 #pragma once
 
@@ -16,7 +16,7 @@ class OUUEDITOR_API UEdGraphNode_OUUReferenceViewer : public UEdGraphNode
 
 public:
 	void Setup(const FOUUReferenceViewerNode& DataNode);
-	void AddReferencer(UEdGraphNode_OUUReferenceViewer& Referencer);
+	void AddReferencer(const UEdGraphNode_OUUReferenceViewer& Referencer) const;
 
 	TWeakObjectPtr<UObject> GetPayload() const;
 

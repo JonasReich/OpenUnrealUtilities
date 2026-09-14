@@ -9,7 +9,7 @@ template <class ChildClass, typename ElementType, typename AllocatorType>
 class TCircularArrayAdaptor_Base
 {
 public:
-	using SizeType = typename AllocatorType::SizeType;
+	using SizeType = AllocatorType::SizeType;
 	using ArrayType = TArray<ElementType, AllocatorType>;
 
 	TCircularArrayAdaptor_Base(ArrayType& InArrayReference, SizeType InArrayMax) :
@@ -132,7 +132,7 @@ class TCircularArrayAdaptor :
 public:
 	using SelfType = TCircularArrayAdaptor<ElementType, AllocatorType>;
 	using Super = TCircularArrayAdaptor_Base<SelfType, ElementType, AllocatorType>;
-	using ArrayType = typename Super::ArrayType;
+	using ArrayType = Super::ArrayType;
 
 	TCircularArrayAdaptor(ArrayType& InArrayReference, int32 InArrayMax) : Super(InArrayReference, InArrayMax) {}
 };
@@ -144,7 +144,7 @@ class TCircularArray :
 public:
 	using SelfType = TCircularArray<ElementType, AllocatorType>;
 	using Super = TCircularArrayAdaptor_Base<SelfType, ElementType, AllocatorType>;
-	using ArrayType = typename Super::ArrayType;
+	using ArrayType = Super::ArrayType;
 
 	TCircularArray() : Super(Storage, 32), Storage({}) { Super::StorageReference = Storage; }
 

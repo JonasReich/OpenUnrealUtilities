@@ -37,6 +37,7 @@ namespace OUU::Tests::ReverseIteratorTests
 
 		bool operator!=(const FFoo& Other) const { return !(*this == Other); }
 
+		// ReSharper disable once CppDeclaratorNeverUsed
 		FString ToString() const { return DisplayString; }
 	};
 

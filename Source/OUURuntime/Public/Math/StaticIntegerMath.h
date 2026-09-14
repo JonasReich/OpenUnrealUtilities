@@ -91,7 +91,7 @@ constexpr T NumDigits(typename TIdentity<T>::Type Value, T Base = 10)
  * Only signed integer types are checked against 0.
  */
 template <typename T>
-constexpr auto IsNegativeInteger(T Number) -> typename TEnableIf<TIsSigned<T>::Value, bool>::Type
+constexpr auto IsNegativeInteger(T Number) -> TEnableIf<TIsSigned<T>::Value, bool>::Type
 {
 	static_assert(TIsInteger<T>::Value, "T must be an integer type");
 	return Number < 0;
@@ -102,7 +102,7 @@ constexpr auto IsNegativeInteger(T Number) -> typename TEnableIf<TIsSigned<T>::V
  * Only signed integer types are checked against 0.
  */
 template <typename T>
-constexpr auto IsNegativeInteger(T Number) -> typename TEnableIf<TIsSigned<T>::Value == false, bool>::Type
+constexpr auto IsNegativeInteger(T Number) -> TEnableIf<TIsSigned<T>::Value == false, bool>::Type
 {
 	static_assert(TIsInteger<T>::Value, "T must be an integer type");
 	return false;

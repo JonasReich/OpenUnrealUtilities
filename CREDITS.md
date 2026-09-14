@@ -4,14 +4,16 @@ This library was initially developed by Jonas Reich with significant help by the
 - Benjamin Barz
 - Bohdan Bessonov
 - David Lehn
+- Eduardo Valencia
+- Elena Neubauer
 - Florian Reichhold
 - Gereon Bartel
 - Jacomi Conradie
 - Johan Conradie
 - Luis Reich
 - Matthias Riegler
-- Moritz Kretz
 - Michael Schlicker
+- Moritz Kretz
 - Philipp Brasin
 - Sergio Airaldi
 

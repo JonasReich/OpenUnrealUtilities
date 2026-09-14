@@ -49,14 +49,14 @@ namespace OUU::Runtime::Private::IteratorUtils
 	}
 
 	/** Call operator->() on an iterator */
-	template <typename IteratorType, typename = typename TEnableIf<TIsPointer<IteratorType>::Value>::Type>
+	template <typename IteratorType, typename = TEnableIf<TIsPointer<IteratorType>::Value>::Type>
 	constexpr IteratorType OperatorArrow(IteratorType&& Target)
 	{
 		return (Target);
 	}
 
 	/** Call operator->() on an iterator */
-	template <typename IteratorType, typename = typename TEnableIf<TIsPointer<IteratorType>::Value == false>::Type>
+	template <typename IteratorType, typename = TEnableIf<TIsPointer<IteratorType>::Value == false>::Type>
 	constexpr IteratorType OperatorArrow(IteratorType Target)
 	{
 		return Forward(Target).operator->();

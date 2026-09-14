@@ -2,6 +2,8 @@
 
 #include "AssetValidation/OUURestrictedNamesValidator.h"
 
+#include "Misc/DataValidation.h"
+
 bool UOUURestrictedNamesValidator::CanValidateAsset_Implementation(
 	const FAssetData& InAssetData,
 	UObject* InObject,
@@ -22,7 +24,7 @@ EDataValidationResult UOUURestrictedNamesValidator::ValidateLoadedAsset_Implemen
 {
 	// Use the package name instead of package path to make sure every folder starts and ends in a slash to simplify
 	// checks below.
-	auto PackagePath = InAssetData.PackageName.ToString();
+	const auto PackagePath = InAssetData.PackageName.ToString();
 	if (PackagePath.StartsWith(TEXT("/Game/")) == false)
 	{
 		// Never validate content outside the main project content dir
@@ -54,11 +56,8 @@ EDataValidationResult UOUURestrictedNamesValidator::ValidateLoadedAsset_Implemen
 			GConfig->GetArray(TEXT("Staging"), TEXT("AllowedDirectories"), OUT AllowedDirectories, GGameIni);
 			// these are known platform specific folders
 			TArray<FString> AllowedPlatformDirectories;
-			GConfig->GetArray(
-				TEXT("Staging"),
-				TEXT("KnownPlatformDirectories"),
-				OUT AllowedPlatformDirectories,
-				GGameIni);
+			GConfig
+				->GetArray(TEXT("Staging"), TEXT("KnownPlatformDirectories"), OUT AllowedPlatformDirectories, GGameIni);
 			AllowedDirectories.Append(AllowedPlatformDirectories);
 			for (auto& Dir : AllowedDirectories)
 			{

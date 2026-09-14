@@ -27,6 +27,6 @@ public:
 private:
 	void RecursivelyBuildGraph(
 		FOUUReferenceViewerNode& Node,
-		UEdGraphNode_OUUReferenceViewer* Referencer,
+		const UEdGraphNode_OUUReferenceViewer* Referencer,
 		FIntPoint& InOutCell);
 };

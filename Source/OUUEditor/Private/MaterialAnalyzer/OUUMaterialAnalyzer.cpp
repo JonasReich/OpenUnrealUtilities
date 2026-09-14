@@ -197,6 +197,7 @@ namespace OUU::Editor::Private::MaterialAnalyzer
 				}
 			SLATE_END_ARGS()
 
+			// ReSharper disable once CppDeclaratorNeverUsed
 			void Construct(const FArguments& InArgs);
 
 		private:

@@ -38,6 +38,8 @@ public:
 	 */
 	UPROPERTY(EditAnywhere)
 	FString ActorClassName;
+
+	UPROPERTY(Transient)
 	mutable UClass* ResolvedActorClass = nullptr;
 	mutable bool bClassNotResolved = true;
 

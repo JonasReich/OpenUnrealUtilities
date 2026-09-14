@@ -6,7 +6,6 @@
 
 #include "GameFramework/Actor.h"
 #include "Templates/BitmaskUtils.h"
-#include "ActorMapWindow/OUUActorMapQuery.h"
 
 namespace OUU::Developer::ActorMapWindow
 {
@@ -16,7 +15,7 @@ namespace OUU::Developer::ActorMapWindow
 	void OUUDEVELOPER_API RegisterNomadTabSpawner();
 	void OUUDEVELOPER_API UnregisterNomadTabSpawner();
 	void OUUDEVELOPER_API TryInvokeTab();
-	
+
 	// Show flags for the main overlay window
 	enum class EShowFlags
 	{

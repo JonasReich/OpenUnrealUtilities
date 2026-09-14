@@ -172,11 +172,11 @@ public:
 	 */
 	template <
 		int32 Idx,
-		typename LockRefType = typename TTupleElement<Idx, TTuple<LockRefTypes...>>::Type,
-		typename VariableType = typename LockRefType::VariableType,
+		typename LockRefType = TTupleElement<Idx, TTuple<LockRefTypes...>>::Type,
+		typename VariableType = LockRefType::VariableType,
 		// return const reference if the type is only read-locked
 		typename ResultType =
-			typename TConditionalType<LockRefType::IsWriteLock, VariableType, const VariableType>::Type>
+			TConditionalType<LockRefType::IsWriteLock, VariableType, const VariableType>::Type>
 	ResultType& GetByIdx() const
 	{
 		const LockRefType& LockRef = LockReferences.template Get<Idx>();

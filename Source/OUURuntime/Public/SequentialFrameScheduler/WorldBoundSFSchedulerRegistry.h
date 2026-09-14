@@ -52,11 +52,6 @@ public:
 		FName SchedulerName,
 		ETickingGroup TickingGroup);
 
-	// - AActor
-	void RegisterActorTickFunctions(bool bRegister) override;
-	void TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
-	// --
-
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Frame Scheduler")
 	static FSequentialFrameTaskHandle ScheduleTask(
 		const UObject* WorldContextObject,
@@ -66,6 +61,14 @@ public:
 		FTimerDynamicDelegate Task);
 	UFUNCTION(BlueprintCallable, Category = "Open Unreal Utilities|Frame Scheduler")
 	static void CancelTask(FSequentialFrameTaskHandle Handle);
+
+	// - AActor
+public:
+	void TickActor(float DeltaTime, ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
+
+protected:
+	void RegisterActorTickFunctions(bool bRegister) override;
+	// --
 
 private:
 	UPROPERTY()

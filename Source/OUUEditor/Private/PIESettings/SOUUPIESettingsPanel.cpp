@@ -2,7 +2,7 @@
 
 #include "PIESettings/SOUUPIESettingsPanel.h"
 
-#include "Framework/Notifications/NotificationManager.h"
+#include "PIESettings/OUUPIESettingsRegistry.h"
 #include "PIESettings/SOUUPIESettingsCapabilityList.h"
 #include "Styling/AppStyle.h"
 #include "Widgets/Input/SButton.h"
@@ -10,9 +10,9 @@
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/Layout/SSeparator.h"
-#include "Widgets/Notifications/SNotificationList.h"
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/Text/STextBlock.h"
+
 
 namespace OUU::Editor::Private::PIESettings
 {

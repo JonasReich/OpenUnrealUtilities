@@ -3,7 +3,6 @@
 
 #include "Debug/DebugDrawService.h"
 #include "Engine/Canvas.h"
-#include "GameFramework/HUD.h"
 #include "Misc/CanvasGraphPlottingUtils.h"
 
 #if WITH_EDITOR
@@ -103,11 +102,13 @@ namespace OUU::Developer
 
 		const float CanvasWidth = InCanvas->Canvas->GetRenderTarget()->GetSizeXY().X / InCanvas->GetDPIScale();
 
+		// ReSharper disable CppTooWideScope
 		constexpr float OuterPaddingX = 80.0f;
 		// this is to keep space for the "stat unitgraph" panel
 		constexpr float GraphGridLeftX = OuterPaddingX + 450.0f;
 		constexpr float WidthPerGraph = 350.f;
 		constexpr float HeightPerGraph = 350.f;
+		// ReSharper restore CppTooWideScope
 
 		const float RemainingWidth = (CanvasWidth - GraphGridLeftX - OuterPaddingX);
 		if (RemainingWidth <= 0.f)

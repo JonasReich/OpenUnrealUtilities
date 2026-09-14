@@ -37,7 +37,7 @@ void UOUUCreditsWidget::SetScrollSpeedPixelsPerSecond(float InScrollSpeedPixelsP
 {
 	ScrollSpeedPixelsPerSecond = InScrollSpeedPixelsPerSecond;
 
-	if (auto Widget = StaticCastSharedPtr<SOUUCreditsList>(TakeWidget().ToSharedPtr()))
+	if (const auto Widget = StaticCastSharedPtr<SOUUCreditsList>(TakeWidget().ToSharedPtr()))
 	{
 		Widget->ScrollSpeedPixelsPerSecond = InScrollSpeedPixelsPerSecond;
 	}
@@ -155,7 +155,7 @@ void UOUUCreditsWidget::ReleaseSlateResources(bool bReleaseChildren)
 
 void UOUUCreditsWidget::HandleOnFinishedScrolling()
 {
-	if (auto Widget = StaticCastSharedPtr<SOUUCreditsList>(TakeWidget().ToSharedPtr()))
+	if (const auto Widget = StaticCastSharedPtr<SOUUCreditsList>(TakeWidget().ToSharedPtr()))
 	{
 		if (bReachedEndOfCredits == false && Widget->IsAtEndOfCredits())
 		{

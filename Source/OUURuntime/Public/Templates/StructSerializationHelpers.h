@@ -7,7 +7,7 @@
 namespace OUU::Runtime
 {
 	inline void DefaultStructSerialization(
-		UScriptStruct& Struct,
+		const UScriptStruct& Struct,
 		void* StructData,
 		FArchive& Ar,
 		const void* Defaults = nullptr)
@@ -20,14 +20,14 @@ namespace OUU::Runtime
 		{
 			Struct.SerializeTaggedProperties(
 				Ar,
-				reinterpret_cast<uint8*>(StructData),
+				static_cast<uint8*>(StructData),
 				&Struct,
-				reinterpret_cast<const uint8*>(Defaults));
+				static_cast<const uint8*>(Defaults));
 		}
 	}
 
 	inline void DefaultStructSerialization(
-		UScriptStruct& Struct,
+		const UScriptStruct& Struct,
 		void* StructData,
 		FStructuredArchive::FSlot Slot,
 		const void* Defaults = nullptr)
@@ -40,9 +40,9 @@ namespace OUU::Runtime
 		{
 			Struct.SerializeTaggedProperties(
 				Slot,
-				reinterpret_cast<uint8*>(StructData),
+				static_cast<uint8*>(StructData),
 				&Struct,
-				reinterpret_cast<const uint8*>(Defaults));
+				static_cast<const uint8*>(Defaults));
 		}
 	}
 

@@ -5,17 +5,16 @@
 #include "CoreMinimal.h"
 
 #include "EditorValidatorBase.h"
-#include "OUUAssetValidatorBase_EngineVersionGlue.h"
 
 #include "OUUHardReferenceValidator.generated.h"
 
 // Check that assets labeled with "NoHardReferences" are not hard referenced by any other asset.
 UCLASS()
-class UOUUHardReferenceValidator : public UOUUAssetValidatorBase_EngineVersionGlue
+class UOUUHardReferenceValidator : public UEditorValidatorBase
 {
 	GENERATED_BODY()
 public:
-	// - UEditorValidatorBase / UOUUAssetValidatorBase_EngineVersionGlue (depending on engine version)
+	// - UEditorValidatorBase
 	bool CanValidateAsset_Implementation(
 		const FAssetData& InAssetData,
 		UObject* InObject,

@@ -17,9 +17,9 @@ template <typename IteratorType>
 class TReverseIterator
 {
 private:
-	using ElementType = typename TIteratorTraits<IteratorType>::ElementType;
-	using PointerType = typename TIteratorTraits<IteratorType>::PointerType;
-	using ReferenceType = typename TIteratorTraits<IteratorType>::ReferenceType;
+	using ElementType = TIteratorTraits<IteratorType>::ElementType;
+	using PointerType = TIteratorTraits<IteratorType>::PointerType;
+	using ReferenceType = TIteratorTraits<IteratorType>::ReferenceType;
 
 	static_assert(
 		TModels<CBidirectionalIterator, IteratorType>::Value,
@@ -91,7 +91,7 @@ constexpr TReverseIterator<IteratorType> MakeReverseIterator(IteratorType Iterat
 }
 
 template <bool bReverse, typename IteratorType>
-using TReverseIteratorIf = typename TEnableIf<bReverse, IteratorType>::Type;
+using TReverseIteratorIf = TEnableIf<bReverse, IteratorType>::Type;
 
 template <bool bReverse, typename IteratorType>
 constexpr TReverseIteratorIf<bReverse == true, IteratorType> MakeReverseIteratorIf(IteratorType Iterator)

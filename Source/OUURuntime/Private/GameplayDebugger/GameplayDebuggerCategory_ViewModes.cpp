@@ -2,11 +2,8 @@
 
 #include "GameplayDebugger/GameplayDebuggerCategory_ViewModes.h"
 
-#include "Engine.h"
-
 #if WITH_GAMEPLAY_DEBUGGER
 	#include "BufferVisualizationData.h"
-	#include "Engine.h"
 	#include "Engine/DebugCameraControllerSettings.h"
 	#include "Engine/Font.h"
 	#include "Engine/GameViewportClient.h"
@@ -55,8 +52,8 @@ namespace OUU::Runtime::Private
 		case VMI_HLODColoration: return TEXT("HLODColoration");
 		case VMI_VisualizeGPUSkinCache: return TEXT("VisualizeGPUSkinCache");
 		case VMI_LWCComplexity: return TEXT("LWCComplexity");
+		default: return TEXT("");
 		}
-		return TEXT("");
 	}
 
 	// #TODO-OUU replace or remove - Not really required in the code we copy/pasted

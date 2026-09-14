@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ActorMapWindow/OUUActorMapWindow_TabSpawner.h"
+#include "ActorMapWindow/OUUactorMapQuery.h"
 #include "Slate/SplitterColumnSizeData.h"
 #include "Templates/BitmaskUtils.h"
 #include "Widgets/SWidget.h"
@@ -25,7 +26,7 @@ namespace OUU::Developer::ActorMapWindow
 			}
 		SLATE_END_ARGS()
 
-		virtual ~SActorMap() override;
+		~SActorMap() override;
 
 		// - SWidget
 		void Construct(const FArguments& InArgs);
@@ -33,7 +34,7 @@ namespace OUU::Developer::ActorMapWindow
 		void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 		// --
 
-		UWorld* GetDynamicTargetWorld() const;
+		static UWorld* GetDynamicTargetWorld();
 		/** Separate initializer outside of construct so the widget can be reused for a different world */
 		void InitializeForWorld(UWorld* InTargetWorld);
 		FORCEINLINE UWorld* GetTargetWorld() const { return TargetWorld.Get(); }

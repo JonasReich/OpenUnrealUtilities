@@ -10,14 +10,14 @@ template <typename IteratorType, class CastTargetType>
 class TCastObjectIterator
 {
 private:
-	using ElementType = typename TIteratorTraits<IteratorType>::ElementType;
-	using CastElementType = typename TConditionalType<
+	using ElementType = TIteratorTraits<IteratorType>::ElementType;
+	using CastElementType = TConditionalType<
 		std::is_const_v<typename TRemovePointer<ElementType>::Type>,
 		const CastTargetType,
 		CastTargetType>::Type;
 
-	using PointerType = typename TIteratorTraits<IteratorType>::PointerType;
-	using ReferenceType = typename TIteratorTraits<IteratorType>::ReferenceType;
+	using PointerType = TIteratorTraits<IteratorType>::PointerType;
+	using ReferenceType = TIteratorTraits<IteratorType>::ReferenceType;
 
 	static_assert(TIsPointer<CastTargetType>::Value == false, "TargetType must not be a pointer type");
 	static_assert(

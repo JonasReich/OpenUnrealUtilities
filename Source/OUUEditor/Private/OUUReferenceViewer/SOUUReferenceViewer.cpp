@@ -38,7 +38,7 @@ void SOUUReferenceViewer::Construct(const FArguments& InArgs, TSubclassOf<UEdGra
 		}
 	});
 
-	auto GraphEditor = SNew(SGraphEditor)
+	const auto GraphEditor = SNew(SGraphEditor)
 						   .GraphToEdit(OwnedGraph)
 						   .GraphEvents(GraphEvents)
 						   .IsEditable(false)

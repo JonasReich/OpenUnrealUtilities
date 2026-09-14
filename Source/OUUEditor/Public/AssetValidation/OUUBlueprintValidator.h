@@ -5,17 +5,17 @@
 #include "CoreMinimal.h"
 
 #include "EditorValidatorBase.h"
-#include "OUUAssetValidatorBase_EngineVersionGlue.h"
 
 #include "OUUBlueprintValidator.generated.h"
 
 // Validates blueprints (esp actor blueprints) with some generic checks.
 UCLASS()
-class UOUUBlueprintValidator : public UOUUAssetValidatorBase_EngineVersionGlue
+class UOUUBlueprintValidator : public UEditorValidatorBase
 {
 	GENERATED_BODY()
+
+	// - UEditorValidatorBase
 public:
-	// - UEditorValidatorBase / UOUUAssetValidatorBase_EngineVersionGlue (depending on engine version)
 	bool CanValidateAsset_Implementation(
 		const FAssetData& InAssetData,
 		UObject* InObject,
