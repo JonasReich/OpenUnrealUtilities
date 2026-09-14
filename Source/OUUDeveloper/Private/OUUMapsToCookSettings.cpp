@@ -66,9 +66,7 @@ void FOUUMapsToCookList::UpdateDefaultConfigFile(const FString& ConfigPath)
 	// Default ini files require the array syntax to be applied to the property name
 	// We also use the hardcoded name "Map", because that's required by the cooker.
 	const FString CompleteKey = TEXT("+Map");
-#if UE_VERSION_OLDER_THAN(5, 4, 0)
-	FConfigSection* Sec = GConfig->GetSectionPrivate(*OwningConfigSection, true, false, *ConfigPath);
-#endif
+
 	if (MapsToCook.Num() > 0)
 	{
 		TArray<FString> MapsToCookStrings;
@@ -78,37 +76,16 @@ void FOUUMapsToCookList::UpdateDefaultConfigFile(const FString& ConfigPath)
 		}
 
 		// Delete the old value for the property in the ConfigCache before (conditionally) adding in the new value
-#if UE_VERSION_OLDER_THAN(5, 4, 0)
-		if (Sec)
-		{
-			Sec->Remove(*CompleteKey);
-		}
-#else
 		GConfig->RemoveKeyFromSection(*OwningConfigSection, *CompleteKey, *ConfigPath);
-#endif
 
 		for (int32 i = 0; i < MapsToCook.Num(); i++)
 		{
-#if UE_VERSION_OLDER_THAN(5, 4, 0)
-			if (Sec)
-			{
-				Sec->Add(*CompleteKey, *MapsToCook[i].FilePath);
-			}
-#else
 			GConfig->AddToSection(*OwningConfigSection, *CompleteKey, *MapsToCook[i].FilePath, *ConfigPath);
-#endif
 		}
 	}
 	else
 	{
-#if UE_VERSION_OLDER_THAN(5, 4, 0)
-		if (Sec)
-		{
-			Sec->Remove(*CompleteKey);
-		}
-#else
 		GConfig->RemoveKeyFromSection(*OwningConfigSection, *CompleteKey, *ConfigPath);
-#endif
 	}
 }
 

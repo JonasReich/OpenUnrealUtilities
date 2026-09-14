@@ -5,17 +5,18 @@
 #include "CoreMinimal.h"
 
 #include "EditorValidatorBase.h"
-#include "OUUAssetValidatorBase_EngineVersionGlue.h"
+#include "Misc/DataValidation.h"
 
 #include "OUURestrictedNamesValidator.generated.h"
 
 // Validates all assets to check if they use any restricted names not enforced by the engine.
 UCLASS()
-class UOUURestrictedNamesValidator : public UOUUAssetValidatorBase_EngineVersionGlue
+class UOUURestrictedNamesValidator : public UEditorValidatorBase
 {
 	GENERATED_BODY()
+
+	// - UEditorValidatorBase
 public:
-	// - UEditorValidatorBase / UOUUAssetValidatorBase_EngineVersionGlue (depending on engine version)
 	bool CanValidateAsset_Implementation(
 		const FAssetData& InAssetData,
 		UObject* InObject,

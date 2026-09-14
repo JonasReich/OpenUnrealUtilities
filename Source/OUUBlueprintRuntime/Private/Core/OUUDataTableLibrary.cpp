@@ -1,13 +1,9 @@
 // Copyright (c) 2023 Jonas Reich & Contributors
 
 #include "Core/OUUDataTableLibrary.h"
+
 #include "Blueprint/BlueprintExceptionInfo.h"
-
 #include "Misc/EngineVersionComparison.h"
-
-#if !UE_VERSION_OLDER_THAN(5, 4, 0)
-	#include "Blueprint/BlueprintExceptionInfo.h"
-#endif
 
 bool UOUUDataTableLibrary::AddRowToDataTable(UDataTable* DataTable, FName RowName, FTableRowBase RowStruct)
 {

@@ -14,11 +14,7 @@ void UMessageDialogLibrary::ShowMessageDialogueNotification(FText OptionalTitle,
 	}
 	else
 	{
-#if UE_VERSION_OLDER_THAN(5, 3, 0)
-		FMessageDialog::Debugf(Message, &OptionalTitle);
-#else
 		FMessageDialog::Debugf(Message, OptionalTitle);
-#endif
 	}
 }
 
@@ -31,11 +27,8 @@ TEnumAsByte<EAppReturnType::Type> UMessageDialogLibrary::OpenMessageDialog(
 	{
 		return FMessageDialog::Open(MessageType, Message);
 	}
-#if UE_VERSION_OLDER_THAN(5, 3, 0)
-	return FMessageDialog::Open(MessageType, Message, &OptionalTitle);
-#else
+
 	return FMessageDialog::Open(MessageType, Message, OptionalTitle);
-#endif
 }
 
 TEnumAsByte<EAppReturnType::Type> UMessageDialogLibrary::OpenMessageDialogWithDefaultValue(
@@ -49,9 +42,5 @@ TEnumAsByte<EAppReturnType::Type> UMessageDialogLibrary::OpenMessageDialogWithDe
 		return FMessageDialog::Open(StaticCast<EAppMsgType::Type>(MessageType), DefaultValue, Message);
 	}
 
-#if UE_VERSION_OLDER_THAN(5, 3, 0)
-	return FMessageDialog::Open(StaticCast<EAppMsgType::Type>(MessageType), DefaultValue, Message, &OptionalTitle);
-#else
 	return FMessageDialog::Open(StaticCast<EAppMsgType::Type>(MessageType), DefaultValue, Message, OptionalTitle);
-#endif
 }

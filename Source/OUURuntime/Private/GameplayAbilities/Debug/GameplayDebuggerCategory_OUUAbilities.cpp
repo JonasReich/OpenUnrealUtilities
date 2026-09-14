@@ -208,11 +208,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayEffect(FActiveGameplayE
 	}
 
 	FString StackString;
-	#if UE_VERSION_OLDER_THAN(5, 3, 0)
 	const int32 ActiveGE_StackCount = ActiveGE.Spec.GetStackCount();
-	#else
-	const int32 ActiveGE_StackCount = ActiveGE.Spec.GetStackCount();
-	#endif
 	if (ActiveGE_StackCount > 1)
 	{
 	#if UE_VERSION_OLDER_THAN(5, 8, 0)
@@ -308,7 +304,6 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayAbilityInstance(UOUUGam
 	{
 		if (Instance->ActiveTasks.Contains(Msg.FromTask) == false)
 		{
-			constexpr int32 MaskTaskDebugCount = 5;
 			// Cap finished task messages to 5 per ability if we are printing to screen (else things
 			// will scroll off)
 			constexpr int32 MaskTaskDebugCount = 5;

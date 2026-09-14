@@ -121,11 +121,7 @@ void UOUUEditorLibrary::FocusOnBlueprintContent(const FOUUBlueprintEditorFocusCo
 	}
 	else if (AssetObject != nullptr)
 	{
-#if UE_VERSION_OLDER_THAN(5, 3, 0)
-		TArray<UObject*> Objects{AssetObject};
-#else
 		const TArray<UObject*> Objects{AssetObject};
-#endif
 		GEditor->SyncBrowserToObjects(Objects);
 	}
 }

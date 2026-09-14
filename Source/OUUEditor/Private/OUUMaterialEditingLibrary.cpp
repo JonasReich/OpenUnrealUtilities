@@ -182,9 +182,7 @@ void UOUUMaterialEditingLibrary::CopyMaterialAttributeConnections(
 	COPY_INPUT_CONNECTION_SIMPLE(ShadingModel);
 	// COPY_INPUT_CONNECTION_SIMPLE(FrontMaterial); -> not exposed in UMaterialExpressionMakeMaterialAttributes
 	// COPY_INPUT_CONNECTION_SIMPLE(SurfaceThickness); -> not exposed in UMaterialExpressionMakeMaterialAttributes
-	#if !UE_VERSION_OLDER_THAN(5, 3, 0)
 	COPY_INPUT_CONNECTION_SIMPLE(Displacement);
-	#endif
 	constexpr int32 LineAfter = __LINE__;
 	// clang-format on
 
@@ -192,23 +190,11 @@ void UOUUMaterialEditingLibrary::CopyMaterialAttributeConnections(
 #undef COPY_INPUT_CONNECTION_CUSTOM_UV
 
 	static_assert(
-#if UE_VERSION_OLDER_THAN(5, 3, 0)
-		MP_EmissiveColor == 0 && MP_SurfaceThickness == 31 && MP_MaterialAttributes == 32,
-#else
 		MP_EmissiveColor == 0 && MP_SurfaceThickness == 31 && MP_MaterialAttributes == 33,
-#endif
 		"The material property enum has changed, so this conversion probably misses some material property. Please "
 		"check the engine source and fix this.");
 
 	static_assert(
-		LineBefore + static_cast<int32>(MP_MaterialAttributes)
-				+ 1
-				// #if / #endif
-				+ 2
-#if UE_VERSION_OLDER_THAN(5, 3, 0)
-				// Displacement not in UE 5.2
-				+ 1
-#endif
-			== LineAfter,
+		LineBefore + static_cast<int32>(MP_MaterialAttributes) + 1 == LineAfter,
 		"Number of CopyInputConnection() calls does not match the number of material properties.");
 }

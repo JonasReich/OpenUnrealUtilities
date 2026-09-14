@@ -5,17 +5,17 @@
 #include "CoreMinimal.h"
 
 #include "EditorValidatorBase.h"
-#include "OUUAssetValidatorBase_EngineVersionGlue.h"
+#include "Misc/DataValidation.h"
 
 #include "OUUActorValidator.generated.h"
 
 // Validates actor instances with some generic checks.
 UCLASS()
-class UOUUActorValidator : public UOUUAssetValidatorBase_EngineVersionGlue
+class UOUUActorValidator : public UEditorValidatorBase
 {
 	GENERATED_BODY()
 public:
-	// - UEditorValidatorBase / UOUUAssetValidatorBase_EngineVersionGlue (depending on engine version)
+	// - UEditorValidatorBase
 	bool CanValidateAsset_Implementation(
 		const FAssetData& InAssetData,
 		UObject* InObject,
