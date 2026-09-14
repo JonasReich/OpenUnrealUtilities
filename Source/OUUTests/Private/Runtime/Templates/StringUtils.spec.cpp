@@ -7,6 +7,8 @@
 	#include "Templates/StringUtils.h"
 	#include "UObject/Package.h"
 
+// ReSharper disable CppEnumeratorNeverUsed
+
 enum class EStringUtilsTestEnum
 {
 	Alpha,
@@ -44,6 +46,7 @@ struct FStringUtilsTestStruct
 {
 	FString S;
 
+	// ReSharper disable once CppDeclaratorNeverUsed
 	FString ToString() const { return S; }
 };
 

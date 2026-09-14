@@ -2,11 +2,12 @@
 
 #include "CoreMinimal.h"
 
-#include "ActorMapWindow/OUUActorMapWindow.h"
+#include "ActorMapWindow/OUUActorMapWindow_TabSpawner.h"
 #include "Modules/ModuleManager.h"
 
 class FOUUDeveloperModule : public IModuleInterface
 {
+public:
 	void StartupModule() override { OUU::Developer::ActorMapWindow::RegisterNomadTabSpawner(); }
 	void ShutdownModule() override { OUU::Developer::ActorMapWindow::UnregisterNomadTabSpawner(); }
 };

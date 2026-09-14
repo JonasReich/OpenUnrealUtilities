@@ -33,7 +33,7 @@ struct CMemberToStringConvertable
 
 /** LexToString overload for pointers to objects that are themselves string convertable with LexToString() */
 template <typename T>
-typename TEnableIf<
+TEnableIf<
 	TPointerIsConvertibleFromTo<T, UObject>::Value == false && TIsCharType<T>::Value == false
 		&& TModels<CMemberToStringConvertable, T>::Value == false,
 	FString>::Type
@@ -44,7 +44,7 @@ typename TEnableIf<
 
 /** LexToString overload for pointers to objects that have a ToString member - copy for const T* */
 template <typename T>
-typename TEnableIf<
+TEnableIf<
 	TPointerIsConvertibleFromTo<T, UObject>::Value == false && TIsArithmetic<T>::Value == false
 		&& TIsCharType<T>::Value == false && TModels<CMemberToStringConvertable, T>::Value == true,
 	FString>::Type
@@ -55,7 +55,7 @@ typename TEnableIf<
 
 /** LexToString overload for references to objects that have a ToString member - copy for const T& */
 template <typename T>
-typename TEnableIf<
+TEnableIf<
 	TIsArithmetic<T>::Value == false && TIsCharType<T>::Value == false
 		&& TModels<CMemberToStringConvertable, T>::Value == true,
 	FString>::Type

@@ -37,6 +37,8 @@ public:
 
 	// Enable an extension for the PIE toolbar to show current OVERRIDE entitlement version.
 	// Recommended to be used if your PIE testing needs frequent tests with different entitlement versions.
+	// #TODO jreich: This only affects editor UI, but it lives in shared project config, so each developer cannot pick
+	// their own value. Remove it once the toolbar entry is registered by default.
 	UPROPERTY(Config, EditAnywhere, meta = (ConfigRestartRequired = true))
 	bool EnablePIEToolbarExtension = false;
 
@@ -45,6 +47,10 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, meta = (Categories = "TypedTag{OUUGameEntitlementModule}"))
 	TMap<FOUUGameEntitlementCollection, FGameplayTagContainer> ModuleCollections;
+
+	// Maps a Steam DLC AppID to the entitlement module(s) granted while that DLC is owned/installed.
+	UPROPERTY(Config, EditAnywhere, meta = (Categories = "TypedTag{OUUGameEntitlementModule}"))
+	TMap<int32, FGameplayTagContainer> SteamDlcEntitlements;
 
 #if WITH_EDITOR
 	FOnOUUGameEntitlementSettingsChanged OnSettingsChanged;

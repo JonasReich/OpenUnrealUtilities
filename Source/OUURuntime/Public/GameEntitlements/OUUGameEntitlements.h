@@ -8,6 +8,9 @@
 
 #include "OUUGameEntitlements.generated.h"
 
+class IConsoleVariable;
+class UGameInstance;
+
 /** Central subsystem to track entitlements */
 UCLASS(BlueprintType)
 class OUURUNTIME_API UOUUGameEntitlementsSubsystem : public UEngineSubsystem
@@ -19,6 +22,14 @@ public:
 
 public:
 	static UOUUGameEntitlementsSubsystem& Get();
+
+	// Evaluate an entitlement check against an explicitly-provided resolved entitlement set (modules + collections),
+	// rather than this subsystem's own local ActiveEntitlements. Useful when the set originates elsewhere - e.g.
+	// reported up from a remote client and stored per-player on the server. An invalid/empty Module is treated as
+	// "no requirement" and returns true.
+	static bool IsEntitled(
+		const FOUUGameEntitlementModuleAndCollections_Value& ActiveEntitlements,
+		const FOUUGameEntitlementModule& Module);
 
 	UFUNCTION(BlueprintPure)
 	bool IsEntitled(const FOUUGameEntitlementModule& Module) const;
@@ -36,8 +47,19 @@ public:
 	// Restrict Blueprint access for now.
 	void SetOverrideVersion(const FOUUGameEntitlementVersion& Version);
 
+#if !UE_BUILD_SHIPPING
+	// Editor/testing only: force a single Steam DLC (by AppID) on or off in the entitlement rebuild, independent of
+	// real Steam ownership. Ignored while ouu.Entitlements.UnlockAllDlc is set.
+	void SetDlcForcedUnlocked(int32 SteamDlcAppId, bool bForceUnlocked);
+#endif
+
 	// - USubsystem
 	void Initialize(FSubsystemCollectionBase& Collection) override;
+	void Deinitialize() override;
+
+#if WITH_EDITOR
+	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 
 public:
 	// Called when entitlements are first initialized or changed by setting an override version.
@@ -49,9 +71,20 @@ private:
 
 #if WITH_EDITOR
 	void OnSettingsChanged(FPropertyChangedChainEvent& PropertyChangedEvent);
-	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 	void RefreshActiveVersionAndEntitlements();
+
+	// Re-evaluate entitlements once a game instance starts, when Steam DLC ownership is available.
+	void HandleStartGameInstance(UGameInstance* GameInstance);
+
+	FDelegateHandle StartGameInstanceHandle;
+
+#if !UE_BUILD_SHIPPING
+	void HandleUnlockAllDlcCVarChanged(IConsoleVariable* Variable);
+
+	// Steam DLC AppIDs forced to be treated as owned, independent of real ownership. Editor/testing only.
+	TSet<int32> ForcedUnlockedDlcAppIds;
+#endif
 
 	bool bHasInitializedActiveEntitlements = false;
 

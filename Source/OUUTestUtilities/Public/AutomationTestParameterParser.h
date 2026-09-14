@@ -15,7 +15,7 @@ namespace OUU::TestUtilities::Private
 {
 	template <
 		typename T,
-		typename EnableType = typename TEnableIf<TModels<CLexTryParseString_Parseable, T>::Value == true>::Type>
+		typename EnableType = TEnableIf<TModels<CLexTryParseString_Parseable, T>::Value == true>::Type>
 	T ParseValue(const FString& s)
 	{
 		T Result;
@@ -26,7 +26,7 @@ namespace OUU::TestUtilities::Private
 
 	template <
 		typename T,
-		typename EnableType = typename TEnableIf<
+		typename EnableType = TEnableIf<
 			TModels<CLexTryParseString_Parseable, T>::Value == false
 			&& TModels<CLexFromString_Parseable, T>::Value == true>::Type,
 		typename T2 = void>
@@ -40,7 +40,7 @@ namespace OUU::TestUtilities::Private
 	/** For enum classes: Parse from int if LexTryParseString and LexFromString are not overloaded */
 	template <
 		typename T,
-		typename EnableType = typename TEnableIf<
+		typename EnableType = TEnableIf<
 			TIsEnumClass<T>::Value == true && TModels<CLexTryParseString_Parseable, T>::Value == false
 			&& TModels<CLexFromString_Parseable, T>::Value == false>::Type,
 		typename T2 = void,
@@ -56,7 +56,7 @@ namespace OUU::TestUtilities::Private
 		return T();
 	}
 
-	template <typename T, typename EnableType = typename TEnableIf<std::is_same_v<T, FVector>>::Type>
+	template <typename T, typename EnableType = TEnableIf<std::is_same_v<T, FVector>>::Type>
 	FVector ParseValue(const FString& s)
 	{
 		FVector Result;

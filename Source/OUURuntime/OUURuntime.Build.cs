@@ -64,6 +64,7 @@ public class OUURuntime : OUUModuleRules
 			"Json",
 			"Projects",
 			"NetCore",
+			"AssetRegistry",
 		});
 
 		if (Target.Platform == UnrealTargetPlatform.Win64)
@@ -93,7 +94,7 @@ public class OUURuntime : OUUModuleRules
 
 				"ContentBrowser",
 				"ContentBrowserData",
-				"AssetRegistry"
+				"ContentBrowserFileDataSource",
 			});
 		}
 

@@ -44,6 +44,42 @@ FAutoConsoleVariableRef CVar_bPrintUnmappedCues{
 	bPrintUnmappedCues,
 	TEXT("Should unmapped gameplay cues be printed? (Default: false)")};
 
+bool bOverrideCategoryAttribute = false;
+FAutoConsoleVariableRef CVar_bOverrideCategoryAttribute{
+	TEXT("ouu.Debug.Ability.ShowAttributes"),
+	bOverrideCategoryAttribute,
+	TEXT("If set to true, only this and other ShowXXXX enabled categories are drawn")};
+
+bool bOverrideCategoryGE = false;
+FAutoConsoleVariableRef CVar_bOverrideCategoryGE{
+	TEXT("ouu.Debug.Ability.ShowEffects"),
+	bOverrideCategoryGE,
+	TEXT("If set to true, only this and other ShowXXXX enabled categories are drawn")};
+
+bool bOverrideCategoryAbility = false;
+FAutoConsoleVariableRef CVar_bOverrideCategoryAbility{
+	TEXT("ouu.Debug.Ability.ShowAbilities"),
+	bOverrideCategoryAbility,
+	TEXT("If set to true, only this and other ShowXXXX enabled categories are drawn")};
+
+bool bOverrideCategoryGECue = false;
+FAutoConsoleVariableRef CVar_bOverrideCategoryGECue{
+	TEXT("ouu.Debug.Ability.ShowEffectCues"),
+	bOverrideCategoryGECue,
+	TEXT("If set to true, only this and other ShowXXXX enabled categories are drawn")};
+
+bool bOverrideCategoryTag = false;
+FAutoConsoleVariableRef CVar_bOverrideCategoryTag{
+	TEXT("ouu.Debug.Ability.ShowTags"),
+	bOverrideCategoryTag,
+	TEXT("If set to true, only this and other ShowXXXX enabled categories are drawn")};
+
+bool bOverrideCategoryEvent = false;
+FAutoConsoleVariableRef CVar_bOverrideCategoryEvent{
+	TEXT("ouu.Debug.Ability.ShowEvents"),
+	bOverrideCategoryEvent,
+	TEXT("If set to true, only this and other ShowXXXX enabled categories are drawn")};
+
 void FGameplayDebuggerCategory_OUUAbilities::DrawBackground(
 	FGameplayDebuggerCanvasContext& CanvasContext,
 	const FVector2D& BackgroundLocation,
@@ -110,7 +146,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawData(
 }
 
 void FGameplayDebuggerCategory_OUUAbilities::DebugDrawGameplayEffectModifier(
-	FActiveGameplayEffect& ActiveGE,
+	const FActiveGameplayEffect& ActiveGE,
 	const FModifierSpec& ModSpec,
 	const FGameplayModifierInfo& ModInfo)
 {
@@ -272,6 +308,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayAbilityInstance(UOUUGam
 	{
 		if (Instance->ActiveTasks.Contains(Msg.FromTask) == false)
 		{
+			constexpr int32 MaskTaskDebugCount = 5;
 			// Cap finished task messages to 5 per ability if we are printing to screen (else things
 			// will scroll off)
 			constexpr int32 MaskTaskDebugCount = 5;
@@ -412,7 +449,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawAbility(
 
 void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayCue(
 	UGameplayCueManager* CueManager,
-	FString BaseCueTagString,
+	const FString& BaseCueTagString,
 	UGameplayCueSet* CueSet,
 	FGameplayTag ThisGameplayCueTag)
 {
@@ -431,7 +468,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayCue(
 	}
 	const auto CueData = CueSet->GameplayCueData[idx];
 
-	if (CueData.LoadedGameplayCueClass == nullptr)
+	if (IsValid(CueData.LoadedGameplayCueClass) == false)
 	{
 		if (bPrintNotLoadedCues)
 		{
@@ -443,36 +480,15 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawGameplayCue(
 
 	auto CueClass = CueData.LoadedGameplayCueClass;
 
-	if (CueClass->GetDefaultObject<UGameplayCueNotify_Static>() != nullptr)
+	if (CueClass->IsChildOf<UGameplayCueNotify_Static>())
 	{
 		Canvas->SetDrawColor(FColorList::Grey);
 		DebugLine(FString::Printf(TEXT("%s -> non-instanced"), *CueTagString), 0.f, 0);
 	}
-	else if (CueClass->GetDefaultObject<AGameplayCueNotify_Actor>() != nullptr)
+	else if (CueClass->IsChildOf<AGameplayCueNotify_Actor>())
 	{
 		Canvas->SetDrawColor(FColorList::White);
-
 		DebugLine(FString::Printf(TEXT("%s -> actor"), *CueTagString), 0.f, 0);
-	#if UE_VERSION_OLDER_THAN(5, 3, 0)
-		AActor* LocalAvatarActor = AbilitySystem->GetAvatarActor_Direct();
-		AActor* LocalOwnerActor = AbilitySystem->GetOwnerActor();
-		for (auto CueEntry : CueManager->NotifyMapActor)
-		{
-			FGCNotifyActorKey Key = CueEntry.Key;
-			if (Key.CueClass != CueClass)
-				continue;
-
-			AGameplayCueNotify_Actor* CueActor = CueEntry.Value.Get();
-			bool bIsValidForThisACS =
-				(Key.TargetActor == LocalAvatarActor || Key.TargetActor == LocalOwnerActor) && IsValid(CueActor);
-
-			Canvas->SetDrawColor(bIsValidForThisACS ? FColorList::Green : FColorList::Grey);
-
-			DebugLine(OUU::Runtime::GameplayDebuggerUtils::CleanupName(CueClass->GetName()), 7.f, 0);
-		}
-	#else
-		DebugLine(TEXT("no NotifyMapActor since UE 5.3.0"), 7.f, 0);
-	#endif
 	}
 	else
 	{
@@ -541,6 +557,10 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawDebugBody()
 	// First the categories that have a pretty stable length - then the categories that are more fluctuating.
 	// That way the entries don't jump around AS MUCH on the screen.
 
+	bool AnyOverridesEnabled = bOverrideCategoryAttribute || bOverrideCategoryAbility || bOverrideCategoryGE
+		|| bOverrideCategoryGECue || bOverrideCategoryEvent || bOverrideCategoryTag;
+
+	if (AnyOverridesEnabled == false || bOverrideCategoryAttribute)
 	{
 		DEBUG_BODY_SECTION("ATTRIBUTES")
 
@@ -554,8 +574,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawDebugBody()
 		}
 	}
 
-	NewColumn();
-
+	if (AnyOverridesEnabled == false || bOverrideCategoryAbility)
 	{
 		DEBUG_BODY_SECTION("ABILITIES")
 
@@ -573,6 +592,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawDebugBody()
 		}
 	}
 
+	if (AnyOverridesEnabled == false || bOverrideCategoryGECue)
 	{
 		DEBUG_BODY_SECTION("CUES")
 		UGameplayCueManager* CueManager = UAbilitySystemGlobals::Get().GetGameplayCueManager();
@@ -586,6 +606,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawDebugBody()
 		}
 	}
 
+	if (AnyOverridesEnabled == false || bOverrideCategoryTag)
 	{
 		DEBUG_BODY_SECTION("TAGS")
 		FGameplayTagContainer OwnerTags;
@@ -594,8 +615,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawDebugBody()
 		AddTagList(BlockedAbilityTags, "BlockedAbilityTags");
 	}
 
-	NewColumn();
-
+	if (AnyOverridesEnabled == false || bOverrideCategoryGE)
 	{
 		DEBUG_BODY_SECTION("GAMEPLAY EFFECTS")
 		for (FActiveGameplayEffect& ActiveGE : &(AbilitySystem->ActiveGameplayEffects))
@@ -604,6 +624,7 @@ void FGameplayDebuggerCategory_OUUAbilities::DrawDebugBody()
 		}
 	}
 
+	if ((AnyOverridesEnabled == false || bOverrideCategoryEvent) && AbilitySystem->CircularGameplayEventHistory.Num())
 	{
 		DEBUG_BODY_SECTION("GAMEPLAY EVENTS")
 		for (auto Entry : ReverseRange(AbilitySystem->CircularGameplayEventHistory))
@@ -775,8 +796,11 @@ void FGameplayDebuggerCategory_OUUAbilities::AddTagList(FGameplayTagContainer Ta
 		}
 	}
 
-	DebugLine(FString::Printf(TEXT("%s: %s"), *TagsListTitle, *CombinedTagsString), 4.f, 2);
-	DebugLine("", 0.f, 2);
+	if (CombinedTagsString.IsEmpty() == false)
+	{
+		DebugLine(FString::Printf(TEXT("%s: %s"), *TagsListTitle, *CombinedTagsString), 4.f, 2);
+		DebugLine("", 0.f, 2);
+	}
 }
 
 #endif

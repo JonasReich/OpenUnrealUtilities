@@ -21,27 +21,27 @@
 
 namespace OUU::Runtime::Animation::GameplayDebugger::Private
 {
-	FName SyncGroups = TEXT("Toggle Sync Groups");
-	FName Montages = TEXT("Toggle Montages");
-	FName Graph = TEXT("Toggle Graph");
-	FName Curves = TEXT("Toggle Curves");
-	FName Notifies = TEXT("Toggle Notifies");
-	FName FullGraphDisplay = TEXT("Toggle Full Graph Display");
-	FName FullBlendspaceDisplay = TEXT("Toggle Full Blendspace Display");
-	FName SceneComponentTree = TEXT("Toggle Scene Component Tree");
+	FName SyncGroups = TEXT("Sync Groups");
+	FName Montages = TEXT("Montages");
+	FName Graph = TEXT("Graph");
+	FName Curves = TEXT("Curves");
+	FName Notifies = TEXT("Notifies");
+	FName FullGraphDisplay = TEXT("Full Graph");
+	FName FullBlendspaceDisplay = TEXT("Full Blendspace");
+	FName SceneComponentTree = TEXT("Scene Components");
 } // namespace OUU::Runtime::Animation::GameplayDebugger::Private
 
 FGameplayDebuggerCategory_Animation::FGameplayDebuggerCategory_Animation()
 {
 	BindKeyPress(
-		TEXT("Cylce Debug Mesh"),
+		TEXT("Cycle Mesh"),
 		EKeys::Insert.GetFName(),
 		FGameplayDebuggerInputModifier::None,
 		this,
 		&FGameplayDebuggerCategory_Animation::CycleDebugMesh);
 
 	BindKeyPress(
-		TEXT("Cylce Debug Linked Instance"),
+		TEXT("Cycle AnimInstance"),
 		EKeys::Delete.GetFName(),
 		FGameplayDebuggerInputModifier::None,
 		this,

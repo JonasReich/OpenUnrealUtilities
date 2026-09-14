@@ -2,6 +2,8 @@
 
 #include "OUUTestUtilities.h"
 
+// ReSharper disable CppEnumeratorNeverUsed
+
 #if WITH_AUTOMATION_WORKER
 
 	#include "Templates/BitmaskUtils.h"

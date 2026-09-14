@@ -30,4 +30,10 @@ public:
 
 	UPROPERTY(Config, EditDefaultsOnly)
 	TArray<FSoftObjectPath> AssetListValidation_AlwaysIncludeAssets;
+
+	// List of message log categories that get monitored when loading and validating assets from the
+	// OUUValidateAssetList commandlet.
+	// Recommended: MapCheck, AssetCheck, PIE, LoadErrors
+	UPROPERTY(Config, EditDefaultsOnly)
+	TArray<FName> AssetListValidation_MonitoredMessageLogListings;
 };

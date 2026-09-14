@@ -9,7 +9,7 @@ template <class ChildClass, typename ElementType, typename AllocatorType>
 class TCircularArrayAdaptor_Base
 {
 public:
-	using SizeType = typename AllocatorType::SizeType;
+	using SizeType = AllocatorType::SizeType;
 	using ArrayType = TArray<ElementType, AllocatorType>;
 
 	TCircularArrayAdaptor_Base(ArrayType& InArrayReference, SizeType InArrayMax) :
@@ -80,6 +80,15 @@ public:
 	ElementType& operator[](SizeType Index) { return GetStorage()[GetWrappedRingIndex(Index)]; }
 	const ElementType& operator[](SizeType Index) const { return GetStorage()[GetWrappedRingIndex(Index)]; }
 
+	// Use this to get a view of all values that were already pushed into the array and are still in storage.
+	// Immediately after initialization, this will return an empty view.
+	// Before wrap, it will return an array view matching the ranged for view.
+	// After wrap, this will be an unpredictable mess, but is quite fast if you don't care about order.
+	TConstArrayView<ElementType> UnsortedValues() const
+	{
+		return TConstArrayView<ElementType>(GetStorage()).Left(Num());
+	}
+
 	void Reset()
 	{
 		GetStorage().Reset();
@@ -123,7 +132,7 @@ class TCircularArrayAdaptor :
 public:
 	using SelfType = TCircularArrayAdaptor<ElementType, AllocatorType>;
 	using Super = TCircularArrayAdaptor_Base<SelfType, ElementType, AllocatorType>;
-	using ArrayType = typename Super::ArrayType;
+	using ArrayType = Super::ArrayType;
 
 	TCircularArrayAdaptor(ArrayType& InArrayReference, int32 InArrayMax) : Super(InArrayReference, InArrayMax) {}
 };
@@ -135,7 +144,7 @@ class TCircularArray :
 public:
 	using SelfType = TCircularArray<ElementType, AllocatorType>;
 	using Super = TCircularArrayAdaptor_Base<SelfType, ElementType, AllocatorType>;
-	using ArrayType = typename Super::ArrayType;
+	using ArrayType = Super::ArrayType;
 
 	TCircularArray() : Super(Storage, 32), Storage({}) { Super::StorageReference = Storage; }
 

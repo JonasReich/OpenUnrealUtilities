@@ -17,6 +17,7 @@
 #include "KismetCompilerModule.h"
 #include "LogOpenUnrealUtilities.h"
 #include "Misc/FileHelper.h"
+#include "Misc/OUUAssetRegistryUtils.h"
 #include "Misc/Paths.h"
 
 namespace OUU::Editor::CompileBlueprints
@@ -26,7 +27,6 @@ namespace OUU::Editor::CompileBlueprints
 		// CommandLine Config Variables
 		bool bResultsOnly = false;
 		bool bSimpleAssetList = false;
-		bool bCompileSkeletonOnly = false;
 		bool bCookedOnly = false;
 		bool bDirtyOnly = false;
 		TArray<FString> IncludeFolders;
@@ -239,11 +239,7 @@ namespace OUU::Editor::CompileBlueprints
 		UE_LOG(LogOpenUnrealUtilities, Display, TEXT("Loading Asset Registry..."));
 		const FAssetRegistryModule& AssetRegistryModule =
 			FModuleManager::LoadModuleChecked<FAssetRegistryModule>(AssetRegistryConstants::ModuleName);
-		auto& AssetRegistry = AssetRegistryModule.Get();
-		if (AssetRegistry.IsLoadingAssets())
-		{
-			AssetRegistry.SearchAllAssets(/*bSynchronousSearch =*/true);
-		}
+		OUU::Runtime::AssetRegistryUtils::WaitForAssetRegistry();
 		UE_LOG(LogOpenUnrealUtilities, Display, TEXT("Finished Loading Asset Registry."));
 
 		UE_LOG(LogOpenUnrealUtilities, Display, TEXT("Gathering All Blueprints From Asset Registry..."));
@@ -564,7 +560,8 @@ namespace OUU::Editor::CompileBlueprints
 		bool bIncludeProject,
 		bool bIncludeEngine)
 	{
-		return FConsoleCommandWithArgsDelegate::CreateLambda([ PresetName, bIncludeProject, bIncludeEngine ](const TArray<FString>&) {
+		return FConsoleCommandWithArgsDelegate::CreateLambda([PresetName, bIncludeProject, bIncludeEngine](
+																 const TArray<FString>&) {
 			FString ArgsLine =
 				FString::Printf(TEXT("-SimpleAssetList %s"), *GetIncludeFoldersArg(bIncludeProject, bIncludeEngine));
 

@@ -6,6 +6,7 @@
 #include "AssetValidation/OUUAssetValidationSettings.h"
 #include "Dom/JsonObject.h"
 #include "Editor.h"
+#include "Editor/Transactor.h"
 #include "EditorValidatorSubsystem.h"
 #include "FileHelpers.h"
 #include "IMessageLogListing.h"
@@ -14,7 +15,35 @@
 #include "LogOpenUnrealUtilities.h"
 #include "MessageLogModule.h"
 #include "Misc/FileHelper.h"
+#include "Misc/OUUAssetRegistryUtils.h"
 #include "Serialization/JsonSerializer.h"
+
+namespace OUU::Editor::ValidateAssetList::Private
+{
+	// Releases the currently loaded editor map and forces a garbage collection.
+	//
+	// Validating a world asset loads a full map and can trigger world partition streaming generation
+	// as well as blueprint reinstancing (e.g. when the project-wide WorldSettings blueprint is compiled).
+	// Inside a single commandlet process none of that is collected on its own, so leftover duplicated /
+	// reinstanced actors keep piling up in memory. In particular the WorldSettings actor can survive as a
+	// duplicate and then get misreported as "has same GUID as ..." by a later MAP CHECK - a false positive
+	// that never shows in the editor, because there only ever one world is resident and GC runs on map change.
+	//
+	// Switching to a blank map first makes the world we just validated unreferenced so the GC can actually
+	// reclaim it, keeping memory bounded and stopping stale actors from leaking into subsequent map checks.
+	void PurgeLoadedMap()
+	{
+		UEditorLoadingAndSavingUtils::NewBlankMap(/*bSaveExistingMap*/ false);
+
+		// The transaction buffer can keep the trashed world and its actors alive, defeating the GC.
+		if (GEditor->Trans != nullptr)
+		{
+			GEditor->Trans->Reset(NSLOCTEXT("OUUValidateAssetList", "PurgeLoadedMap", "Asset validation"));
+		}
+
+		CollectGarbage(RF_NoFlags);
+	}
+} // namespace OUU::Editor::ValidateAssetList::Private
 
 int32 UOUUValidateAssetListCommandlet::Main(const FString& FullCommandLine)
 {
@@ -44,16 +73,13 @@ int32 UOUUValidateAssetListCommandlet::Main(const FString& FullCommandLine)
 	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
 
 	// Make sure asset registry is fully loaded before validation, some assets may rely on that.
-	if (UE::AssetRegistry::ShouldSearchAllAssetsAtStart() == false)
+	OUU::Runtime::AssetRegistryUtils::WaitForAssetRegistry();
+
+	// Setup list of monitored log listings
+	FMessageLogModule& MessageLogModule = FModuleManager::LoadModuleChecked<FMessageLogModule>("MessageLog");
+	for (auto LogListingName : UOUUAssetValidationSettings::Get().AssetListValidation_MonitoredMessageLogListings)
 	{
-		AssetRegistry.SearchAllAssets(true);
-		// Note: OnFilesLoaded will never be broadcast if the asset registry doesn't search all assets right from the
-		// start, so we have to trigger that manually. Why?
-		AssetRegistry.OnFilesLoaded().Broadcast();
-	}
-	else
-	{
-		AssetRegistry.WaitForCompletion();
+		MonitoredLogListings.Add(MessageLogModule.GetLogListing(LogListingName));
 	}
 
 	const auto ReportObject = MakeShared<FJsonObject>();
@@ -96,6 +122,8 @@ int32 UOUUValidateAssetListCommandlet::Main(const FString& FullCommandLine)
 			OUT NumInvalidAssets);
 	}
 
+	MonitoredLogListings.Empty();
+
 	FString JsonString;
 	const TSharedRef<TJsonWriter<>> JsonWriter = TJsonWriterFactory<>::Create(OUT & JsonString);
 	ensure(FJsonSerializer::Serialize(ReportObject, JsonWriter));
@@ -129,18 +157,14 @@ void UOUUValidateAssetListCommandlet::ValidateEntry(
 		AssetRegistry.GetAssetsByPackageName(*AssetListEntry, OUT PackageAssetsData);
 	}
 
-	FMessageLogModule& MessageLogModule = FModuleManager::LoadModuleChecked<FMessageLogModule>("MessageLog");
-	const auto MapCheckListing = MessageLogModule.GetLogListing(TEXT("MapCheck"));
-
 	for (auto& Asset : PackageAssetsData)
 	{
-		ValidateSingleAsset(EditorValidationSubsystem, MapCheckListing, Asset, OutReportObject, OutNumInvalidAssets);
+		ValidateSingleAsset(EditorValidationSubsystem, Asset, OutReportObject, OutNumInvalidAssets);
 	}
 }
 
 void UOUUValidateAssetListCommandlet::ValidateSingleAsset(
 	const UEditorValidatorSubsystem& EditorValidationSubsystem,
-	const TSharedRef<IMessageLogListing>& MapCheckListing,
 	const FAssetData& Asset,
 	const TSharedRef<FJsonObject>& OutReportObject,
 	int32& OutNumInvalidAssets)
@@ -151,8 +175,14 @@ void UOUUValidateAssetListCommandlet::ValidateSingleAsset(
 		return;
 	}
 
-	MapCheckListing->ClearMessages();
+	for (auto LogListing : MonitoredLogListings)
+	{
+		LogListing->ClearMessages();
+	}
+
 	TArray<FString> AssetErrorStrings;
+	// Load the asset but make sure we don't accidentally load a whole World partition map with all actors.
+	auto* AssetPtr = Asset.GetAsset({ULevel::DontLoadExternalObjectsTag});
 
 	if (const auto* AssetClass = Asset.GetClass())
 	{
@@ -166,7 +196,7 @@ void UOUUValidateAssetListCommandlet::ValidateSingleAsset(
 
 		if (AssetClass->IsChildOf<AActor>())
 		{
-			Cast<AActor>(Asset.GetAsset())->CheckForErrors();
+			Cast<AActor>(AssetPtr)->CheckForErrors();
 		}
 
 		// Compile blueprints as part of their validation
@@ -177,7 +207,7 @@ void UOUUValidateAssetListCommandlet::ValidateSingleAsset(
 
 			CompilerLog.BeginEvent(TEXT("Compile"));
 			FKismetEditorUtilities::CompileBlueprint(
-				Cast<UBlueprint>(Asset.GetAsset()),
+				Cast<UBlueprint>(AssetPtr),
 				EBlueprintCompileOptions::SkipGarbageCollection | EBlueprintCompileOptions::SkipSave,
 				&CompilerLog);
 			CompilerLog.EndEvent();
@@ -197,7 +227,7 @@ void UOUUValidateAssetListCommandlet::ValidateSingleAsset(
 		TArray<FText> PackageErrors, PackageWarnings;
 		const auto AssetResult =
 			EditorValidationSubsystem
-				.IsAssetValid(Asset, OUT PackageErrors, OUT PackageWarnings, EDataValidationUsecase::Commandlet);
+				.IsAssetValid(AssetPtr, OUT PackageErrors, OUT PackageWarnings, EDataValidationUsecase::Commandlet);
 
 		if (AssetResult == EDataValidationResult::Invalid)
 		{
@@ -208,20 +238,23 @@ void UOUUValidateAssetListCommandlet::ValidateSingleAsset(
 		}
 	}
 
-	// Add all map check errors that were reported during this assets validation.
-	auto MapCheckMessages = MapCheckListing->GetFilteredMessages();
-	for (const auto& MapCheckMessage : MapCheckMessages)
+	// Add all message log messages in monitored listings
+	for (auto LogListing : MonitoredLogListings)
 	{
-		if (MapCheckMessage->GetSeverity() != EMessageSeverity::Info)
+		auto Messages = LogListing->GetFilteredMessages();
+		for (const auto& Message : Messages)
 		{
-			auto MapCheckMessageString = MapCheckMessage->ToText().ToString();
-			if (MapCheckMessageString.Contains(TEXT("See the MapCheck log messages for details")))
+			if (Message->GetSeverity() != EMessageSeverity::Info)
 			{
-				// Ignore the "See the MapCheck log messages for details" message that is added for every actor
-				// that fails the map check.
-				continue;
+				auto MessageString = Message->ToText().ToString();
+				if (MessageString.Contains(TEXT("See the MapCheck log messages for details")))
+				{
+					// Ignore the "See the MapCheck log messages for details" message that is added for every actor
+					// that fails the map check.
+					continue;
+				}
+				AssetErrorStrings.Add(MessageString);
 			}
-			AssetErrorStrings.Add(MapCheckMessageString);
 		}
 	}
 
@@ -231,5 +264,13 @@ void UOUUValidateAssetListCommandlet::ValidateSingleAsset(
 		OutReportObject->FJsonObject::SetStringField(Asset.PackageName.ToString(), PackageErrorString);
 
 		++OutNumInvalidAssets;
+	}
+
+	// For world assets we loaded an entire map above; release it and collect garbage so leftover actors
+	// (e.g. a reinstanced/duplicated WorldSettings) don't linger and get misreported by a later MAP CHECK.
+	// See OUU::Editor::ValidateAssetList::Private::PurgeLoadedMap for details.
+	if (const auto* AssetClass = Asset.GetClass(); AssetClass != nullptr && AssetClass->IsChildOf<UWorld>())
+	{
+		OUU::Editor::ValidateAssetList::Private::PurgeLoadedMap();
 	}
 }

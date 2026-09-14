@@ -22,13 +22,13 @@ namespace OUU::Editor::PropertyEditorUtils
 		}
 
 		template <typename T>
-		typename TEnableIf<TIsDerivedFrom<T, UObject>::Value, FName>::Type GetStaticTypeName()
+		TEnableIf<TIsDerivedFrom<T, UObject>::Value, FName>::Type GetStaticTypeName()
 		{
 			return T::StaticClass()->GetFName();
 		}
 
 		template <typename T>
-		typename TEnableIf<TIsDerivedFrom<T, UObject>::Value == false, FName>::Type GetStaticTypeName()
+		TEnableIf<TIsDerivedFrom<T, UObject>::Value == false, FName>::Type GetStaticTypeName()
 		{
 			return T::StaticStruct()->GetFName();
 		}

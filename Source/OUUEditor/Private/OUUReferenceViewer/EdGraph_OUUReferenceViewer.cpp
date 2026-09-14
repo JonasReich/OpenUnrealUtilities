@@ -29,7 +29,7 @@ void UEdGraph_OUUReferenceViewer::RebuildGraph()
 
 void UEdGraph_OUUReferenceViewer::RecursivelyBuildGraph(
 	FOUUReferenceViewerNode& Node,
-	UEdGraphNode_OUUReferenceViewer* Referencer,
+	const UEdGraphNode_OUUReferenceViewer* Referencer,
 	FIntPoint& InOutCell)
 {
 	TGuardValue<int32> ColumnGuard{InOutCell.X, InOutCell.X + 1};

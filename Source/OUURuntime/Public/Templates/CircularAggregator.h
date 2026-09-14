@@ -74,7 +74,7 @@ protected:
 	TArray<ElementType, AllocatorType> Storage = {};
 
 	/** Overload for builds with ensure macros that checks for integer overflow */
-	template <typename T, typename = typename TEnableIf<TIsInteger<T>::Value&& static_cast<bool>(DO_CHECK)>::Type>
+	template <typename T, typename = TEnableIf<TIsInteger<T>::Value&& static_cast<bool>(DO_CHECK)>::Type>
 	static void AddNumbersEnsured(T& A, T B)
 	{
 		ElementType SignBefore = FMath::Sign(A);
@@ -87,7 +87,7 @@ protected:
 
 	template <
 		typename T,
-		typename = typename TEnableIf<TIsInteger<T>::Value == false || static_cast<bool>(DO_CHECK) == false>::Type>
+		typename = TEnableIf<TIsInteger<T>::Value == false || static_cast<bool>(DO_CHECK) == false>::Type>
 	static void AddNumbersEnsured(T& A, T B, int32 = 0)
 	{
 		A += B;

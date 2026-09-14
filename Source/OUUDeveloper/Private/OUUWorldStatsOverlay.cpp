@@ -103,14 +103,26 @@ namespace OUU::Developer
 
 		const float CanvasWidth = InCanvas->Canvas->GetRenderTarget()->GetSizeXY().X / InCanvas->GetDPIScale();
 
+		// ReSharper disable CppTooWideScope
 		constexpr float OuterPaddingX = 80.0f;
 		// this is to keep space for the "stat unitgraph" panel
 		constexpr float GraphGridLeftX = OuterPaddingX + 450.0f;
 		constexpr float WidthPerGraph = 350.f;
 		constexpr float HeightPerGraph = 350.f;
+		// ReSharper restore CppTooWideScope
 
 		const float RemainingWidth = (CanvasWidth - GraphGridLeftX - OuterPaddingX);
+		if (RemainingWidth <= 0.f)
+		{
+			return;
+		}
+
 		const int32 NumGraphsPerRow = FMath::Floor(RemainingWidth / WidthPerGraph);
+
+		if (NumGraphsPerRow <= 0)
+		{
+			return;
+		}
 
 		for (int32 StatsIndex = 0; StatsIndex < GraphStats.Num(); ++StatsIndex)
 		{

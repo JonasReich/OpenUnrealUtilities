@@ -70,13 +70,13 @@ public:
 
 private:
 	template <bool bEnable = TModels<CHasExplicitInstanceMethod, GameplayDebuggerCategoryType>::Value>
-	FORCEINLINE static typename TEnableIf<bEnable, TSharedRef<FGameplayDebuggerCategory>>::Type MakeInstance_Internal()
+	FORCEINLINE static TEnableIf<bEnable, TSharedRef<FGameplayDebuggerCategory>>::Type MakeInstance_Internal()
 	{
 		return GameplayDebuggerCategoryType::MakeInstance();
 	}
 
 	template <bool bEnable = TModels<CHasExplicitInstanceMethod, GameplayDebuggerCategoryType>::Value == false>
-	FORCEINLINE static typename TEnableIf<bEnable, TSharedRef<FGameplayDebuggerCategory>>::Type MakeInstance_Internal(
+	FORCEINLINE static TEnableIf<bEnable, TSharedRef<FGameplayDebuggerCategory>>::Type MakeInstance_Internal(
 		int32 OverloadArg = 0)
 	{
 		return MakeShared<GameplayDebuggerCategoryType>();

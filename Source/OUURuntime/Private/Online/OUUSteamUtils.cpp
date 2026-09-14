@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2025 Jonas Reich & Contributors
+// Copyright (c) 2025 Jonas Reich & Contributors
 
 #include "Online/OUUSteamUtils.h"
 
@@ -7,6 +7,8 @@
 
 #if WITH_STEAM
 	#include "SteamSharedModule.h"
+
+	#include <steam/isteamapps.h>
 
 FAutoConsoleCommand CCommand_StartSteamAPI{
 	TEXT("ouu.steam.StartSteamAPI"),
@@ -20,6 +22,21 @@ FAutoConsoleCommand CCommand_StartSteamAPI{
 FString UOUUSteamUtils::GetSteamAppIdFilename()
 {
 	return FString::Printf(TEXT("%s%s"), FPlatformProcess::BaseDir(), TEXT("steam_appid.txt"));
+}
+
+bool UOUUSteamUtils::IsDlcInstalled(int32 SteamDlcAppId)
+{
+#if WITH_STEAM && !WITH_EDITOR
+	auto ScopedSteamAPIClientHandle = FSteamSharedModule::Get().ObtainSteamClientInstanceHandle();
+	if (ScopedSteamAPIClientHandle.IsValid())
+	{
+		if (auto* pSteamApps = SteamApps())
+		{
+			return pSteamApps->BIsDlcInstalled(static_cast<AppId_t>(SteamDlcAppId));
+		}
+	}
+#endif
+	return false;
 }
 
 bool UOUUSteamUtils::WriteSteamAppIdToDisk(int32 SteamAppId)

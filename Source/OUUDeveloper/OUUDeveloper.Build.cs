@@ -6,8 +6,8 @@ public class OUUDeveloper : OUUModuleRules
 {
 	public OUUDeveloper(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PublicDependencyModuleNames.AddRange(new string[] {
-
+		PublicDependencyModuleNames.AddRange(new string[]
+		{
 			// Engine
 			"CoreUObject",
 			"Engine",
@@ -22,8 +22,8 @@ public class OUUDeveloper : OUUModuleRules
 			"OUUTags"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] {
-
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
 			// Engine
 			"Slate",
 			"AIModule",
@@ -31,14 +31,14 @@ public class OUUDeveloper : OUUModuleRules
 			"GameplayAbilities",
 			"DeveloperSettings",
 			"EngineSettings",
-			"SourceControl"
+			"SourceControl",
 		});
 
 		// - Editor only dependencies
 		if (Target.bBuildEditor)
 		{
-			PrivateDependencyModuleNames.AddRange(new string[] {
-
+			PrivateDependencyModuleNames.AddRange(new string[]
+			{
 				// Engine
 				"UnrealEd",
 				"EditorStyle",

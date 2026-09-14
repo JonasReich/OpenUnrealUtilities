@@ -55,8 +55,8 @@ namespace OUU::Runtime::Private
 		case VMI_HLODColoration: return TEXT("HLODColoration");
 		case VMI_VisualizeGPUSkinCache: return TEXT("VisualizeGPUSkinCache");
 		case VMI_LWCComplexity: return TEXT("LWCComplexity");
+		default: return TEXT("");
 		}
-		return TEXT("");
 	}
 
 	// #TODO-OUU replace or remove - Not really required in the code we copy/pasted

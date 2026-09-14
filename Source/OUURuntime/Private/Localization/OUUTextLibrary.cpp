@@ -2,6 +2,7 @@
 
 #include "Localization/OUUTextLibrary.h"
 
+#include "HAL/LowLevelMemTracker.h"
 #include "HAL/PlatformFileManager.h"
 #include "Interfaces/IPluginManager.h"
 #include "Internationalization/Culture.h"
@@ -13,6 +14,10 @@
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Serialization/Csv/CsvParser.h"
+
+#if WITH_EDITOR
+	#include "ContentBrowserFileDataSource.h"
+#endif
 
 #define LOCTEXT_NAMESPACE "OUUTextLibrary"
 
@@ -72,11 +77,24 @@ void UOUUTextLibrary::RegisterPluginStringTable(
 	const FString& InNamespace,
 	const FString& InPluginRelativeTablePath)
 {
+	LLM_SCOPE(ELLMTag::Localization);
+
 	const auto pPlugin = IPluginManager::Get().FindPlugin(InPluginName);
 	if (ensureMsgf(pPlugin, TEXT("Plugin %s not found"), *InPluginName))
 	{
 		FStringTableRegistry::Get()
 			.Internal_LocTableFromFile(InTableId, InNamespace, InPluginRelativeTablePath, pPlugin->GetContentDir());
+#if WITH_EDITOR
+
+		if (auto* pCSVContentBrowserSource =
+				FindObject<UContentBrowserFileDataSource>(GetTransientPackage(), TEXT("CsLocCSV")))
+		{
+			auto RelativeDirectory = FPaths::GetPath(InPluginRelativeTablePath).Replace(TEXT("\\"), TEXT("/"));
+			const FString MountPath = FString::Printf(TEXT("/%s/%s"), *InPluginName, *RelativeDirectory);
+			pCSVContentBrowserSource
+				->AddFileMount(*MountPath, FPaths::Combine(pPlugin->GetContentDir(), RelativeDirectory));
+		}
+#endif
 	}
 }
 
@@ -122,7 +140,21 @@ TSet<FString> UOUUTextLibrary::GetCSVTranslationCultureNames(const FString& CsvD
 
 void UOUUTextLibrary::LoadLocalizedTextsFromCSV(const FString& CsvDirectoryPath)
 {
-	const auto PrioritizedCultureNames = FInternationalization::Get().GetCurrentCulture()->GetPrioritizedParentCultureNames();
+	LLM_SCOPE(ELLMTag::Localization);
+
+	TArray<FString> PrioritizedCultureNames;
+#if WITH_EDITOR
+	const auto PIEPreviewLanguage = FTextLocalizationManager::Get().GetConfiguredGameLocalizationPreviewLanguage();
+	if (FTextLocalizationManager::Get().IsGameLocalizationPreviewEnabled() && PIEPreviewLanguage.IsEmpty() == false)
+	{
+		// In PIE, respect the game localization preview lange instead of the global culture setting.
+		PrioritizedCultureNames = FInternationalization::Get().GetPrioritizedCultureNames(PIEPreviewLanguage);
+	}
+	else
+#endif
+	{
+		PrioritizedCultureNames = FInternationalization::Get().GetCurrentCulture()->GetPrioritizedParentCultureNames();
+	}
 
 	auto& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
 	TMap<FOUUTextIdentity, FPolyglotTextData> PolyglotData;
@@ -166,6 +198,8 @@ void UOUUTextLibrary::LoadLocalizedTextsFromCSV(
 	const FString& Culture,
 	TMap<FOUUTextIdentity, FPolyglotTextData>& InOutPolyglotTextData)
 {
+	LLM_SCOPE(ELLMTag::Localization);
+
 	FString CSVData;
 	const bool bLoadedFile = FFileHelper::LoadFileToString(CSVData, *CsvFilePath);
 	if (bLoadedFile == false)
@@ -241,27 +275,17 @@ void UOUUTextLibrary::LoadLocalizedTextsFromCSV(
 			continue;
 		}
 
-		auto* StringPtr = *LocalizedString;
-		while (FChar::IsWhitespace(*StringPtr))
-		{
-			StringPtr++;
-		}
+		// Manually escape zero width space (as it is not handled by ReplaceEscapedCharWithChar).
+		LocalizedString.ReplaceInline(TEXT("\\u200B"), TEXT("\u200B"));
 
-		// Found non-whitespace non-terminator character in string...
+		auto* StringPtr = *LocalizedString;
 		if (StringPtr && *StringPtr)
 		{
 			NumLoctexts++;
 
-			ELocalizedTextSourceCategory TextSource = ELocalizedTextSourceCategory::Game;
-#if WITH_EDITOR
-			if (GIsEditor)
-			{
-				TextSource = ELocalizedTextSourceCategory::Editor;
-			}
-#endif
 			auto& NewEntry = InOutPolyglotTextData.FindOrAdd(
 				FOUUTextIdentity{Namespace, Key},
-				FPolyglotTextData{TextSource, Namespace, Key, SourceString, TEXT("en")});
+				FPolyglotTextData{ELocalizedTextSourceCategory::Game, Namespace, Key, SourceString, TEXT("en")});
 			NewEntry.AddLocalizedString(Culture, LocalizedString);
 		}
 	}
