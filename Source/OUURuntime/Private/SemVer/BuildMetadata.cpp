@@ -2,7 +2,6 @@
 
 #include "SemVer/BuildMetadata.h"
 
-#include "LogOpenUnrealUtilities.h"
 #include "Misc/RegexUtils.h"
 
 FSemVerBuildMetadata::FSemVerBuildMetadata(

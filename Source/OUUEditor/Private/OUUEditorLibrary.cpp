@@ -10,7 +10,6 @@
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "LevelEditor.h"
-#include "Misc/EngineVersionComparison.h"
 #include "Modules/ModuleManager.h"
 
 void UOUUEditorLibrary::InvokeSessionFrontend(FName Panel)

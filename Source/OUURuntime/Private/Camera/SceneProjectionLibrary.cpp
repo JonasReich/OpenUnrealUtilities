@@ -10,7 +10,6 @@
 #include "GameFramework/WorldSettings.h"
 #include "IXRCamera.h"
 #include "IXRTrackingSystem.h"
-#include "Misc/EngineVersionComparison.h"
 #include "SceneViewExtension.h"
 
 bool UOUUSceneProjectionLibrary::GetViewProjectionData(

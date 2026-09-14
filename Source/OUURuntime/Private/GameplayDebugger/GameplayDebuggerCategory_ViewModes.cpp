@@ -2,12 +2,10 @@
 
 #include "GameplayDebugger/GameplayDebuggerCategory_ViewModes.h"
 
-#include "Engine.h"
-
 #if WITH_GAMEPLAY_DEBUGGER
 	#include "BufferVisualizationData.h"
-	#include "Engine.h"
 	#include "Engine/DebugCameraControllerSettings.h"
+	#include "Engine.h"
 	#include "Engine/Font.h"
 	#include "Engine/GameViewportClient.h"
 	#include "GameFramework/PlayerController.h"

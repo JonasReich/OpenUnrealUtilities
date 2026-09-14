@@ -2,6 +2,8 @@
 
 #include "Misc/OUUPathUtils.h"
 
+#include "Misc/AsciiSet.h"
+
 namespace OUU::Runtime::PathUtils
 {
 	FString SanitizeAsciiFileName(FStringView FileName)

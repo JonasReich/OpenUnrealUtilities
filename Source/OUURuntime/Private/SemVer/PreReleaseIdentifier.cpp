@@ -2,7 +2,6 @@
 
 #include "SemVer/PreReleaseIdentifier.h"
 
-#include "Misc/EngineVersionComparison.h"
 #include "Misc/RegexUtils.h"
 
 FSemVerPreReleaseIdentifier::FSemVerPreReleaseIdentifier(

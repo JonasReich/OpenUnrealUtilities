@@ -3,7 +3,6 @@
 
 #include "Debug/DebugDrawService.h"
 #include "Engine/Canvas.h"
-#include "GameFramework/HUD.h"
 #include "Misc/CanvasGraphPlottingUtils.h"
 
 #if WITH_EDITOR

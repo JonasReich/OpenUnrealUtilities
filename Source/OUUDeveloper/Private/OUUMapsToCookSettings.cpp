@@ -7,7 +7,6 @@
 #include "ISourceControlModule.h"
 #include "LogOpenUnrealUtilities.h"
 #include "Misc/ConfigCacheIni.h"
-#include "Misc/EngineVersionComparison.h"
 #include "SourceControlHelpers.h"
 
 namespace OUU::Developer::Private

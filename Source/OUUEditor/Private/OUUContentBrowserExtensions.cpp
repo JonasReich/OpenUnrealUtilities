@@ -4,7 +4,6 @@
 
 #include "Algo/AllOf.h"
 #include "AssetRegistry/AssetRegistryModule.h"
-#include "ContentBrowserDataSubsystem.h"
 #include "ContentBrowserDelegates.h"
 #include "ContentBrowserModule.h"
 #include "Engine/SkeletalMesh.h"

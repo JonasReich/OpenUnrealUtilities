@@ -10,7 +10,6 @@
 #include "Materials/MaterialExpressionMakeMaterialAttributes.h"
 #include "Materials/MaterialFunction.h"
 #include "Materials/MaterialFunctionInterface.h"
-#include "Misc/EngineVersionComparison.h"
 #include "ScopedTransaction.h"
 #include "Toolkits/IToolkit.h"
 #include "Toolkits/ToolkitManager.h"
