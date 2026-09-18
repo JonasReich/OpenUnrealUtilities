@@ -30,6 +30,8 @@ namespace OUU::Developer::ActorMapWindow
 
 			SLATE_ARGUMENT(FSplitterColumnSizeData*, ColumnSizeData)
 			SLATE_EVENT(FOnClicked, OnDeleteClicked)
+			// Called whenever one of the filter fields is committed with a new value.
+			SLATE_EVENT(FSimpleDelegate, OnQueryChanged)
 			SLATE_ATTRIBUTE(bool, EnableComponentFilters)
 		SLATE_END_ARGS()
 
@@ -42,7 +44,9 @@ namespace OUU::Developer::ActorMapWindow
 		TSharedPtr<FOUUActorMapQuery> ActorQuery;
 		FSplitterColumnSizeData* ColumnSizeData = nullptr;
 		FString GameplayTagQueryString;
+		FSimpleDelegate OnQueryChanged;
 
+// Text boxes also commit when they lose focus, so the setters compare before they notify.
 #define DEFINE_ACTOR_MAP_TEXT_ACCESSOR(Property)                                                                       \
 	FORCEINLINE FText Get##Property##_Text() const                                                                     \
 	{                                                                                                                  \
@@ -50,10 +54,13 @@ namespace OUU::Developer::ActorMapWindow
 	}                                                                                                                  \
 	FORCEINLINE void Set##Property##_Text(const FText& Text, ETextCommit::Type) const                                  \
 	{                                                                                                                  \
-		if (ActorQuery.IsValid())                                                                                      \
-		{                                                                                                              \
-			ActorQuery->Property = Text.ToString();                                                                    \
-		}                                                                                                              \
+		if (ActorQuery.IsValid() == false)                                                                             \
+			return;                                                                                                    \
+		FString NewValue = Text.ToString();                                                                            \
+		if (NewValue.Equals(ActorQuery->Property, ESearchCase::CaseSensitive))                                         \
+			return;                                                                                                    \
+		ActorQuery->Property = MoveTemp(NewValue);                                                                     \
+		OnQueryChanged.ExecuteIfBound();                                                                               \
 	}
 		DEFINE_ACTOR_MAP_TEXT_ACCESSOR(NameFilter);
 		DEFINE_ACTOR_MAP_TEXT_ACCESSOR(NameRegexPattern);
@@ -63,12 +70,17 @@ namespace OUU::Developer::ActorMapWindow
 		}
 		FORCEINLINE void SetActorClassName_Text(const FText& Text, ETextCommit::Type) const
 		{
-			if (ActorQuery.IsValid())
-			{
-				ActorQuery->ActorClassName = Text.ToString();
-				ActorQuery->ResolvedActorClass = nullptr;
-				ActorQuery->bClassNotResolved = true;
-			}
+			if (ActorQuery.IsValid() == false)
+				return;
+
+			FString NewValue = Text.ToString();
+			if (NewValue.Equals(ActorQuery->ActorClassName, ESearchCase::CaseSensitive))
+				return;
+
+			ActorQuery->ActorClassName = MoveTemp(NewValue);
+			ActorQuery->ResolvedActorClass = nullptr;
+			ActorQuery->bClassNotResolved = true;
+			OnQueryChanged.ExecuteIfBound();
 		};
 		DEFINE_ACTOR_MAP_TEXT_ACCESSOR(ComponentClassName);
 #undef DEFINE_ACTOR_MAP_TEXT_ACCESSOR

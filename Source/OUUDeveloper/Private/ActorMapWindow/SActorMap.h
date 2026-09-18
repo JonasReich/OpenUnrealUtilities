@@ -71,13 +71,19 @@ namespace OUU::Developer::ActorMapWindow
 
 		FORCEINLINE void OnSetPosition(float NewValue, ETextCommit::Type CommitInfo, int32 Axis)
 		{
+			if (ReferencePosition.Component(Axis) == NewValue)
+				return;
+
 			ReferencePosition.Component(Axis) = NewValue;
+			InvalidateQueryResults();
 		}
 
 		FVector LocalCameraLocation = FVector::ZeroVector;
 		FORCEINLINE FVector GetReferencePosition() const { return ReferencePosition + LocalCameraLocation; }
 
-#define DEFINE_CHECKBOX_BOOL(BoolName, DefaultValue)                                                                   \
+// OnChanged is a statement that runs whenever the checkbox value actually changes. Pass nothing if there is nothing
+// to do.
+#define DEFINE_CHECKBOX_BOOL(BoolName, DefaultValue, OnChanged)                                                        \
 	bool b##BoolName = DefaultValue;                                                                                   \
 	FORCEINLINE ECheckBoxState Get##BoolName##CheckBoxState() const                                                    \
 	{                                                                                                                  \
@@ -85,23 +91,31 @@ namespace OUU::Developer::ActorMapWindow
 	}                                                                                                                  \
 	FORCEINLINE void On##BoolName##CheckBoxStateChanged(ECheckBoxState CheckBoxState)                                  \
 	{                                                                                                                  \
-		b##BoolName = CheckBoxState == ECheckBoxState::Checked;                                                        \
+		const bool bNewValue = CheckBoxState == ECheckBoxState::Checked;                                               \
+		if (b##BoolName == bNewValue)                                                                                  \
+			return;                                                                                                    \
+		b##BoolName = bNewValue;                                                                                       \
+		OnChanged;                                                                                                     \
 	}
 
 #if WITH_EDITOR
-		DEFINE_CHECKBOX_BOOL(QueryWorldPartition, true)
+		// Switching between the loaded actor and the world partition query changes which filters apply.
+		DEFINE_CHECKBOX_BOOL(QueryWorldPartition, true, InvalidateQueryResults())
 #endif
-		DEFINE_CHECKBOX_BOOL(FollowCamera, false)
+		DEFINE_CHECKBOX_BOOL(FollowCamera, false, )
 #undef DEFINE_CHECKBOX_BOOL
 
-#define DEFINE_CHECKBOX_SHOWFLAG(FlagName)                                                                             \
+#define DEFINE_CHECKBOX_SHOWFLAG(FlagName, OnChanged)                                                                  \
 	FORCEINLINE ECheckBoxState GetDraw##FlagName##CheckBoxState() const                                                \
 	{                                                                                                                  \
 		return ShowFlags & EShowFlags::FlagName ? ECheckBoxState::Checked : ECheckBoxState::Unchecked;                 \
 	}                                                                                                                  \
 	FORCEINLINE void OnDraw##FlagName##CheckBoxStateChanged(ECheckBoxState CheckBoxState)                              \
 	{                                                                                                                  \
-		if (CheckBoxState == ECheckBoxState::Checked)                                                                  \
+		const bool bNewValue = CheckBoxState == ECheckBoxState::Checked;                                               \
+		if (static_cast<bool>(ShowFlags & EShowFlags::FlagName) == bNewValue)                                          \
+			return;                                                                                                    \
+		if (bNewValue)                                                                                                 \
 		{                                                                                                              \
 			ShowFlags |= EShowFlags::FlagName;                                                                         \
 		}                                                                                                              \
@@ -109,10 +123,12 @@ namespace OUU::Developer::ActorMapWindow
 		{                                                                                                              \
 			ShowFlags &= ~EShowFlags::FlagName;                                                                        \
 		}                                                                                                              \
+		OnChanged;                                                                                                     \
 	}
-		DEFINE_CHECKBOX_SHOWFLAG(Labels)
-		DEFINE_CHECKBOX_SHOWFLAG(SceneCapture)
-		DEFINE_CHECKBOX_SHOWFLAG(Distance)
+		// Labels are baked into the query results when an actor is added, so old results have to be discarded.
+		DEFINE_CHECKBOX_SHOWFLAG(Labels, InvalidateQueryResults())
+		DEFINE_CHECKBOX_SHOWFLAG(SceneCapture, )
+		DEFINE_CHECKBOX_SHOWFLAG(Distance, )
 #undef DEFINE_CHECKBOX_SHOWFLAG
 
 		float TickRate = 0.1f;
@@ -127,10 +143,23 @@ namespace OUU::Developer::ActorMapWindow
 		TArray<TArray<TTuple<FVector, FString>>> QueryResults;
 		TArray<uint32> WorldPartitionCellIndexPerQuery;
 
+#if WITH_EDITOR
+		// The world partition query is spread over this many cells per axis, one cell per tick and query.
+		static constexpr uint32 NumWorldPartitionCellsByAxis = 20;
+
+		FWorldPartitionScanProgress GetWorldPartitionScanProgress() const;
+#endif
+
 		void AddActorQuery();
 		void ClearQueries();
 		void ResetQueries();
 		void RebuildQueryList();
+
+		// Discard all cached query results and restart the world partition scan from the first cell.
+		// Must be called whenever anything a query result depends on changes, otherwise a finished world partition scan
+		// keeps displaying its old results forever.
+		void InvalidateQueryResults();
+
 		void WriteQueriesToDefaultConfig();
 
 		//------------------------

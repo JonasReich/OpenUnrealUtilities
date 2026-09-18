@@ -19,6 +19,7 @@ namespace OUU::Developer::ActorMapWindow
 		ensure(ActorQuery.IsValid());
 
 		ColumnSizeData = InArgs._ColumnSizeData;
+		OnQueryChanged = InArgs._OnQueryChanged;
 
 		// clang-format off
 		STableRow<TSharedPtr<FOUUActorMapQuery>>::Construct(
@@ -135,6 +136,7 @@ namespace OUU::Developer::ActorMapWindow
 			if (ActorQuery.IsValid())
 			{
 				ActorQuery->ActorTagQuery = FGameplayTagQueryParser::ParseQuery(GameplayTagQueryString);
+				OnQueryChanged.ExecuteIfBound();
 			}
 		}
 	}

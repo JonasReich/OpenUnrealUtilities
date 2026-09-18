@@ -67,11 +67,15 @@ namespace OUU::Developer::ActorMapWindow
 
 	void SActorMap::OnSetOrthoWidth(float InOrthoSize)
 	{
+		if (OrthoWidth == InOrthoSize)
+			return;
+
 		OrthoWidth = InOrthoSize;
 		if (SceneCaptureActor.IsValid())
 		{
 			SceneCaptureActor->GetCaptureComponent2D()->OrthoWidth = OrthoWidth;
 		}
+		InvalidateQueryResults();
 	}
 
 	void SActorMap::AddActorQuery()
@@ -99,7 +103,7 @@ namespace OUU::Developer::ActorMapWindow
 
 	void SActorMap::RebuildQueryList()
 	{
-		QueryResults.Reset();
+		InvalidateQueryResults();
 		if (ActorQueryListWidget.IsValid())
 		{
 			for (int32 i = 0; ActorQueries.IsValidIndex(i); ++i)
@@ -109,6 +113,49 @@ namespace OUU::Developer::ActorMapWindow
 			ActorQueryListWidget->RebuildList();
 		}
 	}
+
+	void SActorMap::InvalidateQueryResults()
+	{
+		// Null the pointers before destroying what they point at. The overlay and the query rows read CachedResult
+		// between here and the next UpdateQueryResults, which is where it gets bound again.
+		for (auto& QueryPtr : ActorQueries)
+		{
+			if (QueryPtr.IsValid())
+			{
+				QueryPtr->CachedResult = nullptr;
+			}
+		}
+
+		QueryResults.Reset();
+		WorldPartitionCellIndexPerQuery.Reset();
+	}
+
+#if WITH_EDITOR
+	FWorldPartitionScanProgress SActorMap::GetWorldPartitionScanProgress() const
+	{
+		FWorldPartitionScanProgress Result;
+		if (bQueryWorldPartition == false || WorldPartitionCellIndexPerQuery.Num() <= 0)
+			return Result;
+
+		const UWorld* World = GetTargetWorld();
+		if (IsValid(World) == false || World->GetWorldPartition() == nullptr)
+			return Result;
+
+		// The least advanced query decides. A cell only counts as done once every query has looked at it.
+		uint32 NumProcessedCells = TNumericLimits<uint32>::Max();
+		for (const uint32 CellIndex : WorldPartitionCellIndexPerQuery)
+		{
+			NumProcessedCells = FMath::Min(NumProcessedCells, CellIndex);
+		}
+
+		Result.GridMin =
+			FVector2D(ReferencePosition.X, ReferencePosition.Y) - FVector2D(OrthoWidth / 2.f, OrthoWidth / 2.f);
+		Result.CellSize = OrthoWidth / NumWorldPartitionCellsByAxis;
+		Result.NumCellsByAxis = NumWorldPartitionCellsByAxis;
+		Result.NumProcessedCells = NumProcessedCells;
+		return Result;
+	}
+#endif
 
 	void SActorMap::WriteQueriesToDefaultConfig()
 	{
@@ -178,10 +225,8 @@ namespace OUU::Developer::ActorMapWindow
 				.Text(INVTEXT("Refresh"))
 					.OnClicked_Lambda([this]()
 					{
-						// Reset the query results and set status flag to false.
 						// This will trigger one full pass over the WP distributed over multiple ticks.
-						QueryResults.Reset();
-						WorldPartitionCellIndexPerQuery.Reset();
+						InvalidateQueryResults();
 						return FReply::Handled();
 					})
 			)
@@ -305,6 +350,7 @@ namespace OUU::Developer::ActorMapWindow
 				return true;
 #endif
 			})
+			.OnQueryChanged_Lambda([this]() { InvalidateQueryResults(); })
 			.OnDeleteClicked_Lambda([this, WeakItem = InItem.ToWeakPtr()]() {
 				if (auto SharedItem = WeakItem.Pin())
 				{
@@ -343,6 +389,9 @@ namespace OUU::Developer::ActorMapWindow
 					.MapSize(this, &SActorMap::GetOrthoWidth)
 					.ShowFlags(this, &SActorMap::GetShowFlags)
 					.ReferencePosition(this, &SActorMap::GetReferencePosition)
+					#if WITH_EDITOR
+					.WorldPartitionScanProgress(this, &SActorMap::GetWorldPartitionScanProgress)
+					#endif
 			]
 		];
 		// clang-format on
@@ -423,7 +472,7 @@ namespace OUU::Developer::ActorMapWindow
 			{
 				if (auto* WorldPartition = GetTargetWorld()->GetWorldPartition())
 				{
-					constexpr uint32 NumSubdivisionsByAxis = 20;
+					constexpr uint32 NumSubdivisionsByAxis = NumWorldPartitionCellsByAxis;
 					constexpr uint32 NumSubdivisions = NumSubdivisionsByAxis * NumSubdivisionsByAxis;
 
 					if (WorldPartitionCellIndexPerQuery[QueryIndex] == NumSubdivisions)
@@ -436,8 +485,15 @@ namespace OUU::Developer::ActorMapWindow
 					uint32 Subdivision_X = SubdivisionIdx / NumSubdivisionsByAxis;
 					uint32 Subdivision_Y = SubdivisionIdx % NumSubdivisionsByAxis;
 
-					auto TotalWorldBounds = WorldPartition->GetEditorWorldBounds();
-					auto VerticalExtent = TotalWorldBounds.GetExtent().Z;
+					// World bounds are rarely centered on the origin, so we take their actual Z range instead of a
+					// symmetric extent. Worlds without streaming can report invalid bounds, in which case we do not
+					// constrain the query in Z at all.
+					constexpr double UnboundedVerticalExtent = 1.0e7;
+					const FBox TotalWorldBounds = WorldPartition->GetEditorWorldBounds();
+					const double VerticalMin =
+						TotalWorldBounds.IsValid ? TotalWorldBounds.Min.Z : -UnboundedVerticalExtent;
+					const double VerticalMax =
+						TotalWorldBounds.IsValid ? TotalWorldBounds.Max.Z : UnboundedVerticalExtent;
 
 					FVector2D Subdivisions_Min = FVector2D(ReferencePosition.X, ReferencePosition.Y)
 						- FVector2D(OrthoWidth / 2.f, OrthoWidth / 2.f);
@@ -448,8 +504,8 @@ namespace OUU::Developer::ActorMapWindow
 						CurrentSubdivision_Min + FVector2D(SubDivisionWidth, SubDivisionWidth);
 
 					FBox SubdivisionBox = FBox(
-						FVector{CurrentSubdivision_Min.X, CurrentSubdivision_Min.Y, -VerticalExtent},
-						FVector{CurrentSubdivision_Max.X, CurrentSubdivision_Max.Y, VerticalExtent});
+						FVector{CurrentSubdivision_Min.X, CurrentSubdivision_Min.Y, VerticalMin},
+						FVector{CurrentSubdivision_Max.X, CurrentSubdivision_Max.Y, VerticalMax});
 
 					FWorldPartitionHelpers::ForEachIntersectingActorDescInstance(
 						WorldPartition,
