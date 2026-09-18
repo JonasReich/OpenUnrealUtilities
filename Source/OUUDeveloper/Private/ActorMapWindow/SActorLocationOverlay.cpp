@@ -24,6 +24,8 @@ namespace OUU::Developer::ActorMapWindow
 		ShowFlags = InArgs._ShowFlags;
 
 #if WITH_EDITOR
+		WorldPartitionScanProgress = InArgs._WorldPartitionScanProgress;
+
 		if (AWorldPartitionMiniMap* WorldMiniMap = FWorldPartitionMiniMapHelper::GetWorldPartitionMiniMap(InWorld))
 		{
 			WorldMiniMapBounds = FBox2D(
@@ -139,6 +141,43 @@ namespace OUU::Developer::ActorMapWindow
 			DrawDistanceCircle(1.f / 4.f);
 			DrawDistanceCircle(1.f / 8.f);
 		}
+
+#if WITH_EDITOR
+		// Outline the world partition cells that have not been scanned yet. Nothing is drawn once the scan is
+		// complete, so the outlines double as a "results are still incomplete" warning.
+		const FWorldPartitionScanProgress ScanProgress = WorldPartitionScanProgress.Get();
+		if (ScanProgress.HasPendingCells())
+		{
+			const uint32 NumCells = ScanProgress.GetNumCells();
+			for (uint32 CellIndex = ScanProgress.NumProcessedCells; CellIndex < NumCells; ++CellIndex)
+			{
+				const FVector2D CellMin = ScanProgress.GridMin
+					+ FVector2D(ScanProgress.CellSize * (CellIndex / ScanProgress.NumCellsByAxis),
+								ScanProgress.CellSize * (CellIndex % ScanProgress.NumCellsByAxis));
+				const FVector2D CellMax = CellMin + FVector2D(ScanProgress.CellSize, ScanProgress.CellSize);
+
+				const FVector2f MinCorner = FVector2f(WorldToWidgetSpace(AllottedGeometry, CellMin));
+				const FVector2f MaxCorner = FVector2f(WorldToWidgetSpace(AllottedGeometry, CellMax));
+
+				TArray<FVector2f> CellBorder = {
+					MinCorner,
+					FVector2f(MaxCorner.X, MinCorner.Y),
+					MaxCorner,
+					FVector2f(MinCorner.X, MaxCorner.Y),
+					MinCorner};
+
+				FSlateDrawElement::MakeLines(
+					OutDrawElements,
+					RetLayerId,
+					AllottedGeometry.ToPaintGeometry(),
+					MoveTemp(CellBorder),
+					DrawEffects,
+					Style::PendingCellBorderColor,
+					false);
+			}
+			RetLayerId++;
+		}
+#endif
 
 		auto ActualActorQueries = *ActorQueries.Get();
 		for (auto Query : ActualActorQueries)

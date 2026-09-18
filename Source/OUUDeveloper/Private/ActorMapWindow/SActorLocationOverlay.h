@@ -5,7 +5,6 @@
 #include "ActorMapWindow/OUUActorMapQuery.h"
 #include "ActorMapWindow/OUUActorMapWindow_TabSpawner.h"
 
-
 namespace OUU::Developer::ActorMapWindow
 {
 	//------------------------------------------------------------------------
@@ -28,6 +27,9 @@ namespace OUU::Developer::ActorMapWindow
 			SLATE_ATTRIBUTE(FVector, ReferencePosition);
 			SLATE_ATTRIBUTE(float, MapSize);
 			SLATE_ATTRIBUTE(EShowFlags, ShowFlags);
+#if WITH_EDITOR
+			SLATE_ATTRIBUTE(FWorldPartitionScanProgress, WorldPartitionScanProgress);
+#endif
 		SLATE_END_ARGS()
 
 		TAttribute<const TArray<TSharedPtr<FOUUActorMapQuery>>*> ActorQueries;
@@ -36,6 +38,7 @@ namespace OUU::Developer::ActorMapWindow
 		TAttribute<EShowFlags> ShowFlags;
 
 #if WITH_EDITOR
+		TAttribute<FWorldPartitionScanProgress> WorldPartitionScanProgress;
 		FBox2D WorldMiniMapBounds;
 		FSlateBrush WPMinimapBrush;
 #endif

@@ -14,4 +14,5 @@ namespace OUU::Developer::ActorMapWindow::Style
 	inline FSlateColorBrush MediumGrey(FColor(13, 13, 13, 255));
 	inline FSlateColorBrush White(FColor::White);
 	inline FColor LabelBackgroundColor(0, 0, 0, 200);
+	inline FLinearColor PendingCellBorderColor(1.f, 0.6f, 0.1f, 0.4f);
 } // namespace OUU::Developer::ActorMapWindow::Style
