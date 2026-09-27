@@ -3,6 +3,7 @@
 #include "GameEntitlements/OUUGameEntitlements.h"
 
 #include "Engine/World.h"
+#include "GameEntitlements/OUUGameEntitlementsResolver.h"
 #include "GameEntitlements/OUUGameEntitlementsSettings.h"
 #include "HAL/IConsoleManager.h"
 #include "LogOpenUnrealUtilities.h"
@@ -165,7 +166,7 @@ void UOUUGameEntitlementsSubsystem::SetDlcForcedUnlocked(int32 SteamDlcAppId, bo
 		ForcedUnlockedDlcAppIds.Add(SteamDlcAppId, &bWasAlreadyForced);
 		bChanged = bWasAlreadyForced == false;
 
-		if (UOUUGameEntitlementSettings::Get().SteamDlcEntitlements.Contains(SteamDlcAppId) == false)
+		if (UOUUGameEntitlementSettings::Get().GetSteamDlcEntitlements().Contains(SteamDlcAppId) == false)
 		{
 			UE_LOG(
 				LogOpenUnrealUtilities,
@@ -289,10 +290,10 @@ void UOUUGameEntitlementsSubsystem::RefreshActiveVersionAndEntitlements()
 	}
 #endif
 
-	ActiveEntitlements.Reset();
-	if (auto* EntitlementsPtr = Settings.EntitlementsPerVersion.Find(ActiveVersion))
+	FGameplayTagContainer SeedTags;
+	if (auto* EntitlementsPtr = Settings.GetEntitlementsPerVersion().Find(ActiveVersion))
 	{
-		ActiveEntitlements = FOUUGameEntitlementModuleAndCollections_Value::CreateChecked(*EntitlementsPtr);
+		SeedTags = *EntitlementsPtr;
 	}
 
 	// Grant entitlements for owned Steam DLC (the ownership query is wrapped in UOUUSteamUtils).
@@ -301,7 +302,7 @@ void UOUUGameEntitlementsSubsystem::RefreshActiveVersionAndEntitlements()
 #else
 	const bool bUnlockAllDlc = false;
 #endif
-	for (const auto& DlcEntry : Settings.SteamDlcEntitlements)
+	for (const auto& DlcEntry : Settings.GetSteamDlcEntitlements())
 	{
 #if !UE_BUILD_SHIPPING
 		const bool bForceUnlocked = ForcedUnlockedDlcAppIds.Contains(DlcEntry.Key);
@@ -310,39 +311,13 @@ void UOUUGameEntitlementsSubsystem::RefreshActiveVersionAndEntitlements()
 #endif
 		if (bUnlockAllDlc || bForceUnlocked || UOUUSteamUtils::IsDlcInstalled(DlcEntry.Key))
 		{
-			ActiveEntitlements.AppendTags(FOUUGameEntitlementModuleAndCollections_Value::CreateChecked(DlcEntry.Value));
+			SeedTags.AppendTags(DlcEntry.Value);
 		}
 	}
 
-	// recursively add entitlements from module collections
-	int32 LastEntitlementCount = -1;
-	while (ActiveEntitlements.Num() != LastEntitlementCount)
-	{
-		for (const auto Entitlement : ActiveEntitlements)
-		{
-			auto EntitlementAsCollection = FOUUGameEntitlementCollection::TryConvert(Entitlement);
-			if (EntitlementAsCollection.IsValid())
-			{
-				if (auto* EntitlementsPtr = Settings.ModuleCollections.Find(EntitlementAsCollection))
-				{
-					ActiveEntitlements.AppendTags(
-						FOUUGameEntitlementModuleAndCollections_Value::CreateChecked(*EntitlementsPtr));
-				}
-			}
-		}
-		LastEntitlementCount = ActiveEntitlements.Num();
-	}
-
-#if !UE_BUILD_SHIPPING
-	// 2nd way to obtain all DLC: if the version or any collection contains the "grant all DLC" module
-	if (ActiveEntitlements.HasTag(FOUUGameEntitlementTags::Module::UnlockAllDLC::Get()))
-	{
-		for (const auto& DlcEntry : Settings.SteamDlcEntitlements)
-		{
-			ActiveEntitlements.AppendTags(FOUUGameEntitlementModuleAndCollections_Value::CreateChecked(DlcEntry.Value));
-		}
-	}
-#endif
+	// Resolve the entitlements. The "all DLC key" should only be checked in non-shipping builds.
+	ActiveEntitlements = FOUUGameEntitlementModuleAndCollections_Value::CreateChecked(
+		OUU::Runtime::GameEntitlements::ResolveEntitlements(Settings, SeedTags, /*bAllowUnlockAllDlc*/ !UE_BUILD_SHIPPING));
 
 	bHasInitializedActiveEntitlements = true;
 	OnActiveEntitlementsChanged.Broadcast();

@@ -7,11 +7,13 @@
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidgetBlueprint.h"
 #include "Engine/AssetManager.h"
+#include "GameEntitlements/OUUGameEntitlementSettingsCustomization.h"
 #include "GameEntitlements/OUUGameEntitlements.h"
 #include "GameEntitlements/OUUGameEntitlementsSettings.h"
 #include "MaterialAnalyzer/OUUMaterialAnalyzer.h"
 #include "Modules/ModuleManager.h"
 #include "OUUContentBrowserExtensions.h"
+#include "OUUPropertyEditorUtils.h"
 #include "PIESettings/OUUPIESettingsRegistry.h"
 #include "PIESettings/OUUPIESettingsTab.h"
 
@@ -41,6 +43,9 @@ namespace OUU::Editor
 			ContentBrowserExtensions::RegisterHooks();
 
 			FCoreDelegates::OnPostEngineInit.AddRaw(this, &FOUUEditorModule::RegisterGameEntitlementsPIESettings);
+			PropertyEditorUtils::RegisterCustomClassLayout<
+				UOUUGameEntitlementSettings,
+				Private::GameEntitlements::FGameEntitlementSettingsCustomization>();
 
 			PIESettings::RegisterNomadTabSpawner();
 			PIESettings::RegisterToolbarExtension();
@@ -59,6 +64,7 @@ namespace OUU::Editor
 			PIESettings::UnregisterToolbarExtension();
 			PIESettings::UnregisterNomadTabSpawner();
 			UnregisterGameEntitlementsPIESettings();
+			PropertyEditorUtils::UnregisterCustomClassLayout<UOUUGameEntitlementSettings>();
 
 			MaterialAnalyzer::UnregisterNomadTabSpawner();
 			ContentBrowserExtensions::UnregisterHooks();
@@ -155,7 +161,7 @@ namespace OUU::Editor
 					INVTEXT("No entitlement version resolved, so every gated module is locked."));
 			}
 
-			for (auto& DLCEntry : UOUUGameEntitlementSettings::Get().SteamDlcEntitlements)
+			for (auto& DLCEntry : UOUUGameEntitlementSettings::Get().GetSteamDlcEntitlements())
 			{
 				for (auto& Tag : DLCEntry.Value)
 				{

@@ -58,15 +58,12 @@ public class OUUEditor : OUUModuleRules
 			"GameplayTagsEditor",
 			"Json",
 			"MessageLog",
-
-			// Web browser: we wrap SWebBrowser directly, so we only need the WebBrowser module (a built-in
-			// engine module). The WebBrowserWidget plugin is intentionally NOT used - its UWebBrowser class
-			// doesn't expose the navigation hook we need, and its default materials are unused on Win64/CEF.
 			"WebBrowser",
 
 			// OUU
 			"OUURuntime",
 			"OUUDeveloper",
+			"OUUTags"
 		});
 
 		// Optional Hermes (tq2:// deep-link dispatch) support. Hermes is Win64-only and may be absent entirely
