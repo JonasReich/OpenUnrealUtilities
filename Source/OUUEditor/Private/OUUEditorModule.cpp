@@ -92,6 +92,8 @@ namespace OUU::Editor
 				return;
 			}
 
+			TRACE_CPUPROFILER_EVENT_SCOPE(OUU::RegisterAllEditorUtilityWidgetTabs);
+
 			TArray<FAssetData> BlueprintList;
 			FARFilter Filter;
 			Filter.ClassPaths.Add(UEditorUtilityWidgetBlueprint::StaticClass()->GetClassPathName());
