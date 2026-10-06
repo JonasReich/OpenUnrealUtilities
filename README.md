@@ -1,19 +1,27 @@
 ﻿
-# Open Unreal Utilities
+# Open Unreal Utilities - Miscellaneous Utilities
 
-![OUU logo](./Resources/ouu_wide.png)
+![Open Unreal Utilities - Misc. Utilities](./Resources/ouu_wide.png)
 
 The Open Unreal Utilities plugin is a collection of general purpose utilities in Unreal Engine developed by Jonas Reich and colleagues.
 
 I'm developing it during my day job(s) and squeeze all the small utilities in here that don't feel big enough for dedicated plugins and
 that are relatively generic and should prove useful for almost any game project.
 
-Some of those smaller utilities have since grown to the point where I decided to move them to dedicated plugins:
+Some of those smaller utilities have since grown to the point where I decided to move them to dedicated plugins.
+Together they make up the Open Unreal Utilities:
 
-- JSON data assets in [OUUJsonDataAssets](https://github.com/JonasReich/OUUJsonDataAssets) (requires Epic Games group to access).
-- Gameplay Tag Extensions in [OUUTags](https://github.com/JonasReich/OUUTags).
+| | |
+|---|---|
+| **Miscellaneous Utilities** | This plugin |
+| [**Gameplay Tags**](https://github.com/JonasReich/OUUTags) | Literal, typed and otherwise extended gameplay tags |
+| [**Json Data Assets**](https://github.com/JonasReich/OUUJsonDataAssets) | Data assets serialized to JSON text files (requires Epic Games group access) |
+| [**C++ Coding Standard**](https://github.com/JonasReich/OpenUnrealCodingStandard) | The Unreal C++ conventions these plugins adhere to |
+| [**Blueprint Validation**](https://github.com/JonasReich/OUUBlueprintValidation) | Blueprint graph validators |
+| [**Automation Tools**](https://github.com/JonasReich/OpenUnrealAutomationTools) | Python scripts for CI / build automation |
+| [**Sample Project**](https://github.com/JonasReich/OpenUnrealSampleProject) | An integration project that embeds all of the above as subrepos and is used for plugin development |
 
-## Contents
+## Plugin Contents
 
 ### Modules
 
@@ -59,7 +67,6 @@ The **bold** features are the big ones that I most reccommend you to try the plu
 	- One-line message log macros and Blueprint extension
 - Math
 	- ``USpiralIdUtilities`` Conversion to/from 2D grid coordinates to 1D index
-	- Small util functions
 - Misc
 	- Canvas graph plotting
 	- Easy to use regex wrappers
